@@ -1,0 +1,15 @@
+{
+	"name": "tarumae",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.html",
+	"scripts": {
+		"start": "parcel index.html"
+	},
+	"keywords": [],
+	"author": "BULB CORP.",
+	"license": "",
+	"dependencies": {
+    "parcel-bundler": "^1.1.0"
+  }
+}
