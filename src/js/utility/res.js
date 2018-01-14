@@ -1,19 +1,21 @@
 ////////////////////////////////////////////////////////////////////////////////
-// styler3d engine
-// http://styler3d.jp
+// Tarumae engine
+// http://tarumae.jp
 //
 // copyright(c) 2016 bulb inc. all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
-export var ResourceTypes = {
+import Tarumae from "../entry"
+
+Tarumae.ResourceTypes = {
 	Binary: "arraybuffer",
 	Text: "text",
 	Image: "image",
 	JSON: "json",
 };
 
-export class ResourceManager {
-	construct() {
+Tarumae.ResourceManager = class {
+	constructor() {
 		this.loadingQueue = [];
 		this.loadingSessionId = 1;
 		this.loadingQueueCount = {};
@@ -81,7 +83,7 @@ export class ResourceManager {
 		var p = this.loadingQueueCount[sessionId] / this.loadingQueueLength[sessionId];
 	
 		var round = function(val, precision){
-			digit = Math.pow(10, precision);
+			var digit = Math.pow(10, precision);
 			val = val * digit;
 			val = Math.round(val);
 			val = val / digit;
@@ -96,7 +98,7 @@ export class ResourceManager {
 		this.resources[url] = res;
 	}
 
-	loadfunction(onfinish) {
+	load(onfinish) {
 		if (typeof onfinish !== "function") {
 			onfinish = function() { };
 		}
@@ -128,7 +130,7 @@ export class ResourceManager {
 				}
 			} else {
 				(function(res) {
-					ResourceManager.download(res.url, res.type, function(data) {
+					Tarumae.ResourceManager.download(res.url, res.type, function(data) {
 						res.data = data;
 	
 						res.onload(data);
@@ -159,27 +161,27 @@ export class ResourceManager {
 
 	static download(url, type, onfinish, onprogress) {
 		try {
-			var max_retry = 3;
-			var can_retry = max_retry;
+			// var max_retry = 3;
+			// var can_retry = max_retry;
 			
 			(function() {
-					var callee = arguments.callee;
-				var retry = function(e) {
-					if( --can_retry > 0 ){
-						setTimeout(callee, 20);// Do retry
-					}else{
-						console.warn("download resource error: " + url);
-						onfinish(null);
-					}
-				};
+				// 	var callee = arguments.callee;
+				// var retry = function(e) {
+				// 	if( --can_retry > 0 ){
+				// 		setTimeout(callee, 20);// Do retry
+				// 	}else{
+						// console.warn("download resource error: " + url);
+						// onfinish(null);
+					// }
+				// };
 				onfinish = (typeof onfinish === "function")? onfinish : function(){};
 				
-				if (type === ResourceTypes.Image) {
+				if (type === Tarumae.ResourceTypes.Image) {
 					var image = new Image();
 					//max_retry = can_retry = 0; //It's not possible to get the HTTP status of request
 	
-					image.onerror = retry;
-					image.onabort = retry;
+					// image.onerror = retry;
+					// image.onabort = retry;
 	
 					image.onload = function() {
 						// if( can_retry < max_retry ){
@@ -202,8 +204,8 @@ export class ResourceManager {
 					request.responseType = type;
 					request.timeout = 500000;
 	
-					request.onerror = retry;
-					request.onabort = retry;
+					// request.onerror = retry;
+					// request.onabort = retry;
 	
 					if (typeof onprogress === "function") {
 						request.onprogress = onprogress;

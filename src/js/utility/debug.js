@@ -5,6 +5,8 @@
 // Copyright(c) 2016 BULB CORP. all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
+import Tarumae from "../entry"
+
 Tarumae.Debugger = class {
   constructor(renderer) {
   this.renderer = renderer;

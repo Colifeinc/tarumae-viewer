@@ -37,8 +37,7 @@ var PlanDesigner = function(renderer) {
 };
 
 // Event declarations
-new Tarumae.EventDispatcher(PlanDesigner).registerEvents(
-	"areaPlaced");
+new EventDispatcher(PlanDesigner).registerEvents("areaPlaced");
 
 Object.assign(PlanDesigner, {
   OperationModes: {

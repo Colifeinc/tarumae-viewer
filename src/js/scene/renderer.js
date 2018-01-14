@@ -5,12 +5,14 @@
 // Copyright(c) 2016 BULB CORP. all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
-import "../utility/utility.js"
-import { ResourceManager, ResourceTypes } from "../utility/res.js"
-import { vec2, vec3, vec4, color3, color4 } from "../math/vector.js"
-import { Matrix3, Matrix4 } from "../math/matrix.js"
-import { Scene, SceneObject, ObjectTypes } from "../scene/scene.js"
-import { Debugger } from "../utility/debug.js"
+import Tarumae from "../entry"
+import "../utility/utility"
+import { ResourceManager, ResourceTypes } from "../utility/res"
+import { vec2, vec3, vec4, color3, color4 } from "../math/vector"
+import { Matrix3, Matrix4 } from "../math/matrix"
+import "../scene/scene"
+import "../webgl/shader"
+import { Debugger } from "../utility/debug"
 
 export default class TarumaeRenderer {
 	constructor(options) {
@@ -155,7 +157,7 @@ export default class TarumaeRenderer {
 		this.cachedMeshes = {};
 		this.cachedTextures = {};
 
-		var downloader = new ResourceManager();
+		var downloader = new Tarumae.ResourceManager();
 		downloader.downloadShaders = [];
 
 		// create shader programs either from server or tarumae.js
@@ -175,8 +177,8 @@ export default class TarumaeRenderer {
 					shaderDefine.frag = renderer.options.baseShaderUrl + shaderDefine.frag;
 				}
 
-				downloader.add(shaderDefine.vert, ResourceTypes.Text);
-				downloader.add(shaderDefine.frag, ResourceTypes.Text);
+				downloader.add(shaderDefine.vert, Tarumae.ResourceTypes.Text);
+				downloader.add(shaderDefine.frag, Tarumae.ResourceTypes.Text);
 				downloader.downloadShaders.push(shaderDefine);
 			}
 		});
@@ -238,7 +240,7 @@ export default class TarumaeRenderer {
 		}
 	
 		if (typeof options.perspective.method === "undefined") {
-			options.perspective.method = ProjectionMethods.Persp;
+			options.perspective.method = Tarumae.ProjectionMethods.Persp;
 		}
 	
 		if (typeof options.perspective.angle === "undefined") {
@@ -442,12 +444,12 @@ export default class TarumaeRenderer {
 	
 				switch (projectionMethod) {
 					default:
-					case ProjectionMethods.Persp:
+					case Tarumae.ProjectionMethods.Persp:
 					case "persp":
 						this.perspectiveProject(this.projectMatrix);
 						break;
 	
-					case ProjectionMethods.Ortho:
+					case Tarumae.ProjectionMethods.Ortho:
 					case "ortho":
 						this.orthographicProject(this.projectMatrix);
 						break;
@@ -627,12 +629,12 @@ export default class TarumaeRenderer {
 	
 		switch (projectionMethod) {
 			default:
-			case ProjectionMethods.Persp:
+			case Tarumae.ProjectionMethods.Persp:
 			case "persp":
 				this.perspectiveProject(m);
 				break;
 	
-			case ProjectionMethods.Ortho:
+			case Tarumae.ProjectionMethods.Ortho:
 			case "ortho":
 				this.orthographicProject(m);
 				break;
@@ -640,7 +642,7 @@ export default class TarumaeRenderer {
 	};
 	
 	createScene() {
-		return new Scene(this);
+		return new Tarumae.Scene(this);
 	};
 	
 	create2DScene() {
@@ -718,7 +720,7 @@ export default class TarumaeRenderer {
 	
 		switch (obj.type) {
 			default:
-			case ObjectTypes.GenericObject:
+			case Tarumae.ObjectTypes.GenericObject:
 				{
 					for (var i = 0; i < obj.meshes.length; i++) {
 						var mesh = obj.meshes[i];
@@ -738,7 +740,7 @@ export default class TarumaeRenderer {
 				}
 				break;
 	
-			case ObjectTypes.Div:
+			case Tarumae.ObjectTypes.Div:
 				{
 					var div = obj._htmlObject;
 	
@@ -828,7 +830,7 @@ export default class TarumaeRenderer {
 	
 		switch (projectMethod) {
 			default:
-			case ProjectionMethods.Persp:
+			case Tarumae.ProjectionMethods.Persp:
 			case "persp":
 				{
 					var viewAngle = (this.currentScene && this.currentScene.mainCamera)
@@ -847,7 +849,7 @@ export default class TarumaeRenderer {
 				}
 				break;
 	
-			case ProjectionMethods.Ortho:
+			case Tarumae.ProjectionMethods.Ortho:
 			case "ortho":
 				{
 					var viewRange = (this.viewer.originDistance - 0.5) * 10 * 2;
@@ -904,7 +906,7 @@ export default class TarumaeRenderer {
 		var renderHalfWidth = this.renderSize.width / 2;
 		var renderHalfHeight = this.renderSize.height / 2;
 	
-		var w = ((projectMethod == ProjectionMethods.Persp || projectMethod == "persp") ? pos.w : 1.0) || 1.0;
+		var w = ((projectMethod == Tarumae.ProjectionMethods.Persp || projectMethod == "persp") ? pos.w : 1.0) || 1.0;
 	
 		return new Tarumae.Point(
 			(pos.x / w) * renderHalfWidth + renderHalfWidth,
@@ -920,7 +922,7 @@ export default class TarumaeRenderer {
 		var renderHalfWidth = this.renderSize.width / 2;
 		var renderHalfHeight = this.renderSize.height / 2;
 	
-		var w = ((projectMethod == ProjectionMethods.Persp || projectMethod == "persp") ? pos.w : 1.0) || 1.0;
+		var w = ((projectMethod == Tarumae.ProjectionMethods.Persp || projectMethod == "persp") ? pos.w : 1.0) || 1.0;
 	
 		return new vec3(
 			(pos.x / w) * renderHalfWidth + renderHalfWidth,
@@ -1198,7 +1200,7 @@ export default class TarumaeRenderer {
 		return img;
 	};
 
-var ProjectionMethods = {
+Tarumae.ProjectionMethods = {
 	Persp: 0,
 	Ortho: 1,
 };

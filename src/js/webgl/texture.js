@@ -5,6 +5,8 @@
 // Copyright(c) 2016 BULB CORP. all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
+import Tarumae from "../entry"
+
 Tarumae.Utility.isPowerOf2 = function(value) {
   return (value & (value - 1)) == 0;
 };

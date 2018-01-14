@@ -255,7 +255,7 @@ Object.defineProperties(Tarumae.Animation.prototype, {
   },
 });
 
-new Tarumae.EventDispatcher(Tarumae.Animation).registerEvents(
+new EventDispatcher(Tarumae.Animation).registerEvents(
   "finish", "pause", "play", "stop"
 );
 

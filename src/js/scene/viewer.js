@@ -5,6 +5,10 @@
 // Copyright(c) 2016-2017 BULB CORP. all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
+import Tarumae from "../entry"
+import { vec3 } from "../math/vector"
+import { Matrix4 } from "../math/matrix"
+
 Tarumae.Viewer = function(renderer) {
   this.renderer = renderer;
 
@@ -450,7 +454,7 @@ Tarumae.Viewer.prototype = {
         // FIXME: integrated 2D 3D event system
         if (this.renderer.current2DScene) {
           this.renderer.current2DScene.mouseup(this.mouse.position);
-        }            
+        }
         break;
 
       case Tarumae.Viewer.OperationModes.Dragging:

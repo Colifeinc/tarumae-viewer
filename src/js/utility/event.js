@@ -1,19 +1,32 @@
 
-export function EventDispatcher(constructor) {
-  this.owner = constructor;
-  this.events = {};
-};
+////////////////////////////////////////////////////////////////////////////////
+// tarumae engine
+// http://tarumae.jp
+//
+// Copyright(c) 2016 unvell, all rights reserved
+////////////////////////////////////////////////////////////////////////////////
 
-EventDispatcher.prototype = {
-  registerEvents: function() {
+import Tarumae from "../entry"
+
+Tarumae.EventDispatcher = class {
+  constructor(cstor) {
+    if (!cstor) {
+      throw "Owner object to define events cannot be null or undefined";
+    }
+
+    this.owner = cstor;
+    this.events = {};
+  }
+
+  registerEvents() {
     for (var i = 0; i < arguments.length; i++) {
       var eventName = arguments[i];
       this.events[eventName] = null;
       this.setupPrototypeEventDispatcher(this.owner, eventName);
 		}
-  },
+  }
 
-  setupPrototypeEventDispatcher: function(constructor, name) {
+  setupPrototypeEventDispatcher(cstor, name) {
     var _this = this;
 
     var addEventListener = function(eventName, listener) {
@@ -31,7 +44,7 @@ EventDispatcher.prototype = {
       return listener;
     };
 
-    var proto = constructor.prototype;
+    var proto = cstor.prototype;
     
     // addEventListener
     if (typeof proto.addEventListener !== "function") {
@@ -112,9 +125,9 @@ EventDispatcher.prototype = {
 
       enumerable: false,
     });
-  },
+  }
 
-  addEventListenerForObject: function(obj, eventName, listener) {
+  addEventListenerForObject(obj, eventName, listener) {
     if (!this.events.hasOwnProperty(eventName)) {
 
       if (!(function() {
@@ -148,7 +161,7 @@ EventDispatcher.prototype = {
     }
 
     obj._eventListeners[eventName]._s3_pushIfNotExist(listener);
-  },
-};
+  }
+}
 
 

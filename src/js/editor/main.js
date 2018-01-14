@@ -171,7 +171,7 @@ function TarumaeEditor(options) {
 
 }
 
-new Tarumae.EventDispatcher(TarumaeEditor).registerEvents(
+new EventDispatcher(TarumaeEditor).registerEvents(
   "load", "save", "beforeObjectSave", "afterObjectSave",
   "finishAddingObject", "objectCreate",
   "contentChange", "objectSelect", "objectDeselect",

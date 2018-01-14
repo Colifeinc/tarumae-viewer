@@ -7,7 +7,7 @@
 
 ///////////////////// vec2 //////////////////////
 
-function vec2(x, y) {
+export function vec2(x, y) {
 	if (typeof x === "undefined") {
 		this.x = 0; this.y = 0;
 	}
@@ -79,7 +79,7 @@ vec2.dot = function(v1, v2) {
 
 ///////////////////// vec3 //////////////////////
 
-function vec3(x, y, z) {
+export function vec3(x, y, z) {
 	if (typeof x === "undefined") {
 		this.x = 0; this.y = 0; this.z = 0;
 	} else {
@@ -329,7 +329,7 @@ vec3.back = new vec3(0, 0, 1);
 
 //////////////////// vec4 //////////////////////
 
-function vec4(x, y, z, w) {
+export function vec4(x, y, z, w) {
 	switch (arguments.length) {
 		default:
 			this.x = 0;
@@ -488,7 +488,7 @@ vec4.prototype.toArrayDigits = function(digits) {
 
 /////////////////// color3 ////////////////////
 
-function color3(r, g, b) {
+export function color3(r, g, b) {
 	switch (arguments.length) {
 		case 0:
 			this.r = 0; this.g = 0; this.b = 0;
@@ -689,7 +689,7 @@ Ray.MaxDistance = 999999;
 
 ////////// Bounding Box //////////
 
-function BoundingBox(min, max) {
+export function BoundingBox(min, max) {
 
 	switch (arguments.length) {
 		case 0:
@@ -803,7 +803,7 @@ BoundingBox.transformBoundingBox = function(bbox, matrix) {
 
 ////////// Point //////////
 
-function Point(x, y) {
+export function Point(x, y) {
 	this.x = x;
 	this.y = y;
 }
@@ -819,6 +819,7 @@ Object.assign(Point.prototype, {
 			this.x * m.b1 + this.y * m.b2 + m.b3);
 	},
 });	
+
 Point.prototype.set = function(x, y) {
 	this.x = x;
 	this.y = y;
@@ -826,31 +827,33 @@ Point.prototype.set = function(x, y) {
 
 ////////// Size //////////
 
-function Size(w, h) {
-	switch (arguments.length) {
-		case 0:
-			this.width = 0;
-			this.height = 0;
-			break;
+export class Size {
+	constructor(w, h) {
+		switch (arguments.length) {
+			case 0:
+				this.width = 0;
+				this.height = 0;
+				break;
 
-		case 1:
-			var obj = arguments;
-			if (typeof obj === "object") {
-				this.width = obj.width;
-				this.height = obj.height;
-			}
-			break;
+			case 1:
+				var obj = arguments;
+				if (typeof obj === "object") {
+					this.width = obj.width;
+					this.height = obj.height;
+				}
+				break;
 			
-		case 2:
-			this.width = w;
-			this.height = h;
-			break;
+			case 2:
+				this.width = w;
+				this.height = h;
+				break;
+		}
+	}
+	
+	clone() {
+		return new Size(this.width, this.height);
 	}
 }
-
-Size.prototype.clone = function() {
-	return new Size(this.width, this.height);
-};
 
 ////////// Rect //////////
 

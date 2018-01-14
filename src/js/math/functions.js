@@ -5,6 +5,8 @@
 // Copyright(c) 2016 BULB CORP. all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
+import Tarumae from "../entry"
+
 Tarumae.MathFunctions = {
   _PIAngleDelta: Math.PI / 180.0,
 

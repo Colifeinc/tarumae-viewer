@@ -21,7 +21,7 @@ Draw2D.Scene2D = function() {
 };
 
 // Event declarations
-new Tarumae.EventDispatcher(Draw2D.Scene2D).registerEvents(
+new EventDispatcher(Draw2D.Scene2D).registerEvents(
 	"mousedown", "mouseup", "mousemove", "mousewheel",
   "begindrag", "drag", "enddrag",
   "getFocus", "lostFocus",
@@ -312,7 +312,7 @@ Object.assign(Draw2D.Object, {
 });
 
 // Event declarations
-new Tarumae.EventDispatcher(Draw2D.Object).registerEvents(
+new EventDispatcher(Draw2D.Object).registerEvents(
 	"mousedown", "mouseup", "mousemove", "mousewheel",
   "begindrag", "drag", "enddrag",
   "getFocus", "lostFocus",

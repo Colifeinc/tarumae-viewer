@@ -5,35 +5,41 @@
 // Copyright(c) 2016 BULB CORP. all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
-Tarumae.Mesh = function() {
-	this.renderer = undefined;
-	this.meta = undefined;
+import Tarumae from "../entry"
+import { vec3 } from "../math/vector"
+import { Matrix4 } from "../math/matrix"
+
+Tarumae.Mesh = class {
+	constructor() {
+		this.renderer = undefined;
+		this.meta = undefined;
 	
-	this.vertices = undefined;
-	this.normals = undefined;
-	this.texcoords = undefined;
+		this.vertices = undefined;
+		this.normals = undefined;
+		this.texcoords = undefined;
 
-	this.indexed = false;
-	this.indexes = undefined;
+		this.indexed = false;
+		this.indexes = undefined;
 
-	this.composeMode = Tarumae.Mesh.ComposeModes.Triangles;
+		this.composeMode = Tarumae.Mesh.ComposeModes.Triangles;
 
-	this.vertexBuffer = undefined;
-	this.indexBuffer = undefined;
+		this.vertexBuffer = undefined;
+		this.indexBuffer = undefined;
 
-	this.cachedTransformedVertices = undefined;
-	this.cachedNavmeshBorders = undefined;
+		this.cachedTransformedVertices = undefined;
+		this.cachedNavmeshBorders = undefined;
 	
-	// for debug
-	this._vertexMemorySize = undefined;
-	this._polygonCount = undefined;
+		// for debug
+		this._vertexMemorySize = undefined;
+		this._polygonCount = undefined;
 
-	this._lightmap = undefined;
-	this._lightmapTrunkId = undefined;
-	this._lightmapType = undefined;
-}
+		this._lightmap = undefined;
+		this._lightmapTrunkId = undefined;
+		this._lightmapType = undefined;
+	}
+};
 
-Tarumae.Mesh.prototype = {
+Object.assign(Tarumae.Mesh.prototype, {
 	loadFromStream: function(stream) {
 		if (!stream || stream.byteLength <= 0) {
 			console.error("can't load mesh: content is empty");
@@ -338,7 +344,7 @@ Tarumae.Mesh.prototype = {
 	},
 
 	draw: function(renderer) {
-    'use strict';
+		'use strict';
 
 		if (this.meta === undefined || this.meta.vertexBufferId === undefined) {
 			if (!this.bind(renderer)) {
@@ -429,7 +435,7 @@ Tarumae.Mesh.prototype = {
 	},
 
 	hitTestByRay: function(ray, maxt, session, options) {
-    'use strict';
+		'use strict';
 
 		var vertices = undefined, vertexElementCount = 0;
 		var normals = undefined, normalCount = 0;
@@ -504,7 +510,7 @@ Tarumae.Mesh.prototype = {
 	},
 
 	hitTestByRayUsingVertexIndex: (function() {
-    'use strict';
+		'use strict';
 
 		var nmat = new Matrix4();
 
@@ -575,7 +581,7 @@ Tarumae.Mesh.prototype = {
 
 	scaleTexcoords: function(scaleX, scaleY) {
 		if (Array.isArray(this.texcoords)) {
-			for (var i = 0; i < this.texcoords.length; ) {
+			for (var i = 0; i < this.texcoords.length;) {
 				this.texcoords[i++] *= scaleX;
 				this.texcoords[i++] *= scaleY;
 			}
@@ -722,7 +728,7 @@ Tarumae.Mesh.prototype = {
 					return enumerateEdge(transformedVertices, function(i2, e2) {
 						return i !== i2
 							&& ((e1.v1.almostSame(e2.v1) && e1.v2.almostSame(e2.v2))
-							|| (e1.v1.almostSame(e2.v2) && e1.v2.almostSame(e2.v1)));
+								|| (e1.v1.almostSame(e2.v2) && e1.v2.almostSame(e2.v1)));
 					});
 				};
 
@@ -792,7 +798,7 @@ Tarumae.Mesh.prototype = {
 			return true;
 		}
 	})(),
-};
+});	
 
 Object.defineProperties(Tarumae.Mesh.prototype, {
 	"boundingBox": {
@@ -814,7 +820,7 @@ Object.defineProperties(Tarumae.Mesh.prototype, {
 	}
 });
 
-Tarumae.Make_Inheritable_Object(Tarumae.Mesh.prototype);
+// Tarumae.Make_Inheritable_Object(Tarumae.Mesh.prototype);
 
 Object.assign(Tarumae.Mesh, {
 

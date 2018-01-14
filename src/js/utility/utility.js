@@ -5,19 +5,7 @@
 // Copyright(c) 2016 BULB CORP. all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
-if (typeof Tarumae === "undefined") {
-	// namespace declarations
-	Tarumae = {
-		Utility: {
-			NumberExtension: {},
-			StringExtension: {},
-			ObjectExtension: {},
-			ArrayExtension: {},
-		},
-		Debugger: {},
-		ImageToolkit: {},
-	};
-}
+import Tarumae from "../entry"
 
 Object.defineProperties(Tarumae.Utility.NumberExtension, {
 	toStringWithDigits: {

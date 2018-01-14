@@ -5,9 +5,17 @@
 // Copyright(c) 2016 BULB CORP. all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
+import Tarumae from "../entry"
 import { EventDispatcher } from "../utility/event"
+import { vec3, color3 } from "../math/vector"
+import { Matrix4 } from "../math/matrix"
+import "../scene/renderer"
+import "../scene/object"
+import "../scene/camera"
+import "../webgl/texture"
+import "../webgl/cubemap"
 
-export function Scene(renderer) {
+Tarumae.Scene = function(renderer) {
 	this.renderer = renderer;
 
 	this.objects = [];
@@ -23,7 +31,7 @@ export function Scene(renderer) {
 	this.archives = {};
 	this._archives = {};
 
-	this.resourceManager = new ResourceManager();
+	this.resourceManager = new Tarumae.ResourceManager();
 	this.animation = false;
 	this.requestedUpdateFrame = true;
 
@@ -46,12 +54,14 @@ export function Scene(renderer) {
 }
 
 // Event declarations
-new EventDispatcher(Scene).registerEvents(
+new Tarumae.EventDispatcher(Tarumae.Scene).registerEvents(
 	"mousedown", "mouseup", "mousemove", "mousewheel",
 	"begindrag", "drag", "enddrag",
 	"keyup", "keydown",
 	"objectAdd", "objectRemove", "mainCameraChange",
 	"frame");
+
+var Scene = Tarumae.Scene;
 
 Scene.prototype.addRes = function(url, type) {
 	this.resourceManager.add(url, type);
@@ -99,7 +109,7 @@ Scene.prototype.loadArchives = function(archs, loadingSession) {
 		aValue.archive = archive;
 		loadingSession.downloadArchives.push(archive);
 		
-		loadingSession.rm.add(aValue.url, ResourceTypes.Binary, function(stream) {
+		loadingSession.rm.add(aValue.url, Tarumae.ResourceTypes.Binary, function(stream) {
 			try {
 				archive.loadFromStream(stream);
 			} catch (e) { }
@@ -132,7 +142,7 @@ Scene.prototype.loadReflectionMaps = function(refmaps, loadingSession) {
 	var _this = this;
 
 	var datafileUrl = refmaps._datafile;
-	// loadingSession.rm.add(maps[i], ResourceTypes.Binary, function(stream) {
+	// loadingSession.rm.add(maps[i], Tarumae.ResourceTypes.Binary, function(stream) {
 	// 	var header = new Int32Array(stream);
 	// 	var res = header[2];
 	// 	var faceDataLength = res * res * 3 * 4;
@@ -166,7 +176,7 @@ Scene.prototype.loadReflectionMaps = function(refmaps, loadingSession) {
 
 			if (maps) {
 				for (var i = 0; i < maps.length; i++) {
-					rm.add(maps[i], ResourceTypes.Image, function() {
+					rm.add(maps[i], Tarumae.ResourceTypes.Image, function() {
 						pValue.downloadedImageCount++;
 
 						if (pValue.downloadedImageCount >= 6) {
@@ -184,7 +194,7 @@ Scene.prototype.loadReflectionMaps = function(refmaps, loadingSession) {
 				};
 
 				if (!Tarumae.Utility.Archive.canLoadFromArchive(_this, dataUrl, loadedHandler)) {
-					rm.add(dataUrl, ResourceTypes.Binary, loadedHandler);
+					rm.add(dataUrl, Tarumae.ResourceTypes.Binary, loadedHandler);
 				}
 			}
 		}
@@ -286,7 +296,7 @@ Scene.prototype.createMeshFromURL = function(url, handler, rm) {
 		rm = this.resourceManager;
 	}
 	
-	rm.add(url, ResourceTypes.Binary, function(stream) {
+	rm.add(url, Tarumae.ResourceTypes.Binary, function(stream) {
 		var mesh = renderer.cachedMeshes[url];
 		
 		if (!mesh && stream) {
@@ -315,7 +325,7 @@ Scene.prototype.createTextureFromURL = function(url, handler) {
 		return;
 	}
 
-	this.resourceManager.add(url, ResourceTypes.Image, function(stream) {
+	this.resourceManager.add(url, Tarumae.ResourceTypes.Image, function(stream) {
 		var texture = renderer.cachedTextures[url];
 		
 		if (!texture && stream) {
@@ -352,7 +362,7 @@ Scene.prototype.createObjectFromURL = (function() {
 			return createObjectFromArchive(archive, childName);
 		} else {
 
-			ResourceManager.download(url, ResourceTypes.Binary, function(buffer) {
+			ResourceManager.download(url, Tarumae.ResourceTypes.Binary, function(buffer) {
 				var archive = new Tarumae.Utility.Archive();
 				archive.loadFromStream(buffer);
 				_this._archives[url] = archive;
@@ -418,7 +428,7 @@ Scene.prototype.prepareObjectMesh = function(obj, name, value, loadingSession) {
 			};
 
 			if (!Tarumae.Utility.Archive.canLoadFromArchive(this, value, loadedHandler)) {
-				rm.add(value, ResourceTypes.Binary, loadedHandler);
+				rm.add(value, Tarumae.ResourceTypes.Binary, loadedHandler);
 			}
 		}
 	}
@@ -484,7 +494,7 @@ Scene.prototype.prepareMaterialObject = function(mat, rm, loadingSession) {
 					} else {
 						if (loadingSession) loadingSession.resourceTextureCount++;
 
-						rm.add(value, ResourceTypes.Image, function(image) {
+						rm.add(value, Tarumae.ResourceTypes.Image, function(image) {
 							if (loadingSession) {
 								loadingSession.downloadTextureCount++;
 								loadingSession.progress();
@@ -523,11 +533,11 @@ Scene.prototype.prepareObjects = function(obj, loadingSession) {
 	var scene = this;
 	var rm = loadingSession.rm || this.resourceManager;
 
-	if (!(obj instanceof SceneObject)) {
-		if (obj.type === ObjectTypes.Camera) {
+	if (!(obj instanceof Tarumae.SceneObject)) {
+		if (obj.type === Tarumae.ObjectTypes.Camera) {
 			Object.setPrototypeOf(obj, new Tarumae.Camera());
 		} else {
-			Object.setPrototypeOf(obj, new SceneObject());
+			Object.setPrototypeOf(obj, new Tarumae.SceneObject());
 		}
 	}
 	
@@ -556,7 +566,7 @@ Scene.prototype.prepareObjects = function(obj, loadingSession) {
 
 			case "model":
 				var model = scene.models[value];
-				if (!(model instanceof SceneObject)) {
+				if (!(model instanceof Tarumae.SceneObject)) {
 					scene.prepareObjects(model, loadingSession);
 				}
 				Object.setPrototypeOf(obj, model);
@@ -581,7 +591,7 @@ Scene.prototype.prepareObjects = function(obj, loadingSession) {
 				if (typeof value === "string" && value.length > 0) {
 					if (loadingSession) loadingSession.resourceLightmapCount++;
 
-					rm.add(value, ResourceTypes.Image, function(image) {
+					rm.add(value, Tarumae.ResourceTypes.Image, function(image) {
 
 						if (loadingSession) {
 							loadingSession.downloadLightmapCount++;
@@ -652,7 +662,7 @@ Scene.prototype.prepareObjects = function(obj, loadingSession) {
 				div.style.position = "absolute";
 				div.innerHTML = value;
 				obj._htmlObject = div;
-				obj.type = ObjectTypes.Div;
+				obj.type = Tarumae.ObjectTypes.Div;
 				scene.renderer.surface.appendChild(div);
 				break;
 
@@ -734,7 +744,7 @@ Scene.prototype.findObjectByName = function(name) {
  * put the result into an array.
  */
 Scene.prototype.findObjectsByType = function(type, options) {
-	type = (type || ObjectTypes.GenericObject);
+	type = (type || Tarumae.ObjectTypes.GenericObject);
 	options = options || {};
 	var arr = [];
 
@@ -1112,7 +1122,7 @@ Scene.prototype.animate = function(options, onframe, onfinish) {
 
 ///////////////////////// ObjectTypes /////////////////////////
 
-var ObjectTypes = {
+Tarumae.ObjectTypes = {
 	GenericObject: 0,
 	Empty: 11,
 	RoovRange: 15,
@@ -1132,7 +1142,7 @@ var ObjectTypes = {
 
 ///////////////////////// ObjectsLoadingSession /////////////////////////
 
-export class ObjectsLoadingSession {
+Tarumae.ObjectsLoadingSession = class {
 	constructor(rm) {
 		this.rm = rm;
 		this.progressRate = 0;
@@ -1186,5 +1196,5 @@ export class ObjectsLoadingSession {
 	}
 };
 
-new EventDispatcher(ObjectsLoadingSession).registerEvents(
+new Tarumae.EventDispatcher(Tarumae.ObjectsLoadingSession).registerEvents(
 	"progress", "finish", "objectMeshDownload");

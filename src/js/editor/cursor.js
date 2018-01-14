@@ -34,7 +34,7 @@ Tarumae.Axis3DCursor = function(renderer) {
   this.lastMousePosition = null;
 };
 
-new Tarumae.EventDispatcher(Tarumae.Axis3DCursor).registerEvents(
+new EventDispatcher(Tarumae.Axis3DCursor).registerEvents(
   "axisXMove", "axisYMove", "axisZMove"
 );
 
@@ -200,7 +200,7 @@ Tarumae.Multi3DCursor = function(renderer) {
 
 }
 
-new Tarumae.EventDispatcher(Tarumae.Multi3DCursor).registerEvents(
+new EventDispatcher(Tarumae.Multi3DCursor).registerEvents(
   "axisXMove", "axisYMove", "axisZMove",
   "axisXRotate", "axisYRotate", "axisZRotate",
   "axisXScale", "axisYScale", "axisZScale",
