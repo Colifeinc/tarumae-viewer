@@ -3,6 +3,10 @@ import Tarumae from "../entry"
 import TarumaeRenderer from "../scene/renderer"
 import { CubeMesh, PlaneMesh } from "../scene/object"
 import "../scene/viewer"
+import "../scene/animation"
+
+import texWood from "../../../resources/textures/wood.jpg";
+import texFloor from "../../../resources/textures/floor.jpg";
 
 window.addEventListener('load', function() {
 
@@ -18,7 +22,7 @@ window.addEventListener('load', function() {
       mesh: new Tarumae.CubeMesh(),
       location: [-1, 0.25, 0.2],
       scale: [0.5, 0.5, 0.5],
-      mat: { tex: "textures/CES3310.jpg" },
+      mat: { tex: texWood },
 
       onmouseup: function() {
         var cube = this;
@@ -37,7 +41,7 @@ window.addEventListener('load', function() {
       mesh: new Tarumae.CubeMesh(),
       location: [0, 0.5, 0],
       scale: [1, 1, 1],
-      mat: { tex: "textures/Wood.jpg" },
+      mat: { tex: texWood },
 
       onmouseup: function() {
         var cube = this;
@@ -54,7 +58,7 @@ window.addEventListener('load', function() {
       mesh: new Tarumae.CubeMesh(),
       location: [1.2, 0.35, 0.5],
       scale: [0.7, 0.7, 0.7],
-      mat: { tex: "textures/cloth_32.jpg" },
+      mat: { tex: texWood },
 
       onmouseup: function() {
         var cube = this;
@@ -70,7 +74,7 @@ window.addEventListener('load', function() {
     floor: {
       mesh: new Tarumae.PlaneMesh(2, 2),
       scale: [3, 3, 3],
-      mat: { tex: "textures/DefaultFloor.jpg" },
+      mat: { tex: texFloor },
     },
   };
 
