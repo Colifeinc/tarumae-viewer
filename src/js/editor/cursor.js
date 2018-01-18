@@ -9,23 +9,23 @@ Tarumae.Axis3DCursor = function(renderer) {
   this.renderer = renderer;
 
   this.position = new vec3(0, 0, 0);
-  this.screenPosition = new vec2(0, 0);
+  this.screenPosition = new Vec2(0, 0);
   this.enabled = false;
 
   this.arrows = {
     x: {
       dir: new vec3(1, 0, 0), color: "#00ff00",
-      enabled: true, screenPosition: new vec2(0, 0),
+      enabled: true, screenPosition: new Vec2(0, 0),
       planeVertices: TarumaeEditor.AxisPlaneVertices.x,
     },
     y: {
       dir: new vec3(0, 1, 0), color: "#ff0000",
-      enabled: true, screenPosition: new vec2(0, 0),
+      enabled: true, screenPosition: new Vec2(0, 0),
       planeVertices: TarumaeEditor.AxisPlaneVertices.y,
     },
     z: {
       dir: new vec3(0, 0, 1), color: "#0000ff",
-      enabled: true, screenPosition: new vec2(0, 0),
+      enabled: true, screenPosition: new Vec2(0, 0),
       planeVertices: TarumaeEditor.AxisPlaneVertices.z,
     },
   };
@@ -189,7 +189,7 @@ Tarumae.Multi3DCursor = function(renderer) {
   this.renderer = renderer;
 
   this.position = new vec3(0, 0, 0);
-  this.screenPosition = new vec2(0, 0);
+  this.screenPosition = new Vec2(0, 0);
   this.enabled = false;
 
   this.arrows = this.getArrows();

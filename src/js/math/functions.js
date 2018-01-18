@@ -41,7 +41,7 @@ Tarumae.MathFunctions = {
         Tarumae.MathFunctions.clamp(v.y, min, max),
         Tarumae.MathFunctions.clamp(v.z, min, max),
         Tarumae.MathFunctions.clamp(v.w, min, max));
-    } else if (v instanceof vec2) {
+    } else if (v instanceof Vec2) {
       return new vec3(Tarumae.MathFunctions.clamp(v.x, min, max),
         Tarumae.MathFunctions.clamp(v.y, min, max));
     }

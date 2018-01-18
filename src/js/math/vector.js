@@ -7,77 +7,79 @@
 
 import Tarumae from "../entry"
 
-///////////////////// vec2 //////////////////////
+///////////////////// Vec2 //////////////////////
 
-export function vec2(x, y) {
-	if (typeof x === "undefined") {
-		this.x = 0; this.y = 0;
+export class Vec2 {
+	constructor(x, y) {
+		if (typeof x === "undefined") {
+			this.x = 0; this.y = 0;
+		} else {
+			this.x = x; this.y = y;
+		}
 	}
-	else {
-		this.x = x; this.y = y;
-	}	
-}
 
-vec2.prototype.scale = function(scaleX, scaleY) {
-	this.x *= scaleX;
-	this.y *= scaleY;
-};
-
-vec2.prototype.mul = function(sx, sy) {
-	switch (arguments.length) {
-		case 1:
-			if (typeof sx === "object") {
-				return new vec2(this.x * sx.x, this.y * sx.y);
-			} else {
-				return new vec2(this.x * sx, this.y * sx);
-			}
-				
-		case 2:
-			return new vec2(this.x * sx, this.y * sy);
+	scale(scaleX, scaleY) {
+		this.x *= scaleX;
+		this.y *= scaleY;
 	}
-};
 
-vec2.prototype.neg = function() {
-	return new vec2(-this.x, -this.y);
-};
+	mul(sx, sy) {
+		switch (arguments.length) {
+			case 1:
+				if (typeof sx === "object") {
+					return new Vec2(this.x * sx.x, this.y * sx.y);
+				} else {
+					return new Vec2(this.x * sx, this.y * sx);
+				}
 
-vec2.prototype.length = function() {
-	return Math.sqrt(this.x * this.x + this.y * this.y);
-};
+			case 2:
+				return new Vec2(this.x * sx, this.y * sy);
+		}
+	}
 
-vec2.prototype.normalize = function() {
-	var delta = 1 / this.length();
-	return new vec2(this.x * delta, this.y * delta);
-};
+	neg() {
+		return new Vec2(-this.x, -this.y);
+	}
 
-vec2.prototype.clone = function() {
-	return new vec2(this.x, this.y);
-};
+	length() {
+		return Math.sqrt(this.x * this.x + this.y * this.y);
+	}
 
-vec2.prototype.toArray = function() {
-	return [this.x, this.y];
-};
+	normalize() {
+		var delta = 1 / this.length();
+		return new Vec2(this.x * delta, this.y * delta);
+	}
 
-vec2.prototype.toFloat32Array = function() {
-	return new Float32Array(this.toArray());
-};
+	clone() {
+		return new Vec2(this.x, this.y);
+	}
 
-vec2.prototype.toString = function() {
-	var toStringDigits = Tarumae.Utility.NumberExtension.toStringWithDigits;
-	return "[" + toStringDigits(this.x) + ", " + (this.y) + "]";
-};
+	toArray() {
+		return [this.x, this.y];
+	}
 
-vec2.add = function(v1, v2) {
-	return new vec2(v1.x + v2.x, v1.y + v2.y);
-};
+	toFloat32Array() {
+		return new Float32Array(this.toArray());
+	}
 
-vec2.sub = function(v1, v2) {
-	return new vec2(v1.x - v2.x, v1.y - v2.y);
-};
+	toString() {
+		var toStringDigits = Tarumae.Utility.NumberExtension.toStringWithDigits;
+		return "[" + toStringDigits(this.x) + ", " + (this.y) + "]";
+	}
 
-vec2.dot = function(v1, v2) {
-	return v1.x * v2.x + v1.y * v2.y;
-};
+	static add(v1, v2) {
+		return new Vec2(v1.x + v2.x, v1.y + v2.y);
+	}
+	
+	sub(v1, v2) {
+		return new Vec2(v1.x - v2.x, v1.y - v2.y);
+	}
+	
+	dot(v1, v2) {
+		return v1.x * v2.x + v1.y * v2.y;
+	}
+}	
+
 
 ///////////////////// vec3 //////////////////////
 
@@ -90,7 +92,7 @@ export function vec3(x, y, z) {
 }
 
 vec3.prototype.xy = function() {
-	return new vec2(this.x, this.y);	
+	return new Vec2(this.x, this.y);	
 };
 
 vec3.prototype.set = function(x, y, z) {
@@ -671,8 +673,10 @@ color4.black = new color4(color3.black, 1.0);
 
 ////////// Quaternion //////////
 
-function Quaternion() {
-	
+Tarumae.Quaternion = class {
+	constructor() {
+		throw "not available yet";
+	}
 }
 
 ////////// Ray //////////

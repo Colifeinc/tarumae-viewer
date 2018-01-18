@@ -213,7 +213,7 @@ Tarumae.Debugger = class {
     var toStringDigits = Tarumae.Utility.NumberExtension.toStringWithDigits;
     
     return "<b>Tarumae (" + tarumaeversion + ")</b>" + newline + newline
-      + "FPS: " + toStringDigits(fm.currentFPS, 2) + " ~ " + toStringDigits(fm.maxFPS, 2) + ")" + newline
+      + "FPS: " + toStringDigits(fm.currentFPS, 2) + " (" + toStringDigits(fm.minFPS, 2) + " ~ " + (fm.maxFPS, 2) + ")" + newline
       + "average frame rendering time: " + toStringDigits(this.averageFrameRenderingTime, 2) + " ms." + newline
       + "last raycast operation time: " + toStringDigits(this.lastRaycastElapsedTime, 2) + " ms." + newline
       + "current enabled lights: " + this.currentLightCount + newline

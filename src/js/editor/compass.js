@@ -8,17 +8,17 @@
 function TarumaeCompass(renderer) {
   this.renderer = renderer;
 
-  this.screenPosition = new vec2(0, 0);
+  this.screenPosition = new Vec2(0, 0);
   this.angle = new vec3(0, 0, 0);
   this.moving = false;
 
   this.arrows = {
-    x: { dir: new vec3(1, 0, 0), color: "#00ff00", enabled: true, screenPosition: new vec2(0, 0), name: "X" },
-    x2: { dir: new vec3(-1, 0, 0), color: "#888888", enabled: true, screenPosition: new vec2(0, 0) },
-    y: { dir: new vec3(0, 1, 0), color: "#ff0000", enabled: true, screenPosition: new vec2(0, 0), name: "Y" },
-    y2: { dir: new vec3(0, -1, 0), color: "#888888", enabled: true, screenPosition: new vec2(0, 0) },
-    z: { dir: new vec3(0, 0, 1), color: "#0000ff", enabled: true, screenPosition: new vec2(0, 0), name: "Z" },
-    z2: { dir: new vec3(0, 0, -1), color: "#888888", enabled: true, screenPosition: new vec2(0, 0) },
+    x: { dir: new vec3(1, 0, 0), color: "#00ff00", enabled: true, screenPosition: new Vec2(0, 0), name: "X" },
+    x2: { dir: new vec3(-1, 0, 0), color: "#888888", enabled: true, screenPosition: new Vec2(0, 0) },
+    y: { dir: new vec3(0, 1, 0), color: "#ff0000", enabled: true, screenPosition: new Vec2(0, 0), name: "Y" },
+    y2: { dir: new vec3(0, -1, 0), color: "#888888", enabled: true, screenPosition: new Vec2(0, 0) },
+    z: { dir: new vec3(0, 0, 1), color: "#0000ff", enabled: true, screenPosition: new Vec2(0, 0), name: "Z" },
+    z2: { dir: new vec3(0, 0, -1), color: "#888888", enabled: true, screenPosition: new Vec2(0, 0) },
   };
 
   this.selectedArrow = null;

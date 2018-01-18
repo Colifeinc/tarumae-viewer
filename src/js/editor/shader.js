@@ -256,7 +256,7 @@ Object.assign(Tarumae.EditorShader.prototype, {
       if (typeof mat.texTiling === "object") {
         if (Array.isArray(mat.texTiling)) {
           texTiling = mat.texTiling;
-        } else if (mat.texTiling instanceof vec2) {
+        } else if (mat.texTiling instanceof Vec2) {
           texTiling = mat.texTiling.toArray();
         }
       }

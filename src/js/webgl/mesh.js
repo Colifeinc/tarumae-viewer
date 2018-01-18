@@ -760,7 +760,7 @@ Object.assign(Tarumae.Mesh.prototype, {
 					if (out && out.ta >= 0 && out.ta <= 1 && out.tb >= 0 && out.tb <= 1) {
 						out.v1 = border.v1;
 						out.v2 = border.v2;
-						out.hit = new vec2(out.x, out.y);
+						out.hit = new Vec2(out.x, out.y);
 						hits.push(out);
 					}
 				}
@@ -772,13 +772,13 @@ Object.assign(Tarumae.Mesh.prototype, {
 
 					var border = hits[0];
 					
-					var vmove = new vec2(movement.x, movement.z);
+					var vmove = new Vec2(movement.x, movement.z);
 					var movedir = vmove.normalize();
 
-					var vborder = new vec2(border.v2.x - border.v1.x, border.v2.z - border.v1.z);
+					var vborder = new Vec2(border.v2.x - border.v1.x, border.v2.z - border.v1.z);
 					var borderdir = vborder.normalize();
 
-					if (vec2.dot(borderdir, movedir) < 0) {
+					if (Vec2.dot(borderdir, movedir) < 0) {
 						vborder = vborder.neg();
 						borderdir = borderdir.neg();
 					}

@@ -148,8 +148,8 @@ Tarumae.Shader = class {
 };
 
 Tarumae.ShaderUniform = function(shader, name, type, slot) {
-	var gl = shader.gl;
-	var uniform = this;
+	const gl = shader.gl;
+	const uniform = this;
 
 	switch (type) {
 
@@ -333,7 +333,7 @@ Tarumae.ShaderUniform.prototype.register = function(shader, name) {
 // 	this.gl.uniform1i(this.lightmapUniform, 2);
 // 	this.hasLightMapUniform = this.findUniform("hasLightMap");
 // 	this.defaultMaterialColor = new color3(1, 1, 1);
-// 	this.defaultTexTiling = new vec2(1, 1);
+// 	this.defaultTexTiling = new Vec2(1, 1);
 
 // 	this.emptyTexture = Texture.createEmpty(renderer);
 // }
@@ -379,7 +379,7 @@ Tarumae.ShaderUniform.prototype.register = function(shader, name) {
 // 			color = mat.color;
 // 		}
 
-// 		if (mat.texTiling instanceof vec2) {
+// 		if (mat.texTiling instanceof Vec2) {
 // 			texTiling = mat.texTiling;
 // 		}
 
@@ -529,7 +529,7 @@ Tarumae.ViewerShader.prototype.beginObject = function(obj) {
 		if (typeof mat.texTiling === "object") {
 			if (Array.isArray(mat.texTiling)) {
 				texTiling = mat.texTiling;
-			} else if (mat.texTiling instanceof vec2) {
+			} else if (mat.texTiling instanceof Vec2) {
 				texTiling = mat.texTiling.toArray();
 			}	
 		}
@@ -681,7 +681,7 @@ Tarumae.SimpleShader.prototype.beginObject = function(obj) {
 		if (typeof mat.texTiling === "object") {
 			if (Array.isArray(mat.texTiling)) {
 				texTiling = mat.texTiling;
-			} else if (mat.texTiling instanceof vec2) {
+			} else if (mat.texTiling instanceof Vec2) {
 				texTiling = mat.texTiling.toArray();
 			}	
 		}
@@ -780,7 +780,7 @@ Tarumae.BillboardShader.prototype.beginObject = function(obj) {
 		if (typeof mat.texTiling === "object") {
 			if (Array.isArray(mat.texTiling)) {
 				texTiling = mat.texTiling;
-			} else if (mat.texTiling instanceof vec2) {
+			} else if (mat.texTiling instanceof Vec2) {
 				texTiling = mat.texTiling.toArray();
 			}	
 		}
@@ -964,7 +964,7 @@ Tarumae.PanoramaShader.prototype.beginObject = function(obj) {
 		if (typeof mat.texTiling === "object") {
 			if (Array.isArray(mat.texTiling)) {
 				texTiling = mat.texTiling;
-			} else if (mat.texTiling instanceof vec2) {
+			} else if (mat.texTiling instanceof Vec2) {
 				texTiling = mat.texTiling.toArray();
 			}	
 		}
@@ -1333,7 +1333,7 @@ Tarumae.StandardShader.prototype.beginObject = function(obj) {
 		if (typeof mat.texTiling === "object") {
 			if (Array.isArray(mat.texTiling)) {
 				texTiling = mat.texTiling;
-			} else if (mat.texTiling instanceof vec2) {
+			} else if (mat.texTiling instanceof Vec2) {
 				texTiling = mat.texTiling.toArray();
 			}
 		}

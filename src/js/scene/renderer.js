@@ -8,7 +8,7 @@
 import Tarumae from "../entry"
 import "../utility/utility"
 import { ResourceManager, ResourceTypes } from "../utility/res"
-import { vec2, vec3, vec4, color3, color4, Point } from "../math/vector"
+import { Vec2, vec3, vec4, color3, color4, Point } from "../math/vector"
 import { Matrix3, Matrix4 } from "../math/matrix"
 import "../scene/scene"
 import "../webgl/shader"

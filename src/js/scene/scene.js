@@ -517,7 +517,7 @@ Scene.prototype.prepareMaterialObject = function(mat, rm, loadingSession) {
 				if (typeof value === "object" && value instanceof Array) {
 					switch (value.length) {
 						default: break;
-						case 2: mat[name] = new vec2(value[0], value[1]); break;
+						case 2: mat[name] = new Vec2(value[0], value[1]); break;
 						case 3: mat[name] = new vec3(value[0], value[1], value[2]); break;
 						case 4: mat[name] = new vec4(value[0], value[1], value[2], value[3]); break;
 					}
@@ -650,7 +650,7 @@ Scene.prototype.prepareObjects = function(obj, loadingSession) {
 				if (typeof value === "object" && value instanceof Array) {
 					switch (value.length) {
 						default: break;
-						case 2: obj[name] = new vec2(value[0], value[1]); break;
+						case 2: obj[name] = new Vec2(value[0], value[1]); break;
 						case 3: obj[name] = new vec3(value[0], value[1], value[2]); break;
 						case 4: obj[name] = new vec4(value[0], value[1], value[2], value[3]); break;
 					}
