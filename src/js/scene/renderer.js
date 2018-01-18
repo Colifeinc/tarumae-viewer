@@ -8,15 +8,16 @@
 import Tarumae from "../entry"
 import "../utility/utility"
 import { ResourceManager, ResourceTypes } from "../utility/res"
-import { vec2, vec3, vec4, color3, color4 } from "../math/vector"
+import { vec2, vec3, vec4, color3, color4, Point } from "../math/vector"
 import { Matrix3, Matrix4 } from "../math/matrix"
 import "../scene/scene"
 import "../webgl/shader"
 import { Debugger } from "../utility/debug"
 
+import fs from "fs";
+
 export default class TarumaeRenderer {
 	constructor(options) {
-		"use strict";
 
 		this.initialized = false;
 		this.debugMode = false;
@@ -162,36 +163,11 @@ export default class TarumaeRenderer {
 
 		// create shader programs either from server or tarumae.js
 		TarumaeRenderer.Shaders._s3_foreach(function(name, shaderDefine) {
-			if (typeof TarumaeRenderer.ShaderSources === "object"
-				&& TarumaeRenderer.ShaderSources
-				&& TarumaeRenderer.ShaderSources.hasOwnProperty(name)) {
-				// load shader source from tarumae.js
-				var shaderSource = TarumaeRenderer.ShaderSources[name];
-				renderer.loadShader(shaderDefine, shaderSource.vert, shaderSource.frag);
-			} else {
-				// download shader source from server
-				shaderDefine.instance = null;
-
-				if (typeof renderer.options.baseShaderUrl === "string") {
-					shaderDefine.vert = renderer.options.baseShaderUrl + shaderDefine.vert;
-					shaderDefine.frag = renderer.options.baseShaderUrl + shaderDefine.frag;
-				}
-
-				downloader.add(shaderDefine.vert, Tarumae.ResourceTypes.Text);
-				downloader.add(shaderDefine.frag, Tarumae.ResourceTypes.Text);
-				downloader.downloadShaders.push(shaderDefine);
-			}
+			// load shader source from tarumae.js
+			renderer.loadShader(shaderDefine, shaderDefine.vert, shaderDefine.frag);
 		});
 
-		downloader.load(function() {
-			// create shaders from downloaded resources
-			for (var i = 0; i < downloader.downloadShaders.length; i++) {
-				var shaderDefine = downloader.downloadShaders[i];
-				renderer.loadShader(shaderDefine, downloader.get(shaderDefine.vert), downloader.get(shaderDefine.frag));
-			}
-
-			renderer.init();
-		});
+		renderer.init();
 
 		requestAnimationFrame(function() {
 			renderer.drawFrame();
@@ -842,7 +818,7 @@ export default class TarumaeRenderer {
 					var viewportWidth = viewRange * this.aspectRate;
 					var viewportHeight = viewRange;
 	
-					ray = new Ray(new vec3(0, 0, 0), new vec3(
+					ray = new Tarumae.Ray(new vec3(0, 0, 0), new vec3(
 						(p.x / this.renderSize.width - 0.5) * viewportWidth,
 						-(p.y / this.renderSize.height - 0.5) * viewportHeight,
 						-0.5).normalize());
@@ -860,7 +836,7 @@ export default class TarumaeRenderer {
 					var x = (p.x / this.renderSize.width - 0.5) * viewportWidth;
 					var y = -(p.y / this.renderSize.height - 0.5) * viewportHeight;
 	
-					ray = new Ray(new vec3(x, y, 0), new vec3(0, 0, -1));
+					ray = new Tarumae.Ray(new vec3(x, y, 0), new vec3(0, 0, -1));
 				}
 				break;
 		}
@@ -908,7 +884,7 @@ export default class TarumaeRenderer {
 	
 		var w = ((projectMethod == Tarumae.ProjectionMethods.Persp || projectMethod == "persp") ? pos.w : 1.0) || 1.0;
 	
-		return new Tarumae.Point(
+		return new Point(
 			(pos.x / w) * renderHalfWidth + renderHalfWidth,
 			-(pos.y / w) * renderHalfHeight + renderHalfHeight);
 	};
@@ -940,7 +916,7 @@ export default class TarumaeRenderer {
 		for (var i = 0; i < points.length; i++) {
 			var p = new vec4(points[i], 1.0).mulMat(this.projectionViewMatrix);
 	
-			ps[i] = new Tarumae.Point(
+			ps[i] = new Point(
 				(p.x / p.w) * renderHalfWidth + renderHalfWidth,
 				-(p.y / p.w) * renderHalfHeight + renderHalfHeight);
 		}
@@ -960,7 +936,7 @@ export default class TarumaeRenderer {
 	
 	TarumaeRenderer.prototype.viewRayHitTestPlaneInWorldSpace = function(pos, planeVertices) {
 	  var ray = this.createWorldRayFromScreenPosition(pos);
-	  return Tarumae.MathFunctions.rayIntersectsPlane(ray, planeVertices, Ray.MaxDistance);
+	  return Tarumae.MathFunctions.rayIntersectsPlane(ray, planeVertices, Tarumae.Ray.MaxDistance);
 	};
 	
 	TarumaeRenderer.prototype.drawLine = function(from, to, width, color) {
@@ -1211,12 +1187,30 @@ var DrawMode = {
 };
 
 TarumaeRenderer.Shaders = {
-	viewer: { vert: "shader/viewer.vert", frag: "shader/viewer.frag", class: "ViewerShader" },
-	solidcolor: { vert: "shader/solidcolor.vert", frag: "shader/solidcolor.frag", class: "SolidColorShader" },
-	billboard: { vert: "shader/billboard.vert", frag: "shader/billboard.frag", class: "BillboardShader" },
-	simple: { vert: "shader/simple.vert", frag: "shader/simple.frag", class: "SimpleShader" },
-	panorama: { vert: "shader/panorama.vert", frag: "shader/panorama.frag", class: "PanoramaShader" },
-	standard: { vert: "shader/standard.vert", frag: "shader/standard.frag", class: "StandardShader" },
+	viewer: {
+		vert: fs.readFileSync(__dirname + "../../../shader/viewer.vert", "utf8"),
+		frag: fs.readFileSync(__dirname + "../../../shader/viewer.frag", "utf8"), class: "ViewerShader"
+	},
+	solidcolor: {
+		vert: fs.readFileSync(__dirname + "../../../shader/solidcolor.vert", "utf8"),
+		frag: fs.readFileSync(__dirname + "../../../shader/solidcolor.frag", "utf8"), class: "SolidColorShader"
+	},
+	billboard: {
+		vert: fs.readFileSync(__dirname + "../../../shader/billboard.vert", "utf8"),
+		frag: fs.readFileSync(__dirname + "../../../shader/billboard.frag", "utf8"), class: "BillboardShader"
+	},
+	simple: {
+		vert: fs.readFileSync(__dirname + "../../../shader/simple.vert", "utf8"),
+		frag: fs.readFileSync(__dirname + "../../../shader/simple.frag", "utf8"), class: "SimpleShader"
+	},
+	panorama: {
+		vert: fs.readFileSync(__dirname + "../../../shader/panorama.vert", "utf8"),
+		frag: fs.readFileSync(__dirname + "../../../shader/panorama.frag", "utf8"), class: "PanoramaShader"
+	},
+	standard: {
+		vert: fs.readFileSync(__dirname + "../../../shader/standard.vert", "utf8"),
+		frag: fs.readFileSync(__dirname + "../../../shader/standard.frag", "utf8"), class: "StandardShader"
+	},
 };
 
 TarumaeRenderer.ContainerStyle = [

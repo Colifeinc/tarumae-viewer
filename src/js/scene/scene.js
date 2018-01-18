@@ -817,7 +817,7 @@ Scene.prototype.findObjectsByWorldRay = function(ray, transformStack, options) {
 	
 	options = options || {};
 
-	var out = { object: null, hits: [], t: Ray.MaxDistance };
+	var out = { object: null, hits: [], t: Tarumae.Ray.MaxDistance };
 	
 	var rayNormalizedDir = ray.dir.normalize();
 
@@ -908,7 +908,7 @@ Scene.prototype.hitTestObjectByRay = function(obj, ray, out, session, options) {
 		for (var k = 0; k < obj.meshes.length; k++) {
 			var mesh = obj.meshes[k];
 			
-			var mout = mesh.hitTestByRay(ray, Ray.MaxDistance, session, options);
+			var mout = mesh.hitTestByRay(ray, Tarumae.Ray.MaxDistance, session, options);
 			
 			if (mout) {
 				out.hits.push({

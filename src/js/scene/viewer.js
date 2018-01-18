@@ -6,7 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "../entry"
-import { vec3 } from "../math/vector"
+import { vec3, vec4 } from "../math/vector"
 import { Matrix4 } from "../math/matrix"
 
 Tarumae.Viewer = function(renderer) {

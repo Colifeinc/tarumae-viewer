@@ -6,6 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "../entry"
+import { vec3, vec4 } from "./vector"
 
 Tarumae.MathFunctions = {
   _PIAngleDelta: Math.PI / 180.0,

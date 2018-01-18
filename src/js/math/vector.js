@@ -5,6 +5,8 @@
 // Copyright(c) 2016 BULB CORP. all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
+import Tarumae from "../entry"
+
 ///////////////////// vec2 //////////////////////
 
 export function vec2(x, y) {
@@ -675,88 +677,90 @@ function Quaternion() {
 
 ////////// Ray //////////
 
-function Ray(origin, dir) {
-	if (typeof origin === "undefined") {
-		this.origin = new vec3();
-		this.dir = new vec3();
-	} else {
-		this.origin = origin;
-		this.dir = dir;
+Tarumae.Ray = class {
+	constructor(origin, dir) {
+		if (typeof origin === "undefined") {
+			this.origin = new vec3();
+			this.dir = new vec3();
+		} else {
+			this.origin = origin;
+			this.dir = dir;
+		}
 	}
 }
 
-Ray.MaxDistance = 999999;
+Tarumae.Ray.MaxDistance = 999999;
 
 ////////// Bounding Box //////////
 
-export function BoundingBox(min, max) {
+Tarumae.BoundingBox = class {
+	constructor(min, max) {
 
-	switch (arguments.length) {
-		case 0:
-			this.min = new vec3();
-			this.max = new vec3();
-			this.origin = new vec3();
-			break;
+		switch (arguments.length) {
+			case 0:
+				this.min = new vec3();
+				this.max = new vec3();
+				this.origin = new vec3();
+				break;
 
-		case 1:
-			if (typeof arguments[0] === "object") {
-				// get min and max from another boundingbox instance
-				this.max = arguments[0].max;
-				this.min = arguments[0].min;
-			}
-			break;
+			case 1:
+				if (typeof arguments[0] === "object") {
+					// get min and max from another boundingbox instance
+					this.max = arguments[0].max;
+					this.min = arguments[0].min;
+				}
+				break;
 
-		default:
-		case 2:
-			this.min = min;
-			this.max = max;
-			break;
+			default:
+			case 2:
+				this.min = min;
+				this.max = max;
+				break;
+		}
+
+		this.origin = this.getOrigin();
+		this.size = this.getSize();
 	}
 
-	this.origin = this.getOrigin();
-	this.size = this.getSize();
-};
+	getVertexArray(bbox) {
+		return [
+			new vec3(bbox.max.x, bbox.max.y, bbox.max.z),
+			new vec3(bbox.max.x, bbox.max.y, bbox.min.z),
+			new vec3(bbox.max.x, bbox.min.y, bbox.max.z),
+			new vec3(bbox.max.x, bbox.min.y, bbox.min.z),
+			new vec3(bbox.min.x, bbox.max.y, bbox.max.z),
+			new vec3(bbox.min.x, bbox.max.y, bbox.min.z),
+			new vec3(bbox.min.x, bbox.min.y, bbox.max.z),
+			new vec3(bbox.min.x, bbox.min.y, bbox.min.z),
+		];
+	}
 
-BoundingBox.getVertexArray = function(bbox) {
-	return [
-		new vec3(bbox.max.x, bbox.max.y, bbox.max.z),
-		new vec3(bbox.max.x, bbox.max.y, bbox.min.z),
-		new vec3(bbox.max.x, bbox.min.y, bbox.max.z),
-		new vec3(bbox.max.x, bbox.min.y, bbox.min.z),
-		new vec3(bbox.min.x, bbox.max.y, bbox.max.z),
-		new vec3(bbox.min.x, bbox.max.y, bbox.min.z),
-		new vec3(bbox.min.x, bbox.min.y, bbox.max.z),
-		new vec3(bbox.min.x, bbox.min.y, bbox.min.z),
-	];
-};
-
-BoundingBox.prototype = {
-	getSize: function() {
+	getSize() {
 		return vec3.sub(this.max, this.min);
-	},
+	}
 
-	getOrigin: function() {
+	getOrigin() {
 		if (typeof this.size === "undefined") {
 			this.size = this.getSize();
 		}
 
 		return vec3.add(this.min, vec3.div(this.size, 2));
-	},
+	}
 
-	offset: function(off) {
+	offset(off) {
 		this.max = vec3.add(this.max, off);
 		this.min = vec3.add(this.min, off);
 		this.origin = vec3.add(this.origin, off);
-	},
+	}
 
-	contains: function(p) {
+	contains(p) {
 		return p.x > this.min.x && p.x < this.max.x
 			&& p.y > this.min.y && p.x < this.max.y
 			&& p.z > this.min.x && p.z < this.max.z;
-	},
-};
+	}
+}
 
-BoundingBox.findBoundingBoxOfBoundingBoxes = function(bboxA, bboxB) {
+Tarumae.BoundingBox.findBoundingBoxOfBoundingBoxes = function(bboxA, bboxB) {
 	if (!bboxA && !bboxB) return null;
 	if (!bboxA) return bboxB;
 	if (!bboxB) return bboxA;
@@ -778,7 +782,7 @@ BoundingBox.findBoundingBoxOfBoundingBoxes = function(bboxA, bboxB) {
 	return bbox;
 };
 
-BoundingBox.transformBoundingBox = function(bbox, matrix) {
+Tarumae.BoundingBox.transformBoundingBox = function(bbox, matrix) {
 
 	var ruf = new vec4(bbox.max.x, bbox.max.y, bbox.max.z, 1).mulMat(matrix);
 	var rub = new vec4(bbox.max.x, bbox.max.y, bbox.min.z, 1).mulMat(matrix);

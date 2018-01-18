@@ -80,7 +80,7 @@ Object.defineProperties(Object.prototype, {
 			return true;
 		},
 		enumerable: false
-	},
+	}
 
 });
 
@@ -356,6 +356,6 @@ Object.defineProperties(Tarumae.Utility, {
 				// TODO
 			}
 		}
-	},
+	}
 
 });

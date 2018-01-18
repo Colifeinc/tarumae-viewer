@@ -5,6 +5,8 @@
 // Copyright(c) 2016 BULB CORP. all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
+import Tarumae from "../entry"
+
 Tarumae.Animation = function(scene, options, onframe, onfinish) {
   "use strict";
   options = options || {};
@@ -255,7 +257,7 @@ Object.defineProperties(Tarumae.Animation.prototype, {
   },
 });
 
-new EventDispatcher(Tarumae.Animation).registerEvents(
+new Tarumae.EventDispatcher(Tarumae.Animation).registerEvents(
   "finish", "pause", "play", "stop"
 );
 

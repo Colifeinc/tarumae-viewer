@@ -8,7 +8,7 @@
 ////////////////// Shader ///////////////////////
 
 import Tarumae from "../entry"
-import { vec3, BoundingBox } from "../math/vector"
+import { vec3 } from "../math/vector"
 import { Matrix4 } from "../math/matrix"
 
 Tarumae.Shader = class {
@@ -1105,7 +1105,7 @@ Tarumae.StandardShader = class extends Tarumae.Shader {
 		this.emptyCubemap.enableMipmap = false;
 		this.emptyCubemap.createEmpty(2, 2);
 
-		this.emptyBoundingBox = new BoundingBox(vec3.zero, vec3.zero);
+		this.emptyBoundingBox = new Tarumae.BoundingBox(vec3.zero, vec3.zero);
 	}
 };	
 
