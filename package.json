@@ -2,7 +2,7 @@
 	"name": "tarumae",
 	"version": "1.0.0",
 	"description": "",
-	"main": "index.html",
+	"main": "src/js/tarumae.js",
 	"scripts": {
 		"start": "parcel src/index.html",
 		"build": "parcel build src/js/tarumae.js -d build"
@@ -10,5 +10,7 @@
 	"keywords": [],
 	"author": "BULB CORP.",
 	"license": "",
-	"dependencies": {}
+	"dependencies": {
+		"pako": "^1.0.6"
+	}
 }
