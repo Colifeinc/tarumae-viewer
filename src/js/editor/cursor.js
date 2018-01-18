@@ -164,7 +164,7 @@ Object.assign(Tarumae.Axis3DCursor.prototype, {
   },
 
   checkArrowHittedByPosition: function(arrow, p) {
-    var bounds = Rect.createFromPoints(this.screenPosition, arrow.screenPosition);
+    var bounds = Tarumae.Rect.createFromPoints(this.screenPosition, arrow.screenPosition);
   
     if (bounds.width < 8) {
       bounds.x -= 4;

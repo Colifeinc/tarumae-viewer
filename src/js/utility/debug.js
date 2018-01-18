@@ -198,7 +198,7 @@ Tarumae.Debugger = class {
   }
 
   renderDebugInfo() {
-  	var tarumaeversion = typeof TarumaeRenderer.Version === "object" ? TarumaeRenderer.Version.toString() : "development version";
+  	var tarumaeversion = typeof Tarumae.Renderer.Version === "object" ? Tarumae.Renderer.Version.toString() : "development version";
 
     var fm = this.fpsMonitor;
     
@@ -206,7 +206,7 @@ Tarumae.Debugger = class {
   }
 
   generateDebugInfo(newline) {
-  	var tarumaeversion = typeof TarumaeRenderer.Version === "object" ? TarumaeRenderer.Version.toString() : "development version";
+  	var tarumaeversion = typeof Tarumae.Renderer.Version === "object" ? Tarumae.Renderer.Version.toString() : "development version";
 
     var fm = this.fpsMonitor;
 

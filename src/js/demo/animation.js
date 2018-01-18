@@ -1,16 +1,14 @@
 
 import Tarumae from "../entry"
-import TarumaeRenderer from "../scene/renderer"
-import { CubeMesh, PlaneMesh } from "../scene/object"
-import "../scene/viewer"
-import "../scene/animation"
+import "../utility/*"
+import "../scene/*"
 
 import texWood from "../../../resources/textures/wood.jpg";
 import texFloor from "../../../resources/textures/floor.jpg";
 
 window.addEventListener('load', function() {
 
-  var renderer = new TarumaeRenderer();
+  var renderer = new Tarumae.Renderer();
 
   var scene = renderer.createScene();
 

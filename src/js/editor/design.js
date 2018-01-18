@@ -274,7 +274,7 @@ Object.assign(TarumaeEditor.prototype, {
     scalar = new vec3(obj.scale.x * scalar.x, obj.scale.y * scalar.y, obj.scale.z * scalar.z);
 
     // Custom transformation matrix for Gizmos
-    var matrix = new Matrix4().loadIdentity();
+    var matrix = new Tarumae.Matrix4().loadIdentity();
     // Translate to the object's world location
     matrix.translate(worldLocation.x, worldLocation.y, worldLocation.z);
     // Rotate on ZYX order

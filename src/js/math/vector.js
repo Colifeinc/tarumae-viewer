@@ -309,7 +309,7 @@ vec3.createFromEulers = (function() {
 	return function(ex, ey, ez) {
 		
 		// TODO: might be replaced by Quaternion	
-		if (m == undefined) m = new Matrix4();
+		if (m == undefined) m = new Tarumae.Matrix4();
 		m.loadIdentity().rotate(ex, ey, ez);
 		
 		return new vec3(-m.a3, -m.b3, -m.c3);
@@ -831,7 +831,7 @@ Point.prototype.set = function(x, y) {
 
 ////////// Size //////////
 
-export class Size {
+Tarumae.Size = class {
 	constructor(w, h) {
 		switch (arguments.length) {
 			case 0:
@@ -855,133 +855,97 @@ export class Size {
 	}
 	
 	clone() {
-		return new Size(this.width, this.height);
+		return new Tarumae.Size(this.width, this.height);
 	}
 }
 
 ////////// Rect //////////
 
-function Rect(x, y, width, height) {
-	switch (arguments.length) {
-		default:
-			this.x = 0;
-			this.y = 0;
-			this.width = 0;
-			this.height = 0;
-			break;
+Tarumae.Rect = class {
+	constructor(x, y, width, height) {
+		switch (arguments.length) {
+			default:
+				this.x = 0;
+				this.y = 0;
+				this.width = 0;
+				this.height = 0;
+				break;
 
-		case 2:
-			this.x = arguments[0].x;
-			this.y = arguments[0].y;
-			this.width = arguments[1].x;
-			this.height = arguments[1].y;
-			break;
+			case 2:
+				this.x = arguments[0].x;
+				this.y = arguments[0].y;
+				this.width = arguments[1].x;
+				this.height = arguments[1].y;
+				break;
 
-		case 4:
-			this.x = x;
-			this.y = y;
-			this.width = width;
-			this.height = height;
-			break;
+			case 4:
+				this.x = x;
+				this.y = y;
+				this.width = width;
+				this.height = height;
+				break;
+		}
 	}
-}
 
-Rect.createFromPoints = function(p1, p2) {
+	clone() {
+		return new Tarumae.Rect(this.x, this.y, this.width, this.height);
+	}
+
+	contains(pos) {
+		return this.x <= pos.x && this.y <= pos.y
+			&& this.right >= pos.x && this.bottom >= pos.y;
+	}
+	
+	offset(value) {
+		this.x += value.x;
+		this.y += value.y;
+	}
+	
+	centerAt(pos) {
+		this.x = pos.x - this.width / 2;
+		this.y = pos.y - this.height / 2;
+	}
+
+	get right() {
+		return this.x + this.width;
+	}
+	
+	set right(v) {
+		this.width = this.x + v;
+	}
+
+	get bottom() {
+			return this.y + this.height;
+	}
+	
+	set bottom(v) {
+		this.height = this.y + v;
+	}
+
+	get origin() {
+		return new Point(
+			this.x + this.width / 2,
+			this.y + this.height / 2);
+	}
+	
+	set origin(p) {
+		this.x = p.x - this.width / 2;
+		this.y = p.y - this.height / 2;	
+	}
+	
+	set(x, y, width, height) {
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
+	}
+}	
+
+Tarumae.Rect.createFromPoints = function(p1, p2) {
 	var minx = Math.min(p1.x, p2.x);
 	var miny = Math.min(p1.y, p2.y);
 	var maxx = Math.max(p1.x, p2.x);
 	var maxy = Math.max(p1.y, p2.y);
 
-	return new Rect(minx, miny, maxx - minx, maxy - miny);
+	return new Tarumae.Rect(minx, miny, maxx - minx, maxy - miny);
 };
-
-Object.assign(Rect.prototype, {
-	clone: function() {
-		return new Rect(this.x, this.y, this.width, this.height);
-	},
-
-	contains: function(pos) {
-		return this.x <= pos.x && this.y <= pos.y
-			&& this.right >= pos.x && this.bottom >= pos.y;
-	},
-	
-	offset: function(value) {
-		this.x += value.x;
-		this.y += value.y;
-	},
-	
-	centerAt: function(pos) {
-		this.x = pos.x - this.width / 2;
-		this.y = pos.y - this.height / 2;
-	},
-});
-
-Object.defineProperties(Rect.prototype, {
-
-	right: {
-		get: function() {
-			return this.x + this.width;
-		},
-		set: function(v) {
-			this.width = this.x + v;
-		}
-	},
-
-	bottom: {
-		get: function() {
-			return this.y + this.height;
-		},
-		set: function(v) {
-			this.height = this.y + v;
-		}
-	},
-
-	origin: {
-		get: function() {
-			return new Point(
-				this.x + this.width / 2,
-				this.y + this.height / 2);
-		},
-		set: function(p) {
-			this.x = p.x - this.width / 2;
-			this.y = p.y - this.height / 2;
-		},
-	},
-	
-	set: {
-		value: function(x, y, width, height) {
-			this.x = x;
-			this.y = y;
-			this.width = width;
-			this.height = height;
-		}
-	},
-
-	clone: {
-		value: function() {
-			return new Rect(this.x, this.y, this.width, this.height);
-		}
-	},
-
-	contains: {
-		value: function(pos) {
-			return this.x <= pos.x && this.y <= pos.y
-				&& this.right >= pos.x && this.bottom >= pos.y;
-		}
-	},
-	
-	offset: {
-		value: function(value) {
-			this.x += value.x;
-			this.y += value.y;
-		}
-	},
-
-	centerAt: {
-		value: function(pos) {
-			this.x = pos.x - this.width / 2;
-			this.y = pos.y - this.height / 2;
-		}
-	},
-});
-

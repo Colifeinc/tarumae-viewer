@@ -7,7 +7,7 @@
 
 import Tarumae from "../entry"
 import { vec3, vec4 } from "../math/vector"
-import { Matrix4 } from "../math/matrix"
+import "../math/matrix"
 
 Tarumae.Mesh = class {
 	constructor() {
@@ -512,7 +512,7 @@ Object.assign(Tarumae.Mesh.prototype, {
 	hitTestByRayUsingVertexIndex: (function() {
 		'use strict';
 
-		var nmat = new Matrix4();
+		var nmat = new Tarumae.Matrix4();
 
 		return function(ray, vertices, normals, i1, i2, i3, maxt, session, options) {
 
@@ -877,7 +877,7 @@ Object.assign(Tarumae.Mesh, {
 	},
 
 	rotate: (function() {
-		var m = new Matrix4();
+		var m = new Tarumae.Matrix4();
 		var v = new vec3();
 
 		return function(mesh, x, y, z) {

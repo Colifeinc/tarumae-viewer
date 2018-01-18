@@ -83,7 +83,7 @@ TarumaeEditor.ViewerHandler.prototype = {
       }
 
       if (dir.x !== 0 || dir.y !== 0 || dir.z !== 0) {
-        if (m === undefined) m = new Matrix4();
+        if (m === undefined) m = new Tarumae.Matrix4();
         m.loadIdentity();
 
         m.rotateX(-viewer.angle.x);

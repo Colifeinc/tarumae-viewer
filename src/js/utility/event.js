@@ -163,5 +163,3 @@ Tarumae.EventDispatcher = class {
     obj._eventListeners[eventName]._s3_pushIfNotExist(listener);
   }
 }
-
-

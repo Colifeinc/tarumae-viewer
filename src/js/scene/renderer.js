@@ -16,15 +16,15 @@ import { Debugger } from "../utility/debug"
 
 import fs from "fs";
 
-export default class TarumaeRenderer {
+Tarumae.Renderer = class {
 	constructor(options) {
 
 		this.initialized = false;
 		this.debugMode = false;
 		this.developmentVersion = false;
 
-		if (typeof TarumaeRenderer.Version === "object") {
-			var ver = TarumaeRenderer.Version;
+		if (typeof Tarumae.Renderer.Version === "object") {
+			var ver = Tarumae.Renderer.Version;
 			ver.toString = function() {
 				return ver.major + "." + ver.minor + "." + ver.build + "." + ver.revision;
 			};
@@ -110,10 +110,10 @@ export default class TarumaeRenderer {
 		this.transparencyList = [];
 
 		// matrices
-		this.projectMatrix = new Matrix4();
-		this.viewMatrix = new Matrix4();
-		this.cameraMatrix = new Matrix4();
-		this.modelMatrix = new Matrix4();
+		this.projectMatrix = new Tarumae.Matrix4();
+		this.viewMatrix = new Tarumae.Matrix4();
+		this.cameraMatrix = new Tarumae.Matrix4();
+		this.modelMatrix = new Tarumae.Matrix4();
 		this.transformStack = new Tarumae.TransformStack();
 
 		this.gl = gl;
@@ -162,7 +162,7 @@ export default class TarumaeRenderer {
 		downloader.downloadShaders = [];
 
 		// create shader programs either from server or tarumae.js
-		TarumaeRenderer.Shaders._s3_foreach(function(name, shaderDefine) {
+		Tarumae.Renderer.Shaders._s3_foreach(function(name, shaderDefine) {
 			// load shader source from tarumae.js
 			renderer.loadShader(shaderDefine, shaderDefine.vert, shaderDefine.frag);
 		});
@@ -189,7 +189,7 @@ export default class TarumaeRenderer {
 		document.getElementsByTagName('head').item(0).appendChild(styleSheet);
 		var css = styleSheet.sheet;
 	
-		for (var value of TarumaeRenderer.ContainerStyle) {
+		for (var value of Tarumae.Renderer.ContainerStyle) {
 			var rule = value.replace(/#canvas-container/g, '#' + containerId);
 			css.insertRule(rule, 0);
 		}
@@ -332,7 +332,7 @@ export default class TarumaeRenderer {
 		if (!this.initialized) {
 			this.options.defaultShader = shader;
 		} else {
-			var shaderDefine = TarumaeRenderer.Shaders[shader];
+			var shaderDefine = Tarumae.Renderer.Shaders[shader];
 	
 			if (typeof shaderDefine !== "undefined"
 				&& shaderDefine.instance instanceof Tarumae.Shader) {
@@ -569,7 +569,7 @@ export default class TarumaeRenderer {
 			parent = parent.parent;
 		}
 	
-		var m = new Matrix4().loadIdentity();
+		var m = new Tarumae.Matrix4().loadIdentity();
 	
 		for (var i = plist.length - 1; i >= 0; i--) {
 			var obj = plist[i];
@@ -652,7 +652,7 @@ export default class TarumaeRenderer {
 	
 		if (!transparencyRendering) {
 			this.transformStack.push(obj);
-			obj.lastRenderTransform = new Matrix4(this.transformStack.matrix);
+			obj.lastRenderTransform = new Tarumae.Matrix4(this.transformStack.matrix);
 	
 			obj._opacity = (!isNaN(obj.opacity) ? obj.opacity : 1)
 				* (1.0 - Tarumae.MathFunctions.clamp((obj.mat && !isNaN(obj.mat.transparency)) ? obj.mat.transparency : 0));
@@ -669,7 +669,7 @@ export default class TarumaeRenderer {
 				return;
 			}
 		} else {
-			this.transformStack.matrixStack.push(new Matrix4());
+			this.transformStack.matrixStack.push(new Tarumae.Matrix4());
 			this.transformStack.matrix = obj.lastRenderTransform;
 		}
 	
@@ -759,7 +759,7 @@ export default class TarumaeRenderer {
 			return;
 		}
 	
-		this.transformStack.matrixStack.push(new Matrix4());
+		this.transformStack.matrixStack.push(new Tarumae.Matrix4());
 		this.transformStack.matrix = obj.lastRenderTransform;
 	
 		var gl = this.gl;
@@ -841,8 +841,8 @@ export default class TarumaeRenderer {
 				break;
 		}
 	
-		var  m  =  this.viewMatrix.mul(this.cameraMatrix).inverse();
-		ray.origin  =  new  vec4(ray.origin,  1).mulMat(m).xyz();
+		var m = this.viewMatrix.mul(this.cameraMatrix).inverse();
+		ray.origin = new vec4(ray.origin, 1).mulMat(m).xyz();
 		ray.dir = new vec4(ray.dir, 0).mulMat(m).xyz().normalize();
 	
 		return ray;
@@ -852,10 +852,10 @@ export default class TarumaeRenderer {
 		return this.toScreenPosition(this.toWorldPosition(pos, matrix, projectMethod), projectMethod);
 	};
 	
-}
+};
 
-	TarumaeRenderer.prototype.toWorldPosition = (function() {
-		var projectMatrix = new Matrix4();
+Tarumae.Renderer.prototype.toWorldPosition = (function() {
+		var projectMatrix = new Tarumae.Matrix4();
 	
 		return function(pos, viewMatrix, projectMethod) {
 	
@@ -873,7 +873,7 @@ export default class TarumaeRenderer {
 		};
 	})();
 	
-	TarumaeRenderer.prototype.toScreenPosition = function(pos) {
+	Tarumae.Renderer.prototype.toScreenPosition = function(pos) {
 		var projectMethod = projectMethod
 			|| ((this.currentScene && this.currentScene.mainCamera)
 				? (this.currentScene.mainCamera.projectionMethod)
@@ -889,7 +889,7 @@ export default class TarumaeRenderer {
 			-(pos.y / w) * renderHalfHeight + renderHalfHeight);
 	};
 	
-	TarumaeRenderer.prototype.toScreenPositionEx = function(pos) {
+	Tarumae.Renderer.prototype.toScreenPositionEx = function(pos) {
 		var projectMethod = projectMethod
 			|| ((this.currentScene && this.currentScene.mainCamera)
 				? (this.currentScene.mainCamera.projectionMethod)
@@ -906,6 +906,8 @@ export default class TarumaeRenderer {
 			1.0 / pos.z
 		);
 	};
+	
+var TarumaeRenderer = Tarumae.Renderer;
 	
 	TarumaeRenderer.prototype.transformPoints = function(points) {
 		var renderHalfWidth = this.renderSize.width / 2;
@@ -1079,7 +1081,7 @@ export default class TarumaeRenderer {
 			right = Math.max(rect3d[0].x, rect3d[1].x),
 			bottom = Math.max(rect3d[0].y, rect3d[1].y);
 	
-		this.drawRect2D(new Rect(left, top, right - left, bottom - top), strokeWidth, strokeColor, fillColor);
+		this.drawRect2D(new Tarumae.Rect(left, top, right - left, bottom - top), strokeWidth, strokeColor, fillColor);
 	};
 	
 	TarumaeRenderer.prototype.drawRect2D = function(rect, strokeWidth, strokeColor, fillColor) {
@@ -1128,7 +1130,7 @@ export default class TarumaeRenderer {
 	};
 	
 	TarumaeRenderer.prototype.drawEllipse2D = function(p, size, strokeWidth, strokeColor, fillColor) {
-		var r = new Rect(p.x - size / 2, p.y - size / 2, size, size)
+		var r = new Tarumae.Rect(p.x - size / 2, p.y - size / 2, size, size)
 		return this.drawingContext2D.drawEllipse(r, strokeWidth, strokeColor, fillColor);
 	};
 	
@@ -1141,7 +1143,7 @@ export default class TarumaeRenderer {
 		if (x >= 0 && y >= 0
 			&& x < this.renderSize.width && y < this.renderSize.height) {
 			return this.drawingContext2D.drawImage({ x: x, y: y }, image);
-		}	
+		}
 	};
 	
 	TarumaeRenderer.prototype.drawText = function(location, text, color, halign) {
@@ -1181,7 +1183,7 @@ Tarumae.ProjectionMethods = {
 	Ortho: 1,
 };
 
-var DrawMode = {
+Tarumae.DrawMode = {
 	Normal: 0,
 	ShadowMap: 1,
 };
@@ -1240,7 +1242,7 @@ function DrawingContext2D(canvas, ctx) {
 
 	this.resetDrawingStyle();
 
-	this.currentTransform = new Matrix3().loadIdentity();
+	this.currentTransform = new Tarumae.Matrix3().loadIdentity();
 	this.transformStack = new Array();
 };
 
@@ -1398,7 +1400,7 @@ Object.assign(DrawingContext2D.prototype, {
 
 Tarumae.TransformStack = class {
 	constructor() {
-		this.matrix = new Matrix4().loadIdentity();
+		this.matrix = new Tarumae.Matrix4().loadIdentity();
 		this.matrixStack = [];
 	}
 
@@ -1410,7 +1412,7 @@ Tarumae.TransformStack = class {
 	push(obj) {
 		this.matrixStack.push(this.matrix);
 
-		var newMatrix = new Matrix4(this.matrix);
+		var newMatrix = new Tarumae.Matrix4(this.matrix);
 		this.matrix = newMatrix;
 
 		this.applyObjectTransform(obj);

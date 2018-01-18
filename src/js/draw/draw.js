@@ -161,7 +161,7 @@ Object.assign(Draw2D.Scene2D.prototype, {
     var target = null;
     var transformed = false;
     
-    var t = new Matrix3().loadIdentity();
+    var t = new Tarumae.Matrix3().loadIdentity();
     var transformStack = [];
 
     if (obj.angle !== 0) {
@@ -307,7 +307,7 @@ Object.assign(Draw2D.Object, {
 
     this.angle = 0;
     this.scale = { x: 1, y: 1 };
-    this.transform = new Matrix3().loadIdentity();
+    this.transform = new Tarumae.Matrix3().loadIdentity();
   },
 });
 

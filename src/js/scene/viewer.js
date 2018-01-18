@@ -7,7 +7,7 @@
 
 import Tarumae from "../entry"
 import { vec3, vec4 } from "../math/vector"
-import { Matrix4 } from "../math/matrix"
+import "../math/matrix"
 
 Tarumae.Viewer = function(renderer) {
   this.renderer = renderer;
@@ -365,7 +365,7 @@ Tarumae.Viewer = function(renderer) {
 };
 
 // backward compatibility
-Object.defineProperty(window, "Viewer", { get: Tarumae.Utility.deprecate("Viewer", "Tarumae.Viewer") });
+// Object.defineProperty(window, "Viewer", { get: Tarumae.Utility.deprecate("Viewer", "Tarumae.Viewer") });
 
 Object.assign(Tarumae.Viewer, {
   OperationModes: {
@@ -479,7 +479,7 @@ Tarumae.Viewer.prototype = {
 
     return function(offsetX, offsetY, offsetZ) {
 
-      if (m === undefined) m = new Matrix4();
+      if (m === undefined) m = new Tarumae.Matrix4();
       m.loadIdentity().rotate(this.angle).inverse();
 
       var v = new vec4(offsetX, offsetY, offsetZ, 1).mulMat(m);
@@ -774,7 +774,7 @@ Tarumae.FPSController.prototype = {
       var viewer = this.renderer.viewer;
       var camera = this.scene.mainCamera;
 
-      if (m === undefined) m = new Matrix4();
+      if (m === undefined) m = new Tarumae.Matrix4();
       m.loadIdentity().rotate(camera.angle);
           
       var transformedDir = new vec3(
@@ -793,7 +793,7 @@ Tarumae.FPSController.prototype = {
   moveSpeed: 0.2,
   
   detectFirstPersonMove: (function() {
-    var m = new Matrix4(), dir = new vec3();
+    var m = new Tarumae.Matrix4(), dir = new vec3();
     
     return function() {
       var scene = this.scene;
@@ -859,8 +859,8 @@ Tarumae.FPSController.prototype = {
 };
 
 // backward compatibility
-Object.defineProperty(window, "FPSController",
-  { get: Tarumae.Utility.deprecate("FPSController", "Tarumae.FPSController") });
+// Object.defineProperty(window, "FPSController",
+//   { get: Tarumae.Utility.deprecate("FPSController", "Tarumae.FPSController") });
 
 //////////////// Touch Controller ////////////////
 
@@ -877,7 +877,7 @@ Tarumae.TouchController = function(scene) {
   var viewer = this.renderer.viewer;
   var Viewer = Tarumae.Viewer;
   
-  var m = new Matrix4(), dir = new vec3();  
+  var m = new Tarumae.Matrix4(), dir = new vec3();  
   
   this.detectFirstPersonMove = function() {
     if (scene && scene.mainCamera) {
@@ -984,7 +984,7 @@ Tarumae.TouchController = function(scene) {
   });
 
   this.scene.on("drag", (function() {
-    var m = new Matrix4();
+    var m = new Tarumae.Matrix4();
   
     return function() {
       var viewer = this.renderer.viewer;

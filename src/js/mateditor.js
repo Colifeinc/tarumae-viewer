@@ -49,8 +49,8 @@ var MatEditor = {
     MatEditor.scene.requireUpdateFrame();
   },
   init: function(){
-    TarumaeRenderer.ContainerStyle = this.containerStyle;
-    this.renderer = new TarumaeRenderer({
+    Tarumae.Renderer.ContainerStyle = this.containerStyle;
+    this.renderer = new Tarumae.Renderer({
       "baseShaderUrl": "../"
     });
     this.scene = this.renderer.createScene();

@@ -11,12 +11,12 @@ function TarumaeEditor(options) {
   var editor = this;
   this.options = options || {};
 
-  TarumaeRenderer.Shaders.editor = {
+  Tarumae.Renderer.Shaders.editor = {
     vert: "shader/editor.vert", frag: "shader/editor.frag",
     class: "EditorShader"
   };
   
-  var renderer = new TarumaeRenderer(Object.assign({
+  var renderer = new Tarumae.Renderer(Object.assign({
     perspective: {
       angle: 70.0,
     },

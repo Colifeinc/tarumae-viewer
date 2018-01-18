@@ -9,7 +9,7 @@
 
 import Tarumae from "../entry"
 import { vec3 } from "../math/vector"
-import { Matrix4 } from "../math/matrix"
+import "../math/matrix"
 
 Tarumae.Shader = class {
 	constructor(renderer, vertShaderSrc, fragShaderSrc) {
@@ -348,7 +348,7 @@ Tarumae.ShaderUniform.prototype.register = function(shader, name) {
 // 	gl.uniformMatrix4fv(this.projectViewMatrixUniform, false, scene.viewMatrix.mul(this.renderer.projectMatrix).toArray());
 // 	gl.uniformMatrix4fv(this.modelMatrixUniform, false, modelMatrix.toArray());
 
-// 	var normalMatrix = new Matrix4(modelMatrix);
+// 	var normalMatrix = new Tarumae.Matrix4(modelMatrix);
 // 	normalMatrix.inverse();
 // 	normalMatrix.transpose();
 
@@ -649,7 +649,7 @@ Tarumae.SimpleShader.prototype.beginObject = function(obj) {
 	
 	gl.uniformMatrix4fv(this.modelMatrixUniform, false, modelMatrix.toArray());
 
-	var normalMatrix = new Matrix4(modelMatrix);
+	var normalMatrix = new Tarumae.Matrix4(modelMatrix);
 	normalMatrix.inverse();
 	normalMatrix.transpose();
 
@@ -1288,7 +1288,7 @@ Tarumae.StandardShader.prototype.beginObject = function(obj) {
 
 	gl.uniformMatrix4fv(this.modelMatrixUniform, false, modelMatrix.toArray());
 
-	var normalMatrix = new Matrix4(modelMatrix);
+	var normalMatrix = new Tarumae.Matrix4(modelMatrix);
 	normalMatrix.inverse();
 	normalMatrix.transpose();
 
@@ -1386,7 +1386,7 @@ Tarumae.StandardShader.prototype.beginObject = function(obj) {
 	gl.activeTexture(gl.TEXTURE1);
 	if (this.renderer.options.enableNormalMap && this.useNormalmap != null) {
 		this.useNormalmap.use(this.renderer);
-		gl.uniformMatrix3fv(this.modelMatrix3x3Uniform, false, new Matrix3(modelMatrix).toArray());
+		gl.uniformMatrix3fv(this.modelMatrix3x3Uniform, false, new Tarumae.Matrix3(modelMatrix).toArray());
 		gl.uniform1i(this.hasNormalMapUniform, true);
 
 		this.normalMipmapUniform.set(normalMipmap);

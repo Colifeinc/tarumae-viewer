@@ -39,7 +39,7 @@ Tarumae.Camera = class extends Tarumae.SceneObject {
 		this.visible = false;
 	
 		// render result image size
-		this.viewSize = new Size(800, 600);
+		this.viewSize = new Tarumae.Size(800, 600);
 
 		// Field of View (AFOV)
 		this.fieldOfView = 40;

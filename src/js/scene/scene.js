@@ -6,9 +6,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "../entry"
-import { EventDispatcher } from "../utility/event"
+import "../utility/event"
 import { vec3, color3 } from "../math/vector"
-import { Matrix4 } from "../math/matrix"
+import "../math/matrix"
 import "../scene/renderer"
 import "../scene/object"
 import "../scene/camera"

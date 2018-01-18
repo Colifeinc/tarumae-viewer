@@ -215,7 +215,7 @@ Object.assign(Tarumae.EditorShader.prototype, {
 
     gl.uniformMatrix4fv(this.modelMatrixUniform, false, modelMatrix.toArray());
 
-    var normalMatrix = new Matrix4(modelMatrix);
+    var normalMatrix = new Tarumae.Matrix4(modelMatrix);
     normalMatrix.inverse();
     normalMatrix.transpose();
 
@@ -309,7 +309,7 @@ Object.assign(Tarumae.EditorShader.prototype, {
     gl.activeTexture(gl.TEXTURE1);
     if (this.renderer.options.enableNormalMap && this.useNormalmap != null) {
       this.useNormalmap.use(this.renderer);
-      gl.uniformMatrix3fv(this.modelMatrix3x3Uniform, false, new Matrix3(modelMatrix).toArray());
+      gl.uniformMatrix3fv(this.modelMatrix3x3Uniform, false, new Tarumae.Matrix3(modelMatrix).toArray());
       gl.uniform1i(this.hasNormalMapUniform, true);
 
       this.normalMipmapUniform.set(normalMipmap);

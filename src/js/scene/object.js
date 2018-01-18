@@ -6,8 +6,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "../entry"
+import "../utility/event"
 import { vec3, vec4 } from "../math/vector"
-import { Matrix4 } from "../math/matrix"
+import "../math/matrix"
 import { Mesh } from "../webgl/mesh"
 
 Tarumae.CollisionModes = {
@@ -483,7 +484,7 @@ Object.assign(Tarumae.SceneObject.prototype, {
 			}
 
 			if (up === undefined) up = vec3.up;
-			if (m === undefined) m = new Matrix4();
+			if (m === undefined) m = new Tarumae.Matrix4();
 
 			m.lookAt(this.getWorldLocation(), target, up);
 			this.angle = m.extractEulerAngles().neg();
@@ -587,7 +588,7 @@ Object.assign(Tarumae.SceneObject.prototype, {
 			parent = parent.parent;
 		}
 
-		var m = new Matrix4().loadIdentity();
+		var m = new Tarumae.Matrix4().loadIdentity();
 
 		for (var i = plist.length - 1; i >= 0; i--) {
 			var obj = plist[i];
@@ -615,7 +616,7 @@ Object.assign(Tarumae.SceneObject.prototype, {
 			parent = parent.parent;
 		}
 
-		var m = new Matrix4().loadIdentity();
+		var m = new Tarumae.Matrix4().loadIdentity();
 
 		for (var i = plist.length - 1; i >= 0; i--) {
 			var obj = plist[i];
@@ -1184,7 +1185,7 @@ Tarumae.Shapes.LineMesh.prototype.update = function(start, end, width) {
 
 	this.vertices = [];
 
-	var m = new Matrix4().lookAt(start, end, vec3.up);
+	var m = new Tarumae.Matrix4().lookAt(start, end, vec3.up);
 
 	for (var i = 0, a = 0; i <= segs; i++ , a += angles) {
 		var v = new vec4(Math.sin(a) * width, Math.cos(a) * width, 0, 1).mulMat(m);
