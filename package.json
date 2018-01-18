@@ -4,12 +4,11 @@
 	"description": "",
 	"main": "index.html",
 	"scripts": {
-		"start": "parcel index.html"
+		"start": "parcel src/index.html",
+		"build": "parcel build src/js/tarumae.js -d build"
 	},
 	"keywords": [],
 	"author": "BULB CORP.",
 	"license": "",
-	"dependencies": {
-    "parcel-bundler": "^1.1.0"
-  }
+	"dependencies": {}
 }
