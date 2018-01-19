@@ -6,7 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "../entry"
-import { vec3 } from "./vector"
+import { Vec3 } from "./vector"
 import "./functions"
 
 ///////////////////// Matrix3 //////////////////////
@@ -194,7 +194,7 @@ Tarumae.Matrix4 = class {
 
 		switch (arguments.length) {
 			case 1:
-				if (typeof x === "object" && x instanceof vec3) {
+				if (typeof x === "object" && x instanceof Vec3) {
 					this.rotateX(x.x);
 					this.rotateY(x.y);
 					this.rotateZ(x.z);
@@ -219,23 +219,23 @@ Tarumae.Matrix4 = class {
 	rotateX(angle) {
 		if (angle === 0) return this;
 
-		var d = Tarumae.MathFunctions.angleToDegree(angle);
+		const d = Tarumae.MathFunctions.angleToDegree(angle);
 
-		var sin = Math.sin(d);
-		var cos = Math.cos(d);
+		const sin = Math.sin(d);
+		const cos = Math.cos(d);
 
-		var m2b2 = cos, m2c2 = sin;
-		var m2b3 = -sin, m2c3 = cos;
+		const m2b2 = cos, m2c2 = sin;
+		const m2b3 = -sin, m2c3 = cos;
 
-		var a2 = this.a2 * m2b2 + this.a3 * m2c2;
-		var b2 = this.b2 * m2b2 + this.b3 * m2c2;
-		var c2 = this.c2 * m2b2 + this.c3 * m2c2;
-		var d2 = this.d2 * m2b2 + this.d3 * m2c2;
+		const a2 = this.a2 * m2b2 + this.a3 * m2c2;
+		const b2 = this.b2 * m2b2 + this.b3 * m2c2;
+		const c2 = this.c2 * m2b2 + this.c3 * m2c2;
+		const d2 = this.d2 * m2b2 + this.d3 * m2c2;
 
-		var a3 = this.a2 * m2b3 + this.a3 * m2c3;
-		var b3 = this.b2 * m2b3 + this.b3 * m2c3;
-		var c3 = this.c2 * m2b3 + this.c3 * m2c3;
-		var d3 = this.d2 * m2b3 + this.d3 * m2c3;
+		const a3 = this.a2 * m2b3 + this.a3 * m2c3;
+		const b3 = this.b2 * m2b3 + this.b3 * m2c3;
+		const c3 = this.c2 * m2b3 + this.c3 * m2c3;
+		const d3 = this.d2 * m2b3 + this.d3 * m2c3;
 
 		this.a2 = a2; this.b2 = b2; this.c2 = c2; this.d2 = d2;
 		this.a3 = a3; this.b3 = b3; this.c3 = c3; this.d3 = d3;
@@ -246,23 +246,23 @@ Tarumae.Matrix4 = class {
 	rotateY(angle) {
 		if (angle === 0) return this;
 
-		var d = Tarumae.MathFunctions.angleToDegree(angle);
+		const d = Tarumae.MathFunctions.angleToDegree(angle);
 
-		var sin = Math.sin(d);
-		var cos = Math.cos(d);
+		const sin = Math.sin(d);
+		const cos = Math.cos(d);
 
-		var m2a1 = cos, m2c1 = -sin;
-		var m2a3 = sin, m2c3 = cos;
+		const m2a1 = cos, m2c1 = -sin;
+		const m2a3 = sin, m2c3 = cos;
 
-		var a1 = this.a1 * m2a1 + this.a3 * m2c1;
-		var b1 = this.b1 * m2a1 + this.b3 * m2c1;
-		var c1 = this.c1 * m2a1 + this.c3 * m2c1;
-		var d1 = this.d1 * m2a1 + this.d3 * m2c1;
+		const a1 = this.a1 * m2a1 + this.a3 * m2c1;
+		const b1 = this.b1 * m2a1 + this.b3 * m2c1;
+		const c1 = this.c1 * m2a1 + this.c3 * m2c1;
+		const d1 = this.d1 * m2a1 + this.d3 * m2c1;
 
-		var a3 = this.a1 * m2a3 + this.a3 * m2c3;
-		var b3 = this.b1 * m2a3 + this.b3 * m2c3;
-		var c3 = this.c1 * m2a3 + this.c3 * m2c3;
-		var d3 = this.d1 * m2a3 + this.d3 * m2c3;
+		const a3 = this.a1 * m2a3 + this.a3 * m2c3;
+		const b3 = this.b1 * m2a3 + this.b3 * m2c3;
+		const c3 = this.c1 * m2a3 + this.c3 * m2c3;
+		const d3 = this.d1 * m2a3 + this.d3 * m2c3;
 
 		this.a1 = a1; this.b1 = b1; this.c1 = c1; this.d1 = d1;
 		this.a3 = a3; this.b3 = b3; this.c3 = c3; this.d3 = d3;
@@ -273,23 +273,23 @@ Tarumae.Matrix4 = class {
 	rotateZ(angle) {
 		if (angle === 0) return this;
 
-		var d = Tarumae.MathFunctions.angleToDegree(angle);
+		const d = Tarumae.MathFunctions.angleToDegree(angle);
 
-		var sin = Math.sin(d);
-		var cos = Math.cos(d);
+		const sin = Math.sin(d);
+		const cos = Math.cos(d);
 
-		var m2a1 = cos, m2b1 = sin;
-		var m2a2 = -sin, m2b2 = cos;
+		const m2a1 = cos, m2b1 = sin;
+		const m2a2 = -sin, m2b2 = cos;
 
-		var a1 = this.a1 * m2a1 + this.a2 * m2b1;
-		var b1 = this.b1 * m2a1 + this.b2 * m2b1;
-		var c1 = this.c1 * m2a1 + this.c2 * m2b1;
-		var d1 = this.d1 * m2a1 + this.d2 * m2b1;
+		const a1 = this.a1 * m2a1 + this.a2 * m2b1;
+		const b1 = this.b1 * m2a1 + this.b2 * m2b1;
+		const c1 = this.c1 * m2a1 + this.c2 * m2b1;
+		const d1 = this.d1 * m2a1 + this.d2 * m2b1;
 
-		var a2 = this.a1 * m2a2 + this.a2 * m2b2;
-		var b2 = this.b1 * m2a2 + this.b2 * m2b2;
-		var c2 = this.c1 * m2a2 + this.c2 * m2b2;
-		var d2 = this.d1 * m2a2 + this.d2 * m2b2;
+		const a2 = this.a1 * m2a2 + this.a2 * m2b2;
+		const b2 = this.b1 * m2a2 + this.b2 * m2b2;
+		const c2 = this.c1 * m2a2 + this.c2 * m2b2;
+		const d2 = this.d1 * m2a2 + this.d2 * m2b2;
 
 		this.a1 = a1; this.b1 = b1; this.c1 = c1; this.d1 = d1;
 		this.a2 = a2; this.b2 = b2; this.c2 = c2; this.d2 = d2;
@@ -364,68 +364,54 @@ Tarumae.Matrix4 = class {
 	}
 
 	canInverse() {
-		var
+		const
 			a = this.a1, b = this.b1, c = this.c1, d = this.d1,
 			e = this.a2, f = this.b2, g = this.c2, h = this.d2,
 			i = this.a3, j = this.b3, k = this.c3, l = this.d3,
 			m = this.a4, n = this.b4, o = this.c4, p = this.d4;
 
-		var q = f * k * p + j * o * h + n * g * l
-			- f * l * o - g * j * p - h * k * n;
+		const q = f * k * p + j * o * h + n * g * l - f * l * o - g * j * p - h * k * n;
+		const r = e * k * p + i * o * h + m * g * l - e * l * o - g * i * p - h * k * m;
+		const s = e * j * p + i * n * h + m * f * l - e * l * n - f * i * p - h * j * m;
+		const t = e * j * o + i * n * g + m * f * k - e * k * n - f * i * o - g * j * m;
 
-		var r = e * k * p + i * o * h + m * g * l
-			- e * l * o - g * i * p - h * k * m;
-
-		var s = e * j * p + i * n * h + m * f * l
-			- e * l * n - f * i * p - h * j * m;
-
-		var t = e * j * o + i * n * g + m * f * k
-			- e * k * n - f * i * o - g * j * m;
-
-		var delta = (a * q - b * r + c * s - d * t);
+		const delta = (a * q - b * r + c * s - d * t);
 
 		return (delta !== 0);
 	}
 
 	inverse() {
-		var
+		const
 			a = this.a1, b = this.b1, c = this.c1, d = this.d1,
 			e = this.a2, f = this.b2, g = this.c2, h = this.d2,
 			i = this.a3, j = this.b3, k = this.c3, l = this.d3,
 			m = this.a4, n = this.b4, o = this.c4, p = this.d4;
 
-		var q = f * k * p + j * o * h + n * g * l
-			- f * l * o - g * j * p - h * k * n;
-
-		var r = e * k * p + i * o * h + m * g * l
-			- e * l * o - g * i * p - h * k * m;
-
-		var s = e * j * p + i * n * h + m * f * l
-			- e * l * n - f * i * p - h * j * m;
-
-		var t = e * j * o + i * n * g + m * f * k
-			- e * k * n - f * i * o - g * j * m;
-
-		var delta = (a * q - b * r + c * s - d * t);
+		const q = f * k * p + j * o * h + n * g * l	- f * l * o - g * j * p - h * k * n;
+		const r = e * k * p + i * o * h + m * g * l - e * l * o - g * i * p - h * k * m;
+		const s = e * j * p + i * n * h + m * f * l	- e * l * n - f * i * p - h * j * m;
+		const t = e * j * o + i * n * g + m * f * k - e * k * n - f * i * o - g * j * m;
+		
+		const delta = (a * q - b * r + c * s - d * t);
 
 		if (delta === 0) return this;
 
-		var detM = 1 / delta;
+		const detM = 1 / delta;
 
 		// adj
-		var m2a1 = q, m2b1 = r, m2c1 = s, m2d1 = t;
-		var m2a2 = b * k * p + j * o * d + n * c * l - b * l * o - c * j * p - d * k * n;
-		var m2b2 = a * k * p + i * o * d + m * c * l - a * l * o - c * i * p - d * k * m;
-		var m2c2 = a * j * p + i * n * d + m * b * l - a * l * n - b * i * p - d * j * m;
-		var m2d2 = a * j * o + i * n * c + m * b * k - a * k * n - b * i * o - c * j * m;
-		var m2a3 = b * g * p + f * o * d + n * c * h - b * h * o - c * f * p - d * g * n;
-		var m2b3 = a * g * p + e * o * d + m * c * h - a * h * o - c * e * p - d * g * m;
-		var m2c3 = a * f * p + e * n * d + m * b * h - a * h * n - b * e * p - d * f * m;
-		var m2d3 = a * f * o + e * n * c + m * b * g - a * g * n - b * e * o - c * f * m;
-		var m2a4 = b * g * l + f * k * d + j * c * h - b * h * k - c * f * l - d * g * j;
-		var m2b4 = a * g * l + e * k * d + i * c * h - a * h * k - c * e * l - d * g * i;
-		var m2c4 = a * f * l + e * j * d + i * b * h - a * h * j - b * e * l - d * f * i;
-		var m2d4 = a * f * k + e * j * c + i * b * g - a * g * j - b * e * k - c * f * i;
+		let m2a1 = q, m2b1 = r, m2c1 = s, m2d1 = t;
+		let m2a2 = b * k * p + j * o * d + n * c * l - b * l * o - c * j * p - d * k * n;
+		let m2b2 = a * k * p + i * o * d + m * c * l - a * l * o - c * i * p - d * k * m;
+		let m2c2 = a * j * p + i * n * d + m * b * l - a * l * n - b * i * p - d * j * m;
+		let m2d2 = a * j * o + i * n * c + m * b * k - a * k * n - b * i * o - c * j * m;
+		let m2a3 = b * g * p + f * o * d + n * c * h - b * h * o - c * f * p - d * g * n;
+		let m2b3 = a * g * p + e * o * d + m * c * h - a * h * o - c * e * p - d * g * m;
+		let m2c3 = a * f * p + e * n * d + m * b * h - a * h * n - b * e * p - d * f * m;
+		let m2d3 = a * f * o + e * n * c + m * b * g - a * g * n - b * e * o - c * f * m;
+		let m2a4 = b * g * l + f * k * d + j * c * h - b * h * k - c * f * l - d * g * j;
+		let m2b4 = a * g * l + e * k * d + i * c * h - a * h * k - c * e * l - d * g * i;
+		let m2c4 = a * f * l + e * j * d + i * b * h - a * h * j - b * e * l - d * f * i;
+		let m2d4 = a * f * k + e * j * c + i * b * g - a * g * j - b * e * k - c * f * i;
 
 		m2b1 = -m2b1; m2d1 = -m2d1;
 		m2a2 = -m2a2; m2c2 = -m2c2;
@@ -433,10 +419,10 @@ Tarumae.Matrix4 = class {
 		m2a4 = -m2a4; m2c4 = -m2c4;
 
 		// transpose
-		var m3a1 = m2a1, m3b1 = m2a2, m3c1 = m2a3, m3d1 = m2a4;
-		var m3a2 = m2b1, m3b2 = m2b2, m3c2 = m2b3, m3d2 = m2b4;
-		var m3a3 = m2c1, m3b3 = m2c2, m3c3 = m2c3, m3d3 = m2c4;
-		var m3a4 = m2d1, m3b4 = m2d2, m3c4 = m2d3, m3d4 = m2d4;
+		const m3a1 = m2a1, m3b1 = m2a2, m3c1 = m2a3, m3d1 = m2a4;
+		const m3a2 = m2b1, m3b2 = m2b2, m3c2 = m2b3, m3d2 = m2b4;
+		const m3a3 = m2c1, m3b3 = m2c2, m3c3 = m2c3, m3d3 = m2c4;
+		const m3a4 = m2d1, m3b4 = m2d2, m3c4 = m2d3, m3d4 = m2d4;
 
 		this.a1 = m3a1 * detM; this.b1 = m3b1 * detM; this.c1 = m3c1 * detM; this.d1 = m3d1 * detM;
 		this.a2 = m3a2 * detM; this.b2 = m3b2 * detM; this.c2 = m3c2 * detM; this.d2 = m3d2 * detM;
@@ -447,21 +433,10 @@ Tarumae.Matrix4 = class {
 	}
 
 	transpose() {
-		var a2 = this.b1;
-		var a3 = this.c1;
-		var a4 = this.d1;
-
-		var b1 = this.a2;
-		var b3 = this.c2;
-		var b4 = this.d2;
-
-		var c1 = this.a3;
-		var c2 = this.b3;
-		var c4 = this.d3;
-
-		var d1 = this.a4;
-		var d2 = this.b4;
-		var d3 = this.c4;
+		const a2 = this.b1, a3 = this.c1, a4 = this.d1;
+		const b1 = this.a2, b3 = this.c2, b4 = this.d2;
+		const c1 = this.a3, c2 = this.b3, c4 = this.d3;
+		const d1 = this.a4, d2 = this.b4, d3 = this.c4;
 
 		this.b1 = b1; this.c1 = c1; this.d1 = d1;
 		this.a2 = a2; this.c2 = c2; this.d2 = d2;
@@ -472,8 +447,8 @@ Tarumae.Matrix4 = class {
 	}
 
 	mul(m2) {
-		var m1 = this;
-		var m3 = new Tarumae.Matrix4();
+		const m1 = this;
+		let m3 = new Tarumae.Matrix4();
 
 		m3.a1 = m1.a1 * m2.a1 + m1.b1 * m2.a2 + m1.c1 * m2.a3 + m1.d1 * m2.a4;
 		m3.a2 = m1.a2 * m2.a1 + m1.b2 * m2.a2 + m1.c2 * m2.a3 + m1.d2 * m2.a4;
@@ -499,8 +474,8 @@ Tarumae.Matrix4 = class {
 	}
 
 	mulInv(m1) {
-		var m2 = this;
-		var m3 = new Tarumae.Matrix4();
+		const m2 = this;
+		let m3 = new Tarumae.Matrix4();
 
 		m3.a1 = m1.a1 * m2.a1 + m1.a2 * m2.b1 + m1.a3 * m2.c1 + m1.a4 * m2.d1;
 		m3.a2 = m1.a1 * m2.a2 + m1.a2 * m2.b2 + m1.a3 * m2.c2 + m1.a4 * m2.d2;
@@ -526,14 +501,14 @@ Tarumae.Matrix4 = class {
 	}
 
 	equals(m2) {
-		return this.a1 == m2.a1 && this.b1 == m2.b1 && this.c1 == m2.c1 && this.d1 == m2.d1
-			&& this.a2 == m2.a2 && this.b2 == m2.b2 && this.c2 == m2.c2 && this.d2 == m2.d2
-			&& this.a3 == m2.a3 && this.b3 == m2.b3 && this.c3 == m2.c3 && this.d3 == m2.d3
-			&& this.a4 == m2.a4 && this.b4 == m2.b4 && this.c4 == m2.c4 && this.d4 == m2.d4;
+		return this.a1 === m2.a1 && this.b1 === m2.b1 && this.c1 === m2.c1 && this.d1 === m2.d1
+			&& this.a2 === m2.a2 && this.b2 === m2.b2 && this.c2 === m2.c2 && this.d2 === m2.d2
+			&& this.a3 === m2.a3 && this.b3 === m2.b3 && this.c3 === m2.c3 && this.d3 === m2.d3
+			&& this.a4 === m2.a4 && this.b4 === m2.b4 && this.c4 === m2.c4 && this.d4 === m2.d4;
 	}
 
 	frustum(left, right, top, bottom, near, far) {
-		var x = right - left, y = bottom - top, z = far - near;
+		const x = right - left, y = bottom - top, z = far - near;
 
 		this.a1 = near * 2 / x; this.b1 = 0; this.c1 = 0; this.d1 = 0;
 		this.a2 = 0; this.b2 = near * 2 / y; this.c2 = 0; this.d2 = 0;
@@ -544,7 +519,7 @@ Tarumae.Matrix4 = class {
 	}
 
 	perspective(angle, widthRate, near, far) {
-		var topRate = near * Math.tan(angle * Math.PI / 360);
+		const topRate = near * Math.tan(angle * Math.PI / 360);
 		widthRate = topRate * widthRate;
 		this.frustum(-widthRate, widthRate, -topRate, topRate, near, far);
 
@@ -552,7 +527,7 @@ Tarumae.Matrix4 = class {
 	}
 
 	ortho(left, right, bottom, top, near, far) {
-		var x = right - left, y = top - bottom, z = far - near;
+		const x = right - left, y = top - bottom, z = far - near;
 
 		this.a1 = 2 / x; this.b1 = 0; this.c1 = 0; this.d1 = 0;
 		this.a2 = 0; this.b2 = 2 / y; this.c2 = 0; this.d2 = 0;
@@ -570,9 +545,9 @@ Tarumae.Matrix4 = class {
 	 * Make a lookat matrix. This method does not require an identity matrix.
 	 */
 	lookAt(eye, target, up) {
-		var zaxis = vec3.sub(eye, target).normalize();    // forward
-		var xaxis = vec3.cross(up, zaxis).normalize();    // right
-		var yaxis = vec3.cross(zaxis, xaxis);             // up
+		const zaxis = Vec3.sub(eye, target).normalize();    // forward
+		const xaxis = Vec3.cross(up, zaxis).normalize();    // right
+		const yaxis = Vec3.cross(zaxis, xaxis);             // up
 
 		this.a1 = xaxis.x; this.b1 = yaxis.x; this.c1 = zaxis.x; this.d1 = 0;
 		this.a2 = xaxis.y; this.b2 = yaxis.y; this.c2 = zaxis.y; this.d2 = 0;
@@ -587,7 +562,7 @@ Tarumae.Matrix4 = class {
 	}
 
 	extractEulerAngles() {
-		var
+		const
 			m11 = this.a1, m12 = this.b1, m13 = this.c1,
 			m21 = this.a2, m22 = this.b2, m23 = this.c2,
 			m31 = this.a3, m32 = this.b3, m33 = this.c3;
@@ -604,15 +579,15 @@ Tarumae.Matrix4 = class {
 			z = Math.asin(-m21);
 		}
 
-		return new vec3(Tarumae.MathFunctions.degreeToAngle(x),
+		return new Vec3(Tarumae.MathFunctions.degreeToAngle(x),
 			Tarumae.MathFunctions.degreeToAngle(y),
 			Tarumae.MathFunctions.degreeToAngle(z));
 	}
 
 	extractLookAtVectors() {
 		return {
-			dir: new vec3(this.c1, this.c2, -this.c3).normalize(),
-			up: new vec3(this.b1, this.b2, -this.b3).normalize()
+			dir: new Vec3(this.c1, this.c2, -this.c3).normalize(),
+			up: new Vec3(this.b1, this.b2, -this.b3).normalize()
 		};
 	}
 
