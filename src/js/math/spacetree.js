@@ -33,13 +33,13 @@ SpaceTreeNode.prototype.split = function(depth) {
     case SpaceTree.ST_SplitX:
       {
         var halfHalfSize = this.halfSize.x / 2;
-        var splittdBoxSize = new vec3(this.halfSize.x, this.size.y, this.size.z);
+        var splittdBoxSize = new Vec3(this.halfSize.x, this.size.y, this.size.z);
         
-        this.left = new SpaceTreeNode(new vec3(origin.x - halfHalfSize,
+        this.left = new SpaceTreeNode(new Vec3(origin.x - halfHalfSize,
                                           origin.y,
                                           origin.z), splittdBoxSize);
 
-        this.right = new SpaceTreeNode(new vec3(origin.x + halfHalfSize,
+        this.right = new SpaceTreeNode(new Vec3(origin.x + halfHalfSize,
                                            origin.y,
                                            origin.z), splittdBoxSize);
         
@@ -51,13 +51,13 @@ SpaceTreeNode.prototype.split = function(depth) {
     case SpaceTree.ST_SplitY:
       {
         var halfHalfSize = this.halfSize.y / 2;
-        var splittdBoxSize = new vec3(this.size.x, this.halfSize.y, this.size.z);
+        var splittdBoxSize = new Vec3(this.size.x, this.halfSize.y, this.size.z);
         
-        this.left = new SpaceTreeNode(new vec3(origin.x,
+        this.left = new SpaceTreeNode(new Vec3(origin.x,
                                           origin.y - halfHalfSize,
                                           origin.z), splittdBoxSize);
         
-        this.right = new SpaceTreeNode(new vec3(origin.x,
+        this.right = new SpaceTreeNode(new Vec3(origin.x,
                                            origin.y + halfHalfSize,
                                            origin.z), splittdBoxSize);
         
@@ -69,13 +69,13 @@ SpaceTreeNode.prototype.split = function(depth) {
     case SpaceTree.ST_SplitZ:
       {
         var halfHalfSize = this.halfSize.z / 2;
-        var splittdBoxSize = new vec3(this.size.x, this.size.y, this.halfSize.z);
+        var splittdBoxSize = new Vec3(this.size.x, this.size.y, this.halfSize.z);
         
-        this.left = new SpaceTreeNode(new vec3(origin.x,
+        this.left = new SpaceTreeNode(new Vec3(origin.x,
                                           origin.y,
                                           origin.z - halfHalfSize), splittdBoxSize);
         
-        this.right = new SpaceTreeNode(new vec3(origin.x, 
+        this.right = new SpaceTreeNode(new Vec3(origin.x, 
                                            origin.y,
                                            origin.z + halfHalfSize), splittdBoxSize);
         
@@ -113,9 +113,9 @@ SpaceTree.init = function(spaceSize) {
 
   var halfSize = spaceSize / 2.0;
     
-  this.root.origin = new vec3(0, 0, 0);
-  this.root.size = new vec3(spaceSize, spaceSize, spaceSize);
-  this.root.halfSize = new vec3(halfSize, halfSize, halfSize);
+  this.root.origin = new Vec3(0, 0, 0);
+  this.root.size = new Vec3(spaceSize, spaceSize, spaceSize);
+  this.root.halfSize = new Vec3(halfSize, halfSize, halfSize);
 
   this.root.split(maxDepth);
 };

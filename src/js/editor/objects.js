@@ -18,7 +18,7 @@ _s3_Class("EditorGround", Tarumae.EditorObject, function() {
 
   this.radiyBody = {
     type: "plane",
-    vertices: [new vec3(0, 0, -1000), new vec3(-1000, 0, 1000), new vec3(1000, 0, 1000)],
+    vertices: [new Vec3(0, 0, -1000), new Vec3(-1000, 0, 1000), new Vec3(1000, 0, 1000)],
   };
 });
 
@@ -43,7 +43,7 @@ _s3_Class("EditorWall", Tarumae.EditorObject, function(width, height) {
   }
   
   if (typeof angle !== "undefined") {
-    this.angle = new vec3(0, angle, 0);
+    this.angle = new Vec3(0, angle, 0);
   }
 
   if (typeof width !== "undefined") {
@@ -68,7 +68,7 @@ Tarumae.EditorWall.prototype.create = function() {
     left: {
       axies: "-x",
       get: function() {
-        return new vec3(-wall.width / 2, wall.height / 2, 0);
+        return new Vec3(-wall.width / 2, wall.height / 2, 0);
       },
       set: function(movement) {
         var mx = movement.x / 50;
@@ -89,7 +89,7 @@ Tarumae.EditorWall.prototype.create = function() {
     right: {
       axies: "+x",
       get: function() {
-        return new vec3(wall.width / 2, wall.height / 2, 0);
+        return new Vec3(wall.width / 2, wall.height / 2, 0);
       },
       set: function(movement) {
         var mx = movement.x / 50;
@@ -110,7 +110,7 @@ Tarumae.EditorWall.prototype.create = function() {
     back: {
       axies: "-z",
       get: function() {
-        return new vec3(0, wall.height / 2, -wall.thickness / 2);
+        return new Vec3(0, wall.height / 2, -wall.thickness / 2);
       },
       set: function(movement) {
         var mx = movement.x / 50;
@@ -127,7 +127,7 @@ Tarumae.EditorWall.prototype.create = function() {
     front: {
       axies: "+z",
       get: function() {
-        return new vec3(0, wall.height / 2, wall.thickness / 2);
+        return new Vec3(0, wall.height / 2, wall.thickness / 2);
       },
       set: function(movement) {
         var mx = movement.x / 50;
@@ -535,7 +535,7 @@ _s3_Class("EditorBeam", Tarumae.EditorObject, function() {
     front: {
       axies: "+z",
       get: function() {
-        return new vec3(0, 0, 0.5);
+        return new Vec3(0, 0, 0.5);
       },
       set: function(movement) {
         var mx = movement.x / 50;
@@ -547,7 +547,7 @@ _s3_Class("EditorBeam", Tarumae.EditorObject, function() {
     down: {
       axies: "-y",
       get: function() {
-        return new vec3(0, -0.5, 0);
+        return new Vec3(0, -0.5, 0);
       },
       set: function(movement) {
         var mx = movement.y / 50;
@@ -570,7 +570,7 @@ _s3_Class("EditorCube", Tarumae.EditorObject, function() {
     top: {
       axies: "+y",
       get: function() {
-        return new vec3(0, 0.5, 0);
+        return new Vec3(0, 0.5, 0);
       },
       set: function(movement) {
         var mx = movement.y / 50;
@@ -582,7 +582,7 @@ _s3_Class("EditorCube", Tarumae.EditorObject, function() {
     down: {
       axies: "-y",
       get: function() {
-        return new vec3(0, -0.5, 0);
+        return new Vec3(0, -0.5, 0);
       },
       set: function(movement) {
         var mx = movement.y / 50;
@@ -594,7 +594,7 @@ _s3_Class("EditorCube", Tarumae.EditorObject, function() {
     front: {
       axies: "+z",
       get: function() {
-        return new vec3(0, 0, 0.5);
+        return new Vec3(0, 0, 0.5);
       },
       set: function(movement) {
         var mx = movement.x / 50;
@@ -707,12 +707,12 @@ Tarumae.EditorEmptyObject.prototype.draw = function(renderer) {
 
   var halfSize = this.size * 0.5;
   
-  var top = vec3.add(loc, new vec3(0, this.size, 0)),
-    bottom = vec3.add(loc, new vec3(0, -this.size, 0)),
-    left = vec3.add(loc, new vec3(-this.size, 0, 0)),
-    right = vec3.add(loc, new vec3(this.size, 0, 0)),
-    forward = vec3.add(loc, new vec3(0, 0, -this.size)),
-    back = vec3.add(loc, new vec3(0, 0, this.size));
+  var top = Vec3.add(loc, new Vec3(0, this.size, 0)),
+    bottom = Vec3.add(loc, new Vec3(0, -this.size, 0)),
+    left = Vec3.add(loc, new Vec3(-this.size, 0, 0)),
+    right = Vec3.add(loc, new Vec3(this.size, 0, 0)),
+    forward = Vec3.add(loc, new Vec3(0, 0, -this.size)),
+    back = Vec3.add(loc, new Vec3(0, 0, this.size));
   
   renderer.drawLine(bottom, top, 2, this.color);
   renderer.drawLine(left, right, 2, this.color);
@@ -745,12 +745,12 @@ Tarumae.EditorRefRange.prototype.draw = function(renderer) {
   var halfSize = this.scale.mul(0.5);
   
   renderer.drawFocusBox({
-    min: vec3.add(loc, halfSize.neg()),
-    max: vec3.add(loc, halfSize),
+    min: Vec3.add(loc, halfSize.neg()),
+    max: Vec3.add(loc, halfSize),
   }, 0.1, 2, this.color);
 
   // temporary hide text label of range guide 
-  //renderer.drawText(vec3.add(loc, new vec3(0, -0.5, 0)), this.name, "black", "center");
+  //renderer.drawText(Vec3.add(loc, new Vec3(0, -0.5, 0)), this.name, "black", "center");
 };
 
 //////////////// EditorResizeGuideBoundingBox /////////////////
@@ -772,7 +772,7 @@ Tarumae.EditorResizeGuideBoundingBox.prototype.draw = function(renderer) {
   var halfSize = this.scale.mul(0.5);
   
   renderer.drawFocusBox({
-    min: vec3.add(loc, halfSize.neg()),
-    max: vec3.add(loc, halfSize),
+    min: Vec3.add(loc, halfSize.neg()),
+    max: Vec3.add(loc, halfSize),
   }, 0.1, 2, this.color);
 };

@@ -8,7 +8,7 @@
 import Tarumae from "../entry"
 import "../utility/utility"
 import { ResourceManager, ResourceTypes } from "../utility/res"
-import { Vec2, vec3, vec4, color3, color4, Point } from "../math/vector"
+import { Vec2, Vec3, vec4, color3, color4, Point } from "../math/vector"
 import { Matrix3, Matrix4 } from "../math/matrix"
 import "../scene/scene"
 import "../webgl/shader"
@@ -818,7 +818,7 @@ Tarumae.Renderer = class {
 					var viewportWidth = viewRange * this.aspectRate;
 					var viewportHeight = viewRange;
 	
-					ray = new Tarumae.Ray(new vec3(0, 0, 0), new vec3(
+					ray = new Tarumae.Ray(new Vec3(0, 0, 0), new Vec3(
 						(p.x / this.renderSize.width - 0.5) * viewportWidth,
 						-(p.y / this.renderSize.height - 0.5) * viewportHeight,
 						-0.5).normalize());
@@ -836,7 +836,7 @@ Tarumae.Renderer = class {
 					var x = (p.x / this.renderSize.width - 0.5) * viewportWidth;
 					var y = -(p.y / this.renderSize.height - 0.5) * viewportHeight;
 	
-					ray = new Tarumae.Ray(new vec3(x, y, 0), new vec3(0, 0, -1));
+					ray = new Tarumae.Ray(new Vec3(x, y, 0), new Vec3(0, 0, -1));
 				}
 				break;
 		}
@@ -900,7 +900,7 @@ Tarumae.Renderer.prototype.toWorldPosition = (function() {
 	
 		var w = ((projectMethod == Tarumae.ProjectionMethods.Persp || projectMethod == "persp") ? pos.w : 1.0) || 1.0;
 	
-		return new vec3(
+		return new Vec3(
 			(pos.x / w) * renderHalfWidth + renderHalfWidth,
 			-(pos.y / w) * renderHalfHeight + renderHalfHeight,
 			1.0 / pos.z

@@ -8,23 +8,23 @@
 Tarumae.Axis3DCursor = function(renderer) {
   this.renderer = renderer;
 
-  this.position = new vec3(0, 0, 0);
+  this.position = new Vec3(0, 0, 0);
   this.screenPosition = new Vec2(0, 0);
   this.enabled = false;
 
   this.arrows = {
     x: {
-      dir: new vec3(1, 0, 0), color: "#00ff00",
+      dir: new Vec3(1, 0, 0), color: "#00ff00",
       enabled: true, screenPosition: new Vec2(0, 0),
       planeVertices: TarumaeEditor.AxisPlaneVertices.x,
     },
     y: {
-      dir: new vec3(0, 1, 0), color: "#ff0000",
+      dir: new Vec3(0, 1, 0), color: "#ff0000",
       enabled: true, screenPosition: new Vec2(0, 0),
       planeVertices: TarumaeEditor.AxisPlaneVertices.y,
     },
     z: {
-      dir: new vec3(0, 0, 1), color: "#0000ff",
+      dir: new Vec3(0, 0, 1), color: "#0000ff",
       enabled: true, screenPosition: new Vec2(0, 0),
       planeVertices: TarumaeEditor.AxisPlaneVertices.z,
     },
@@ -157,9 +157,9 @@ Object.assign(Tarumae.Axis3DCursor.prototype, {
 
   getAxisPlaneVertices: function(axis) {
     return {
-      v1: vec3.add(this.position, axis.planeVertices.v1),
-      v2: vec3.add(this.position, axis.planeVertices.v2),
-      v3: vec3.add(this.position, axis.planeVertices.v3),
+      v1: Vec3.add(this.position, axis.planeVertices.v1),
+      v2: Vec3.add(this.position, axis.planeVertices.v2),
+      v3: Vec3.add(this.position, axis.planeVertices.v3),
     };
   },
 
@@ -188,7 +188,7 @@ Object.assign(Tarumae.Axis3DCursor.prototype, {
 Tarumae.Multi3DCursor = function(renderer) {
   this.renderer = renderer;
 
-  this.position = new vec3(0, 0, 0);
+  this.position = new Vec3(0, 0, 0);
   this.screenPosition = new Vec2(0, 0);
   this.enabled = false;
 
@@ -331,9 +331,9 @@ Object.assign(Tarumae.Multi3DCursor.prototype, {
     )? TarumaeEditor.AxisPlaneVertices[axis.planeAxis] : axis.planeVertices;
 
     return {
-      v1: vec3.add(this.position, vertices.v1),
-      v2: vec3.add(this.position, vertices.v2),
-      v3: vec3.add(this.position, vertices.v3),
+      v1: Vec3.add(this.position, vertices.v1),
+      v2: Vec3.add(this.position, vertices.v2),
+      v3: Vec3.add(this.position, vertices.v3),
     };
   },
 
@@ -377,7 +377,7 @@ Object.assign(Tarumae.Multi3DCursor.prototype, {
       this.arrows[mode].visible = true;
 
       this.initEnabled();
-      this.arrows.angle = new vec3(0,0,0);
+      this.arrows.angle = new Vec3(0,0,0);
       scene.requireUpdateFrame();
     }
   },

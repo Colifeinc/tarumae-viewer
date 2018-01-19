@@ -46,7 +46,7 @@ export class Vec2 {
 	}
 
 	normalize() {
-		var delta = 1 / this.length();
+		const delta = 1 / this.length();
 		return new Vec2(this.x * delta, this.y * delta);
 	}
 
@@ -63,7 +63,7 @@ export class Vec2 {
 	}
 
 	toString() {
-		var toStringDigits = Tarumae.Utility.NumberExtension.toStringWithDigits;
+		const toStringDigits = Tarumae.Utility.NumberExtension.toStringWithDigits;
 		return "[" + toStringDigits(this.x) + ", " + (this.y) + "]";
 	}
 
@@ -80,232 +80,233 @@ export class Vec2 {
 	}
 }	
 
+///////////////////// Vec3 //////////////////////
 
-///////////////////// vec3 //////////////////////
+export class Vec3 {
+	constructor(x, y, z) {
+		if (typeof x === "undefined") {
+			this.x = 0; this.y = 0; this.z = 0;
+		} else {
+			this.x = x; this.y = y; this.z = z;
+		}
+	}
 
-export function vec3(x, y, z) {
-	if (typeof x === "undefined") {
-		this.x = 0; this.y = 0; this.z = 0;
-	} else {
+	xy() {
+		return new Vec2(this.x, this.y);
+	}
+	
+	set(x, y, z) {
 		this.x = x; this.y = y; this.z = z;
+	}
+	
+	setToZero() {
+		this.x = 0; this.y = 0; this.z = 0;
+	}
+	
+	equals() {
+		switch (arguments.length) {
+			default:
+				return false;
+	
+			case 1:
+				var obj = arguments[0];
+				return (typeof obj === "object")
+					&& this.x == obj.x && this.y == obj.y && this.z == obj.z;
+	
+			case 3:
+				return this.x == arguments[0] && this.y == arguments[1] && this.z == arguments[2];
+		}
+	};
+	
+	almostSame() {
+		switch (arguments.length) {
+			default:
+				return false;
+	
+			case 1:
+				var obj = arguments[0];
+				return (typeof obj === "object")
+					&& Math.abs(this.x - obj.x) < 0.00001 && Math.abs(this.y - obj.y) < 0.00001
+					&& Math.abs(this.z - obj.z) < 0.00001;
+	
+			case 3:
+				return Math.abs(this.x - arguments[0]) < 0.00001 && Math.abs(this.y - arguments[1]) < 0.00001
+					&& Math.abs(this.z - arguments[2]) < 0.00001;
+		}
+	}
+	
+	mulMat(m) {
+		return new Vec3(
+			this.x * m.a1 + this.y * m.a2 + this.z * m.a3,
+			this.x * m.b1 + this.y * m.b2 + this.z * m.b3,
+			this.x * m.c1 + this.y * m.c2 + this.z * m.c3);
+	}
+	
+	length() {
+		return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+	}
+	
+	normalize() {
+		var scalar = 1 / this.length();
+		
+		if (isFinite(scalar)) {
+			return new Vec3(this.x * scalar, this.y * scalar, this.z * scalar);
+		} else {
+			return new Vec3();
+		}
+	}
+	
+	add(v) {
+		return new Vec3(this.x + v.x, this.y + v.y, this.z + v.z);
+	}
+	
+	sub(v) {
+		return new Vec3(this.x - v.x, this.y - v.y, this.z - v.z);
+	}
+	
+	mul(scalar) {
+		var x, y, z;
+	
+		if (isFinite(scalar)) {
+			return new Vec3(this.x * scalar, this.y * scalar, this.z * scalar);
+		} else {
+			return new Vec3();
+		}
+	}
+	
+	div(s) {
+		var scalar = 1 / s;
+	
+		if (isFinite(scalar)) {
+			return new Vec3(this.x * scalar, this.y * scalar, this.z * scalar);
+		} else {
+			return new Vec3();
+		}
+	}
+	
+	cross(v) {
+		return new Vec3(this.y * v.z - this.z * v.y,
+			-(this.x * v.z - this.z * v.x),
+			this.x * v.y - this.y * v.x);
+	}
+	
+	dot(v) {
+		return this.x * v.x + this.y * v.y + this.z * v.z;
+	}
+	
+	neg() {
+		return new Vec3(-this.x, -this.y, -this.z);
+	}
+	
+	abs() {
+		return new Vec3(Math.abs(this.x), Math.abs(this.y), Math.abs(this.z));
+	}
+	
+	lerp(v2, t) {
+		return this.add((v2.sub(this)).mul(t));
+	}
+	
+	lerp(v1, v2, t) {
+		return v1.lerp(v2, t);
+	}
+	
+	fromEulers(e1, e2) {
+		var v = Tarumae.MathFunctions.vectorFromEulerAngles(e1, e2);
+		this.x = v.x;
+		this.y = v.y;
+		this.z = v.z;
+	}
+	
+	offset(x, y, z) {
+		switch (arguments.length) {
+			case 1:
+				if (typeof x === "object") {
+					this.x += x.x;
+					this.y += x.y;
+					this.z += x.z;
+				}
+				break;
+			
+			case 3:
+				this.x += x;
+				this.y += y;
+				this.z += z;
+				break;
+		}
+	
+		return this;
+	}
+	
+	clone() {
+		return new Vec3(this.x, this.y, this.z);
+	}
+	
+	toArray() {
+		return [this.x, this.y, this.z];
+	}
+	
+	toArrayDigits(digits) {
+		var roundDigits = Tarumae.Utility.NumberExtension.roundDigits;
+		return [roundDigits(this.x, digits), roundDigits(this.y, digits), roundDigits(this.z, digits)];
+	}
+	
+	toFloat32Array() {
+		return new Float32Array(this.toArray());
+	}
+		
+	toString() {
+		var toStringDigits = Tarumae.Utility.NumberExtension.toStringWithDigits;
+	
+		return "[" + toStringDigits(this.x) + ", " + toStringDigits(this.y) + ", "
+			+ toStringDigits(this.z) + "]";
+	}
+
+	static add(v1, v2) {
+		return new Vec3(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
+	}
+
+	static sub(v1, v2) {
+		return new Vec3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
+	}
+
+	static mul(v1, s) {
+		return new Vec3(v1.x * s, v1.y * s, v1.z * s);
+	}
+
+	static div(v1, s) {
+		return new Vec3(v1.x / s, v1.y / s, v1.z / s);
+	}
+
+	static neg(v1) {
+		return new Vec3(-v1.x, -v1.y, -v1.z);
+	}
+
+	static dot(v1, v2) {
+		return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+	}
+
+	static cross(v1, v2) {
+		return new Vec3(v1.y * v2.z - v1.z * v2.y,
+			-(v1.x * v2.z - v1.z * v2.x),
+			v1.x * v2.y - v1.y * v2.x);
+	}
+
+	static getLength(v) {
+		return Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+	}
+
+	static normalize(v) {
+		var scalar = 1 / Vec3.getLength(v);
+	
+		if (isFinite(scalar)) {
+			return new Vec3(v.x * scalar, v.y * scalar, v.z * scalar);
+		} else {
+			return new Vec3();
+		}
 	}
 }
 
-vec3.prototype.xy = function() {
-	return new Vec2(this.x, this.y);	
-};
-
-vec3.prototype.set = function(x, y, z) {
-	this.x = x; this.y = y; this.z = z;
-};
-
-vec3.prototype.setToZero = function() {
-	this.x = 0; this.y = 0; this.z = 0;
-};
-
-vec3.prototype.equals = function() {
-	switch (arguments.length) {
-		default:
-			return false;
-
-		case 1:
-			var obj = arguments[0];
-			return (typeof obj === "object")
-				&& this.x == obj.x && this.y == obj.y && this.z == obj.z;
-
-		case 3:
-			return this.x == arguments[0] && this.y == arguments[1] && this.z == arguments[2];
-	}
-};
-
-vec3.prototype.almostSame = function() {
-	switch (arguments.length) {
-		default:
-			return false;
-
-		case 1:
-			var obj = arguments[0];
-			return (typeof obj === "object")
-				&& Math.abs(this.x - obj.x) < 0.00001 && Math.abs(this.y - obj.y) < 0.00001
-				&& Math.abs(this.z - obj.z) < 0.00001;
-
-		case 3:
-			return Math.abs(this.x - arguments[0]) < 0.00001 && Math.abs(this.y - arguments[1]) < 0.00001
-				&& Math.abs(this.z - arguments[2]) < 0.00001;
-	}
-};
-
-vec3.prototype.toString = function() {
-	var toStringDigits = Tarumae.Utility.NumberExtension.toStringWithDigits;
-
-	return "[" + toStringDigits(this.x) + ", " + toStringDigits(this.y) + ", "
-		+ toStringDigits(this.z) + "]";
-};
-
-vec3.prototype.mulMat = function (m) {
-	return new vec3(
-		this.x * m.a1 + this.y * m.a2 + this.z * m.a3,
-		this.x * m.b1 + this.y * m.b2 + this.z * m.b3,
-		this.x * m.c1 + this.y * m.c2 + this.z * m.c3);
-};
-
-vec3.prototype.length = function() {
-	return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
-};
-
-vec3.prototype.normalize = function () {
-	var scalar = 1 / this.length();
-	
-	if (isFinite(scalar)) {
-		return new vec3(this.x * scalar, this.y * scalar, this.z * scalar);
-	} else {
-		return new vec3();
-	}
-};
-
-vec3.prototype.add = function(v) {
-	return new vec3(this.x + v.x, this.y + v.y, this.z + v.z);
-};
-
-vec3.prototype.sub = function(v) {
-	return new vec3(this.x - v.x, this.y - v.y, this.z - v.z);
-};
-
-vec3.prototype.mul = function(scalar) {
-	var x, y, z;
-
-	if (isFinite(scalar)) {
-		return new vec3(this.x * scalar, this.y * scalar, this.z * scalar);
-	} else {
-		return new vec3();
-	}
-};
-
-vec3.prototype.div = function(s) {
-	var scalar = 1 / s;
-
-	if (isFinite(scalar)) {
-		return new vec3(this.x * scalar, this.y * scalar, this.z * scalar);
-	} else {
-		return new vec3();
-	}
-};
-
-vec3.prototype.cross = function(v) {
-	return new vec3(this.y * v.z - this.z * v.y,
-				-(this.x * v.z - this.z * v.x),
-				this.x * v.y - this.y * v.x);
-};
-
-vec3.prototype.dot = function(v) {
-	return this.x * v.x + this.y * v.y + this.z * v.z;
-};
-
-vec3.prototype.neg = function() {
-	return new vec3(-this.x, -this.y, -this.z);
-};
-
-vec3.prototype.abs = function() {
-	return new vec3(Math.abs(this.x), Math.abs(this.y), Math.abs(this.z));
-};
-
-vec3.prototype.lerp = function(v2, t) {
-	return this.add((v2.sub(this)).mul(t));
-};
-
-vec3.lerp = function(v1, v2, t) {
-	return v1.lerp(v2, t);
-};
-
-vec3.prototype.fromEulers = function(e1, e2) {
-	var v = Tarumae.MathFunctions.vectorFromEulerAngles(e1, e2);
-	this.x = v.x;
-	this.y = v.y;
-	this.z = v.z;
-};
-
-vec3.prototype.offset = function(x, y, z) {
-	switch (arguments.length) {
-		case 1:
-			if (typeof x === "object") {
-				this.x += x.x;
-				this.y += x.y;
-				this.z += x.z;
-			}
-			break;
-		
-		case 3:
-			this.x += x;
-			this.y += y;
-			this.z += z;
-			break;
-	}
-
-	return this;
-};
-
-vec3.prototype.clone = function() {
-	return new vec3(this.x, this.y, this.z);
-};
-
-vec3.prototype.toArray = function() {
-	return [this.x, this.y, this.z];
-};
-
-vec3.prototype.toArrayDigits = function(digits) {
-	var roundDigits = Tarumae.Utility.NumberExtension.roundDigits;
-	return [roundDigits(this.x, digits), roundDigits(this.y, digits), roundDigits(this.z, digits)];
-};
-
-vec3.prototype.toFloat32Array = function() {
-	return new Float32Array(this.toArray());
-};
-
-vec3.add = function(v1, v2) {
-	return new vec3(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
-};
-
-vec3.sub = function(v1, v2) {
-	return new vec3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
-};
-
-vec3.mul = function(v1, s) {
-	return new vec3(v1.x * s, v1.y * s, v1.z * s);
-};
-
-vec3.div = function(v1, s) {
-	return new vec3(v1.x / s, v1.y / s, v1.z / s);
-};
-
-vec3.neg = function(v1) {
-	return new vec3(-v1.x, -v1.y, -v1.z);
-};
-
-vec3.dot = function(v1, v2) {
-	return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
-};
-
-vec3.cross = function(v1, v2) {
-	return new vec3(v1.y * v2.z - v1.z * v2.y,
-				-(v1.x * v2.z - v1.z * v2.x),
-				v1.x * v2.y - v1.y * v2.x);
-};
-
-vec3.getLength = function(v) {
-	return Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
-};
-
-vec3.normalize = function(v) {
-	var scalar = 1 / vec3.getLength(v);
-	
-	if (isFinite(scalar)) {
-		return new vec3(v.x * scalar, v.y * scalar, v.z * scalar);
-	} else {
-		return new vec3();
-	}
-};
-
-vec3.createFromEulers = (function() {
+Vec3.createFromEulers = (function() {
 	var m;
 
 	return function(ex, ey, ez) {
@@ -314,22 +315,22 @@ vec3.createFromEulers = (function() {
 		if (m == undefined) m = new Tarumae.Matrix4();
 		m.loadIdentity().rotate(ex, ey, ez);
 		
-		return new vec3(-m.a3, -m.b3, -m.c3);
+		return new Vec3(-m.a3, -m.b3, -m.c3);
 	}
 })();
 
-vec3.fromArray = function(arr) {
-	return new vec3(arr[0], arr[1], arr[2]);
+Vec3.fromArray = function(arr) {
+	return new Vec3(arr[0], arr[1], arr[2]);
 };
 
-vec3.zero = new vec3(0, 0, 0);
-vec3.one = new vec3(1, 1, 1);
-vec3.up = new vec3(0, 1, 0);
-vec3.down = new vec3(0, -1, 0);
-vec3.left = new vec3(-1, 0, 0);
-vec3.right = new vec3(1, 0, 0);
-vec3.forward = new vec3(0, 0, -1);
-vec3.back = new vec3(0, 0, 1);
+Vec3.zero = new Vec3(0, 0, 0);
+Vec3.one = new Vec3(1, 1, 1);
+Vec3.up = new Vec3(0, 1, 0);
+Vec3.down = new Vec3(0, -1, 0);
+Vec3.left = new Vec3(-1, 0, 0);
+Vec3.right = new Vec3(1, 0, 0);
+Vec3.forward = new Vec3(0, 0, -1);
+Vec3.back = new Vec3(0, 0, 1);
 
 //////////////////// vec4 //////////////////////
 
@@ -346,7 +347,7 @@ export function vec4(x, y, z, w) {
 			var obj = arguments[0];
 			
 			if (typeof obj === "object") {
-				if (obj instanceof vec3) {
+				if (obj instanceof Vec3) {
 					this.x = obj.x;
 					this.y = obj.y;
 					this.z = obj.z;
@@ -382,7 +383,7 @@ export function vec4(x, y, z, w) {
 }
 
 vec4.prototype.xyz = function () {
-	return new vec3(this.x, this.y, this.z);
+	return new Vec3(this.x, this.y, this.z);
 };
 
 vec4.prototype.set = function(x, y, z, w) {
@@ -684,8 +685,8 @@ Tarumae.Quaternion = class {
 Tarumae.Ray = class {
 	constructor(origin, dir) {
 		if (typeof origin === "undefined") {
-			this.origin = new vec3();
-			this.dir = new vec3();
+			this.origin = new Vec3();
+			this.dir = new Vec3();
 		} else {
 			this.origin = origin;
 			this.dir = dir;
@@ -702,9 +703,9 @@ Tarumae.BoundingBox = class {
 
 		switch (arguments.length) {
 			case 0:
-				this.min = new vec3();
-				this.max = new vec3();
-				this.origin = new vec3();
+				this.min = new Vec3();
+				this.max = new Vec3();
+				this.origin = new Vec3();
 				break;
 
 			case 1:
@@ -728,19 +729,19 @@ Tarumae.BoundingBox = class {
 
 	getVertexArray(bbox) {
 		return [
-			new vec3(bbox.max.x, bbox.max.y, bbox.max.z),
-			new vec3(bbox.max.x, bbox.max.y, bbox.min.z),
-			new vec3(bbox.max.x, bbox.min.y, bbox.max.z),
-			new vec3(bbox.max.x, bbox.min.y, bbox.min.z),
-			new vec3(bbox.min.x, bbox.max.y, bbox.max.z),
-			new vec3(bbox.min.x, bbox.max.y, bbox.min.z),
-			new vec3(bbox.min.x, bbox.min.y, bbox.max.z),
-			new vec3(bbox.min.x, bbox.min.y, bbox.min.z),
+			new Vec3(bbox.max.x, bbox.max.y, bbox.max.z),
+			new Vec3(bbox.max.x, bbox.max.y, bbox.min.z),
+			new Vec3(bbox.max.x, bbox.min.y, bbox.max.z),
+			new Vec3(bbox.max.x, bbox.min.y, bbox.min.z),
+			new Vec3(bbox.min.x, bbox.max.y, bbox.max.z),
+			new Vec3(bbox.min.x, bbox.max.y, bbox.min.z),
+			new Vec3(bbox.min.x, bbox.min.y, bbox.max.z),
+			new Vec3(bbox.min.x, bbox.min.y, bbox.min.z),
 		];
 	}
 
 	getSize() {
-		return vec3.sub(this.max, this.min);
+		return Vec3.sub(this.max, this.min);
 	}
 
 	getOrigin() {
@@ -748,13 +749,13 @@ Tarumae.BoundingBox = class {
 			this.size = this.getSize();
 		}
 
-		return vec3.add(this.min, vec3.div(this.size, 2));
+		return Vec3.add(this.min, Vec3.div(this.size, 2));
 	}
 
 	offset(off) {
-		this.max = vec3.add(this.max, off);
-		this.min = vec3.add(this.min, off);
-		this.origin = vec3.add(this.origin, off);
+		this.max = Vec3.add(this.max, off);
+		this.min = Vec3.add(this.min, off);
+		this.origin = Vec3.add(this.origin, off);
 	}
 
 	contains(p) {
@@ -770,8 +771,8 @@ Tarumae.BoundingBox.findBoundingBoxOfBoundingBoxes = function(bboxA, bboxB) {
 	if (!bboxB) return bboxA;
 
 	var bbox = {
-		min: new vec3(),
-		max: new vec3()
+		min: new Vec3(),
+		max: new Vec3()
 	};
 
 	bbox.min.x = bboxA.min.x < bboxB.min.x ? bboxA.min.x : bboxB.min.x;
@@ -802,8 +803,8 @@ Tarumae.BoundingBox.transformBoundingBox = function(bbox, matrix) {
 	var zList = [ruf.z, rub.z, rdf.z, rdb.z, luf.z, lub.z, ldf.z, ldb.z];
 
 	return {
-		min: new vec3(Math.min.apply(null, xList), Math.min.apply(null, yList), Math.min.apply(null, zList)),
-		max: new vec3(Math.max.apply(null, xList), Math.max.apply(null, yList), Math.max.apply(null, zList))
+		min: new Vec3(Math.min.apply(null, xList), Math.min.apply(null, yList), Math.min.apply(null, zList)),
+		max: new Vec3(Math.max.apply(null, xList), Math.max.apply(null, yList), Math.max.apply(null, zList))
 	};
 };
 

@@ -6,15 +6,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "../entry"
-import { vec3, vec4 } from "../math/vector"
+import { Vec3, vec4 } from "../math/vector"
 import "../math/matrix"
 
 Tarumae.Viewer = function(renderer) {
   this.renderer = renderer;
 
-  this.location = new vec3(0, 0, 0);
-  this.angle = new vec3(0, 0, 0);
-  this.scale = new vec3(1, 1, 1);
+  this.location = new Vec3(0, 0, 0);
+  this.angle = new Vec3(0, 0, 0);
+  this.scale = new Vec3(1, 1, 1);
   this.originDistance = 0;
 
   this.firstMovementUpdate = true;
@@ -413,12 +413,12 @@ Object.assign(Tarumae.Viewer, {
   },
 
   Faces: {
-    Front: new vec3(0, 0, 0),
-    Back: new vec3(0, 180, 0),
-    Top: new vec3(90, 0, 0),
-    Bottom: new vec3(-90, 0, 0),
-    Left: new vec3(0, -90, 0),
-    Right: new vec3(0, 90, 0),
+    Front: new Vec3(0, 0, 0),
+    Back: new Vec3(0, 180, 0),
+    Top: new Vec3(90, 0, 0),
+    Bottom: new Vec3(-90, 0, 0),
+    Left: new Vec3(0, -90, 0),
+    Right: new Vec3(0, 90, 0),
   },
 });
 
@@ -509,7 +509,7 @@ Tarumae.Viewer.prototype = {
       }
         
       targetLocation = target.neg();
-    } else if (target instanceof vec3) {
+    } else if (target instanceof Vec3) {
       targetLocation = target;
     } else {
       return;
@@ -545,7 +545,7 @@ Tarumae.Viewer.prototype = {
     options = options || {};
 
     if (options.append) {
-      angles = vec3.add(angles, this.angle);
+      angles = Vec3.add(angles, this.angle);
     }
     
     var scene = _this.renderer.currentScene;
@@ -777,7 +777,7 @@ Tarumae.FPSController.prototype = {
       if (m === undefined) m = new Tarumae.Matrix4();
       m.loadIdentity().rotate(camera.angle);
           
-      var transformedDir = new vec3(
+      var transformedDir = new Vec3(
         viewer.mouse.movement.x * 50 / viewer.renderer.renderSize.width, 0,
         viewer.mouse.movement.y * 50 / viewer.renderer.renderSize.height).mulMat(m);
 
@@ -793,7 +793,7 @@ Tarumae.FPSController.prototype = {
   moveSpeed: 0.2,
   
   detectFirstPersonMove: (function() {
-    var m = new Tarumae.Matrix4(), dir = new vec3();
+    var m = new Tarumae.Matrix4(), dir = new Vec3();
     
     return function() {
       var scene = this.scene;
@@ -877,7 +877,7 @@ Tarumae.TouchController = function(scene) {
   var viewer = this.renderer.viewer;
   var Viewer = Tarumae.Viewer;
   
-  var m = new Tarumae.Matrix4(), dir = new vec3();  
+  var m = new Tarumae.Matrix4(), dir = new Vec3();  
   
   this.detectFirstPersonMove = function() {
     if (scene && scene.mainCamera) {
@@ -1009,7 +1009,7 @@ Tarumae.TouchController = function(scene) {
 
           m.loadIdentity().rotate(camera.angle);
         
-          var transformedDir = new vec3(
+          var transformedDir = new Vec3(
             viewer.mouse.movement.x * 30 / viewer.renderer.renderSize.width, 0,
             viewer.mouse.movement.y * 30 / viewer.renderer.renderSize.height).mulMat(m);
 
@@ -1038,8 +1038,8 @@ Tarumae.ScenePrologue.prototype = {
     this.oldCameraLocation = this.scene.mainCamera.location;
     this.oldCameraAngle = this.scene.mainCamera.angle;
     
-    this.scene.mainCamera.location = options.startCameraLocation || new vec3(-17.232386, 10, -12.892001);
-    this.scene.mainCamera.lookAt(options.startCameraLookAt || new vec3(0, 1, 0));
+    this.scene.mainCamera.location = options.startCameraLocation || new Vec3(-17.232386, 10, -12.892001);
+    this.scene.mainCamera.lookAt(options.startCameraLookAt || new Vec3(0, 1, 0));
 
     var effect = options.effect || "tall";
     var duration = options.duration || 1;
@@ -1065,7 +1065,7 @@ Tarumae.ScenePrologue.prototype = {
         case "fadein":
           var originLocation = obj.location.clone();
 
-          var fadeLocation = new vec3((Math.random() * 25) - 12.5, 0,
+          var fadeLocation = new Vec3((Math.random() * 25) - 12.5, 0,
             (Math.random() * 25) - 12.5);
 
           _this.scene.animate({

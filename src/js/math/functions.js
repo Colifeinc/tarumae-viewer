@@ -6,7 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "../entry"
-import { vec3, vec4 } from "./vector"
+import { Vec3, vec4 } from "./vector"
 
 Tarumae.MathFunctions = {
   _PIAngleDelta: Math.PI / 180.0,
@@ -19,8 +19,8 @@ Tarumae.MathFunctions = {
   },
   
   abs: function(v) {
-    if (v instanceof vec3) {
-      return new vec3(Math.abs(v.x), Math.abs(v.y), Math.abs(v.z));
+    if (v instanceof Vec3) {
+      return new Vec3(Math.abs(v.x), Math.abs(v.y), Math.abs(v.z));
     }
   },
 
@@ -32,8 +32,8 @@ Tarumae.MathFunctions = {
       if (v < min) return min;
       else if (v > max) return max;
       else return v;
-    } else if (v instanceof vec3) {
-      return new vec3(Tarumae.MathFunctions.clamp(v.x, min, max),
+    } else if (v instanceof Vec3) {
+      return new Vec3(Tarumae.MathFunctions.clamp(v.x, min, max),
         Tarumae.MathFunctions.clamp(v.y, min, max),
         Tarumae.MathFunctions.clamp(v.z, min, max));
     } else if (v instanceof vec4) {
@@ -42,7 +42,7 @@ Tarumae.MathFunctions = {
         Tarumae.MathFunctions.clamp(v.z, min, max),
         Tarumae.MathFunctions.clamp(v.w, min, max));
     } else if (v instanceof Vec2) {
-      return new vec3(Tarumae.MathFunctions.clamp(v.x, min, max),
+      return new Vec3(Tarumae.MathFunctions.clamp(v.x, min, max),
         Tarumae.MathFunctions.clamp(v.y, min, max));
     }
   },
@@ -111,7 +111,7 @@ Tarumae.MathFunctions = {
       z = Math.asin(-m21);
     }
 
-    return new vec3(Tarumae.MathFunctions.degreeToAngle(x),
+    return new Vec3(Tarumae.MathFunctions.degreeToAngle(x),
       Tarumae.MathFunctions.degreeToAngle(y),
       Tarumae.MathFunctions.degreeToAngle(z));
   
@@ -209,7 +209,7 @@ Tarumae.MathFunctions = {
     //     break;
     // }
 
-    // return new vec3(Tarumae.MathFunctions.degreeToAngle(x),
+    // return new Vec3(Tarumae.MathFunctions.degreeToAngle(x),
     //   Tarumae.MathFunctions.degreeToAngle(y),
     //   Tarumae.MathFunctions.degreeToAngle(z));
   },
@@ -367,10 +367,10 @@ Tarumae.MathFunctions = {
   },
 
   rayIntersectsSphere: function(ray, sphere, out) {
-    var m = vec3.sub(ray.origin, sphere.origin);
+    var m = Vec3.sub(ray.origin, sphere.origin);
     
-    var b = vec3.dot(m, ray.dir);
-    var c = vec3.dot(m, m) - sphere.radius * sphere.radius;
+    var b = Vec3.dot(m, ray.dir);
+    var c = Vec3.dot(m, m) - sphere.radius * sphere.radius;
 
     if (c > 0.0 && b > 0.0) return false;
 
@@ -386,7 +386,7 @@ Tarumae.MathFunctions = {
       // If t is negative, ray started inside sphere so clamp t to zero 
       if (out.t < 0.0) out.t = 0.0;
     
-      out.hit = vec3.add(ray.origin, vec3.mul(ray.dir, out.t));
+      out.hit = Vec3.add(ray.origin, Vec3.mul(ray.dir, out.t));
     }
 
     return true;
@@ -395,7 +395,7 @@ Tarumae.MathFunctions = {
   rayIntersectsBox: function(ray, bbox, out) {
     // r.dir is unit direction vector of ray
     var dir = ray.dir;
-    var dirfrac = new vec3(1.0 / dir.x, 1.0 / dir.y, 1.0 / dir.z);
+    var dirfrac = new Vec3(1.0 / dir.x, 1.0 / dir.y, 1.0 / dir.z);
 
     var org = ray.origin, lb = bbox.min, rt = bbox.max;
 

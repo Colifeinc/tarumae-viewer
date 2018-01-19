@@ -257,7 +257,7 @@ Object.assign(TarumaeEditor.prototype, {
     var pos = ap.get();
     
     // Getting the final scaling value
-    var scalar = new vec3(1, 1, 1);
+    var scalar = new Vec3(1, 1, 1);
     var plist = [];
     var parent = obj.parent;
 
@@ -269,9 +269,9 @@ Object.assign(TarumaeEditor.prototype, {
     for (var j = plist.length - 1; j >= 0; j--) {
       var parentobj = plist[j];
 
-      scalar = new vec3(parentobj.scale.x * scalar.x, parentobj.scale.y * scalar.y, parentobj.scale.z * scalar.z);
+      scalar = new Vec3(parentobj.scale.x * scalar.x, parentobj.scale.y * scalar.y, parentobj.scale.z * scalar.z);
     }
-    scalar = new vec3(obj.scale.x * scalar.x, obj.scale.y * scalar.y, obj.scale.z * scalar.z);
+    scalar = new Vec3(obj.scale.x * scalar.x, obj.scale.y * scalar.y, obj.scale.z * scalar.z);
 
     // Custom transformation matrix for Gizmos
     var matrix = new Tarumae.Matrix4().loadIdentity();
@@ -289,27 +289,27 @@ Object.assign(TarumaeEditor.prototype, {
         break;
 
       case "-x":
-        ap.arrowPoints = [new vec3(-0.3, 0, 0), new vec3(-0.1, -0.1, 0), new vec3(-0.1, 0.1, 0)];
+        ap.arrowPoints = [new Vec3(-0.3, 0, 0), new Vec3(-0.1, -0.1, 0), new Vec3(-0.1, 0.1, 0)];
         break;
 
       case "+x":
-        ap.arrowPoints = [new vec3(0.3, 0, 0), new vec3(0.1, -0.1, 0), new vec3(0.1, 0.1, 0)];
+        ap.arrowPoints = [new Vec3(0.3, 0, 0), new Vec3(0.1, -0.1, 0), new Vec3(0.1, 0.1, 0)];
         break;
 
       case "-y":
-        ap.arrowPoints = [new vec3(0, -0.3, 0), new vec3(-0.1, -0.1, 0), new vec3(0.1, -0.1, 0)];
+        ap.arrowPoints = [new Vec3(0, -0.3, 0), new Vec3(-0.1, -0.1, 0), new Vec3(0.1, -0.1, 0)];
         break;
 
       case "+y":
-        ap.arrowPoints = [new vec3(0, 0.3, 0), new vec3(-0.1, 0.1, 0), new vec3(0.1, 0.1, 0)];
+        ap.arrowPoints = [new Vec3(0, 0.3, 0), new Vec3(-0.1, 0.1, 0), new Vec3(0.1, 0.1, 0)];
         break;
 
       case "-z":
-        ap.arrowPoints = [new vec3(0, 0, -0.3), new vec3(-0.1, 0, -0.1), new vec3(0.1, 0, -0.1)];
+        ap.arrowPoints = [new Vec3(0, 0, -0.3), new Vec3(-0.1, 0, -0.1), new Vec3(0.1, 0, -0.1)];
         break;
 
       case "+z":
-        ap.arrowPoints = [new vec3(0, 0, 0.3), new vec3(-0.1, 0, 0.1), new vec3(0.1, 0, 0.1)];
+        ap.arrowPoints = [new Vec3(0, 0, 0.3), new Vec3(-0.1, 0, 0.1), new Vec3(0.1, 0, 0.1)];
         break;
     }
 

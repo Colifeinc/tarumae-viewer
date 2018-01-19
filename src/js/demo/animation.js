@@ -28,7 +28,7 @@ window.addEventListener('load', function() {
         lastAnimation = scene.animate({duration: 2, delay: 0.5}, function(t) {
           var s = 0.25 + Math.abs(Math.sin(t * Math.PI * 5) / 10);
           cube.location.y = s;
-          // cube.scale = new vec3(0.25 + s, 0.5, 0.25 + s);
+          // cube.scale = new Vec3(0.25 + s, 0.5, 0.25 + s);
         });
       },
 

@@ -378,8 +378,8 @@ Object.assign(TarumaeEditor.prototype, {
                     maxy = Math.max(minpos.y, maxpos.y),
                     maxz = Math.max(minpos.z, maxpos.z);
                   
-                  minpos = new vec3(minx, miny, minz);
-                  maxpos = new vec3(maxx, maxy, maxz);
+                  minpos = new Vec3(minx, miny, minz);
+                  maxpos = new Vec3(maxx, maxy, maxz);
 
                   box.location = minpos.add(halfScale);
                   box.scale = box.scale.abs();

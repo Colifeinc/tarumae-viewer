@@ -8,7 +8,7 @@
 ////////////////// Shader ///////////////////////
 
 import Tarumae from "../entry"
-import { vec3 } from "../math/vector"
+import { Vec3 } from "../math/vector"
 import "../math/matrix"
 
 Tarumae.Shader = class {
@@ -31,7 +31,7 @@ Tarumae.Shader = class {
 			enumerable: false,
 		});
 	
-		this.defaultSunColor = new vec3(0.21, 0.14, 0.05);
+		this.defaultSunColor = new Vec3(0.21, 0.14, 0.05);
 
 		this.emptyTexture = null;
 
@@ -629,13 +629,13 @@ Tarumae.SimpleShader.prototype.beginScene = function(scene) {
 	// sun
 	if (typeof scene.sun === "object" && scene.sun != null) {
 		var sunloc = scene.sun.getWorldLocation();
-		var sundir = vec3.normalize(sunloc);
+		var sundir = Vec3.normalize(sunloc);
 		this.sundirUniform.set(sundir);
 		
 		var mat = scene.sun.mat || null;
 		var suncolor = (mat && mat.color) || this.defaultSunColor;
 
-		this.sunlightUniform.set(suncolor.mul(vec3.dot(sundir, vec3.up)).toArray());
+		this.sunlightUniform.set(suncolor.mul(Vec3.dot(sundir, Vec3.up)).toArray());
 	}
 
 };
@@ -909,13 +909,13 @@ Tarumae.PanoramaShader = class extends Tarumae.Shader {
 // 	// // sun
 // 	// if (typeof scene.sun === "object" && scene.sun != null) {
 // 	// 	var sunloc = scene.sun.getWorldLocation();
-// 	// 	var sundir = vec3.normalize(sunloc);
+// 	// 	var sundir = Vec3.normalize(sunloc);
 // 	// 	this.sundirUniform.set(sundir);
 		
 // 	// 	var mat = scene.sun.mat || null;
 // 	// 	var suncolor = (mat && mat.color) || this.defaultSunColor;
 
-// 	// 	this.sunlightUniform.set(suncolor.mul(vec3.dot(sundir, vec3.up)).toArray());
+// 	// 	this.sunlightUniform.set(suncolor.mul(Vec3.dot(sundir, Vec3.up)).toArray());
 // 	// }
 
 // };
@@ -1105,7 +1105,7 @@ Tarumae.StandardShader = class extends Tarumae.Shader {
 		this.emptyCubemap.enableMipmap = false;
 		this.emptyCubemap.createEmpty(2, 2);
 
-		this.emptyBoundingBox = new Tarumae.BoundingBox(vec3.zero, vec3.zero);
+		this.emptyBoundingBox = new Tarumae.BoundingBox(Vec3.zero, Vec3.zero);
 	}
 };	
 
@@ -1126,12 +1126,12 @@ Tarumae.StandardShader.prototype.checkSceneLightSources = function(scene, camera
 					
 					if (Array.isArray(object.meshes) && object.meshes.length > 0) {
 						var bounds = object.getBounds();
-						lightWorldPos = vec3.add(bounds.min, vec3.div(vec3.sub(bounds.max, bounds.min), 2));
+						lightWorldPos = Vec3.add(bounds.min, Vec3.div(Vec3.sub(bounds.max, bounds.min), 2));
 					} else {
 						lightWorldPos = new vec4(0, 0, 0, 1).mulMat(transform).xyz();
 					}
 
-					var distance = vec3.sub(lightWorldPos, cameraLocation).length();
+					var distance = Vec3.sub(lightWorldPos, cameraLocation).length();
 					if (distance > Tarumae.StandardShader.LightLimitation.Distance) return;
 
 					var index = -1;
@@ -1183,7 +1183,7 @@ Tarumae.StandardShader.prototype.beginScene = function(scene) {
 	if (typeof camera !== "undefined" && camera != null) {
 		cameraLocation = camera.getWorldLocation();
 	} else {
-		cameraLocation = new vec3(0, 0, 0);
+		cameraLocation = new Vec3(0, 0, 0);
 	}
 
 	this.cameraUniform.loc.set(cameraLocation.toArray());
@@ -1240,13 +1240,13 @@ Tarumae.StandardShader.prototype.beginScene = function(scene) {
 	// sun
 	if (typeof scene.sun === "object" && scene.sun != null) {
 		var sunloc = scene.sun.getWorldLocation();
-		var sundir = vec3.normalize(sunloc);
+		var sundir = Vec3.normalize(sunloc);
 		this.sundirUniform.set(sundir);
 		
 		var mat = scene.sun.mat || null;
 		var suncolor = (mat && mat.color) || this.defaultSunColor;
 
-		this.sunlightUniform.set(suncolor.mul(vec3.dot(sundir, vec3.up)).toArray());
+		this.sunlightUniform.set(suncolor.mul(Vec3.dot(sundir, Vec3.up)).toArray());
 	}
 	
 	// shadowMap
@@ -1268,7 +1268,7 @@ Tarumae.StandardShader.prototype.beginScene = function(scene) {
 		// 	gl.uniform3fv(this.shadowMapUniform.boundingBox.origin, scene.shadowMap.boxOrigin.toArray());
 		// } else {
 		// 	gl.uniform3fv(this.shadowMapUniform.boundingBox.origin,
-		// 		scene.shadowMap.boxMin.add((vec3.sub(scene.shadowMap.boxMax, scene.shadowMap.boxMin)).div(2)).toArray());
+		// 		scene.shadowMap.boxMin.add((Vec3.sub(scene.shadowMap.boxMax, scene.shadowMap.boxMin)).div(2)).toArray());
 		// }
 	}
 	

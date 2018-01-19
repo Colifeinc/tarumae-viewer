@@ -55,7 +55,7 @@ TarumaeEditor.ViewerHandler.prototype = {
       var viewer = this.editor.renderer.viewer;
       var scene = this.scene;
 
-      var dir = new vec3();
+      var dir = new Vec3();
       var Viewer = Tarumae.Viewer;
 
       if (!viewer.pressedKeys._s3_contains(Viewer.Keys.Shift)) {

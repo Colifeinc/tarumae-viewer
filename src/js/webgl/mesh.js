@@ -6,7 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "../entry"
-import { vec3, vec4 } from "../math/vector"
+import { Vec3, vec4 } from "../math/vector"
 import "../math/matrix"
 
 Tarumae.Mesh = class {
@@ -108,8 +108,8 @@ Object.assign(Tarumae.Mesh.prototype, {
 				var boundingBoxBuffer = new Float32Array(stream, 32, 48);
 
 				this._boundingBox = {
-					min: new vec3(boundingBoxBuffer[0], boundingBoxBuffer[1], boundingBoxBuffer[2]),
-					max: new vec3(boundingBoxBuffer[3], boundingBoxBuffer[4], boundingBoxBuffer[5]),
+					min: new Vec3(boundingBoxBuffer[0], boundingBoxBuffer[1], boundingBoxBuffer[2]),
+					max: new Vec3(boundingBoxBuffer[3], boundingBoxBuffer[4], boundingBoxBuffer[5]),
 				};
 			}
 
@@ -564,7 +564,7 @@ Object.assign(Tarumae.Mesh.prototype, {
 
 					var normal = new vec4(vertexNormal, 0).mulMat(nmat).xyz().normalize();
 
-					if (vec3.dot(session.rayNormalizedNegDir, normal) < 0) {
+					if (Vec3.dot(session.rayNormalizedNegDir, normal) < 0) {
 						return null;
 					}
 				}
@@ -618,8 +618,8 @@ Object.assign(Tarumae.Mesh.prototype, {
 		}
 
 		return {
-			min: new vec3(minx, miny, minz),
-			max: new vec3(maxx, maxy, maxz),
+			min: new Vec3(minx, miny, minz),
+			max: new Vec3(maxx, maxy, maxz),
 		};
 	},
 
@@ -660,7 +660,7 @@ Object.assign(Tarumae.Mesh.prototype, {
 	getCacheTransformedVertexBorderPolygon: (function() {
 
 		var isSameEdge = function(v1, v2, v3, v4) {
-			return (vec3.sub(v3, v1) < 0.00001 && vec3.sub(v4, v2) < 0.00001);
+			return (Vec3.sub(v3, v1) < 0.00001 && Vec3.sub(v4, v2) < 0.00001);
 		};
 
 		return function() {
@@ -741,7 +741,7 @@ Object.assign(Tarumae.Mesh.prototype, {
 				});
 			}
 			
-			var target = vec3.add(loc, movement);
+			var target = Vec3.add(loc, movement);
 	
 			if (!this.containsPointHorizontally(target, transform)) {
 
@@ -786,7 +786,7 @@ Object.assign(Tarumae.Mesh.prototype, {
 					var fixmove = borderdir.mul(Math.max(vmove.length(), 0));
 				
 					// FIXME: need to be optimized without searching mesh again
-					if (!this.containsPointHorizontally(vec3.add(loc, new vec3(fixmove.x, 0, fixmove.y)), transform)) {
+					if (!this.containsPointHorizontally(Vec3.add(loc, new Vec3(fixmove.x, 0, fixmove.y)), transform)) {
 						return false;
 					}
 					
@@ -878,7 +878,7 @@ Object.assign(Tarumae.Mesh, {
 
 	rotate: (function() {
 		var m = new Tarumae.Matrix4();
-		var v = new vec3();
+		var v = new Vec3();
 
 		return function(mesh, x, y, z) {
 			var vertices = mesh.vertices;

@@ -7,7 +7,7 @@
 
 import Tarumae from "../entry"
 import "../utility/event"
-import { vec3, color3 } from "../math/vector"
+import { Vec3, color3 } from "../math/vector"
 import "../math/matrix"
 import "../scene/renderer"
 import "../scene/object"
@@ -46,7 +46,7 @@ Tarumae.Scene = function(renderer) {
 	// sun
 	if (typeof Tarumae.Sun === 'function') {
 		this.sun = new Tarumae.Sun();
-		this.sun.location = new vec3(10, 20, 5);
+		this.sun.location = new Vec3(10, 20, 5);
 	}
 
 	this.shadowMap = null;
@@ -162,8 +162,8 @@ Scene.prototype.loadReflectionMaps = function(refmaps, loadingSession) {
 		pValue.name = pName;
 		pValue.cubemap = new Tarumae.CubeMap(_this.renderer);
 
-		var bbmin = vec3.fromArray(pValue.bounds.min);
-		var bbmax = vec3.fromArray(pValue.bounds.max);
+		var bbmin = Vec3.fromArray(pValue.bounds.min);
+		var bbmax = Vec3.fromArray(pValue.bounds.max);
 		pValue.cubemap.bbox = new Tarumae.BoundingBox(bbmin, bbmax);
 		_this._refmaps[pName] = pValue;
 
@@ -518,7 +518,7 @@ Scene.prototype.prepareMaterialObject = function(mat, rm, loadingSession) {
 					switch (value.length) {
 						default: break;
 						case 2: mat[name] = new Vec2(value[0], value[1]); break;
-						case 3: mat[name] = new vec3(value[0], value[1], value[2]); break;
+						case 3: mat[name] = new Vec3(value[0], value[1], value[2]); break;
 						case 4: mat[name] = new vec4(value[0], value[1], value[2], value[3]); break;
 					}
 				}
@@ -636,7 +636,7 @@ Scene.prototype.prepareObjects = function(obj, loadingSession) {
 			// 	obj._location = loc;
 				
 			// 	if (typeof value === "object") {
-			// 		if (value instanceof vec3) {
+			// 		if (value instanceof Vec3) {
 			// 			loc.setVector(value);
 			// 		} else if (value instanceof Array && value.length == 3) {
 			// 			loc.set(value[0], value[1], value[2]); break;
@@ -651,7 +651,7 @@ Scene.prototype.prepareObjects = function(obj, loadingSession) {
 					switch (value.length) {
 						default: break;
 						case 2: obj[name] = new Vec2(value[0], value[1]); break;
-						case 3: obj[name] = new vec3(value[0], value[1], value[2]); break;
+						case 3: obj[name] = new Vec3(value[0], value[1], value[2]); break;
 						case 4: obj[name] = new vec4(value[0], value[1], value[2], value[3]); break;
 					}
 				}
@@ -708,7 +708,7 @@ Scene.prototype.prepareObjects = function(obj, loadingSession) {
 					&& !(value instanceof Tarumae.Texture)
 					&& !(value instanceof Tarumae.CubeMap)
 					&& !(value instanceof Scene)
-					&& !(value instanceof vec3)
+					&& !(value instanceof Vec3)
 					&& !(value instanceof color3)
 					&& !(value instanceof Array)) {
 					scene.prepareObjects(value, loadingSession);
@@ -957,7 +957,7 @@ Scene.prototype.getBounds = (function() {
 
 		if (!bbox) {
 			// no objects, no bounds :-(
-			return { min: new vec3(), max: new vec3() };
+			return { min: new Vec3(), max: new Vec3() };
 		}
 	
 		return bbox;

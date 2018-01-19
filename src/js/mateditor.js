@@ -82,7 +82,7 @@ var MatEditor = {
     });
     var objs = {
       light: {
-        location: new vec3(0.8, 5.0, 3.0),
+        location: new Vec3(0.8, 5.0, 3.0),
         mat: {emission: 1.0}
       },
       sphere: this.obj

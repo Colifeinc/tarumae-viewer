@@ -58,7 +58,7 @@ Object.assign(TarumaeEditor.prototype, {
         case "angle":
         case "scale":
           if (prop instanceof Array && prop.length == 3) {
-            obj[name] = new vec3(prop[0], prop[1], prop[2]);
+            obj[name] = new Vec3(prop[0], prop[1], prop[2]);
           }
           break;
         

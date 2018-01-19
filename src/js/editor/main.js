@@ -60,12 +60,12 @@ function TarumaeEditor(options) {
 
   // this.cursor = new Tarumae.Axis3DCursor(renderer);
   this.cursor = new Tarumae.Multi3DCursor(renderer);
-  this.cursor.on("axisXMove", function(v) { editor.moveSelectedObjects(new vec3(v, 0, 0)); });
-  this.cursor.on("axisYMove", function(v) { editor.moveSelectedObjects(new vec3(0, v, 0)); });
-  this.cursor.on("axisZMove", function(v) { editor.moveSelectedObjects(new vec3(0, 0, v)); });
-  this.cursor.on("axisXRotate", function(v) { editor.rotateSelectedObjects(new vec3(v, 0, 0)); });
-  this.cursor.on("axisYRotate", function(v) { editor.rotateSelectedObjects(new vec3(0, v, 0)); });
-  this.cursor.on("axisZRotate", function(v) { editor.rotateSelectedObjects(new vec3(0, 0, v)); });
+  this.cursor.on("axisXMove", function(v) { editor.moveSelectedObjects(new Vec3(v, 0, 0)); });
+  this.cursor.on("axisYMove", function(v) { editor.moveSelectedObjects(new Vec3(0, v, 0)); });
+  this.cursor.on("axisZMove", function(v) { editor.moveSelectedObjects(new Vec3(0, 0, v)); });
+  this.cursor.on("axisXRotate", function(v) { editor.rotateSelectedObjects(new Vec3(v, 0, 0)); });
+  this.cursor.on("axisYRotate", function(v) { editor.rotateSelectedObjects(new Vec3(0, v, 0)); });
+  this.cursor.on("axisZRotate", function(v) { editor.rotateSelectedObjects(new Vec3(0, 0, v)); });
   this.cursor.on("axisXScale", function(v) { editor.scaleSelectedObjects(v, 1, 1); });
   this.cursor.on("axisYScale", function(v) { editor.scaleSelectedObjects(1, v, 1); });
   this.cursor.on("axisZScale", function(v) { editor.scaleSelectedObjects(1, 1, v); });
@@ -118,8 +118,8 @@ function TarumaeEditor(options) {
   var toggleFromView;
 
   var toggleToView = {
-    angle: new vec3(0, 0, 0),
-    location: new vec3(0, 0, 0),
+    angle: new Vec3(0, 0, 0),
+    location: new Vec3(0, 0, 0),
   };
 
   var lastEditCamera = {};
@@ -132,8 +132,8 @@ function TarumaeEditor(options) {
 
     if (!inroom) {
       toggleToView = {
-        angle: new vec3(0, 0, 0),
-        location: new vec3(0, 0, 0),
+        angle: new Vec3(0, 0, 0),
+        location: new Vec3(0, 0, 0),
       };
       lastEditCamera = {
         angle: viewer.angle.clone(),
@@ -196,13 +196,13 @@ TarumaeEditor.DisplayModes = {
 };
 
 TarumaeEditor.AxisPlaneVertices = {
-  x: { v1: new vec3(0, 0, 1), v2: new vec3(-1, 0, 0), v3: new vec3(1, 0, 0) },
-  y: { v1: new vec3(0, 1, 0), v2: new vec3(-1, 0, 0), v3: new vec3(1, 0, 0) },
-  z: { v1: new vec3(0, 0, 1), v2: new vec3(-1, 0, 0), v3: new vec3(1, 0, 0) },
+  x: { v1: new Vec3(0, 0, 1), v2: new Vec3(-1, 0, 0), v3: new Vec3(1, 0, 0) },
+  y: { v1: new Vec3(0, 1, 0), v2: new Vec3(-1, 0, 0), v3: new Vec3(1, 0, 0) },
+  z: { v1: new Vec3(0, 0, 1), v2: new Vec3(-1, 0, 0), v3: new Vec3(1, 0, 0) },
 
-  xz: { v1: new vec3(0, 0, 1), v2: new vec3(-1, 0, 0), v3: new vec3(1, 0, 0) },
-  xy: { v1: new vec3(0, 1, 0), v2: new vec3(-1, 0, 0), v3: new vec3(1, 0, 0) },
-  yz: { v1: new vec3(0, 0, 1), v2: new vec3( 0, 0,-1), v3: new vec3(0, 1, 0) },
+  xz: { v1: new Vec3(0, 0, 1), v2: new Vec3(-1, 0, 0), v3: new Vec3(1, 0, 0) },
+  xy: { v1: new Vec3(0, 1, 0), v2: new Vec3(-1, 0, 0), v3: new Vec3(1, 0, 0) },
+  yz: { v1: new Vec3(0, 0, 1), v2: new Vec3( 0, 0,-1), v3: new Vec3(0, 1, 0) },
 };
 
 Object.assign(TarumaeEditor.prototype, {

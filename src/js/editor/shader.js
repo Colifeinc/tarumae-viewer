@@ -87,7 +87,7 @@ Object.assign(Tarumae.EditorShader.prototype, {
 
       if (Array.isArray(object.meshes) && object.meshes.length > 0) {
         var bounds = object.getBounds();
-        lightWorldPos = vec3.add(bounds.min, vec3.div(vec3.sub(bounds.max, bounds.min), 2));
+        lightWorldPos = Vec3.add(bounds.min, Vec3.div(Vec3.sub(bounds.max, bounds.min), 2));
       } else {
         lightWorldPos = new vec4(0, 0, 0, 1).mulMat(transform).xyz();
       }
@@ -176,13 +176,13 @@ Object.assign(Tarumae.EditorShader.prototype, {
     // sun
     if (typeof scene.sun === "object" && scene.sun != null) {
       var sunloc = scene.sun.getWorldLocation();
-      var sundir = vec3.normalize(sunloc);
+      var sundir = Vec3.normalize(sunloc);
       this.sundirUniform.set(sundir);
 		
       var mat = scene.sun.mat || null;
       var suncolor = (mat && mat.color) || this.defaultSunColor;
 
-      this.sunlightUniform.set(suncolor.mul(vec3.dot(sundir, vec3.up)).toArray());
+      this.sunlightUniform.set(suncolor.mul(Vec3.dot(sundir, Vec3.up)).toArray());
     }
   
     // shadowMap

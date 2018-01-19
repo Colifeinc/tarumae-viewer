@@ -99,7 +99,7 @@ Tarumae.Camera = class extends Tarumae.SceneObject {
 		var distance = this.calcVisibleDistanceToObject(obj, options.padding, out);
 	
 		var worldpos = this.getWorldLocation();
-		var dir = vec3.sub(worldpos, out.targetLocation).normalize();
+		var dir = Vec3.sub(worldpos, out.targetLocation).normalize();
 	
 		var targetpos = out.targetLocation.add(dir.mul(distance));
 	
@@ -114,7 +114,7 @@ Tarumae.Camera = class extends Tarumae.SceneObject {
 				duration: options.duration || 0.8,
 				effect: options.effect || "smooth",
 				lookdir: out.targetLocation.sub(worldpos),
-				lookup: options.lookup || vec3.up,
+				lookup: options.lookup || Vec3.up,
 			}, options.onfinish);
 		}
 	}

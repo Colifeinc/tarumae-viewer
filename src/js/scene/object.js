@@ -7,7 +7,7 @@
 
 import Tarumae from "../entry"
 import "../utility/event"
-import { vec3, vec4 } from "../math/vector"
+import { Vec3, vec4 } from "../math/vector"
 import "../math/matrix"
 import { Mesh } from "../webgl/mesh"
 
@@ -27,11 +27,11 @@ Tarumae.SceneObject = class {
 		this._parent = null;
 		this._scene = null;
 
-		this._location = new vec3(0, 0, 0);
-		this._angle = new vec3(0, 0, 0);
+		this._location = new Vec3(0, 0, 0);
+		this._angle = new Vec3(0, 0, 0);
 		// this._location = new Tarumae.SceneObject.LocationProperty(this);
 		// this._angle = new Tarumae.VectorProperty(this, "onrotate");
-		this._scale = new vec3(1, 1, 1);
+		this._scale = new Vec3(1, 1, 1);
 
 		this.meshes = [];
 		this.objects = [];
@@ -103,7 +103,7 @@ Tarumae.SceneObject.LocationProperty = class {
 // 	}
 // };
 
-// Tarumae.VectorProperty.prototype = new vec3();
+// Tarumae.VectorProperty.prototype = new Vec3();
 
 // Object.defineProperties(Tarumae.VectorProperty.prototype, {
 // 	"x": {
@@ -177,7 +177,7 @@ Object.defineProperties(Tarumae.SceneObject.prototype, {
 			return this._location;
 		},
 		set: function(value) {
-			// vec3 object should be copied rather than set reference directly (treat as struct)
+			// Vec3 object should be copied rather than set reference directly (treat as struct)
 			if (typeof value === "object" && typeof value.clone === "function") {
 				this._location = value.clone();
 			}
@@ -193,7 +193,7 @@ Object.defineProperties(Tarumae.SceneObject.prototype, {
 			return this._angle;
 		},
 		set: function(value) {
-			// vec3 object should be copied rather than set reference directly (treat as struct)
+			// Vec3 object should be copied rather than set reference directly (treat as struct)
 			if (typeof value === "object" && typeof value.clone === "function") {
 				this._angle = value.clone();
 			}
@@ -209,7 +209,7 @@ Object.defineProperties(Tarumae.SceneObject.prototype, {
 			return this._scale;
 		},
 		set: function(value) {
-			// vec3 object should be copied rather than set reference directly (treat as struct)
+			// Vec3 object should be copied rather than set reference directly (treat as struct)
 			if (typeof value === "object" && typeof value.clone === "function") {
 				this._scale = value.clone();
 			}
@@ -270,7 +270,7 @@ Object.defineProperties(Tarumae.SceneObject.prototype, {
 Object.assign(Tarumae.SceneObject.prototype, {
 
 	move: function(x, y, z) {
-		var movement = new vec3(x, y, z);
+		var movement = new Vec3(x, y, z);
 		
 		switch (this.collisionMode) {
 			default:
@@ -483,7 +483,7 @@ Object.assign(Tarumae.SceneObject.prototype, {
 				return;
 			}
 
-			if (up === undefined) up = vec3.up;
+			if (up === undefined) up = Vec3.up;
 			if (m === undefined) m = new Tarumae.Matrix4();
 
 			m.lookAt(this.getWorldLocation(), target, up);
@@ -509,40 +509,40 @@ Object.assign(Tarumae.SceneObject.prototype, {
 		var rotationMatrix;
 
 		if (options.lookdir) {
-			endDirection = options.lookdir || (options.lookObject ? options.lookObject.getWorldLocation() : vec3.forward);
+			endDirection = options.lookdir || (options.lookObject ? options.lookObject.getWorldLocation() : Vec3.forward);
 		}
 
 		if (options.lookup) {
-			endUplook = options.up || options.lookup || vec3.up;
+			endUplook = options.up || options.lookup || Vec3.up;
 		} else if (options.lookdir) {
-			endUplook = vec3.up;
+			endUplook = Vec3.up;
 		}
 
 		if (options.startLookdir && endDirection) {
 			startDirection = options.startLookdir;
 		} else {
 			if (rotationMatrix === undefined) rotationMatrix = this.getRotationMatrix(true);
-			startDirection = new vec3(rotationMatrix.c1, rotationMatrix.c2, -rotationMatrix.c3).normalize();
+			startDirection = new Vec3(rotationMatrix.c1, rotationMatrix.c2, -rotationMatrix.c3).normalize();
 		}
 
 		if (startDirection && endDirection && options.startLookup && endUplook) {
 			startUplook = options.startLookup;
 		} else {
 			if (rotationMatrix === undefined) rotationMatrix = this.getRotationMatrix(true);
-			startUplook = new vec3(rotationMatrix.b1, rotationMatrix.b2, -rotationMatrix.b3).normalize();
+			startUplook = new Vec3(rotationMatrix.b1, rotationMatrix.b2, -rotationMatrix.b3).normalize();
 		}
 		
 		if (typeof options.animation !== "boolean" || options.animation === true) {
 			this.scene.animate(options, function(t) {
 
-				var newLocation = vec3.lerp(startLocation, endLocation, t);
-				var diff = vec3.sub(newLocation, _this.location);
+				var newLocation = Vec3.lerp(startLocation, endLocation, t);
+				var diff = Vec3.sub(newLocation, _this.location);
 				_this.move(diff.x, diff.y, diff.z);
 
 				if (startDirection && endDirection) {
 					_this.lookAt(
-						vec3.add(_this.location, vec3.lerp(startDirection, endDirection, t)),
-						vec3.lerp(startUplook, endUplook, t));
+						Vec3.add(_this.location, Vec3.lerp(startDirection, endDirection, t)),
+						Vec3.lerp(startUplook, endUplook, t));
 				}
 
 				if (typeof options.onframe === "function") {
@@ -1106,8 +1106,8 @@ Tarumae.Shapes.Line = class extends Tarumae.SceneObject {
 	constructor(start, end, width) {
 		super();
 	
-		this._start = start || new vec3();
-		this._end = end || new vec3();
+		this._start = start || new Vec3();
+		this._end = end || new Vec3();
 		this._width = width || 0.1;
 
 		this.dirty = true;
@@ -1176,8 +1176,8 @@ Tarumae.Shapes.LineMesh = class extends Tarumae.SceneObject {
 Tarumae.Shapes.LineMesh.prototype.update = function(start, end, width) {
 	this.destroy();
 	
-	start = start || vec3.zero;
-	end = end || vec3.zero;
+	start = start || Vec3.zero;
+	end = end || Vec3.zero;
 	width = width || 0.5;
 
 	var segs = 5;
@@ -1185,7 +1185,7 @@ Tarumae.Shapes.LineMesh.prototype.update = function(start, end, width) {
 
 	this.vertices = [];
 
-	var m = new Tarumae.Matrix4().lookAt(start, end, vec3.up);
+	var m = new Tarumae.Matrix4().lookAt(start, end, Vec3.up);
 
 	for (var i = 0, a = 0; i <= segs; i++ , a += angles) {
 		var v = new vec4(Math.sin(a) * width, Math.cos(a) * width, 0, 1).mulMat(m);
