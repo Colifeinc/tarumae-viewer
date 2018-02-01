@@ -8,7 +8,7 @@
 ////////////////// Shader ///////////////////////
 
 import Tarumae from "../entry"
-import { Vec3 } from "../math/vector"
+import { Vec2, Vec3, Vec4, Color3, Color4 } from "../math/vector"
 import "../math/matrix"
 
 Tarumae.Shader = class {

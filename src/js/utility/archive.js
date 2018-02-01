@@ -1,5 +1,5 @@
 import Tarumae from "../entry"
-import "pako"
+import pako from "pako"
 
 Tarumae.Utility.Archive = class {
 	constructor() {
@@ -99,9 +99,13 @@ Object.defineProperties(Tarumae.Utility.Archive, {
 			if (matches !== null && matches.length >= 3) {
 				var archive = scene._archives[matches[1]].archive;
 				var uid = parseInt(matches[2], 16);
-				archive.onChunkReady(uid, function(buffer) {
-					callback.call(scene, buffer, archive, uid);
-				});
+				if (archive.isLoading) {
+					archive.onChunkReady(uid, function(buffer) {
+						callback.call(scene, buffer, archive, uid);
+					});
+				} else {
+					callback.call(scene, archive.getChunkData(uid), archive, uid);
+				}
 				return true;
 			}
 			return false;

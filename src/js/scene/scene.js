@@ -15,42 +15,173 @@ import "../scene/camera"
 import "../webgl/texture"
 import "../webgl/cubemap"
 
-Tarumae.Scene = function(renderer) {
-	this.renderer = renderer;
+Tarumae.Scene = class {
+	constructor(renderer) {
+		this.renderer = renderer;
 
-	this.objects = [];
-	this.hoverObject = null;
-	this.selectedObjects = [];
+		this.objects = [];
+		this.hoverObject = null;
+		this.selectedObjects = [];
 
-	this.hitObject = null;
-	this.draggingObject = null;
+		this.hitObject = null;
+		this.draggingObject = null;
 
-	this.models = {};
-	this.materials = {};
-	this._refmaps = {};
-	this.archives = {};
-	this._archives = {};
+		this.models = {};
+		this.materials = {};
+		this._refmaps = {};
+		this.archives = {};
+		this._archives = {};
 
-	this.resourceManager = new Tarumae.ResourceManager();
-	this.animation = false;
-	this.requestedUpdateFrame = true;
+		this.resourceManager = new Tarumae.ResourceManager();
+		this.animation = false;
+		this.requestedUpdateFrame = true;
 
-	// main camera
-	if (typeof Tarumae.Camera === 'function') {
-		this.mainCamera = new Tarumae.Camera();
-		this.mainCamera.location.set(0, 1.5, 6);
-		this.mainCamera.angle.x = -5;
-		this.add(this.mainCamera);
+		// main camera
+		if (typeof Tarumae.Camera === 'function') {
+			this.mainCamera = new Tarumae.Camera();
+			this.mainCamera.location.set(0, 1.5, 6);
+			this.mainCamera.angle.x = -5;
+			this.add(this.mainCamera);
+		}
+
+		// sun
+		if (typeof Tarumae.Sun === 'function') {
+			this.sun = new Tarumae.Sun();
+			this.sun.location = new Vec3(10, 20, 5);
+		}
+
+		this.shadowMap = null;
+		this.skycube = null;
 	}
 
-	// sun
-	if (typeof Tarumae.Sun === 'function') {
-		this.sun = new Tarumae.Sun();
-		this.sun.location = new Vec3(10, 20, 5);
+	createObjectFromArchive(archive, childName) {
+		var manifestData = archive.getChunkData(0x1, 0x6e6f736a);
+		if (manifestData) {
+			var manifest = JSON.parse(String.fromCharCode.apply(null, new Uint8Array(manifestData)));
+			
+			var _archives = manifest._archives;
+
+			if (_archives) {
+				_archives._s3_foreach((name, arinfo) => {
+
+					if (arinfo.url === "__this__") {
+						arinfo.url = archive.url;
+						arinfo.name = name;
+						arinfo.archive = archive;
+
+						this._archives[name] = arinfo;
+					}
+				});
+			}
+
+			this.load(manifest);
+		}
+	}
+	
+	createObjectFromURL(url, handler, childName) {
+		var archive = this._archives[url];
+			
+		if (archive) {
+			this.createObjectFromArchive(archive, childName);
+		} else {
+	
+			Tarumae.ResourceManager.download(url, Tarumae.ResourceTypes.Binary, buffer => {
+				var archive = new Tarumae.Utility.Archive();
+				archive.url = url;
+				archive.loadFromStream(buffer);
+				this.createObjectFromArchive(archive, childName);
+			});
+		};
 	}
 
-	this.shadowMap = null;
-	this.skyMap = null;
+	load() {
+	
+		var loadingSession = new Tarumae.ObjectsLoadingSession(this.resourceManager);
+		
+		for (var i = 0; i < arguments.length; i++) {
+			var obj = arguments[i];
+	
+			if (obj === null || obj === undefined) continue;
+	
+			var _archives = obj._archives;
+			if (_archives) {
+				this.loadArchives(_archives, loadingSession);
+			}
+			
+			var _materials = obj._materials;
+			if (_materials) {
+				this.loadMaterials(_materials, loadingSession);
+			}
+	
+			var _refmaps = obj._refmaps;
+			if (_refmaps) {
+				this.loadReflectionMaps(_refmaps, loadingSession);
+			}
+	
+			this.prepareObjects(obj, loadingSession);
+			this.objects.push(obj);
+			obj.scene = this;
+		}
+	
+		this.resourceManager.load();
+
+		this.requireUpdateFrame();
+	
+		// add callback
+		for (var k = 0; k < arguments.length; k++) {
+			this.onobjectAdd(arguments[k]);
+		}
+	
+		return loadingSession;
+	}
+
+	loadArchives(archs, loadingSession) {
+		var _this = this;
+	
+		var loadArchive = function(aName, aValue) {
+			if (!aValue.archive) {
+				aValue.name = aName;
+				_this._archives[aName] = aValue;
+	
+				var archive = new Tarumae.Utility.Archive();
+				archive.isLoading = true;
+	
+				aValue.archive = archive;
+				loadingSession.downloadArchives.push(archive);
+			
+				loadingSession.rm.add(aValue.url, Tarumae.ResourceTypes.Binary, function(stream) {
+					try {
+						archive.loadFromStream(stream);
+					} catch (e) { }
+					archive.isLoading = false;
+				}, function(e) {
+					archive.dataLength = e.total;
+					archive.loadingLength = e.loaded;
+			
+					if (loadingSession) loadingSession.progress();
+				});
+			}
+		};
+		
+		archs._s3_foreach(loadArchive);
+	}
+
+	add() {
+		for (var i = 0; i < arguments.length; i++) {
+			var obj = arguments[i];
+			if (obj !== null && obj !== undefined) {
+				this.objects._s3_pushIfNotExist(obj);
+			}	
+		}
+		this.requireUpdateFrame();
+	}
+
+	show() {
+		this.renderer.showScene(this);
+		this.requireUpdateFrame();
+	}
+
+
 }
 
 // Event declarations
@@ -71,11 +202,6 @@ Scene.prototype.getRes = function(name) {
 	return this.resourceManager.get(name);
 };
 
-Scene.prototype.show = function() {
-	this.renderer.showScene(this);
-	this.requireUpdateFrame();
-};
-
 Scene.prototype.destroy = function() {
 	// todo: destroy all objects and meshes that use the resources 
 	// 			 downloaded and created from this scene
@@ -94,36 +220,6 @@ Scene.prototype.drawFrame = function(renderer) {
 
 Scene.prototype.requireUpdateFrame = function() {
 	this.requestedUpdateFrame = true;
-};
-
-Scene.prototype.loadArchives = function(archs, loadingSession) {
-	var _this = this;
-
-	var loadArchive = function(aName, aValue) {
-		aValue.name = aName;
-		_this._archives[aName] = aValue;
-
-		var archive = new Tarumae.Utility.Archive();
-		archive.isLoading = true;
-
-		aValue.archive = archive;
-		loadingSession.downloadArchives.push(archive);
-		
-		loadingSession.rm.add(aValue.url, Tarumae.ResourceTypes.Binary, function(stream) {
-			try {
-				archive.loadFromStream(stream);
-			} catch (e) { }
-			archive.isLoading = false;
-		}, function(e) {
-			archive.dataLength = e.total;
-			archive.loadingLength = e.loaded;
-		
-			if (loadingSession) loadingSession.progress();
-		});
-		
-	};
-	
-	archs._s3_foreach(loadArchive);
 };
 
 Scene.prototype.loadMaterials = function(mats, loadingSession) {
@@ -201,51 +297,6 @@ Scene.prototype.loadReflectionMaps = function(refmaps, loadingSession) {
 	};
 
 	refmaps._s3_foreach(iterateReflectionMap);
-};
-
-Scene.prototype.add = function() {
-	"use strict";
-
-	var _this = this;
-
-	var loadingSession = new Tarumae.ObjectsLoadingSession(this.resourceManager);
-	
-	for (var i = 0; i < arguments.length; i++) {
-		var obj = arguments[i];
-
-		var _archives = obj._archives;
-		if (_archives) {
-			_this.loadArchives(_archives, loadingSession);
-		}
-		
-		var _materials = obj._materials;
-		if (_materials) {
-			_this.loadMaterials(_materials, loadingSession);
-		}
-
-		var _refmaps = obj._refmaps;
-		if (_refmaps) {
-			_this.loadReflectionMaps(_refmaps, loadingSession);
-		}
-
-
-		this.prepareObjects(obj, loadingSession);
-		this.objects.push(obj);
-		obj.scene = this;
-	}
-
-	// async load objects resource
-	this.resourceManager.load();
-
-	// require to update current frame
-	this.requireUpdateFrame();
-
-	// add callback
-	for (var k = 0; k < arguments.length; k++) {
-		this.onobjectAdd(arguments[k]);
-	}
-
-	return loadingSession;
 };
 
 Scene.prototype.remove = function(obj) {
@@ -343,35 +394,6 @@ Scene.prototype.createTextureFromURL = function(url, handler) {
 
 	this.resourceManager.load();
 };
-
-Scene.prototype.createObjectFromURL = (function() {
-
-	var createObjectFromArchive = function(archive, childName) {
-		var manifestData = archive.getChunkData(0x1, 0x6e6f736a);
-		if (manifestData) {
-			var manifest = JSON.parse(String.fromCharCode.apply(null, new Uint8Array(manifestData)));
-			console.log(manifest);
-		}
-	};
-	
-	return function(url, handler, childName) {
-		var _this = this;
-		var archive = this._archives[url];
-		
-		if (archive) {
-			return createObjectFromArchive(archive, childName);
-		} else {
-
-			ResourceManager.download(url, Tarumae.ResourceTypes.Binary, function(buffer) {
-				var archive = new Tarumae.Utility.Archive();
-				archive.loadFromStream(buffer);
-				_this._archives[url] = archive;
-
-				return createObjectFromArchive(archive, childName);
-			});
-		};
-	};
-})();
 
 Scene.prototype.prepareObjectMesh = function(obj, name, value, loadingSession) {
 	var scene = this;
@@ -528,7 +550,6 @@ Scene.prototype.prepareMaterialObject = function(mat, rm, loadingSession) {
 };
 
 Scene.prototype.prepareObjects = function(obj, loadingSession) {	
-	"use strict";
 
 	var scene = this;
 	var rm = loadingSession.rm || this.resourceManager;
