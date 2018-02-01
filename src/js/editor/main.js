@@ -20,7 +20,7 @@ function TarumaeEditor(options) {
     perspective: {
       angle: 70.0,
     },
-    backColor: new color4(0.7, 0.7, 0.65, 1),
+    backColor: new Color4(0.7, 0.7, 0.65, 1),
     enableShadow: false,
     defaultShader: "editor",
   }, options));

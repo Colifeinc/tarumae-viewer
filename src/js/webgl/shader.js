@@ -843,7 +843,7 @@ Tarumae.SolidColorShader.prototype.beginObject = function(obj) {
 
 		if (Array.isArray(cobj)) {
 			color = cobj;
-		} else if (cobj instanceof color4) {
+		} else if (cobj instanceof Color4) {
 			color = cobj.toArray();
 		} else if (cobj instanceof color3) {
 			color = [cobj.r, cobj.g, cobj.b, 1.0];

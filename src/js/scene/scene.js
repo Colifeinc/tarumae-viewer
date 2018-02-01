@@ -480,7 +480,7 @@ Scene.prototype.prepareMaterialObject = function(mat, rm, loadingSession) {
 							mat[name] = new color3(value[0], value[1], value[2]);
 							break;
 						case 4:
-							mat[name] = new color4(value[0], value[1], value[2], value[3]);
+							mat[name] = new Color4(value[0], value[1], value[2], value[3]);
 							break;
 					}
 				}

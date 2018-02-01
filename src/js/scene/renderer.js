@@ -132,7 +132,7 @@ Tarumae.Renderer = class {
 		var renderer = this;
 
 		if (this.options.enableShadow && typeof Tarumae.FrameBuffer === 'function') {
-			this.shadowFrameBuffer = new Tarumae.FrameBuffer(this, 2048, 2048, color4.white);
+			this.shadowFrameBuffer = new Tarumae.FrameBuffer(this, 2048, 2048, Color4.white);
 		}
 
 		if (typeof Tarumae.StencilBuffer === 'function') {
@@ -266,7 +266,7 @@ Tarumae.Renderer = class {
 	
 		// background color
 		if (typeof options.backColor === "undefined") {
-			options.backColor = new color4(0.93, 0.93, 0.93, 1.0);
+			options.backColor = new Color4(0.93, 0.93, 0.93, 1.0);
 		}
 	}
 
@@ -498,10 +498,10 @@ Tarumae.Renderer = class {
 			for (var i = 0; i < scene.selectedObjects.length; i++) {
 				var obj = scene.selectedObjects[i];
 				if (obj.visible) {
-					this.drawHighlightObject(obj, new color4(0.1, 0.6, 1.0, 0.5));
+					this.drawHighlightObject(obj, new Color4(0.1, 0.6, 1.0, 0.5));
 	
 					if (this.options.enableHighlightSelectedChildren) {
-						this.drawHighlightChildren(obj, new color4(0.1, 1.0, 0.6, 0.5));
+						this.drawHighlightChildren(obj, new Color4(0.1, 1.0, 0.6, 0.5));
 					}
 				}
 			}
@@ -509,7 +509,7 @@ Tarumae.Renderer = class {
 	
 		// draw hover object
 		if (scene.hoverObject) {
-			this.drawHighlightObject(scene.hoverObject, new color4(1.0, 0.5, 0.0, 0.5));
+			this.drawHighlightObject(scene.hoverObject, new Color4(1.0, 0.5, 0.0, 0.5));
 		}
 	
 		scene.drawFrame(this);
@@ -1230,7 +1230,7 @@ TarumaeRenderer.ContainerStyle = [
 
 TarumaeRenderer.DefaultOptions = {
 	debugMode: false,
-	backColor: new color4(0.93, 0.93, 0.93, 1.0),
+	backColor: new Color4(0.93, 0.93, 0.93, 1.0),
 
 };
 

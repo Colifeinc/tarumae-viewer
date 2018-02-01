@@ -408,7 +408,7 @@ Object.assign(Tarumae.Multi3DCursor.prototype, {
           type: Tarumae.ObjectTypes.Cursor,
           mesh: new Tarumae.CubeMesh(),
           scale: [1,0.05,0.05],
-          shader: { name: "solidcolor", color: new color4(0,1,0,1) },
+          shader: { name: "solidcolor", color: new Color4(0,1,0,1) },
 
           enabled: true,
         },
@@ -416,7 +416,7 @@ Object.assign(Tarumae.Multi3DCursor.prototype, {
           type: Tarumae.ObjectTypes.Cursor,
           mesh: new Tarumae.CubeMesh(),
           scale: [0.2,0.01,0.2],//X-Y plane
-          shader: { name: "solidcolor", color: new color4(0,1,0,1) },
+          shader: { name: "solidcolor", color: new Color4(0,1,0,1) },
 
           enabled: true,
         },
@@ -428,7 +428,7 @@ Object.assign(Tarumae.Multi3DCursor.prototype, {
           // mesh: "models/editor/rotation_x.mesh",//X-axis
           mesh: getCursorAxisMeshInstance(Tarumae.Multi3DCursor.CursorMesh.RotationX),
           scale: [2,2,5],
-          shader: { name: "solidcolor", color: new color4(0,1,0, 1) },
+          shader: { name: "solidcolor", color: new Color4(0,1,0, 1) },
 
           enabled: true,
         },
@@ -436,7 +436,7 @@ Object.assign(Tarumae.Multi3DCursor.prototype, {
         //   type: Tarumae.ObjectTypes.Cursor,
         //   cube: { mesh: new Tarumae.CubeMesh(), location: [1,0,0]  , scale: [0.1,0.1,0.1] },
         //   guid: { mesh: new Tarumae.CubeMesh(), location: [0.5,0,0], scale: [1,0.01,0.01] },
-        //   shader: { name: "solidcolor", color: new color4(0,1,0, 1) },
+        //   shader: { name: "solidcolor", color: new Color4(0,1,0, 1) },
 
         //   enabled: true,
         // }
@@ -456,7 +456,7 @@ Object.assign(Tarumae.Multi3DCursor.prototype, {
         y: {
           model: "editor/translation_1axis",
           location: [0,0.5,0], angle: [0,0,90], planeAxis: "yz",
-          shader: { name: "solidcolor", color: new color4(1,0,0,1) },
+          shader: { name: "solidcolor", color: new Color4(1,0,0,1) },
 
           onmove: function (off){
             this.onaxisYMove(off.y);
@@ -467,7 +467,7 @@ Object.assign(Tarumae.Multi3DCursor.prototype, {
         z: {
           model: "editor/translation_1axis",
           location: [0,0,0.5], angle: [0,90,0], planeAxis: "xz",
-          shader: { name: "solidcolor", color: new color4(0,0,1,1) },
+          shader: { name: "solidcolor", color: new Color4(0,0,1,1) },
 
           onmove: function (off){
             this.onaxisZMove(off.z);
@@ -492,7 +492,7 @@ Object.assign(Tarumae.Multi3DCursor.prototype, {
         yz: {
           model: "editor/translation_2axis",
           location: [0,0.1,0.1],  angle: [0,0,90], planeAxis: "yz",
-          shader: { name: "solidcolor", color: new color4(1,0,0,1) },
+          shader: { name: "solidcolor", color: new Color4(1,0,0,1) },
 
           onmove: function (off){
             this.onaxisYMove(off.y);
@@ -506,7 +506,7 @@ Object.assign(Tarumae.Multi3DCursor.prototype, {
         xz: {
           model: "editor/translation_2axis",
           location: [0.1,0,0.1], planeAxis: "xz",
-          shader: { name: "solidcolor", color: new color4(0,0,1,1) },
+          shader: { name: "solidcolor", color: new Color4(0,0,1,1) },
 
           onmove: function (off){
             this.onaxisXMove(off.x);
@@ -533,7 +533,7 @@ Object.assign(Tarumae.Multi3DCursor.prototype, {
         y: {
           model: "editor/rotation_1axis",
           angle: [90,0,0], planeAxis: "yz",
-          shader: { name: "solidcolor", color: new color4(1,0,0, 1) },
+          shader: { name: "solidcolor", color: new Color4(1,0,0, 1) },
 
           onmove: function (off){
             this.onaxisYRotate(off.y*10);
@@ -543,7 +543,7 @@ Object.assign(Tarumae.Multi3DCursor.prototype, {
         z: {
           model: "editor/rotation_1axis",
           planeAxis: "xz",
-          shader: { name: "solidcolor", color: new color4(0,0,1, 1) },
+          shader: { name: "solidcolor", color: new Color4(0,0,1, 1) },
 
           onmove: function (off){
             this.onaxisZRotate(off.z*10);
@@ -560,7 +560,7 @@ Object.assign(Tarumae.Multi3DCursor.prototype, {
           cube: { mesh: new Tarumae.CubeMesh(), location: [1,0,0]  , scale: [0.1,0.1,0.1] },
           guid: { mesh: new Tarumae.CubeMesh(), location: [0.5,0,0], scale: [1,0.01,0.01] },
           planeAxis: "xy",
-          shader: { name: "solidcolor", color: new color4(0,1,0, 1) },
+          shader: { name: "solidcolor", color: new Color4(0,1,0, 1) },
 
           enabled: true,
           onmove: function (offset){
@@ -573,7 +573,7 @@ Object.assign(Tarumae.Multi3DCursor.prototype, {
           cube: { mesh: new Tarumae.CubeMesh(), location: [1,0,0]  , scale: [0.1,0.1,0.1] },
           guid: { mesh: new Tarumae.CubeMesh(), location: [0.5,0,0], scale: [1,0.01,0.01] },
           angle: [0,0,90], planeAxis: "yz",
-          shader: { name: "solidcolor", color: new color4(1,0,0, 1) },
+          shader: { name: "solidcolor", color: new Color4(1,0,0, 1) },
 
           enabled: true,
           onmove: function (offset){
@@ -586,7 +586,7 @@ Object.assign(Tarumae.Multi3DCursor.prototype, {
           cube: { mesh: new Tarumae.CubeMesh(), location: [1,0,0]  , scale: [0.1,0.1,0.1] },
           guid: { mesh: new Tarumae.CubeMesh(), location: [0.5,0,0], scale: [1,0.01,0.01] },
           angle: [0,-90,0], planeAxis: "xz",
-          shader: { name: "solidcolor", color: new color4(0,0,1, 1) },
+          shader: { name: "solidcolor", color: new Color4(0,0,1, 1) },
 
           enabled: true,
           onmove: function (offset){
@@ -599,7 +599,7 @@ Object.assign(Tarumae.Multi3DCursor.prototype, {
           cube: { mesh: new Tarumae.CubeMesh(), location: [1,0,0]  , scale: [0.1,0.1,0.1] },
           guid: { mesh: new Tarumae.CubeMesh(), location: [0.5,0,0], scale: [1,0.01,0.01] },
           angle: [45,0,45], planeAxis: "xz",
-          shader: { name: "solidcolor", color: new color4(1,0,1, 1) },
+          shader: { name: "solidcolor", color: new Color4(1,0,1, 1) },
 
           enabled: true,
           onmove: function (offset){

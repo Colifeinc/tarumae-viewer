@@ -1329,7 +1329,7 @@ Tarumae.Circle = class extends Tarumae.SceneObject {
 
 			shader: {
 				name: "solidcolor",
-				color: new color4(0.2, 0.64, 0.86, 1)
+				color: new Color4(0.2, 0.64, 0.86, 1)
 			},
 
 			mesh: new Tarumae.CircleMesh(_segments, _circleSize),

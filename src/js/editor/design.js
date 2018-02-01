@@ -74,7 +74,7 @@ Object.assign(TarumaeEditor.prototype, {
 
   objectDesignTimeShader: {
     name: "solidcolor",
-    color: new color4(1, 0.5, 0.5, 0.5),
+    color: new Color4(1, 0.5, 0.5, 0.5),
   },
 
   startAddingNewObject: function(modelId) {

@@ -595,7 +595,7 @@ color3.randomlyDark = function() {
 };
 /////////////////// color4 ////////////////////
 
-export function color4(r, g, b, a) {
+export function Color4(r, g, b, a) {
 	switch (arguments.length) {
 		default:
 		case 0:
@@ -609,7 +609,7 @@ export function color4(r, g, b, a) {
 					this.g = r.g;
 					this.b = r.b;
 					this.a = g;
-				} else if (r instanceof color4) {
+				} else if (r instanceof Color4) {
 					this.r = r.r;
 					this.g = r.g;
 					this.b = r.b;
@@ -633,44 +633,44 @@ export function color4(r, g, b, a) {
 	}
 }
 
-color4.prototype.rgb = function () {
-	return new color3(this.r, this.g, this.b);
+Color4.prototype.rgb = function () {
+	return new Color3(this.r, this.g, this.b);
 };
 
-color4.prototype.clone = function() {
-	return new color4(this.r, this.g, this.b, this.a);
+Color4.prototype.clone = function() {
+	return new Color4(this.r, this.g, this.b, this.a);
 };
 
-color4.prototype.add = function(c) {
-	return new color4(this.r + c.r, this.g + c.g, this.b + c.b, this.a + c.a);
+Color4.prototype.add = function(c) {
+	return new Color4(this.r + c.r, this.g + c.g, this.b + c.b, this.a + c.a);
 };
 
-color4.prototype.sub = function(c) {
-	return new color4(this.r - c.r, this.g - c.g, this.b - c.b, this.a - c.a);
+Color4.prototype.sub = function(c) {
+	return new Color4(this.r - c.r, this.g - c.g, this.b - c.b, this.a - c.a);
 };
 
-color4.prototype.mul = function(s) {
-	return new color4(this.r * s, this.g * s, this.b * s, this.a * s);
+Color4.prototype.mul = function(s) {
+	return new Color4(this.r * s, this.g * s, this.b * s, this.a * s);
 };
 
-color4.prototype.lerp = function(c2, t) {
+Color4.prototype.lerp = function(c2, t) {
 	return this.add((c2.sub(this)).mul(t));
 };
 
-color4.lerp = function(c1, c2, t) {
+Color4.lerp = function(c1, c2, t) {
 	return c1.lerp(c2, t);
 };
 
-color4.prototype.toArray = function() {
+Color4.prototype.toArray = function() {
 	return [this.r, this.g, this.b, this.a];
 };
 
-color4.prototype.toFloat32Array = function() {
+Color4.prototype.toFloat32Array = function() {
 	return new Float32Array(this.toArray());
 };
 
-color4.white = new color4(color3.white, 1.0);
-color4.black = new color4(color3.black, 1.0);
+Color4.white = new Color4(Color3.white, 1.0);
+Color4.black = new Color4(Color3.black, 1.0);
 
 ////////// Quaternion //////////
 
