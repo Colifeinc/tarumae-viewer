@@ -6,7 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "../entry"
-import { Vec3, vec4 } from "../math/vector"
+import { Vec3, Vec4 } from "../math/vector"
 import "../math/matrix"
 
 Tarumae.Mesh = class {
@@ -530,9 +530,9 @@ Object.assign(Tarumae.Mesh.prototype, {
 				i3 = indexes[i3 / 3] * 3;
 			}
 
-			var v1 = new vec4(vertices[i1], vertices[i1 + 1], vertices[i1 + 2], 1);
-			var v2 = new vec4(vertices[i2], vertices[i2 + 1], vertices[i2 + 2], 1);
-			var v3 = new vec4(vertices[i3], vertices[i3 + 1], vertices[i3 + 2], 1);
+			var v1 = new Vec4(vertices[i1], vertices[i1 + 1], vertices[i1 + 2], 1);
+			var v2 = new Vec4(vertices[i2], vertices[i2 + 1], vertices[i2 + 2], 1);
+			var v3 = new Vec4(vertices[i3], vertices[i3 + 1], vertices[i3 + 2], 1);
 
 			var mmat = session.mmat;
 
@@ -554,15 +554,15 @@ Object.assign(Tarumae.Mesh.prototype, {
 
 				if (options.cullingSurfaceBack === true && (normals instanceof Float32Array || Array.isArray(normals))) {
 				
-					var n1 = new vec4(normals[i1], normals[i1 + 1], normals[i1 + 2], 0);
-					var n2 = new vec4(normals[i2], normals[i2 + 1], normals[i2 + 2], 0);
-					var n3 = new vec4(normals[i3], normals[i3 + 1], normals[i3 + 2], 0);
+					var n1 = new Vec4(normals[i1], normals[i1 + 1], normals[i1 + 2], 0);
+					var n2 = new Vec4(normals[i2], normals[i2 + 1], normals[i2 + 2], 0);
+					var n3 = new Vec4(normals[i3], normals[i3 + 1], normals[i3 + 2], 0);
 					
 					var vertexNormal = (n1.mul(a1)).add(n2.mul(a2)).add(n3.mul(a3));
 
 					nmat.copyFrom(mmat).inverse().transpose();
 
-					var normal = new vec4(vertexNormal, 0).mulMat(nmat).xyz().normalize();
+					var normal = new Vec4(vertexNormal, 0).mulMat(nmat).xyz().normalize();
 
 					if (Vec3.dot(session.rayNormalizedNegDir, normal) < 0) {
 						return null;
@@ -638,9 +638,9 @@ Object.assign(Tarumae.Mesh.prototype, {
 			}
 
 			for (var i = 0; i < vertexElementCount; i += 9) {
-				var v1 = new vec4(vertices[i + 0], vertices[i + 1], vertices[i + 2], 1).mulMat(transform);
-				var v2 = new vec4(vertices[i + 3], vertices[i + 4], vertices[i + 5], 1).mulMat(transform);
-				var v3 = new vec4(vertices[i + 6], vertices[i + 7], vertices[i + 8], 1).mulMat(transform);
+				var v1 = new Vec4(vertices[i + 0], vertices[i + 1], vertices[i + 2], 1).mulMat(transform);
+				var v2 = new Vec4(vertices[i + 3], vertices[i + 4], vertices[i + 5], 1).mulMat(transform);
+				var v3 = new Vec4(vertices[i + 6], vertices[i + 7], vertices[i + 8], 1).mulMat(transform);
 
 				this.cachedTransformedVertices.push(v1, v2, v3);
 			}

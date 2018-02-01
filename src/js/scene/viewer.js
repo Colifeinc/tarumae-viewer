@@ -6,7 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "../entry"
-import { Vec3, vec4 } from "../math/vector"
+import { Vec3, Vec4 } from "../math/vector"
 import "../math/matrix"
 
 Tarumae.Viewer = function(renderer) {
@@ -482,7 +482,7 @@ Tarumae.Viewer.prototype = {
       if (m === undefined) m = new Tarumae.Matrix4();
       m.loadIdentity().rotate(this.angle).inverse();
 
-      var v = new vec4(offsetX, offsetY, offsetZ, 1).mulMat(m);
+      var v = new Vec4(offsetX, offsetY, offsetZ, 1).mulMat(m);
       this.location.offset(v);
 
       var scene = this.renderer.currentScene;

@@ -332,9 +332,9 @@ Vec3.right = new Vec3(1, 0, 0);
 Vec3.forward = new Vec3(0, 0, -1);
 Vec3.back = new Vec3(0, 0, 1);
 
-//////////////////// vec4 //////////////////////
+//////////////////// Vec4 //////////////////////
 
-export function vec4(x, y, z, w) {
+export function Vec4(x, y, z, w) {
 	switch (arguments.length) {
 		default:
 			this.x = 0;
@@ -352,7 +352,7 @@ export function vec4(x, y, z, w) {
 					this.y = obj.y;
 					this.z = obj.z;
 					this.w = 1.0;
-				} else if (obj instanceof vec4) {
+				} else if (obj instanceof Vec4) {
 					this.x = obj.x;
 					this.y = obj.y;
 					this.z = obj.z;
@@ -382,15 +382,15 @@ export function vec4(x, y, z, w) {
 	}
 }
 
-vec4.prototype.xyz = function () {
+Vec4.prototype.xyz = function () {
 	return new Vec3(this.x, this.y, this.z);
 };
 
-vec4.prototype.set = function(x, y, z, w) {
+Vec4.prototype.set = function(x, y, z, w) {
 	this.x = x; this.y = y; this.z = z; this.w = w;
 };
 
-vec4.prototype.equals = function() {
+Vec4.prototype.equals = function() {
 	switch (arguments.length) {
 		default:
 			return false;
@@ -406,7 +406,7 @@ vec4.prototype.equals = function() {
 	}
 };
 
-vec4.prototype.almostSame = function() {
+Vec4.prototype.almostSame = function() {
 	switch (arguments.length) {
 		default:
 			return false;
@@ -423,69 +423,69 @@ vec4.prototype.almostSame = function() {
 	}
 };
 
-vec4.prototype.add = function(v) {
-	return new vec4(this.x + v.x, this.y + v.y, this.z + v.z, this.w + v.w);
+Vec4.prototype.add = function(v) {
+	return new Vec4(this.x + v.x, this.y + v.y, this.z + v.z, this.w + v.w);
 };
 
-vec4.prototype.sub = function(v) {
-	return new vec4(this.x - v.x, this.y - v.y, this.z - v.z, this.w - v.w);
+Vec4.prototype.sub = function(v) {
+	return new Vec4(this.x - v.x, this.y - v.y, this.z - v.z, this.w - v.w);
 };
 
-vec4.prototype.mul = function(s) {
-	return new vec4(this.x * s, this.y * s, this.z * s, this.w * s);
+Vec4.prototype.mul = function(s) {
+	return new Vec4(this.x * s, this.y * s, this.z * s, this.w * s);
 };
 
-vec4.prototype.div = function(s) {
-	return new vec4(this.x / s, this.y / s, this.z / s, this.w / s);
+Vec4.prototype.div = function(s) {
+	return new Vec4(this.x / s, this.y / s, this.z / s, this.w / s);
 };
 
-vec4.prototype.mulMat = function(m) {
-	return new vec4(
+Vec4.prototype.mulMat = function(m) {
+	return new Vec4(
 		this.x * m.a1 + this.y * m.a2 + this.z * m.a3 + this.w * m.a4,
 		this.x * m.b1 + this.y * m.b2 + this.z * m.b3 + this.w * m.b4,
 		this.x * m.c1 + this.y * m.c2 + this.z * m.c3 + this.w * m.c4,
 		this.x * m.d1 + this.y * m.d2 + this.z * m.d3 + this.w * m.d4);
 };
 
-vec4.prototype.dot = function(v) {
+Vec4.prototype.dot = function(v) {
 	return this.x * v.x + this.y * v.y + this.z * v.z + this.w * v.w;
 };
 
-vec4.prototype.neg = function() {
-	return new vec4(-this.x, -this.y, -this.z, -this.w);
+Vec4.prototype.neg = function() {
+	return new Vec4(-this.x, -this.y, -this.z, -this.w);
 };
 
-vec4.prototype.length = function() {
+Vec4.prototype.length = function() {
 	return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w);
 };
 
-vec4.prototype.normalize = function () {
+Vec4.prototype.normalize = function () {
 	var scalar = 1 / this.length();
 	
 	if (isFinite(scalar)) {
-		return new vec4(this.x * scalar, this.y * scalar, this.z * scalar, this.w * scalar);
+		return new Vec4(this.x * scalar, this.y * scalar, this.z * scalar, this.w * scalar);
 	} else {
-		return new vec4();
+		return new Vec4();
 	}
 };
 
-vec4.prototype.lerp = function(v2, t) {
+Vec4.prototype.lerp = function(v2, t) {
 	return this.add((v2.sub(this)).mul(t));
 };
 
-vec4.lerp = function(v1, v2, t) {
+Vec4.lerp = function(v1, v2, t) {
 	return v1.lerp(v2, t);
 };
 
-vec4.prototype.clone = function() {
-	return new vec4(this.x, this.y, this.z, this.w);
+Vec4.prototype.clone = function() {
+	return new Vec4(this.x, this.y, this.z, this.w);
 };
 
-vec4.prototype.toArray = function() {
+Vec4.prototype.toArray = function() {
 	return [this.x, this.y, this.z, this.w];
 };
 
-vec4.prototype.toArrayDigits = function(digits) {
+Vec4.prototype.toArrayDigits = function(digits) {
 	var roundDigits = Tarumae.Utility.NumberExtension.roundDigits;
 	return [roundDigits(this.x, digits), roundDigits(this.y, digits),
 		roundDigits(this.z, digits), roundDigits(this.w, digits)];
@@ -789,14 +789,14 @@ Tarumae.BoundingBox.findBoundingBoxOfBoundingBoxes = function(bboxA, bboxB) {
 
 Tarumae.BoundingBox.transformBoundingBox = function(bbox, matrix) {
 
-	var ruf = new vec4(bbox.max.x, bbox.max.y, bbox.max.z, 1).mulMat(matrix);
-	var rub = new vec4(bbox.max.x, bbox.max.y, bbox.min.z, 1).mulMat(matrix);
-	var rdf = new vec4(bbox.max.x, bbox.min.y, bbox.max.z, 1).mulMat(matrix);
-	var rdb = new vec4(bbox.max.x, bbox.min.y, bbox.min.z, 1).mulMat(matrix);
-	var luf = new vec4(bbox.min.x, bbox.max.y, bbox.max.z, 1).mulMat(matrix);
-	var lub = new vec4(bbox.min.x, bbox.max.y, bbox.min.z, 1).mulMat(matrix);
-	var ldf = new vec4(bbox.min.x, bbox.min.y, bbox.max.z, 1).mulMat(matrix);
-	var ldb = new vec4(bbox.min.x, bbox.min.y, bbox.min.z, 1).mulMat(matrix);
+	var ruf = new Vec4(bbox.max.x, bbox.max.y, bbox.max.z, 1).mulMat(matrix);
+	var rub = new Vec4(bbox.max.x, bbox.max.y, bbox.min.z, 1).mulMat(matrix);
+	var rdf = new Vec4(bbox.max.x, bbox.min.y, bbox.max.z, 1).mulMat(matrix);
+	var rdb = new Vec4(bbox.max.x, bbox.min.y, bbox.min.z, 1).mulMat(matrix);
+	var luf = new Vec4(bbox.min.x, bbox.max.y, bbox.max.z, 1).mulMat(matrix);
+	var lub = new Vec4(bbox.min.x, bbox.max.y, bbox.min.z, 1).mulMat(matrix);
+	var ldf = new Vec4(bbox.min.x, bbox.min.y, bbox.max.z, 1).mulMat(matrix);
+	var ldb = new Vec4(bbox.min.x, bbox.min.y, bbox.min.z, 1).mulMat(matrix);
 
 	var xList = [ruf.x, rub.x, rdf.x, rdb.x, luf.x, lub.x, ldf.x, ldb.x];
 	var yList = [ruf.y, rub.y, rdf.y, rdb.y, luf.y, lub.y, ldf.y, ldb.y];

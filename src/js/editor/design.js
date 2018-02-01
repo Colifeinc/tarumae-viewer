@@ -40,7 +40,7 @@ Object.assign(TarumaeEditor.prototype, {
       var obj = scene.selectedObjects[i];
 
       var m = obj.getRotationMatrix().inverse();
-      var transformedOffset = new vec4(offset, 0).mulMat(m);
+      var transformedOffset = new Vec4(offset, 0).mulMat(m);
 
       obj.location.offset(transformedOffset);
     }
@@ -315,7 +315,7 @@ Object.assign(TarumaeEditor.prototype, {
 
     for (var i = 0; i < ap.arrowPoints.length; i++) {
       var p = ap.arrowPoints[i];
-      ap.arrowPoints[i] = (new vec4(p, 1.0).mulMat(matrix)).xyz();
+      ap.arrowPoints[i] = (new Vec4(p, 1.0).mulMat(matrix)).xyz();
     }
   },
 

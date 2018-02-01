@@ -7,7 +7,7 @@
 
 import Tarumae from "../entry"
 import "../utility/event"
-import { Vec3, vec4 } from "../math/vector"
+import { Vec3, Vec4 } from "../math/vector"
 import "../math/matrix"
 import { Mesh } from "../webgl/mesh"
 
@@ -633,7 +633,7 @@ Object.assign(Tarumae.SceneObject.prototype, {
 
 	getWorldLocation: function() {
 		var m = this.getTransformMatrix();
-		return (new vec4(this.location, 1.0).mulMat(m)).xyz();
+		return (new Vec4(this.location, 1.0).mulMat(m)).xyz();
 	},
 
 	getWorldRotation: function() {
@@ -643,7 +643,7 @@ Object.assign(Tarumae.SceneObject.prototype, {
 
 	setWorldLocation: function(loc) {
 		var m = this.getTransformMatrix().inverse();
-		this.location = (new vec4(loc, 1.0).mulMat(m)).xyz();
+		this.location = (new Vec4(loc, 1.0).mulMat(m)).xyz();
 	},
 
 	setWorldRotation: function(rot) {
@@ -681,9 +681,9 @@ Object.assign(Tarumae.SceneObject.prototype, {
 						
 						if (mmat) {
 							planeVectors = {
-								v1: new vec4(triangle.v1, 1.0).mulMat(mmat).xyz(),
-								v2: new vec4(triangle.v2, 1.0).mulMat(mmat).xyz(),
-								v3: new vec4(triangle.v3, 1.0).mulMat(mmat).xyz(),
+								v1: new Vec4(triangle.v1, 1.0).mulMat(mmat).xyz(),
+								v2: new Vec4(triangle.v2, 1.0).mulMat(mmat).xyz(),
+								v3: new Vec4(triangle.v3, 1.0).mulMat(mmat).xyz(),
 							};
 						} else {
 							planeVectors = triangle;
@@ -720,7 +720,7 @@ Object.assign(Tarumae.SceneObject.prototype, {
 							radius = this.radiyBody.radius;
 						}
 
-						var loc = new vec4(0, 0, 0, 1).mulMat(mmat).xyz();
+						var loc = new Vec4(0, 0, 0, 1).mulMat(mmat).xyz();
 
 						var inSphere = Tarumae.MathFunctions.rayIntersectsSphere(ray, { origin: loc, radius: radius }, out);
 						if (inSphere) out.t = 0;
@@ -1188,7 +1188,7 @@ Tarumae.Shapes.LineMesh.prototype.update = function(start, end, width) {
 	var m = new Tarumae.Matrix4().lookAt(start, end, Vec3.up);
 
 	for (var i = 0, a = 0; i <= segs; i++ , a += angles) {
-		var v = new vec4(Math.sin(a) * width, Math.cos(a) * width, 0, 1).mulMat(m);
+		var v = new Vec4(Math.sin(a) * width, Math.cos(a) * width, 0, 1).mulMat(m);
 		
 		this.vertices.push(start.x + v.x, start.y + v.y, start.z + v.z);
 		this.vertices.push(end.x + v.x, end.y + v.y, end.z + v.z);

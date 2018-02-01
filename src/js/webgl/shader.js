@@ -1128,7 +1128,7 @@ Tarumae.StandardShader.prototype.checkSceneLightSources = function(scene, camera
 						var bounds = object.getBounds();
 						lightWorldPos = Vec3.add(bounds.min, Vec3.div(Vec3.sub(bounds.max, bounds.min), 2));
 					} else {
-						lightWorldPos = new vec4(0, 0, 0, 1).mulMat(transform).xyz();
+						lightWorldPos = new Vec4(0, 0, 0, 1).mulMat(transform).xyz();
 					}
 
 					var distance = Vec3.sub(lightWorldPos, cameraLocation).length();

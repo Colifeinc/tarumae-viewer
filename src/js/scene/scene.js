@@ -519,7 +519,7 @@ Scene.prototype.prepareMaterialObject = function(mat, rm, loadingSession) {
 						default: break;
 						case 2: mat[name] = new Vec2(value[0], value[1]); break;
 						case 3: mat[name] = new Vec3(value[0], value[1], value[2]); break;
-						case 4: mat[name] = new vec4(value[0], value[1], value[2], value[3]); break;
+						case 4: mat[name] = new Vec4(value[0], value[1], value[2], value[3]); break;
 					}
 				}
 				break;
@@ -652,7 +652,7 @@ Scene.prototype.prepareObjects = function(obj, loadingSession) {
 						default: break;
 						case 2: obj[name] = new Vec2(value[0], value[1]); break;
 						case 3: obj[name] = new Vec3(value[0], value[1], value[2]); break;
-						case 4: obj[name] = new vec4(value[0], value[1], value[2], value[3]); break;
+						case 4: obj[name] = new Vec4(value[0], value[1], value[2], value[3]); break;
 					}
 				}
 				break;
@@ -797,8 +797,8 @@ Scene.prototype.findObjectsByViewPosition = function(p, options) {
 Scene.prototype.findObjectsByRay = function(ray, options) {
 	var transformStack = new Tarumae.TransformStack();
 
-	ray.origin = new vec4(ray.origin, 1.0).mulMat(transformStack.matrix).xyz();
-	ray.dir = new vec4(ray.dir, 0.0).mulMat(transformStack.matrix).xyz().normalize();
+	ray.origin = new Vec4(ray.origin, 1.0).mulMat(transformStack.matrix).xyz();
+	ray.dir = new Vec4(ray.dir, 0.0).mulMat(transformStack.matrix).xyz().normalize();
 
 	return this.findObjectsByWorldRay(ray, transformStack, options);
 };

@@ -720,7 +720,7 @@ Tarumae.Renderer = class {
 				{
 					var div = obj._htmlObject;
 	
-					var worldloc = new vec4(0, 0, 0, 1).mulMat(this.transformStack.matrix);
+					var worldloc = new Vec4(0, 0, 0, 1).mulMat(this.transformStack.matrix);
 					var p = this.transformPoint(worldloc);
 	
 					var w = div.scrollWidth / 2;
@@ -842,8 +842,8 @@ Tarumae.Renderer = class {
 		}
 	
 		var m = this.viewMatrix.mul(this.cameraMatrix).inverse();
-		ray.origin = new vec4(ray.origin, 1).mulMat(m).xyz();
-		ray.dir = new vec4(ray.dir, 0).mulMat(m).xyz().normalize();
+		ray.origin = new Vec4(ray.origin, 1).mulMat(m).xyz();
+		ray.dir = new Vec4(ray.dir, 0).mulMat(m).xyz().normalize();
 	
 		return ray;
 	};
@@ -865,10 +865,10 @@ Tarumae.Renderer.prototype.toWorldPosition = (function() {
 	
 			if (Array.isArray(pos)) {
 				for (var i = 0; i < pos.length; i++) {
-					pos[i] = new vec4(pos[i], 1.0).mulMat(m);
+					pos[i] = new Vec4(pos[i], 1.0).mulMat(m);
 				}
 			} else {
-				return new vec4(pos, 1.0).mulMat(m);
+				return new Vec4(pos, 1.0).mulMat(m);
 			}
 		};
 	})();

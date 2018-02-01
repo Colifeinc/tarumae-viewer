@@ -6,7 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "../entry"
-import { Vec3, vec4 } from "./vector"
+import { Vec3, Vec4 } from "./vector"
 
 Tarumae.MathFunctions = {
   _PIAngleDelta: Math.PI / 180.0,
@@ -36,8 +36,8 @@ Tarumae.MathFunctions = {
       return new Vec3(Tarumae.MathFunctions.clamp(v.x, min, max),
         Tarumae.MathFunctions.clamp(v.y, min, max),
         Tarumae.MathFunctions.clamp(v.z, min, max));
-    } else if (v instanceof vec4) {
-      return new vec4(Tarumae.MathFunctions.clamp(v.x, min, max),
+    } else if (v instanceof Vec4) {
+      return new Vec4(Tarumae.MathFunctions.clamp(v.x, min, max),
         Tarumae.MathFunctions.clamp(v.y, min, max),
         Tarumae.MathFunctions.clamp(v.z, min, max),
         Tarumae.MathFunctions.clamp(v.w, min, max));
@@ -319,10 +319,10 @@ Tarumae.MathFunctions = {
   rayIntersectsPlane: function(ray, plane, maxt) {
     var pd = plane.v2.sub(plane.v1).cross(plane.v3.sub(plane.v2));
     var len = pd.length();
-    var l = new vec4(pd.x, pd.y, pd.z, pd.neg().dot(plane.v1)).mul(1.0 / len);
+    var l = new Vec4(pd.x, pd.y, pd.z, pd.neg().dot(plane.v1)).mul(1.0 / len);
 
-    var dist = -l.dot(new vec4(ray.origin.x, ray.origin.y, ray.origin.z, 1.0))
-      / l.dot(new vec4(ray.dir.x, ray.dir.y, ray.dir.z, 0.0));
+    var dist = -l.dot(new Vec4(ray.origin.x, ray.origin.y, ray.origin.z, 1.0))
+      / l.dot(new Vec4(ray.dir.x, ray.dir.y, ray.dir.z, 0.0));
 
     if (dist < 0 || isNaN(dist)) {
       return null;
@@ -340,10 +340,10 @@ Tarumae.MathFunctions = {
   rayIntersectsTriangle: function(ray, t, maxt) {
     var pd = t.v2.sub(t.v1).cross(t.v3.sub(t.v2));
     var len = pd.length();
-    var l = new vec4(pd.x, pd.y, pd.z, pd.neg().dot(t.v1)).mul(1.0 / len);
+    var l = new Vec4(pd.x, pd.y, pd.z, pd.neg().dot(t.v1)).mul(1.0 / len);
 
-    var dist = -l.dot(new vec4(ray.origin.x, ray.origin.y, ray.origin.z, 1.0))
-      / l.dot(new vec4(ray.dir.x, ray.dir.y, ray.dir.z, 0.0));
+    var dist = -l.dot(new Vec4(ray.origin.x, ray.origin.y, ray.origin.z, 1.0))
+      / l.dot(new Vec4(ray.dir.x, ray.dir.y, ray.dir.z, 0.0));
 
     if (dist < 0 || isNaN(dist) || dist > maxt) {
       return null;
