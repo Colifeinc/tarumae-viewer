@@ -950,7 +950,7 @@ Tarumae.GridLine = class extends Tarumae.SceneObject {
 	constructor(gridSize, stride) {
 		super();
 
-		this.mat = { color: new color3(0.7, 0.7, 0.7) };
+		this.mat = { color: new Color3(0.7, 0.7, 0.7) };
 		this.receiveLight = false;
 
 		if (typeof gridSize === "undefined") {

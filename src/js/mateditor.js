@@ -90,7 +90,7 @@ var MatEditor = {
     this.scene.add(objs);
 
     this.scene.sun.location.set(0, 10, 10);
-    this.scene.sun.mat = { color: new color3(0.15, 0.15, 0.15) };
+    this.scene.sun.mat = { color: new Color3(0.15, 0.15, 0.15) };
     this.scene.mainCamera.location.set(0, 0, 2);
     this.scene.mainCamera.angle.set(0, 0, 0);
     this.scene.show();

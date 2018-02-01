@@ -149,7 +149,7 @@ Object.assign(TarumaeEditor.prototype, {
       var converted = false;
 
       if (typeof item === "object") {
-        if (item instanceof color3) {
+        if (item instanceof Color3) {
           jsobj[name] = [item.r, item.g, item.b];
           converted = true;
         } else if (item instanceof Color4) {

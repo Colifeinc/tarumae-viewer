@@ -7,7 +7,7 @@
 
 import Tarumae from "../entry"
 import "../utility/event"
-import { Vec3, color3 } from "../math/vector"
+import { Vec3, Color3 } from "../math/vector"
 import "../math/matrix"
 import "../scene/renderer"
 import "../scene/object"
@@ -477,7 +477,7 @@ Scene.prototype.prepareMaterialObject = function(mat, rm, loadingSession) {
 				if (typeof value === "object" && value instanceof Array) {
 					switch (value.length) {
 						case 3:
-							mat[name] = new color3(value[0], value[1], value[2]);
+							mat[name] = new Color3(value[0], value[1], value[2]);
 							break;
 						case 4:
 							mat[name] = new Color4(value[0], value[1], value[2], value[3]);
@@ -709,7 +709,7 @@ Scene.prototype.prepareObjects = function(obj, loadingSession) {
 					&& !(value instanceof Tarumae.CubeMap)
 					&& !(value instanceof Scene)
 					&& !(value instanceof Vec3)
-					&& !(value instanceof color3)
+					&& !(value instanceof Color3)
 					&& !(value instanceof Array)) {
 					scene.prepareObjects(value, loadingSession);
 					value.name = name;

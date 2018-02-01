@@ -122,7 +122,7 @@ Object.assign(Tarumae.EditorShader.prototype, {
           if (Array.isArray(mat.color)) {
             var colorArr = mat.color;
             lightUniform.color.set([colorArr[0] * emission, colorArr[1] * emission, colorArr[2] * emission]);
-          } else if (mat.color instanceof color3) {
+          } else if (mat.color instanceof Color3) {
             lightUniform.color.set(mat.color.mul(emission));
           }
         } else {
@@ -247,7 +247,7 @@ Object.assign(Tarumae.EditorShader.prototype, {
       if (typeof mat.color === "object") {
         if (Array.isArray(mat.color)) {
           color = mat.color;
-        } else if (mat.color instanceof color3) {
+        } else if (mat.color instanceof Color3) {
           color = mat.color.toArray();
         }
       }

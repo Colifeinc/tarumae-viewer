@@ -53,7 +53,7 @@ function TarumaeEditor(options) {
   this.dragging = false;
 
   this.gridLine = new Tarumae.GridLine(10, 1);
-  this.gridLine.mat.color = new color3(0.5, 0.5, 0.5);
+  this.gridLine.mat.color = new Color3(0.5, 0.5, 0.5);
   
   this.focusObject = null;
   this.focusActivePoint = null;

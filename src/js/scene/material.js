@@ -10,7 +10,7 @@ function Material() {
 
 Material.prototype.copyFrom = function(mat) {
 	// color
-	if (typeof mat.color === "object" && mat.color instanceof color3) {
+	if (typeof mat.color === "object" && mat.color instanceof Color3) {
 		this.color = mat.color.clone();
 	}
 	

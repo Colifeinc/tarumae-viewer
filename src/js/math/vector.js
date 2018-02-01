@@ -491,9 +491,9 @@ Vec4.prototype.toArrayDigits = function(digits) {
 		roundDigits(this.z, digits), roundDigits(this.w, digits)];
 };
 
-/////////////////// color3 ////////////////////
+/////////////////// Color3 ////////////////////
 
-export function color3(r, g, b) {
+export function Color3(r, g, b) {
 	switch (arguments.length) {
 		case 0:
 			this.r = 0; this.g = 0; this.b = 0;
@@ -513,87 +513,87 @@ export function color3(r, g, b) {
 	}
 }
 
-color3.prototype.clone = function() {
-	return new color3(this.r, this.g, this.b);
+Color3.prototype.clone = function() {
+	return new Color3(this.r, this.g, this.b);
 };
 
-color3.prototype.copyFrom = function(c) {
+Color3.prototype.copyFrom = function(c) {
 	this.r = c.r;
 	this.g = c.g;
 	this.b = c.b;
 	return this;
 };
 
-color3.prototype.add = function(c) {
-	return new color3(this.r + c.r, this.g + c.g, this.b + c.b);
+Color3.prototype.add = function(c) {
+	return new Color3(this.r + c.r, this.g + c.g, this.b + c.b);
 };
 
-color3.prototype.sub = function(c) {
-	return new color3(this.r - c.r, this.g - c.g, this.b - c.b);
+Color3.prototype.sub = function(c) {
+	return new Color3(this.r - c.r, this.g - c.g, this.b - c.b);
 };
 
-color3.prototype.mul = function(s) {
-	return new color3(this.r * s, this.g * s, this.b * s);
+Color3.prototype.mul = function(s) {
+	return new Color3(this.r * s, this.g * s, this.b * s);
 };
 
-color3.prototype.length = function() {
+Color3.prototype.length = function() {
 	return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
 };
 
-color3.prototype.normalize = function () {
+Color3.prototype.normalize = function () {
 	var scalar = 1 / this.length();
 	
 	if (isFinite(scalar)) {
-		return new color3(this.x * scalar, this.y * scalar, this.z * scalar);
+		return new Color3(this.x * scalar, this.y * scalar, this.z * scalar);
 	} else {
-		return new color3();
+		return new Color3();
 	}
 };
 
-color3.prototype.lerp = function(v2, t) {
+Color3.prototype.lerp = function(v2, t) {
 	return this.add((v2.sub(this)).mul(t));
 };
 
-color3.lerp = function(v1, v2, t) {
+Color3.lerp = function(v1, v2, t) {
 	return v1.lerp(v2, t);
 };
 
-color3.prototype.toArray = function() {
+Color3.prototype.toArray = function() {
 	return [this.r, this.g, this.b];
 };
 
-color3.prototype.toFloat32Array = function() {
+Color3.prototype.toFloat32Array = function() {
 	return new Float32Array(this.toArray());
 };
 
-color3.prototype.toString = function() {
+Color3.prototype.toString = function() {
 	var toStringDigits = Tarumae.Utility.NumberExtension.toStringWithDigits;
 
 	return "[" + toStringDigits(this.r) + ", " + toStringDigits(this.g) + ", "
 		+ toStringDigits(this.b) + "]";
 };
 
-color3.white = new color3(1.0, 1.0, 1.0);
-color3.silver = new color3(0.7, 0.7, 0.7);
-color3.gray = new color3(0.5, 0.5, 0.5);
-color3.dimgray = new color3(0.3, 0.3, 0.3);
-color3.black = new color3(0.0, 0.0, 0.0);
-color3.red = new color3(1.0, 0.0, 0.0);
-color3.green = new color3(0.0, 1.0, 0.0);
-color3.blue = new color3(0.0, 0.0, 1.0);
+Color3.white = new Color3(1.0, 1.0, 1.0);
+Color3.silver = new Color3(0.7, 0.7, 0.7);
+Color3.gray = new Color3(0.5, 0.5, 0.5);
+Color3.dimgray = new Color3(0.3, 0.3, 0.3);
+Color3.black = new Color3(0.0, 0.0, 0.0);
+Color3.red = new Color3(1.0, 0.0, 0.0);
+Color3.green = new Color3(0.0, 1.0, 0.0);
+Color3.blue = new Color3(0.0, 0.0, 1.0);
 
-color3.randomly = function() {
-	return new color3(Math.random(), Math.random(), Math.random());
+Color3.randomly = function() {
+	return new Color3(Math.random(), Math.random(), Math.random());
 };
 
-color3.randomlyLight = function() {
-	return new color3(0.3 + Math.random() * 0.7, 0.3 + Math.random() * 0.7, 0.3 + Math.random() * 0.7);
+Color3.randomlyLight = function() {
+	return new Color3(0.3 + Math.random() * 0.7, 0.3 + Math.random() * 0.7, 0.3 + Math.random() * 0.7);
 };
 
-color3.randomlyDark = function() {
-	return new color3(Math.random() * 0.5, Math.random() * 0.5, Math.random() * 0.5);
+Color3.randomlyDark = function() {
+	return new Color3(Math.random() * 0.5, Math.random() * 0.5, Math.random() * 0.5);
 };
-/////////////////// color4 ////////////////////
+/////////////////// Color4 ////////////////////
 
 export function Color4(r, g, b, a) {
 	switch (arguments.length) {
@@ -604,7 +604,7 @@ export function Color4(r, g, b, a) {
 			
 		case 1:
 			if (typeof r === "object") {
-				if (r instanceof color3) {
+				if (r instanceof Color3) {
 					this.r = r.r;
 					this.g = r.g;
 					this.b = r.b;

@@ -332,7 +332,7 @@ Tarumae.ShaderUniform.prototype.register = function(shader, name) {
 // 	this.lightmapUniform = this.findUniform("lightMap");
 // 	this.gl.uniform1i(this.lightmapUniform, 2);
 // 	this.hasLightMapUniform = this.findUniform("hasLightMap");
-// 	this.defaultMaterialColor = new color3(1, 1, 1);
+// 	this.defaultMaterialColor = new Color3(1, 1, 1);
 // 	this.defaultTexTiling = new Vec2(1, 1);
 
 // 	this.emptyTexture = Texture.createEmpty(renderer);
@@ -375,7 +375,7 @@ Tarumae.ShaderUniform.prototype.register = function(shader, name) {
 // 			this.texture = mat.tex;
 // 		}
 
-// 		if (mat.color instanceof color3) {
+// 		if (mat.color instanceof Color3) {
 // 			color = mat.color;
 // 		}
 
@@ -520,7 +520,7 @@ Tarumae.ViewerShader.prototype.beginObject = function(obj) {
 		if (typeof mat.color === "object") {
 			if (Array.isArray(mat.color)) {
 				color = mat.color;
-			} else if (mat.color instanceof color3) {
+			} else if (mat.color instanceof Color3) {
 				color = mat.color.toArray();
 			}
 		}
@@ -672,7 +672,7 @@ Tarumae.SimpleShader.prototype.beginObject = function(obj) {
 		if (typeof mat.color === "object") {
 			if (Array.isArray(mat.color)) {
 				color = mat.color;
-			} else if (mat.color instanceof color3) {
+			} else if (mat.color instanceof Color3) {
 				color = mat.color.toArray();
 			}
 		}
@@ -771,7 +771,7 @@ Tarumae.BillboardShader.prototype.beginObject = function(obj) {
 		if (typeof mat.color === "object") {
 			if (Array.isArray(mat.color)) {
 				color = mat.color;
-			} else if (mat.color instanceof color3) {
+			} else if (mat.color instanceof Color3) {
 				color = mat.color.toArray();
 			}
 		}
@@ -829,7 +829,7 @@ Tarumae.SolidColorShader = class extends Tarumae.Shader {
 
 		this.defaultColor4 = [0.8, 0.8, 0.8, 1.0];
 	}
-}	
+}
 
 Tarumae.SolidColorShader.prototype.beginObject = function(obj) {
 	Tarumae.Shader.prototype.beginObject.call(this, obj);
@@ -845,7 +845,7 @@ Tarumae.SolidColorShader.prototype.beginObject = function(obj) {
 			color = cobj;
 		} else if (cobj instanceof Color4) {
 			color = cobj.toArray();
-		} else if (cobj instanceof color3) {
+		} else if (cobj instanceof Color3) {
 			color = [cobj.r, cobj.g, cobj.b, 1.0];
 		}
 	}
@@ -955,7 +955,7 @@ Tarumae.PanoramaShader.prototype.beginObject = function(obj) {
 		if (typeof mat.color === "object") {
 			if (Array.isArray(mat.color)) {
 				color = mat.color;
-			} else if (mat.color instanceof color3) {
+			} else if (mat.color instanceof Color3) {
 				color = mat.color.toArray();
 			}
 		}
@@ -1219,7 +1219,7 @@ Tarumae.StandardShader.prototype.beginScene = function(scene) {
 					if (Array.isArray(light.mat.color)) {
 						var colorArr = light.mat.color;
 						lightUniform.color.set([colorArr[0] * emission, colorArr[1] * emission, colorArr[2] * emission]);
-					} else if (light.mat.color instanceof color3) {
+					} else if (light.mat.color instanceof Color3) {
 						lightUniform.color.set(light.mat.color.mul(emission));
 					}
 				} else {
@@ -1324,7 +1324,7 @@ Tarumae.StandardShader.prototype.beginObject = function(obj) {
 		if (typeof mat.color === "object") {
 			if (Array.isArray(mat.color)) {
 				color = mat.color;
-			} else if (mat.color instanceof color3) {
+			} else if (mat.color instanceof Color3) {
 				color = mat.color.toArray();
 			}
 		}

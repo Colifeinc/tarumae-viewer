@@ -8,7 +8,7 @@
 import Tarumae from "../entry"
 import "../utility/utility"
 import { ResourceManager, ResourceTypes } from "../utility/res"
-import { Vec2, Vec3, vec4, color3, color4, Point } from "../math/vector"
+import { Vec2, Vec3, Vec4, Color3, Color4, Point } from "../math/vector"
 import { Matrix3, Matrix4 } from "../math/matrix"
 import "../scene/scene"
 import "../webgl/shader"
@@ -916,7 +916,7 @@ var TarumaeRenderer = Tarumae.Renderer;
 		var ps = new Array(points.length);
 	
 		for (var i = 0; i < points.length; i++) {
-			var p = new vec4(points[i], 1.0).mulMat(this.projectionViewMatrix);
+			var p = new Vec4(points[i], 1.0).mulMat(this.projectionViewMatrix);
 	
 			ps[i] = new Point(
 				(p.x / p.w) * renderHalfWidth + renderHalfWidth,
