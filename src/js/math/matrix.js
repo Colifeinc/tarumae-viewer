@@ -168,10 +168,10 @@ Tarumae.Matrix4 = class {
 	}
 	
 	loadIdentity() {
-		this.a1 = 1.0; this.b1 = 0.0; this.c1 = 0.0; this.d1 = 0.0;
-		this.a2 = 0.0; this.b2 = 1.0; this.c2 = 0.0; this.d2 = 0.0;
-		this.a3 = 0.0; this.b3 = 0.0; this.c3 = 1.0; this.d3 = 0.0;
-		this.a4 = 0.0; this.b4 = 0.0; this.c4 = 0.0; this.d4 = 1.0;
+		this.a1 = 1; this.b1 = 0; this.c1 = 0; this.d1 = 0;
+		this.a2 = 0; this.b2 = 1; this.c2 = 0; this.d2 = 0;
+		this.a3 = 0; this.b3 = 0; this.c3 = 1; this.d3 = 0;
+		this.a4 = 0; this.b4 = 0; this.c4 = 0; this.d4 = 1;
 
 		return this;
 	}
@@ -604,3 +604,5 @@ Tarumae.Matrix4 = class {
 		return new Float32Array(this.toArray());
 	}
 }
+
+Tarumae.Matrix4.Identity = new Tarumae.Matrix4().loadIdentity();
