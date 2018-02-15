@@ -480,7 +480,7 @@ Tarumae.Renderer = class {
 			this.drawObject(scene.objects[i], false);
 		}
 	
-		this.useShader("simple");
+		// this.useShader("simple");
 		this.currentShader.beginScene(scene);
 	
 		// draw transparency objects
@@ -488,7 +488,7 @@ Tarumae.Renderer = class {
 			this.drawObject(this.transparencyList[i], true);
 		}
 	
-		this.disuseCurrentShader();
+		// this.disuseCurrentShader();
 	
 		// draw selected objects
 		if (Array.isArray(scene.selectedObjects)) {

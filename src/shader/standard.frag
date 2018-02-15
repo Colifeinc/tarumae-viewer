@@ -124,9 +124,9 @@ void main(void) {
 
 	float alpha = opacity * textureColor.a;
 
-	if (alpha < 0.05) {
-		discard;
-	}
+//	if (alpha < 0.05) {
+//		discard;
+//	}
 
 	//////////////// NormalMap ////////////////
 
@@ -193,6 +193,14 @@ void main(void) {
 			}
 			finalColor = finalColor + pow(refColor, vec3(7.5)) * (glossy * 0.7);
 		}
+	
+		if (alpha < 1.0) {
+			alpha = max(finalColor.r, max(finalColor.g, finalColor.b)) * 0.5;
+		}
+	}
+
+	if (alpha < 0.05) {
+		discard;
 	}
 
 	//////////////// ShadowMap ////////////////

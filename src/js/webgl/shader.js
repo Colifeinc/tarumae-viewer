@@ -1457,6 +1457,7 @@ Tarumae.StandardShader.prototype.beginObject = function(obj) {
 
 	// opacity
 	if (obj._opacity < 1) {
+		gl.enable(gl.BLEND);
 		this.opacityUniform.set(obj._opacity);
 	} else {
 		this.opacityUniform.set(1);
@@ -1515,6 +1516,8 @@ Tarumae.StandardShader.prototype.endObject = function(obj) {
 		gl.activeTexture(gl.TEXTURE3);
 		this.useNormalmap.disuse();
 	}
+
+	gl.disable(gl.BLEND);
 
 	Tarumae.Shader.prototype.endObject.call(this, obj);
 };
