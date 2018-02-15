@@ -100,7 +100,7 @@ Tarumae.Renderer = class {
 			this.debugger = new Tarumae.Debugger(this);
 		}
 
-		this.drawingContext2D = new DrawingContext2D(this.canvas2d, this.ctx);
+		this.drawingContext2D = new Tarumae.DrawingContext2D(this.canvas2d, this.ctx);
 
 		this.currentScene = null;
 		this.current2DScene = null;
@@ -1220,37 +1220,37 @@ TarumaeRenderer.DefaultOptions = {
 
 ///////////////// DrawingContext2D /////////////////
 
-function DrawingContext2D(canvas, ctx) {
-	this.canvas = canvas;
-	this.ctx = ctx;
+Tarumae.DrawingContext2D = class {
+	constructor(canvas, ctx) {
+		this.canvas = canvas;
+		this.ctx = ctx;
 
-	this.resetDrawingStyle();
+		this.resetDrawingStyle();
 
-	this.currentTransform = new Tarumae.Matrix3().loadIdentity();
-	this.transformStack = new Array();
-};
+		this.currentTransform = new Tarumae.Matrix3().loadIdentity();
+		this.transformStack = new Array();
+	}
 
-Object.assign(DrawingContext2D.prototype, {
-	pushTransform: function(t) {
+	pushTransform(t) {
 		this.transformStack.push(this.currentTransform.clone());
 		this.currentTransform = this.currentTransform.mul(t);
 		t = this.currentTransform;
 		this.ctx.setTransform(t.a1, t.b1, t.a2, t.b2, t.a3, t.b3);
-	},
+	}
 
-	popTransform: function() {
+	popTransform() {
 		this.currentTransform = this.transformStack.pop();
 		var t = this.currentTransform;
 		this.ctx.setTransform(t.a1, t.b1, t.a2, t.b2, t.a3, t.b3);
-	},
+	}
 
-	resetDrawingStyle: function() {
+	resetDrawingStyle() {
 		this.strokeWidth = 1;
 		this.strokeColor = "black";
 		this.fillColor = "transparent";
-	},
+	}
 
-	drawRect: function(rect, strokeWidth, strokeColor, fillColor) {
+	drawRect(rect, strokeWidth, strokeColor, fillColor) {
 		var ctx = this.ctx;
 	
 		var fillColor = fillColor || this.fillColor;
@@ -1280,9 +1280,13 @@ Object.assign(DrawingContext2D.prototype, {
 				// ctx.closePath();
 			}
 		}
-	},
+	}
 
-	drawEllipse: function(rect, strokeWidth, strokeColor, fillColor) {
+	drawPoint(p, size = 3, color = 'black') {
+		this.drawEllipse(new Tarumae.Rect(p.x - size / 2, p.y - size / 2, size, size), 0, null, color);
+	}
+
+	drawEllipse(rect, strokeWidth, strokeColor, fillColor) {
 		var ctx = this.ctx;
 		
 		strokeWidth = strokeWidth || this.strokeWidth;
@@ -1329,9 +1333,9 @@ Object.assign(DrawingContext2D.prototype, {
 		}
 	
 		ctx.closePath();
-	},
+	}
 
-	drawLines: function(lines, width, color) {
+	drawLines(lines, width, color) {
 		if (lines.length < 2) return;
 	
 		var ctx = this.ctx;
@@ -1354,15 +1358,15 @@ Object.assign(DrawingContext2D.prototype, {
 			ctx.stroke();
 			ctx.closePath();
 		}
-	},
+	}
 
-	drawImage: function(p, image) {
+	drawImage(p, image) {
 		var ctx = this.ctx;
 		
 		ctx.drawImage(image, p.x, p.y);
-	},
+	}
 
-	drawText: function(p, text, color, halign) {
+	drawText(p, text, color, halign) {
 		var ctx = this.ctx;
 	
 		ctx.fillStyle = color || "black";
