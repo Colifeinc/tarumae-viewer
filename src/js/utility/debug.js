@@ -252,19 +252,19 @@ Tarumae.Debugger = class {
           + "color: " + (obj.mat.color ? obj.mat.color.toString() : "<default>") + "<br/>"
           + "gloss: " + (!isNaN(obj.mat.glossy) ? toStringDigits(obj.mat.glossy) : 0) + "<br/>"
           + "rough: " + (!isNaN(obj.mat.roughness) ? toStringDigits(obj.mat.roughness) : 0.5) + "<br/>"
-          + "trans: " + (!isNaN(obj.mat.transparency) ? toStringDigits(transparency) : 0) + "<br/>"
+          + "trans: " + (!isNaN(obj.mat.transparency) ? toStringDigits(obj.mat.transparency) : 0) + "<br/>"
           + "tilng: " + (obj.mat.texTiling ? obj.mat.texTiling.toString() : "[1, 1]") + "<br/>";
 
         if (obj.mat.normalMipmap) {
-          html += "normip: " + (obj.mat.normalMipmap ? toStringDigits(normalMipmap) : 0) + "<br/>";
+          html += "normip: " + (obj.mat.normalMipmap ? toStringDigits(obj.mat.normalMipmap) : 0) + "<br/>";
         }
         
         if (obj.mat.emission) {
-          html += "emiss: " + (obj.mat.emission ? toStringDigits(emission) : 0) + "<br/>";
+          html += "emiss: " + (obj.mat.emission ? toStringDigits(obj.mat.emission) : 0) + "<br/>";
         }
         
         if (obj.mat.spotRange) {
-          html += "sptrn: " + (obj.mat.spotRange ? toStringDigits(spotRange) : 0) + "<br/>";
+          html += "sptrn: " + (obj.mat.spotRange ? toStringDigits(obj.mat.spotRange) : 0) + "<br/>";
         }
 
         if (typeof obj.mat.tex === "string") {
