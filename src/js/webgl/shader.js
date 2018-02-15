@@ -496,7 +496,7 @@ Tarumae.ViewerShader.prototype.beginObject = function(obj) {
 
 	var gl = this.gl;
 
-	var modelMatrix = this.renderer.transformStack.matrix;
+	var modelMatrix = obj._transform;
 	
 	gl.uniformMatrix4fv(this.projectViewModelMatrixUniform, false,
 		modelMatrix.mul(this.renderer.projectionViewMatrix).toArray());
@@ -645,7 +645,7 @@ Tarumae.SimpleShader.prototype.beginObject = function(obj) {
 
 	var gl = this.gl;
 
-	var modelMatrix = this.renderer.transformStack.matrix;
+	var modelMatrix = obj._transform;
 	
 	gl.uniformMatrix4fv(this.modelMatrixUniform, false, modelMatrix.toArray());
 
@@ -751,8 +751,10 @@ Tarumae.BillboardShader.prototype.beginObject = function(obj) {
 
 	var gl = this.gl;
 
+	var modelMatrix = obj._transform;
+	
 	gl.uniformMatrix4fv(this.projectViewModelMatrixUniform, false,
-		this.renderer.transformStack.matrix.mul(this.renderer.projectionViewMatrix).toArray());
+		modelMatrix.mul(this.renderer.projectionViewMatrix).toArray());
 
 	// material
 	var mat = obj.mat;
@@ -854,8 +856,10 @@ Tarumae.SolidColorShader.prototype.beginObject = function(obj) {
 
 	this.colorUniform.set(this.color);
 
+	var modelMatrix = obj._transform;
+	
  	this.projectViewModelMatrixUniform.set(
-			(this.renderer.transformStack.matrix.mul(this.renderer.projectionViewMatrix)).toArray());
+			(modelMatrix.mul(this.renderer.projectionViewMatrix)).toArray());
 	
 	gl.enable(gl.BLEND);
 	gl.disable(gl.DEPTH_TEST);
@@ -925,11 +929,11 @@ Tarumae.PanoramaShader.prototype.beginObject = function(obj) {
 
 	var gl = this.gl;
 	
-	this.projectViewModelMatrixUniform.set(this.renderer.transformStack.matrix.mul(
-		this.renderer.projectionViewMatrix));	
+	var modelMatrix = obj._transform;
+		
+	this.projectViewModelMatrixUniform.set(
+		modelMatrix.mul(this.renderer.projectionViewMatrix));	
 
-	// var modelMatrix = this.renderer.transformStack.matrix;
-	
 	// gl.uniformMatrix4fv(this.modelMatrixUniform, false, modelMatrix.toArray());
 
 	// var normalMatrix = new Matrix4(modelMatrix);
@@ -1117,7 +1121,7 @@ Tarumae.StandardShader.LightLimitation = {
 Tarumae.StandardShader.prototype.checkSceneLightSources = function(scene, cameraLocation) {
 	var shader = this;
 
-	Tarumae.SceneObject.scanTransforms(scene, function(object, transform) {
+	Tarumae.SceneObject.scanTransforms(scene, function(object) {
 		if (object.visible === true) {
 			if (typeof object.mat === "object" && object.mat !== null) {
 				if (typeof object.mat.emission !== "undefined" && object.mat.emission > 0) {
@@ -1126,9 +1130,9 @@ Tarumae.StandardShader.prototype.checkSceneLightSources = function(scene, camera
 					
 					if (Array.isArray(object.meshes) && object.meshes.length > 0) {
 						var bounds = object.getBounds();
-						lightWorldPos = Vec3.add(bounds.min, Vec3.div(Vec3.sub(bounds.max, bounds.min), 2));
+						lightWorldPos = Vec3.add(bounds.min, Vec3.mul(Vec3.sub(bounds.max, bounds.min), 0.5));
 					} else {
-						lightWorldPos = new Vec4(0, 0, 0, 1).mulMat(transform).xyz();
+						lightWorldPos = new Vec4(0, 0, 0, 1).mulMat(object._transform).xyz();
 					}
 
 					var distance = Vec3.sub(lightWorldPos, cameraLocation).length();
@@ -1284,7 +1288,7 @@ Tarumae.StandardShader.prototype.beginObject = function(obj) {
 
 	var gl = this.gl;
 
-	var modelMatrix = this.renderer.transformStack.matrix;
+	var modelMatrix = obj._transform;
 
 	gl.uniformMatrix4fv(this.modelMatrixUniform, false, modelMatrix.toArray());
 

@@ -78,7 +78,7 @@ Tarumae.EditorShader.prototype = new Tarumae.Shader();
 
 Object.assign(Tarumae.EditorShader.prototype, {
   
-  setShaderLightSource: function(object, transform) {
+  setShaderLightSource: function(object) {
 
     if (typeof object.mat === "object" && object.mat !== null) {
       var mat = object.mat;
@@ -89,7 +89,7 @@ Object.assign(Tarumae.EditorShader.prototype, {
         var bounds = object.getBounds();
         lightWorldPos = Vec3.add(bounds.min, Vec3.div(Vec3.sub(bounds.max, bounds.min), 2));
       } else {
-        lightWorldPos = new Vec4(0, 0, 0, 1).mulMat(transform).xyz();
+        lightWorldPos = new Vec4(0, 0, 0, 1).mulMat(object._transform).xyz();
       }
       
       var lightUniform;
@@ -154,11 +154,11 @@ Object.assign(Tarumae.EditorShader.prototype, {
 
       var _this = this;
 
-      Tarumae.SceneObject.scanTransforms(scene, function(object, transform) {
+      Tarumae.SceneObject.scanTransforms(scene, function(object) {
         if (object.visible === true) {
           if (typeof object.mat === "object" && object.mat !== null) {
             if (typeof object.mat.emission !== "undefined" && object.mat.emission > 0 && object.meshes.length <= 0) {
-              _this.setShaderLightSource(object, transform);
+              _this.setShaderLightSource(object);
             }
           }
         }
@@ -211,7 +211,7 @@ Object.assign(Tarumae.EditorShader.prototype, {
 
     var gl = this.gl;
 
-    var modelMatrix = this.renderer.transformStack.matrix;
+    var modelMatrix = obj._transform;
 
     gl.uniformMatrix4fv(this.modelMatrixUniform, false, modelMatrix.toArray());
 

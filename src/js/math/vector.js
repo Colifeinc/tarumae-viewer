@@ -323,6 +323,7 @@ Vec3.fromArray = function(arr) {
 	return new Vec3(arr[0], arr[1], arr[2]);
 };
 
+// deparacted
 Vec3.zero = new Vec3(0, 0, 0);
 Vec3.one = new Vec3(1, 1, 1);
 Vec3.up = new Vec3(0, 1, 0);
@@ -331,6 +332,15 @@ Vec3.left = new Vec3(-1, 0, 0);
 Vec3.right = new Vec3(1, 0, 0);
 Vec3.forward = new Vec3(0, 0, -1);
 Vec3.back = new Vec3(0, 0, 1);
+
+Vec3.Zero = new Vec3(0, 0, 0);
+Vec3.One = new Vec3(1, 1, 1);
+Vec3.Up = new Vec3(0, 1, 0);
+Vec3.Down = new Vec3(0, -1, 0);
+Vec3.Left = new Vec3(-1, 0, 0);
+Vec3.Right = new Vec3(1, 0, 0);
+Vec3.Forward = new Vec3(0, 0, -1);
+Vec3.Back = new Vec3(0, 0, 1);
 
 //////////////////// Vec4 //////////////////////
 

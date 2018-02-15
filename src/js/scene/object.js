@@ -7,7 +7,7 @@
 
 import Tarumae from "../entry"
 import "../utility/event"
-import { Vec3, Vec4 } from "../math/vector"
+import { Vec3, Vec4, Matrix4 } from "../math/vector"
 import "../math/matrix"
 import { Mesh } from "../webgl/mesh"
 
@@ -25,13 +25,17 @@ Tarumae.CollisionModes = {
 Tarumae.SceneObject = class {
 	constructor() {
 		this._parent = null;
-		this._scene = null;
+		this._scene = undefined;
+		this._transform = new Tarumae.Matrix4().loadIdentity();
 
-		this._location = new Vec3(0, 0, 0);
-		this._angle = new Vec3(0, 0, 0);
-		// this._location = new Tarumae.SceneObject.LocationProperty(this);
-		// this._angle = new Tarumae.VectorProperty(this, "onrotate");
-		this._scale = new Vec3(1, 1, 1);
+		// this._location = new Vec3(0, 0, 0);
+		// this._angle = new Vec3(0, 0, 0);
+		// this._scale = new Vec3(1, 1, 1);
+		this._suspendTransformUpdate = true;
+		this._location = new Tarumae.ObjectVectorProperty(this, this.onmove);
+		this._angle = new Tarumae.ObjectVectorProperty(this, this.onrotate);
+		this._scale = new Tarumae.ObjectVectorProperty(this, this.onscale, Vec3.One);
+		this._suspendTransformUpdate = false;
 
 		this.meshes = [];
 		this.objects = [];
@@ -47,224 +51,221 @@ Tarumae.SceneObject = class {
 
 		this.isSelected = false;
 	}
-};
 
-// // backward compatibility
-// Object.defineProperty(window, "SceneObject",
-// 	{ get: Tarumae.Utility.deprecate("SceneObject", "Tarumae.SceneObject") });
+	get scene() {
+		return this._scene;
+	}
+
+	set scene(val) {
+		if (this._scene != val) {
+			this._scene = val;
+			this.onsceneChange(this._scene);
+		}
+
+		for (let i = 0; i < this.objects.length; i++) {
+			var child = this.objects[i];
+			if (child._scene != this._scene) {
+				child.scene = this._scene;
+			}
+		}
+	}
+
+	get location() { return this._location; }
+	set location(value) { this._location.setVec3(value); }
+
+	get angle() { return this._angle; }
+	set angle(value) { this._angle.setVec3(value); }
+	
+	get scale() { return this._scale; }
+	set scale(value) { this._scale.setVec3(value); }
+
+	get parent() { return this._parent; }
+	set parent(value) {
+		if (this._parent != value) {
+			this._parent = value;
+			this.onparentChange();
+		}
+	}
+
+	get polygonCount() {
+		if (!Array.isArray(this.meshes)) return 0;
+			
+		var polygonCount = 0;
+		for (var i = 0; i < this.meshes.length; i++) {
+			polygonCount += this.meshes[i].polygonCount;
+		}
+		return polygonCount;
+	}
+
+	updateTransform() {
+		if (this._suspendTransformUpdate) return;
+
+		var t = this._transform;
+
+		if (this._parent) {
+			t.copyFrom(this._parent._transform);
+		} else {
+			t.loadIdentity();
+		}
+
+		if (!this._location.equals(0, 0, 0)
+			|| !this._angle.equals(0, 0, 0)
+			|| !this._scale.equals(1, 1, 1)) {
+
+			t.translate(this._location._x, this._location._y, this._location._z);
+			t.rotate(this._angle._x, this._angle._y, this._angle._z);
+			t.scale(this._scale._x, this._scale._y, this._scale._z);
+		}
+
+		for (var i = 0; i < this.objects.length; i++) {
+			this.objects[i].updateTransform();
+		}
+
+	}
+};
 
 new Tarumae.EventDispatcher(Tarumae.SceneObject).registerEvents(
 	"mousedown", "mouseup", "mouseenter", "mouseout", 
 	"begindrag", "drag", "enddrag",
-	"move", "rotate",
+	"move", "rotate", "scale",
 	"draw", 
 	"add", "sceneChange", "parentChange",
 	"meshAdd", "meshRemove");
 
-Tarumae.SceneObject.LocationProperty = class {
-	constructor() {
+Tarumae.ObjectVectorProperty = class extends Vec3 {
+	constructor(obj, eventName, defValue) {
+		super();
+
 		this.obj = obj;
-		this._x = 0;
-		this._y = 0;
-		this._z = 0;
-	}
 
-	get x() { return this._x; }
-	set x(val) { if (this._x != val) this.obj._changeLocation(val, this._y, this._z); }
-
-	get y() { return this._y; }
-	set y(val) { if (this._y != val) this.obj._changeLocation(this._x, val, this._z); }
-
-	get z() { return this._z; }
-	set z(val) { if (this._z != val) this.obj._changeLocation(this._x, this._y, val); }
-
-	set(x, y, z) {
-		if (this._x != x || this._y != y || this._z != z) {
-			this.obj._changeLocation(x, y, z);
-		}
-	}
-
-	setVec3(v) {
-		if (this._x != v.x || this._y != v.y || this._z != v.z) {
-			this.obj._changeLocation(v.x, v.y, v.z);
-		}
-	}
-}
-
-// Tarumae.VectorProperty = function(obj, eventName) {
-// 	this.obj = obj;
-// 	this._x = 0;
-// 	this._y = 0;
-// 	this._z = 0;
+		if (defValue) {
+			this.setVec3(defValue);
+		} else {
+			this._x = 0;
+			this._y = 0;
+			this._z = 0;
+		}	
 	
-// 	if (eventName) {
-// 		this.eventName = eventName;
-// 		this.changeEvent = obj[eventName];
-// 	}
-// };
-
-// Tarumae.VectorProperty.prototype = new Vec3();
-
-// Object.defineProperties(Tarumae.VectorProperty.prototype, {
-// 	"x": {
-// 		get: function() { return this._x; },
-// 		set: function(val) {
-// 			if (this._x != val) {
-// 				this._x = val;
-// 				if (this.changeEvent) this.changeEvent.call(this.obj);
-// 			}
-// 		},
-// 	},
-// 	"y": {
-// 		get: function() { return this._y; },
-// 		set: function(val) {
-// 			if (this._y != val) {
-// 				this._y = val;
-// 				if (this.changeEvent) this.changeEvent.call(this.obj);
-// 			}
-// 		},
-// 	},
-// 	"z": {
-// 		get: function() { return this._z; },
-// 		set: function(val) {
-// 			if (this._z != val) {
-// 				this._z = val;
-// 				if (this.changeEvent) this.changeEvent.call(this.obj);
-// 			}
-// 		},
-// 	},
-// 	"set": {
-// 		value: function(x, y, z) {
-// 			if ((this._x != x || this._y != y || this._z != z)) {
-// 				this._x = x;
-// 				this._y = y;
-// 				this._z = z;
-// 				if (this.changeEvent) this.changeEvent.call(this.obj);
-// 			}
-// 		}
-// 	},
-// 	"setVec3": {
-// 		value: function(v) {
-// 			if (this._x != v.x || this._y != v.y || this._z != v.z) {
-// 				this._x = v.x;
-// 				this._y = v.y;
-// 				this._z = v.z;
-// 				if (this.changeEvent) this.changeEvent.call(this.obj);
-// 			}
-// 		}
-// 	},
-// });
-
-// Tarumae.ArrayProperty = function(obj, addEventName, removeEventName) {
-// 	this.array = [];
-// };
-// Tarumae.Make_Inheritable_Object(Tarumae.SceneObject.prototype);
+		if (eventName) {
+			this.eventName = eventName;
+			this.changeEvent = obj[eventName];
+		}
+	}
+	
+	get x() { return this._x; }
+	set x(val) {
+		if (this._x !== val) {
+			this._x = val;
+			if (this.obj) {
+				if (this.changeEvent) this.changeEvent.call(this.obj);
+				this.obj.updateTransform();
+			}	
+		}
+	}
+	
+	get y() { return this._y; }
+	set y(val) {
+		if (this._y !== val) {
+			this._y = val;
+			if (this.obj) {
+				if (this.changeEvent) this.changeEvent.call(this.obj);
+				this.obj.updateTransform();
+			}	
+		}
+	}
+		
+	get z() { return this._z; }
+	set z(val) {
+		if (this._z !== val) {
+			this._z = val;
+			if (this.obj) {
+				if (this.changeEvent) this.changeEvent.call(this.obj);
+				this.obj.updateTransform();
+			}	
+		}
+	}
+		
+	set(x, y, z) {
+		if ((this._x !== x || this._y !== y || this._z !== z)) {
+			this._x = x;
+			this._y = y;
+			this._z = z;
+			if (this.obj) {
+				if (this.changeEvent) this.changeEvent.call(this.obj);
+				this.obj.updateTransform();
+			}
+		}
+	}
+	
+	setVec3(v) {
+		if (!this.equals(v)) {
+			this._x = v.x;
+			this._y = v.y;
+			this._z = v.z;
+			if (this.obj) {
+				if (this.changeEvent) this.changeEvent.call(this.obj);
+				this.obj.updateTransform();
+			}	
+		}
+	}
+	
+};
 
 Object.defineProperties(Tarumae.SceneObject.prototype, {
-	// "location": {
-	// 	get: function() { return this._location; },
-	// 	set: function(value) { this._location.setVec3(value); },
-	// 	enumerable: false,
-	// },
 
 	// "angle": {
 	// 	get: function() { return this._angle; },
 	// 	set: function(value) { this._angle.setVec3(value); },
 	// 	enumerable: false,
 	// },
-	"location": {
-		get: function() {
-			return this._location;
-		},
-		set: function(value) {
-			// Vec3 object should be copied rather than set reference directly (treat as struct)
-			if (typeof value === "object" && typeof value.clone === "function") {
-				this._location = value.clone();
-			}
-			else {
-				this._location = value;
-			}
-		},
-		enumerable: false,
-	},
+	// "location": {
+	// 	get: function() {
+	// 		return this._location;
+	// 	},
+	// 	set: function(value) {
+	// 		// Vec3 object should be copied rather than set reference directly (treat as struct)
+	// 		if (typeof value === "object" && typeof value.clone === "function") {
+	// 			this._location = value.clone();
+	// 		}
+	// 		else {
+	// 			this._location = value;
+	// 		}
+	// 	},
+	// 	enumerable: false,
+	// },
 
-	"angle": {
-		get: function() {
-			return this._angle;
-		},
-		set: function(value) {
-			// Vec3 object should be copied rather than set reference directly (treat as struct)
-			if (typeof value === "object" && typeof value.clone === "function") {
-				this._angle = value.clone();
-			}
-			else {
-				this._angle = value;
-			}
-		},
-		enumerable: false,
-	},
+	// "angle": {
+	// 	get: function() {
+	// 		return this._angle;
+	// 	},
+	// 	set: function(value) {
+	// 		// Vec3 object should be copied rather than set reference directly (treat as struct)
+	// 		if (typeof value === "object" && typeof value.clone === "function") {
+	// 			this._angle = value.clone();
+	// 		}
+	// 		else {
+	// 			this._angle = value;
+	// 		}
+	// 	},
+	// 	enumerable: false,
+	// },
 
-	"scale": {
-		get: function() {
-			return this._scale;
-		},
-		set: function(value) {
-			// Vec3 object should be copied rather than set reference directly (treat as struct)
-			if (typeof value === "object" && typeof value.clone === "function") {
-				this._scale = value.clone();
-			}
-			else {
-				this._scale = value;
-			}
-		},
-		enumerable: false,
-	},
+	// "scale": {
+	// 	get: function() {
+	// 		return this._scale;
+	// 	},
+	// 	set: function(value) {
+	// 		// Vec3 object should be copied rather than set reference directly (treat as struct)
+	// 		if (typeof value === "object" && typeof value.clone === "function") {
+	// 			this._scale = value.clone();
+	// 		}
+	// 		else {
+	// 			this._scale = value;
+	// 		}
+	// 	},
+	// 	enumerable: false,
+	// },
 
-	"scene": {
-		get: function() {
-			return this._scene;
-		},
-		set: function(val) {
-			if (this._scene != val) {
-				this._scene = val;
-				this.onsceneChange(this._scene);
-			}
-
-			for (var i = 0; i < this.objects.length; i++) {
-				var child = this.objects[i];
-				if (child._scene != this._scene) {
-					child.scene = this._scene;
-				}
-			}
-		},
-		enumerable: false,
-	},
-
-	"parent": {
-		get: function() {
-			return this._parent;
-		},
-		set: function(value) {
-			if (this._parent != value) {
-				this._parent = value;
-				this.onparentChange();
-			}
-		},
-		enumerable: false,
-	},
-
-	"polygonCount": {
-		get: function() {
-			if (!Array.isArray(this.meshes)) return 0;
-			
-			var polygonCount = 0;
-			for (var i = 0; i < this.meshes.length; i++) {
-				polygonCount += this.meshes[i].polygonCount;
-			}
-			return polygonCount;
-		},
-		enumerable: false,
-	},
 });
 
 Object.assign(Tarumae.SceneObject.prototype, {
@@ -580,31 +581,39 @@ Object.assign(Tarumae.SceneObject.prototype, {
 
 	getTransformMatrix: function(selfTransform) {
 
-		var plist = [];
-		var parent = this.parent;
-
-		while (parent) {
-			plist.push(parent);
-			parent = parent.parent;
+		if (selfTransform) {
+			return this._transform;
+		} else {
+			return this._parent ? this._parent._transform : Tarumae.Matrix4.Identity;
 		}
 
-		var m = new Tarumae.Matrix4().loadIdentity();
+		return;
 
-		for (var i = plist.length - 1; i >= 0; i--) {
-			var obj = plist[i];
+		// var plist = [];
+		// var parent = this.parent;
 
-			m.translate(obj.location.x, obj.location.y, obj.location.z)
-				.rotate(obj.angle.x, obj.angle.y, obj.angle.z)
-				.scale(obj.scale.x, obj.scale.y, obj.scale.z);
-		}
+		// while (parent) {
+		// 	plist.push(parent);
+		// 	parent = parent.parent;
+		// }
 
-		if (selfTransform === true) {
-			m.translate(this.location.x, this.location.y, this.location.z)
-				.rotate(this.angle.x, this.angle.y, this.angle.z)
-				.scale(this.scale.x, this.scale.y, this.scale.z);
-		}
+		// var m = new Tarumae.Matrix4().loadIdentity();
 
-		return m;
+		// for (var i = plist.length - 1; i >= 0; i--) {
+		// 	var obj = plist[i];
+
+		// 	m.translate(obj.location.x, obj.location.y, obj.location.z)
+		// 		.rotate(obj.angle.x, obj.angle.y, obj.angle.z)
+		// 		.scale(obj.scale.x, obj.scale.y, obj.scale.z);
+		// }
+
+		// if (selfTransform === true) {
+		// 	m.translate(this.location.x, this.location.y, this.location.z)
+		// 		.rotate(this.angle.x, this.angle.y, this.angle.z)
+		// 		.scale(this.scale.x, this.scale.y, this.scale.z);
+		// }
+
+		// return m;
 	},
 
 	getRotationMatrix: function(selfRotate) {
@@ -657,7 +666,7 @@ Object.assign(Tarumae.SceneObject.prototype, {
 	/*
 	 * Perform hit test with specified ray.
 	 */
-	hitTestByRay: function(ray, mmat, out) {
+	hitTestByRay: function(ray, out) {
 		if (typeof this.radiyBody === "object" && this.radiyBody !== null) {
 			var type = "cube";
 
@@ -677,17 +686,11 @@ Object.assign(Tarumae.SceneObject.prototype, {
 							triangle = { v1: triangle[0], v2: triangle[1], v3: triangle[2] };
 						}
  						
-						var planeVectors;
-						
-						if (mmat) {
-							planeVectors = {
-								v1: new Vec4(triangle.v1, 1.0).mulMat(mmat).xyz(),
-								v2: new Vec4(triangle.v2, 1.0).mulMat(mmat).xyz(),
-								v3: new Vec4(triangle.v3, 1.0).mulMat(mmat).xyz(),
-							};
-						} else {
-							planeVectors = triangle;
-						}
+						var planeVectors = {
+							v1: new Vec4(triangle.v1, 1.0).mulMat(this._transform).xyz(),
+							v2: new Vec4(triangle.v2, 1.0).mulMat(this._transform).xyz(),
+							v3: new Vec4(triangle.v3, 1.0).mulMat(this._transform).xyz(),
+						};
 						
 						var hit = Tarumae.MathFunctions.rayIntersectsPlane(ray, planeVectors, 99999);
 
@@ -720,7 +723,7 @@ Object.assign(Tarumae.SceneObject.prototype, {
 							radius = this.radiyBody.radius;
 						}
 
-						var loc = new Vec4(0, 0, 0, 1).mulMat(mmat).xyz();
+						var loc = new Vec4(0, 0, 0, 1).mulMat(this._transform).xyz();
 
 						var inSphere = Tarumae.MathFunctions.rayIntersectsSphere(ray, { origin: loc, radius: radius }, out);
 						if (inSphere) out.t = 0;
@@ -732,24 +735,7 @@ Object.assign(Tarumae.SceneObject.prototype, {
 		}
 	},
 
-	getBounds: (function() {
-		var transformStack;
-
-		return function(options) {
-
-			if (transformStack === undefined) {
-				transformStack = new Tarumae.TransformStack();
-			} else {
-				transformStack.reset();
-			}
-
-			transformStack.matrix = this.getTransformMatrix();
-	
-			return this.getBoundsWithTransform(transformStack, options);
-		};
-	})(),
-
-	getBoundsWithTransform: function(transformStack, options) {		
+	getBounds: function() {
 		var bbox, i;
 
 		// scan meshes
@@ -759,10 +745,8 @@ Object.assign(Tarumae.SceneObject.prototype, {
 			}
 		}
 	
-		transformStack.push(this);
-
 		if (bbox) {
-			bbox = Tarumae.BoundingBox.transformBoundingBox(bbox, transformStack.matrix);
+			bbox = Tarumae.BoundingBox.transformBoundingBox(bbox, this._transform);
 		}
 
 		// scan children
@@ -771,7 +755,7 @@ Object.assign(Tarumae.SceneObject.prototype, {
 				var object = this.objects[i];
 				
 				if (typeof object.visible !== "undefined" && object.visible) {
-					var objectBBox = object.getBoundsWithTransform(transformStack, options);
+					var objectBBox = object.getBounds();
 					
 					if (!options || !options.filter || options.filter(object)) {
 						bbox = Tarumae.BoundingBox.findBoundingBoxOfBoundingBoxes(bbox, objectBBox);
@@ -779,8 +763,6 @@ Object.assign(Tarumae.SceneObject.prototype, {
 				}
 			}
 		}
-
-		transformStack.pop();
 
 		return bbox;
 	},
@@ -794,23 +776,16 @@ Object.assign(Tarumae.SceneObject.prototype, {
 	}
 });
 
-Tarumae.SceneObject.scanTransforms = function(parent, handler, mstack) {
-	if (typeof mstack === "undefined") {
-		mstack = new Tarumae.TransformStack();
-	}
+Tarumae.SceneObject.scanTransforms = function(parent, handler) {
 
 	for (var i = 0; i < parent.objects.length; i++) {
 		var obj = parent.objects[i];
 
-		mstack.push(obj);
-
-		handler(obj, mstack.matrix);
+		handler(obj, obj._transform);
 
 		if (obj.objects.length > 0) {
-			this.scanTransforms(obj, handler, mstack);
+			this.scanTransforms(obj, handler);
 		}
-		
-		mstack.pop();
 	}
 };
 
