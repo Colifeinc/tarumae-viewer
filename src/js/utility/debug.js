@@ -179,9 +179,9 @@ Tarumae.Debugger = class {
     }
   }
 
-  drawBoundingBox(obj, transformStack) {
+  drawBoundingBox(obj) {
     if (this.showObjectBoundingBox) {
-			var bbox = obj.getBoundsWithTransform(transformStack);
+			var bbox = obj.getBounds();
 			this.renderer.drawBox(bbox, 1.5, "#6666aa");
 		}
   }

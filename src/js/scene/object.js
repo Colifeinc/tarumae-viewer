@@ -666,7 +666,7 @@ Object.assign(Tarumae.SceneObject.prototype, {
 	/*
 	 * Perform hit test with specified ray.
 	 */
-	hitTestByRay: function(ray, mmat, out) {
+	hitTestByRay: function(ray, out) {
 		if (typeof this.radiyBody === "object" && this.radiyBody !== null) {
 			var type = "cube";
 
@@ -686,17 +686,11 @@ Object.assign(Tarumae.SceneObject.prototype, {
 							triangle = { v1: triangle[0], v2: triangle[1], v3: triangle[2] };
 						}
  						
-						var planeVectors;
-						
-						if (mmat) {
-							planeVectors = {
-								v1: new Vec4(triangle.v1, 1.0).mulMat(mmat).xyz(),
-								v2: new Vec4(triangle.v2, 1.0).mulMat(mmat).xyz(),
-								v3: new Vec4(triangle.v3, 1.0).mulMat(mmat).xyz(),
-							};
-						} else {
-							planeVectors = triangle;
-						}
+						var planeVectors = {
+							v1: new Vec4(triangle.v1, 1.0).mulMat(this._transform).xyz(),
+							v2: new Vec4(triangle.v2, 1.0).mulMat(this._transform).xyz(),
+							v3: new Vec4(triangle.v3, 1.0).mulMat(this._transform).xyz(),
+						};
 						
 						var hit = Tarumae.MathFunctions.rayIntersectsPlane(ray, planeVectors, 99999);
 
@@ -729,7 +723,7 @@ Object.assign(Tarumae.SceneObject.prototype, {
 							radius = this.radiyBody.radius;
 						}
 
-						var loc = new Vec4(0, 0, 0, 1).mulMat(mmat).xyz();
+						var loc = new Vec4(0, 0, 0, 1).mulMat(this._transform).xyz();
 
 						var inSphere = Tarumae.MathFunctions.rayIntersectsSphere(ray, { origin: loc, radius: radius }, out);
 						if (inSphere) out.t = 0;
@@ -741,24 +735,7 @@ Object.assign(Tarumae.SceneObject.prototype, {
 		}
 	},
 
-	getBounds: (function() {
-		var transformStack;
-
-		return function(options) {
-
-			if (transformStack === undefined) {
-				transformStack = new Tarumae.TransformStack();
-			} else {
-				transformStack.reset();
-			}
-
-			transformStack.matrix = this.getTransformMatrix();
-	
-			return this.getBoundsWithTransform(transformStack, options);
-		};
-	})(),
-
-	getBoundsWithTransform: function(transformStack, options) {		
+	getBounds: function() {
 		var bbox, i;
 
 		// scan meshes
@@ -768,10 +745,8 @@ Object.assign(Tarumae.SceneObject.prototype, {
 			}
 		}
 	
-		transformStack.push(this);
-
 		if (bbox) {
-			bbox = Tarumae.BoundingBox.transformBoundingBox(bbox, transformStack.matrix);
+			bbox = Tarumae.BoundingBox.transformBoundingBox(bbox, this._transform);
 		}
 
 		// scan children
@@ -780,7 +755,7 @@ Object.assign(Tarumae.SceneObject.prototype, {
 				var object = this.objects[i];
 				
 				if (typeof object.visible !== "undefined" && object.visible) {
-					var objectBBox = object.getBoundsWithTransform(transformStack, options);
+					var objectBBox = object.getBounds();
 					
 					if (!options || !options.filter || options.filter(object)) {
 						bbox = Tarumae.BoundingBox.findBoundingBoxOfBoundingBoxes(bbox, objectBBox);
@@ -788,8 +763,6 @@ Object.assign(Tarumae.SceneObject.prototype, {
 				}
 			}
 		}
-
-		transformStack.pop();
 
 		return bbox;
 	},
@@ -803,23 +776,16 @@ Object.assign(Tarumae.SceneObject.prototype, {
 	}
 });
 
-Tarumae.SceneObject.scanTransforms = function(parent, handler, mstack) {
-	if (typeof mstack === "undefined") {
-		mstack = new Tarumae.TransformStack();
-	}
+Tarumae.SceneObject.scanTransforms = function(parent, handler) {
 
 	for (var i = 0; i < parent.objects.length; i++) {
 		var obj = parent.objects[i];
 
-		mstack.push(obj);
-
-		handler(obj, mstack.matrix);
+		handler(obj, obj._transform);
 
 		if (obj.objects.length > 0) {
-			this.scanTransforms(obj, handler, mstack);
+			this.scanTransforms(obj, handler);
 		}
-		
-		mstack.pop();
 	}
 };
 

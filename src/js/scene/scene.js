@@ -816,21 +816,15 @@ Scene.prototype.findObjectsByViewPosition = function(p, options) {
 };
 
 Scene.prototype.findObjectsByRay = function(ray, options) {
-	var transformStack = new Tarumae.TransformStack();
-
-	ray.origin = new Vec4(ray.origin, 1.0).mulMat(transformStack.matrix).xyz();
-	ray.dir = new Vec4(ray.dir, 0.0).mulMat(transformStack.matrix).xyz().normalize();
-
-	return this.findObjectsByWorldRay(ray, transformStack, options);
+	return this.findObjectsByWorldRay(ray, options);
 };
 
 Scene.prototype.findObjectsByViewRay = function(ray, options) {
-	var transformStack = new Tarumae.TransformStack();
-
-	return this.findObjectsByWorldRay(ray, transformStack, options);
+	//TODO: remove?
+	return this.findObjectsByWorldRay(ray, options);
 };
 
-Scene.prototype.findObjectsByWorldRay = function(ray, transformStack, options) {
+Scene.prototype.findObjectsByWorldRay = function(ray, options) {
 
 	if (this.renderer.debugMode) {
 		this.renderer.debugger.beforeRaycast();
@@ -843,7 +837,6 @@ Scene.prototype.findObjectsByWorldRay = function(ray, transformStack, options) {
 	var rayNormalizedDir = ray.dir.normalize();
 
 	var session = {
-		mmstack: transformStack,
 		level: 0,
 		rayNormalizedDir: rayNormalizedDir,
 		rayNormalizedNegDir: rayNormalizedDir.neg(),
@@ -883,14 +876,10 @@ Scene.prototype.hitTestObjectByRay = function(obj, ray, out, session, options) {
 	if (typeof options.descendantFilter === "function" && options.descendantFilter(obj) === false) {
 		return false;
 	}
-
-	var mmstack = session.mmstack;
-
-	mmstack.push(obj);
 	
 	if (typeof obj.hitTestByRay === "function"
 		&& (typeof options.filter !== "function" || options.filter(obj))) {
-		if (obj.hitTestByRay.call(obj, ray, mmstack.matrix, out)) {
+		if (obj.hitTestByRay.call(obj, ray, out)) {
 			if (typeof out.t === "undefined") {
 				out.t = 0;
 			}
@@ -906,7 +895,6 @@ Scene.prototype.hitTestObjectByRay = function(obj, ray, out, session, options) {
 	}
 
 	if (!Array.isArray(obj.objects) || !Array.isArray(obj.meshes)) {
-		mmstack.pop();
 		return false;
 	}
 
@@ -923,7 +911,7 @@ Scene.prototype.hitTestObjectByRay = function(obj, ray, out, session, options) {
 		&& (typeof options.filter !== "function" || options.filter(obj))
 		&& Array.isArray(obj.meshes)) {
 
-		var mmat = mmstack.matrix;
+		var mmat = obj._transform;
 		session.mmat = mmat;
 		
 		for (var k = 0; k < obj.meshes.length; k++) {
@@ -938,52 +926,39 @@ Scene.prototype.hitTestObjectByRay = function(obj, ray, out, session, options) {
 					t: mout.t,
 					worldPosition: mout.worldPosition,
 					localPosition: mout.localPosition,
-					transform: mmat
 				});
 			}
 		}
 	}
-
-	mmstack.pop();
 };
 
 /*
  * Get the bounds of this scene.
  */
-Scene.prototype.getBounds = (function() {
-	var transformStack;
+Scene.prototype.getBounds = function() {
+	var bbox = null;
 
-	return function(options) {
-		var bbox = null;
+	for (var i = 0; i < this.objects.length; i++) {
+		var object = this.objects[i];
+		if (typeof object.visible !== "undefined" && object.visible) {
 
-		if (transformStack === undefined) {
-			transformStack = new Tarumae.TransformStack();
-		} else {
-			transformStack.reset();
-		}
-
-		for (var i = 0; i < this.objects.length; i++) {
-			var object = this.objects[i];
-			if (typeof object.visible !== "undefined" && object.visible) {
-
-				var objectBBox = object.getBoundsWithTransform(transformStack, options);
-			
-				if (!options || !options.filter || options.filter(object)) {
-					bbox = Tarumae.BoundingBox.findBoundingBoxOfBoundingBoxes(bbox, objectBBox);
-				} else if (!bbox) {
-					bbox = objectBBox;
-				}
+			var objectBBox = object.getBounds();
+		
+			if (!options || !options.filter || options.filter(object)) {
+				bbox = Tarumae.BoundingBox.findBoundingBoxOfBoundingBoxes(bbox, objectBBox);
+			} else if (!bbox) {
+				bbox = objectBBox;
 			}
 		}
+	}
 
-		if (!bbox) {
-			// no objects, no bounds :-(
-			return { min: new Vec3(), max: new Vec3() };
-		}
-	
-		return bbox;
-	};
-})();
+	if (!bbox) {
+		// no objects, no bounds :-(
+		return { min: new Vec3(), max: new Vec3() };
+	}
+
+	return bbox;
+}
 
 Scene.prototype.mousedown = function(scrpos) {
 

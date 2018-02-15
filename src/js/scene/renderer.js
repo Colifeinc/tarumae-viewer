@@ -114,7 +114,6 @@ Tarumae.Renderer = class {
 		this.viewMatrix = new Tarumae.Matrix4();
 		this.cameraMatrix = new Tarumae.Matrix4();
 		this.modelMatrix = new Tarumae.Matrix4();
-		this.transformStack = new Tarumae.TransformStack();
 
 		this.gl = gl;
 
@@ -477,8 +476,6 @@ Tarumae.Renderer = class {
 			Tarumae.Utility.invokeIfExist(this.currentShader, "beginScene", scene);
 		}
 	
-		this.transformStack.matrix.loadIdentity();
-	
 		for (var i = 0; i < scene.objects.length; i++) {
 			this.drawObject(scene.objects[i], false);
 		}
@@ -650,10 +647,7 @@ Tarumae.Renderer = class {
 			return;
 		}
 	
-		if (!transparencyRendering) {
-			this.transformStack.push(obj);
-			obj.lastRenderTransform = new Tarumae.Matrix4(this.transformStack.matrix);
-	
+		if (!transparencyRendering) {	
 			obj._opacity = (!isNaN(obj.opacity) ? obj.opacity : 1)
 				* (1.0 - Tarumae.MathFunctions.clamp((obj.mat && !isNaN(obj.mat.transparency)) ? obj.mat.transparency : 0));
 	
@@ -665,12 +659,8 @@ Tarumae.Renderer = class {
 					this.drawObject(child, false);
 				}
 	
-				this.transformStack.pop();
 				return;
 			}
-		} else {
-			this.transformStack.matrixStack.push(new Tarumae.Matrix4());
-			this.transformStack.matrix = obj.lastRenderTransform;
 		}
 	
 		var shaderPushed = false;
@@ -720,7 +710,7 @@ Tarumae.Renderer = class {
 				{
 					var div = obj._htmlObject;
 	
-					var worldloc = new Vec4(0, 0, 0, 1).mulMat(this.transformStack.matrix);
+					var worldloc = new Vec4(0, 0, 0, 1).mulMat(obj._transform);
 					var p = this.transformPoint(worldloc);
 	
 					var w = div.scrollWidth / 2;
@@ -746,21 +736,16 @@ Tarumae.Renderer = class {
 		if (shaderPushed) {
 			this.disuseCurrentShader();
 		}
-	
-		this.transformStack.pop();
-	
-		if (this.debugMode) {
-			this.debugger.drawBoundingBox(obj, this.transformStack);
-		}
+		
+		// if (this.debugMode) {
+		// 	this.debugger.drawBoundingBox(obj, this.transformStack);
+		// }
 	};
 	
 	drawHighlightObject(obj, color) {
-		if (obj.lastRenderTransform === undefined || obj.visible === false || !this.options.enableDrawMesh) {
+		if (obj.visible === false || !this.options.enableDrawMesh || !obj._transform) {
 			return;
 		}
-	
-		this.transformStack.matrixStack.push(new Tarumae.Matrix4());
-		this.transformStack.matrix = obj.lastRenderTransform;
 	
 		var gl = this.gl;
 	
@@ -783,7 +768,6 @@ Tarumae.Renderer = class {
 	
 		shader.endObject(obj);
 		this.disuseCurrentShader();
-		this.transformStack.pop();
 	};
 	
 	drawHighlightChildren(obj, color) {
@@ -1393,38 +1377,5 @@ Object.assign(DrawingContext2D.prototype, {
 		}
 	
 		ctx.fillText(text, p.x, p.y);
-	},
-});
-
-///////////////// TransformStack /////////////////
-
-Tarumae.TransformStack = class {
-	constructor() {
-		this.matrix = new Tarumae.Matrix4().loadIdentity();
-		this.matrixStack = [];
-	}
-
-	reset() {
-		this.matrix.loadIdentity();
-		this.matrixStack._s3_clear();
-	}
-
-	push(obj) {
-		this.matrixStack.push(this.matrix);
-
-		var newMatrix = new Tarumae.Matrix4(this.matrix);
-		this.matrix = newMatrix;
-
-		this.applyObjectTransform(obj);
-	}
-
-	pop() {
-		this.matrix = this.matrixStack.pop();
-	}
-
-	applyObjectTransform(obj) {
-		this.matrix.translate(obj.location.x, obj.location.y, obj.location.z);
-		this.matrix.rotate(obj.angle.x, obj.angle.y, obj.angle.z);
-		this.matrix.scale(obj.scale.x, obj.scale.y, obj.scale.z);
 	}
 }
