@@ -4,6 +4,7 @@ attribute vec2 vertexTexcoord;
 attribute vec2 vertexTexcoord2;
 attribute vec3 vertexTangent;
 attribute vec3 vertexBitangent;
+attribute vec3 vertexColor;
 
 uniform mat4 projectViewMatrix;
 uniform mat4 modelMatrix;
@@ -11,11 +12,13 @@ uniform mat3 modelMatrix3x3;
 uniform mat4 normalMatrix;
 
 uniform bool hasNormalMap;
+uniform bool hasVColor;
 
 varying vec3 vertex;
 varying vec3 normal;
 varying vec2 texcoord1;
 varying vec2 texcoord2;
+varying vec3 vcolor;
 varying mat3 TBN;
 
 void main(void) {
@@ -26,6 +29,7 @@ void main(void) {
 	
 	vertex = transformPos.xyz;
 	normal = normalize((normalMatrix * vec4(vertexNormal, 0.0)).xyz);
+	vcolor = vertexColor;
 	
 	texcoord1 = vertexTexcoord;
 	texcoord2 = vertexTexcoord2;

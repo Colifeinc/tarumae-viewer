@@ -1035,6 +1035,7 @@ Tarumae.StandardShader = class extends Tarumae.Shader {
 		this.vertexTexcoord2Attribute = this.findAttribute('vertexTexcoord2');
 		this.vertexTangentAttribute = this.findAttribute('vertexTangent');
 		this.vertexBitangentAttribute = this.findAttribute('vertexBitangent');
+		this.vertexColorAttribute = this.findAttribute('vertexColor');
 		
 		this.projectViewMatrixUniform = this.findUniform('projectViewMatrix');
 		this.modelMatrixUniform = this.findUniform('modelMatrix');

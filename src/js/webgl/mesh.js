@@ -75,7 +75,8 @@ Object.assign(Tarumae.Mesh.prototype, {
 					indexCount: header[5],
 					normalCount: 0,
 					texcoordCount: 0,
-					tangentBasisCount: 0
+					tangentBasisCount: 0,
+					hasColor: false,
 				};
 
 				this.indexed = this.meta.indexCount > 0;
@@ -116,15 +117,25 @@ Object.assign(Tarumae.Mesh.prototype, {
 			if ((flags & Tarumae.Mesh.HeaderFlags.HasTangentBasisData) === Tarumae.Mesh.HeaderFlags.HasTangentBasisData) {
 				this.meta.tangentBasisCount = this.meta.vertexCount;
 			}
+
+			if ((flags & 0x20) == 0x20) {
+				console.log('has color');
+				this.meta.hasColor = true;
+			}
 		
 			var headerLength = header[2];
 
 			this.vertexBuffer = new Float32Array(stream, headerLength);
 
 			if (this.indexed) {
-				this.indexBuffer = new Uint16Array(stream, headerLength + (this.meta.vertexCount * 12
-					+ this.meta.normalCount * 12 + this.meta.texcoordCount * this.meta.uvCount * 8
-					+ this.meta.tangentBasisCount * 24));
+				var indexByteOffset = headerLength
+					+ this.meta.vertexCount * 12
+					+ this.meta.normalCount * 12
+					+ this.meta.texcoordCount * this.meta.uvCount * 8
+					+ this.meta.tangentBasisCount * 24
+					+ (this.meta.hasColor ? this.meta.vertexCount * 12 : 0);
+				
+				this.indexBuffer = new Uint16Array(stream, indexByteOffset);
 			}
 		} else {
 
@@ -240,6 +251,11 @@ Object.assign(Tarumae.Mesh.prototype, {
 
 				meta.bitangentBasisOffset = offset;
 				offset += meta.tangentBasisCount * 12;
+			}
+
+			if (meta.hasColor) {
+				meta.vertexColorOffset = offset;
+				offset += meta.vertexCount * 12;
 			}
 		}
 
@@ -404,6 +420,16 @@ Object.assign(Tarumae.Mesh.prototype, {
 			} else {
 				gl.disableVertexAttribArray(sp.vertexTangentAttribute);
 				gl.disableVertexAttribArray(sp.vertexBitangentAttribute);
+			}
+		}
+
+		// color
+		if (sp.vertexColorAttribute >= 0) {
+			if (meta.hasColor) {
+				gl.vertexAttribPointer(sp.vertexColorAttribute, 3, gl.FLOAT, false, meta.stride, meta.vertexColorOffset);
+				gl.enableVertexAttribArray(sp.vertexColorAttribute);
+			} else {
+				gl.disableVertexAttribArray(sp.vertexColorAttribute);
 			}
 		}
 	
