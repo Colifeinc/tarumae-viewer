@@ -162,6 +162,19 @@ Object.defineProperties(Array.prototype, {
 
 });
 
+Object.defineProperties(Float32Array.prototype, {
+	_s3_set: {
+		value: function(i) {
+			if (arguments.length > 1) {
+				for (var j = 0; j < arguments.length - 1; j++) {
+					this[i++] = arguments[j + 1];
+				}
+			}
+		},
+		enumerable: false
+	},
+});
+	
 // IE ployfill
 if (typeof Object.assign !== "function") {
   Object.assign = function(target, varArgs) { // .length of function is 2
@@ -296,6 +309,8 @@ Object.defineProperties(Tarumae.Utility, {
 				y: viewer.mouse.movement.y * intensity,
 			};
 
+			scene.animation = true;
+
 			var acc = setInterval(function() {
 
 				var xvol = movement.x * attenuation;
@@ -309,6 +324,7 @@ Object.defineProperties(Tarumae.Utility, {
 
 				if (Math.abs(movement.x) < 0.2 && Math.abs(movement.y) < 0.2) {
 					clearInterval(acc);
+          scene.animation = false;
 
 					if (typeof onfinish === "function") {
 						onfinish();

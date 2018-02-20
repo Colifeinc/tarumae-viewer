@@ -13,10 +13,8 @@ import "../math/matrix"
 
 Tarumae.Shader = class {
 	constructor(renderer, vertShaderSrc, fragShaderSrc) {
-		this.vertexShader = null;
-		this.fragmentShader = null;
 
-		if (renderer != null) {
+		if (renderer) {
 			this.create(renderer, vertShaderSrc, fragShaderSrc);
 		}
 
@@ -32,7 +30,6 @@ Tarumae.Shader = class {
 		});
 	
 		this.defaultSunColor = new Vec3(0.21, 0.14, 0.05);
-
 		this.emptyTexture = null;
 
 		this.sceneStack = [];
@@ -147,116 +144,118 @@ Tarumae.Shader = class {
 	}
 };
 
-Tarumae.ShaderUniform = function(shader, name, type, slot) {
-	const gl = shader.gl;
-	const uniform = this;
+Tarumae.ShaderUniform = class {
+	constructor(shader, name, type, slot) {
+		const gl = shader.gl;
+		const uniform = this;
 
-	switch (type) {
+		switch (type) {
 
-		case "bool":
-		case "boolean":	
-		case "int":
-			uniform.address = uniform.register(shader, name);
-			uniform.set = function(val) {
-				gl.uniform1i(uniform.address, val);
-			};
-			break;
+			case "bool":
+			case "boolean":
+			case "int":
+				uniform.address = uniform.register(shader, name);
+				uniform.set = function(val) {
+					gl.uniform1i(uniform.address, val);
+				};
+				break;
 
-		case "float":
-			uniform.address = uniform.register(shader, name);
-			uniform.set = function(val) {
-				gl.uniform1f(uniform.address, val);
-			};
-			break;
+			case "float":
+				uniform.address = uniform.register(shader, name);
+				uniform.set = function(val) {
+					gl.uniform1f(uniform.address, val);
+				};
+				break;
 
-		case "vec2":
-			uniform.address = uniform.register(shader, name);
-			uniform.set = function(val) {
-				gl.uniform2fv(uniform.address, val);
-			}
-			break;
-
-		case "vec3":
-			uniform.address = uniform.register(shader, name);
-			uniform.set = function(val) {
-				if (Array.isArray(val)) {
-					gl.uniform3fv(uniform.address, val);
-				} else {
-					gl.uniform3fv(uniform.address, val.toArray());
+			case "vec2":
+				uniform.address = uniform.register(shader, name);
+				uniform.set = function(val) {
+					gl.uniform2fv(uniform.address, val);
 				}
-			}
-			break;
+				break;
 
-		case "vec4":
-			uniform.address = uniform.register(shader, name);
-			uniform.set = function(val) {
-				if (Array.isArray(val)) {
-					gl.uniform4fv(uniform.address, val);
-				} else {
-					gl.uniform4fv(uniform.address, val.toArray());
+			case "vec3":
+				uniform.address = uniform.register(shader, name);
+				uniform.set = function(val) {
+					if (Array.isArray(val)) {
+						gl.uniform3fv(uniform.address, val);
+					} else {
+						gl.uniform3fv(uniform.address, val.toArray());
+					}
 				}
-			}
-			break;
+				break;
 
-		case "mat3":
-			uniform.address = uniform.register(shader, name);
-			uniform.set = function(val) {
-				gl.uniformMatrix3fv(uniform.address, false, val);
-			}
-			break;
-
-		case "mat4":
-			uniform.address = uniform.register(shader, name);
-			uniform.set = function(val) {
-				if (Array.isArray(val)) {
-					gl.uniformMatrix4fv(uniform.address, false, val);
-				}	else {
-					gl.uniformMatrix4fv(uniform.address, false, val.toArray());
+			case "vec4":
+				uniform.address = uniform.register(shader, name);
+				uniform.set = function(val) {
+					if (Array.isArray(val)) {
+						gl.uniform4fv(uniform.address, val);
+					} else {
+						gl.uniform4fv(uniform.address, val.toArray());
+					}
 				}
-			}
-			break;
+				break;
 
-		case "tex2d":
-		case "texture":
-		case "tex":
-		case "texcube":
-			uniform.address = uniform.register(shader, name);
-			gl.uniform1i(uniform.address, slot);
+			case "mat3":
+				uniform.address = uniform.register(shader, name);
+				uniform.set = function(val) {
+					gl.uniformMatrix3fv(uniform.address, false, val);
+				}
+				break;
 
-			uniform.hasUniform = shader.bindUniform("has" + name, "bool");
+			case "mat4":
+				uniform.address = uniform.register(shader, name);
+				uniform.set = function(val) {
+					if (Array.isArray(val)) {
+						gl.uniformMatrix4fv(uniform.address, false, val);
+					} else {
+						gl.uniformMatrix4fv(uniform.address, false, val.toArray());
+					}
+				}
+				break;
+
+			case "tex2d":
+			case "texture":
+			case "tex":
+			case "texcube":
+				uniform.address = uniform.register(shader, name);
+				gl.uniform1i(uniform.address, slot);
+
+				uniform.hasUniform = shader.bindUniform("has" + name, "bool");
 			
-			uniform.set = function(tex) {
-				gl.activeTexture(gl.TEXTURE0 + slot);
-				tex.use(shader.renderer);
-			};
-			break;
+				uniform.set = function(tex) {
+					gl.activeTexture(gl.TEXTURE0 + slot);
+					tex.use(shader.renderer);
+				};
+				break;
 
-		case "bbox":
-			uniform.max = shader.bindUniform(name + ".max", "vec3");
-			uniform.min = shader.bindUniform(name + ".min", "vec3");
-			uniform.origin = shader.bindUniform(name + ".origin", "vec3");
+			case "bbox":
+				uniform.max = shader.bindUniform(name + ".max", "vec3");
+				uniform.min = shader.bindUniform(name + ".min", "vec3");
+				uniform.origin = shader.bindUniform(name + ".origin", "vec3");
 				
-			uniform.set = function(bbox) {
-				uniform.max.set(bbox.max);
-				uniform.min.set(bbox.min);
-				uniform.origin.set(bbox.origin);
-			};
-			break;
-	}
-};
-
-Tarumae.ShaderUniform.prototype.register = function(shader, name) {
-	var address = shader.findUniform(name);
-
-	if (!address) {
-		if (shader.renderer.debugMode && shader.renderer.developmentVersion) {
-			console.warn("uniform not found: " + name);
+				uniform.set = function(bbox) {
+					uniform.max.set(bbox.max);
+					uniform.min.set(bbox.min);
+					uniform.origin.set(bbox.origin);
+				};
+				break;
 		}
-		this.set = function() { };
-		return;
+	}	
+	
+	register(shader, name) {
+		var address = shader.findUniform(name);
+	
+		if (!address) {
+			if (shader.renderer.debugMode && shader.renderer.developmentVersion) {
+				console.warn("uniform not found: " + name);
+			}
+			this.set = function() { };
+			return;
+		}
+	
+		return address;
 	}
-
-	return address;
 };
 
 // function DefaultShaderProgram(renderer, vertShaderSrc, fragShaderSrc) {
@@ -456,7 +455,7 @@ Tarumae.ShaderUniform.prototype.register = function(shader, name) {
 //  	  (scene.transformStack.matrix.mul(this.lightMatrix).mul(this.lightProjectMatrix)).toArray());
 // };
 
-////////////////// SceneShaderProgram ///////////////////////
+////////////////// ViewerShader ///////////////////////
 
 Tarumae.ViewerShader = class extends Tarumae.Shader {
 	constructor(renderer, vertShaderSrc, fragShaderSrc) {
@@ -1527,6 +1526,84 @@ Tarumae.StandardShader.prototype.endScene = function(scene) {
 	// process goes before call endScene of prototype
 	
 	Tarumae.Shader.prototype.endScene.call(this, scene);
+};
+
+////////////////// PointShader ///////////////////////
+
+Tarumae.PointShader = class extends Tarumae.Shader {
+	constructor(renderer, vertShaderSrc, fragShaderSrc) {
+		super(renderer, vertShaderSrc, fragShaderSrc);
+
+		// this.create(renderer, vertShaderSrc, fragShaderSrc);
+		this.use();
+
+		// vertex
+		this.vertexPositionAttribute = this.findAttribute('vertexPosition');
+		// this.vertexNormalAttribute = this.findAttribute('vertexNormal');
+		this.vertexColorAttribute = this.findAttribute('vertexColor');
+
+		// projection
+		this.projectViewModelMatrixUniform = this.bindUniform("projectViewModelMatrix", "mat4");
+
+		// material
+		this.colorUniform = this.bindUniform("color", "vec3");
+		this.opacityUniform = this.bindUniform("opacity", "float");
+
+		this.pointSizeUniform = this.bindUniform("pointSize", "float");
+		this.pointSizeUniform.set(1);
+	}
+
+	beginObject(obj) {
+		super.beginObject.apply(this, arguments);
+	
+		var gl = this.gl;
+		
+		this.projectViewModelMatrixUniform.set(obj._transform.mul(this.renderer.projectionViewMatrix));
+		
+		var mat = obj.mat;
+		var color = undefined;
+		var opacity = obj.opacity;
+		
+		if (typeof mat === "object" && mat != null) {
+			
+			// color
+			if (typeof mat.color === "object") {
+				if (Array.isArray(mat.color)) {
+					color = mat.color;
+				} else if (mat.color instanceof Color3) {
+					color = mat.color.toArray();
+				}
+			}
+		}
+		
+		// color
+		if (color) {
+			this.colorUniform.set(color);
+		} else {
+			this.colorUniform.set(this.defaultColor);
+		}
+	
+		// opacity
+		if (opacity) {
+			gl.enable(gl.BLEND);
+			gl.disable(gl.DEPTH_TEST);
+			this.opacityUniform.set(opacity);
+		} else {
+			this.opacityUniform.set(1.0);
+		}
+	}
+
+	endObject(obj) {
+		var gl = this.renderer.gl;
+	
+		if (typeof obj.mat === "object" && typeof obj.mat.opacity !== "undefined"
+			&& obj.mat.opacity < 1.0) {
+			gl.disable(gl.BLEND);
+			gl.enable(gl.DEPTH_TEST);
+		}
+	
+		super.endObject.apply(this, arguments);
+	}
 };
 
 ////////////////// GLShader ///////////////////////

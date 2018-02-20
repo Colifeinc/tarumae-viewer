@@ -677,6 +677,11 @@ Tarumae.Renderer = class {
 				shaderPushed = true;
 			}
 		}
+
+		if (!shaderPushed && obj instanceof Tarumae.ParticleObject) {
+			this.useShader("point");
+			shaderPushed = true;
+		}
 	
 		this.currentShader.beginObject(obj);
 	
@@ -732,7 +737,7 @@ Tarumae.Renderer = class {
 		}
 	
 		this.currentShader.endObject(obj);
-	
+
 		if (shaderPushed) {
 			this.disuseCurrentShader();
 		}
@@ -1196,6 +1201,10 @@ TarumaeRenderer.Shaders = {
 	standard: {
 		vert: fs.readFileSync(__dirname + "../../../shader/standard.vert", "utf8"),
 		frag: fs.readFileSync(__dirname + "../../../shader/standard.frag", "utf8"), class: "StandardShader"
+	},
+	point: {
+		vert: fs.readFileSync(__dirname + "../../../shader/points.vert", "utf8"),
+		frag: fs.readFileSync(__dirname + "../../../shader/points.frag", "utf8"), class: "PointShader"
 	},
 };
 

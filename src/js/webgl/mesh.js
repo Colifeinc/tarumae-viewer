@@ -37,10 +37,8 @@ Tarumae.Mesh = class {
 		this._lightmapTrunkId = undefined;
 		this._lightmapType = undefined;
 	}
-};
 
-Object.assign(Tarumae.Mesh.prototype, {
-	loadFromStream: function(stream) {
+	loadFromStream(stream) {
 		if (!stream || stream.byteLength <= 0) {
 			console.error("can't load mesh: content is empty");
 			return;
@@ -119,7 +117,6 @@ Object.assign(Tarumae.Mesh.prototype, {
 			}
 
 			if ((flags & 0x20) == 0x20) {
-				console.log('has color');
 				this.meta.hasColor = true;
 			}
 		
@@ -153,9 +150,9 @@ Object.assign(Tarumae.Mesh.prototype, {
 
 			this.vertexBuffer = new Float32Array(stream, 12);
 		}
-	},
+	}
 
-	bind: function(renderer) {
+	bind(renderer) {
 		if (this.meta === undefined) {
 			this.meta = {
 				vertexCount: 0,
@@ -191,6 +188,10 @@ Object.assign(Tarumae.Mesh.prototype, {
 			meta.texcoordCount = meta.vertexCount;
 		}
 
+		if (Array.isArray(this.colors)) {
+			meta.hasColor = true;
+		}
+
 		if (Array.isArray(this.indexes)) {
 			meta.indexCount = this.indexes.length;
 		}
@@ -213,6 +214,10 @@ Object.assign(Tarumae.Mesh.prototype, {
 
 			if (meta.tangentBasisCount > 0) {
 				vertexBuffer = vertexBuffer.concat(this.tangents).concat(this.bitangents);
+			}
+
+			if (meta.hasColor) {
+				vertexBuffer = vertexBuffer.concat(this.colors);
 			}
 
 			this.vertexBuffer = new Float32Array(vertexBuffer);
@@ -265,11 +270,8 @@ Object.assign(Tarumae.Mesh.prototype, {
 			}
 		}
 
-		// create buffer
-
 		var gl = renderer.gl;
 
-		// save stream into WebGL memory
 		this.meta.vertexBufferId = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.meta.vertexBufferId);
 		gl.bufferData(gl.ARRAY_BUFFER, this.vertexBuffer, gl.STATIC_DRAW);
@@ -281,8 +283,6 @@ Object.assign(Tarumae.Mesh.prototype, {
 		}
 
 		var indexBufferLength = (!this.indexBuffer ? 0 : (this.indexBuffer.length * 2));
-
-		// console.debug("mesh bound: " + this.vertexBuffer.length * 4	+ " / " + indexBufferLength);
 		
 		if (renderer.debugger) {
 			this._vertexMemorySize = this.vertexBuffer.length * 4 + indexBufferLength;
@@ -307,20 +307,20 @@ Object.assign(Tarumae.Mesh.prototype, {
 		}
 		
 		return true;
-	},
+	}
 
-	unbind: function() {
+	unbind() {
 		if (this.meta) {
 
 			var renderer = this.meta.renderer;
 		
-			if (this.meta.vertexBufferId != undefined) {
+			if (this.meta.vertexBufferId) {
 				if (renderer) renderer.gl.deleteBuffer(this.meta.vertexBufferId);
 				this.meta.vertexBufferId = undefined;
 				this.vertexBuffer = undefined;
 			}
 
-			if (this.meta.indexBufferId != undefined) {
+			if (this.meta.indexBufferId) {
 				if (renderer) renderer.gl.deleteBuffer(this.meta.indexBufferId);
 				this.meta.indexBufferId = undefined;
 				this.indexBuffer = undefined;
@@ -335,34 +335,32 @@ Object.assign(Tarumae.Mesh.prototype, {
 					renderer.debugger.totalMeshMemoryUsed -= this._vertexMemorySize;
 				}
 			}
-
-			// console.debug("mesh unbound");
 		}
-	},
+	}
 
-	destroy: function() {
+	destroy() {
 		this.unbind();
 
-		if (Array.isArray(this.vertices)) {
+		if(Array.isArray(this.vertices)) {
 			this.vertices.length = 0;
 		}
-		if (Array.isArray(this.normals)) {
+		if(Array.isArray(this.normals)) {
 			this.normals.length = 0;
 		}
-		if (Array.isArray(this.texcoords)) {
+		if(Array.isArray(this.texcoords)) {
 			this.texcoords.length = 0;
 		}
-		if (Array.isArray(this.indexes)) {
+		if(Array.isArray(this.indexes)) {
 			this.indexes.length = 0;
 		}
 		
 		this._polygonCount = 0;
-	},
+	}
 
-	draw: function(renderer) {
+	draw(renderer) {
 		'use strict';
 
-		if (this.meta === undefined || this.meta.vertexBufferId === undefined) {
+		if (!this.meta || !this.meta.vertexBufferId) {
 			if (!this.bind(renderer)) {
 				return;
 			}
@@ -458,7 +456,26 @@ Object.assign(Tarumae.Mesh.prototype, {
 		} else {
 			gl.drawArrays(glPrimitiveMode, 0, meta.vertexCount);
 		}
-	},
+	}
+
+	get boundingBox() {
+		if (!this._boundingBox) {
+			this._boundingBox = this.calcBoundingBox();
+		}
+
+		return {
+			min: this._boundingBox.min.clone(),
+			max: this._boundingBox.max.clone(),
+		};
+	}
+	
+	get polygonCount() {
+		return this._polygonCount;
+	}
+	
+};
+
+Object.assign(Tarumae.Mesh.prototype, {
 
 	hitTestByRay: function(ray, maxt, session, options) {
 		'use strict';
@@ -824,29 +841,7 @@ Object.assign(Tarumae.Mesh.prototype, {
 			return true;
 		}
 	})(),
-});	
-
-Object.defineProperties(Tarumae.Mesh.prototype, {
-	"boundingBox": {
-		get: function() {
-			if (!this._boundingBox) {
-				this._boundingBox = this.calcBoundingBox();
-			}
-
-			return {
-				min: this._boundingBox.min.clone(),
-				max: this._boundingBox.max.clone(),
-			};
-		}
-	},
-	"polygonCount": {
-		get: function() {
-			return this._polygonCount;
-		}
-	}
 });
-
-// Tarumae.Make_Inheritable_Object(Tarumae.Mesh.prototype);
 
 Object.assign(Tarumae.Mesh, {
 
@@ -932,3 +927,70 @@ Object.assign(Tarumae.Mesh, {
 		};
 	})(),
 });
+
+Tarumae.ParticleMesh = class extends Tarumae.Mesh {
+	constructor(count = 100) {
+		super();
+
+		// this.vertexBuffer = new Float32Array();
+		this.meta = {
+			vertexCount: count,
+			hasColor: true,
+			stride: 0,
+			vertexColorOffset: count * 3 * 4,
+		};
+
+		this.composeMode = Tarumae.Mesh.ComposeModes.Points;
+		this.bufferDirty = true;
+
+		// this.vertexArray = new ArrayBuffer(count * 2 * 3 * 4);
+		this.vertexBuffer = new Float32Array(count * 2 * 3);
+	}
+
+	bind(renderer) {
+		if (!this.meta || this.meta.vertexBufferId) return;
+
+		this.meta.renderer = renderer;
+		var gl = renderer.gl;
+
+		this.meta.vertexBufferId = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.meta.vertexBufferId);
+		gl.bufferData(gl.ARRAY_BUFFER, this.vertexBuffer, gl.DYNAMIC_DRAW);
+	}
+
+	updateBuffer() {
+		if (this.meta && this.meta.vertexBufferId) {
+			var gl = this.meta.renderer.gl;
+			if (gl) {
+				gl.bindBuffer(gl.ARRAY_BUFFER, this.meta.vertexBufferId);
+				gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.vertexBuffer);
+
+				this.bufferDirty = false;
+			}
+		}
+	}
+
+	update() {
+		this.bufferDirty = true;
+	}
+
+	draw(renderer) {
+		if (!this.meta || !this.meta.vertexBufferId) {
+			this.bind(renderer);
+
+			if (!this.meta.vertexBufferId) {
+				return;
+			}
+		}
+
+		if (this.bufferDirty) {
+			this.updateBuffer();
+
+			if (this.bufferDirty) {
+				return;
+			}
+		}
+
+		super.draw.apply(this, arguments);
+	}
+};

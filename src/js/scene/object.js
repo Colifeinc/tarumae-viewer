@@ -801,18 +801,12 @@ Tarumae.Sun = class extends Tarumae.SceneObject {
 
 ////////////////////////// Plane //////////////////////////
 
-export class Plane extends Tarumae.SceneObject {
-	
+Tarumae.Plane = class extends Tarumae.SceneObject {
 	constructor(width, height) {
 		super();
-
 		this.addMesh(new Tarumae.PlaneMesh(width, height));
-	}	
+	}
 }
-
-// // backward compatibility
-// Object.defineProperty(window, "Plane",
-// { get: Tarumae.Utility.deprecate("Plane", "Tarumae.Plane") });
 
 Tarumae.PlaneMesh = class extends Tarumae.Mesh {
 	constructor(width, height) {
@@ -915,10 +909,6 @@ Tarumae.Cube = class extends Tarumae.SceneObject {
 	}
 };
 
-// backward compatibility
-// Object.defineProperty(window, "Cube",
-// { get: Tarumae.Utility.deprecate("Cube", "Tarumae.Cube") });
-
 ////////////////////////// GridLine //////////////////////////
 
 Tarumae.GridLine = class extends Tarumae.SceneObject {
@@ -945,13 +935,7 @@ Tarumae.GridLine = class extends Tarumae.SceneObject {
 
 		this.addMesh(Tarumae.GridLine.generateGridLineMesh(this.gridSize, this.stride));
 	}
-}	
-
-// backward compatibility
-// Object.defineProperty(window, "GridLine",
-// 	{ get: Tarumae.Utility.deprecate("GridLine", "Tarumae.GridLine") });
-
-// Tarumae.GridLine.prototype = new Tarumae.SceneObject();
+}
 
 Tarumae.GridLine.generateGridLineMesh = function(gridSize, stride) {
 	var width = gridSize, height = gridSize;
@@ -1035,12 +1019,6 @@ Tarumae.Billboard = class extends Tarumae.SceneObject {
 	}
 };	
 
-// Backward compatibility
-// Object.defineProperty(window, "Billboard",
-// 	{ get: Tarumae.Utility.deprecate("Billboard", "Tarumae.Billboard") });
-
-// Tarumae.Billboard.prototype = new Tarumae.SceneObject();
-
 Tarumae.Billboard.faceToCamera = function(billboard, camera) {
 	var cameraLoc = camera.getWorldLocation();
 	var worldLoc = billboard.getWorldLocation();
@@ -1064,8 +1042,6 @@ Tarumae.BillboardMesh = class extends Tarumae.Mesh {
 		this.composeMode = Tarumae.Mesh.ComposeModes.TriangleStrip;
 	}
 }	
-
-// Tarumae.BillboardMesh.prototype = new Tarumae.Mesh();
 
 Tarumae.BillboardMesh.instance = null;
 
@@ -1145,8 +1121,6 @@ Tarumae.Shapes.LineMesh = class extends Tarumae.SceneObject {
 		this.composeMode = Tarumae.Mesh.ComposeModes.TriangleStrip;
 	}
 }	
-
-// Tarumae.Shapes.LineMesh.prototype = new Tarumae.Mesh();
 
 Tarumae.Shapes.LineMesh.prototype.update = function(start, end, width) {
 	this.destroy();
@@ -1331,11 +1305,7 @@ Tarumae.Circle = class extends Tarumae.SceneObject {
 
 		this.addMesh(this.Parameters.mesh);
 	}
-}	
-
-// backward compatibility
-// Object.defineProperty(window, "Circle",
-// { get: Tarumae.Utility.deprecate("Circle", "Tarumae.Circle") });
+}
 
 Tarumae.CircleMesh = class extends Tarumae.SceneObject {
 	constructor(segments, circleSize) {
@@ -1355,10 +1325,6 @@ Tarumae.CircleMesh = class extends Tarumae.SceneObject {
 		this.composeMode = Tarumae.Mesh.ComposeModes.TriangleFan;
 	}
 }	
-
-// backward compatibility
-// Object.defineProperty(window, "CircleMesh",
-// { get: Tarumae.Utility.deprecate("CircleMesh", "Tarumae.CircleMesh") });
 
 ///////////////// ParticleGenerator /////////////////
 
@@ -1483,4 +1449,12 @@ Tarumae.ProgressBarObject = class extends Tarumae.SceneObject {
 	}
 }	
 
-// Tarumae.ProgressBarObject.prototype = new Tarumae.SceneObject();
+//////////////////// ParticleObject ////////////////////
+
+Tarumae.ParticleObject = class extends Tarumae.SceneObject {
+	constructor() {
+		super();
+	}
+
+
+};
