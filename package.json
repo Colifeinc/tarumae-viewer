@@ -5,6 +5,7 @@
 	"main": "src/js/tarumae.js",
 	"scripts": {
 		"start": "parcel src/index.html",
+		"watch": "parcel watch src/index.html --public-url /tarumae/",
 		"build": "parcel build src/js/tarumae.js -d build"
 	},
 	"keywords": [],
