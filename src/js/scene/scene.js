@@ -121,6 +121,7 @@ Tarumae.Scene = class {
 			this.prepareObjects(obj, loadingSession);
 			this.objects.push(obj);
 			obj.scene = this;
+			obj.updateTransform();
 		}
 	
 		this.resourceManager.load();
@@ -171,7 +172,9 @@ Tarumae.Scene = class {
 			var obj = arguments[i];
 			if (obj !== null && obj !== undefined) {
 				this.objects._s3_pushIfNotExist(obj);
-			}	
+			}
+			obj.scene = this;
+			obj.updateTransform();
 		}
 		this.requireUpdateFrame();
 	}
