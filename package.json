@@ -12,6 +12,7 @@
 	"author": "BULB CORP.",
 	"license": "",
 	"dependencies": {
+		"eslint": "^4.18.1",
 		"pako": "^1.0.6"
 	}
 }
