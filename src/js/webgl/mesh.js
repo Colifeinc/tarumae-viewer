@@ -946,15 +946,16 @@ Tarumae.ParticleMesh = class extends Tarumae.Mesh {
 		this.meta = {
 			vertexCount: count,
 			hasColor: true,
+			hasSize: true,
 			stride: 0,
-			vertexColorOffset: count * 3 * 4,
+			vertexColorOffset: count * 12,
+			vertexSizeOffset: count * 24,
 		};
 
 		this.composeMode = Tarumae.Mesh.ComposeModes.Points;
 		this.bufferDirty = true;
 
-		// this.vertexArray = new ArrayBuffer(count * 2 * 3 * 4);
-		this.vertexBuffer = new Float32Array(count * 2 * 3);
+		this.vertexBuffer = new Float32Array(count * 2 * 3 + count);
 	}
 
 	bind(renderer) {
