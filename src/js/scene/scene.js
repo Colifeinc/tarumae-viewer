@@ -170,7 +170,8 @@ Tarumae.Scene = class {
 	add() {
 		for (var i = 0; i < arguments.length; i++) {
 			var obj = arguments[i];
-			if (obj !== null && obj !== undefined) {
+			if (obj !== null && obj !== undefined
+				&& obj instanceof Tarumae.SceneObject) {
 				this.objects._s3_pushIfNotExist(obj);
 			}
 			obj.scene = this;
