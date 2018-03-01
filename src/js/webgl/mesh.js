@@ -430,7 +430,17 @@ Tarumae.Mesh = class {
 				gl.disableVertexAttribArray(sp.vertexColorAttribute);
 			}
 		}
-	
+
+		// size
+		if (sp.vertexSizeAttribute >= 0) {
+			if (meta.hasSize) {
+				gl.vertexAttribPointer(sp.vertexSizeAttribute, 1, gl.FLOAT, false, meta.stride, meta.vertexSizeOffset);
+				gl.enableVertexAttribArray(sp.vertexSizeAttribute);
+			} else {
+				gl.disableVertexAttribArray(sp.vertexSizeAttribute);
+			}
+		}
+
 		var glPrimitiveMode;
 
 		switch (this.composeMode) {

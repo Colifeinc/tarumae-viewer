@@ -1538,9 +1538,10 @@ Tarumae.PointShader = class extends Tarumae.Shader {
 		this.use();
 
 		// vertex
-		this.vertexPositionAttribute = this.findAttribute('vertexPosition');
+		this.vertexPositionAttribute = this.findAttribute("vertexPosition");
 		// this.vertexNormalAttribute = this.findAttribute('vertexNormal');
-		this.vertexColorAttribute = this.findAttribute('vertexColor');
+		this.vertexColorAttribute = this.findAttribute("vertexColor");
+		this.vertexSizeAttribute = this.findAttribute("vertexSize");
 
 		// projection
 		this.projectViewModelMatrixUniform = this.bindUniform("projectViewModelMatrix", "mat4");
@@ -1549,7 +1550,7 @@ Tarumae.PointShader = class extends Tarumae.Shader {
 		this.colorUniform = this.bindUniform("color", "vec3");
 		this.opacityUniform = this.bindUniform("opacity", "float");
 
-		this.pointSizeUniform = this.bindUniform("pointSize", "float");
+		this.pointSizeUniform = this.bindUniform("defaultPointSize", "float");
 		this.pointSizeUniform.set(1);
 	}
 
@@ -1591,6 +1592,8 @@ Tarumae.PointShader = class extends Tarumae.Shader {
 		} else {
 			this.opacityUniform.set(1.0);
 		}
+
+		gl.enable(gl.BLEND);
 	}
 
 	endObject(obj) {
@@ -1601,6 +1604,7 @@ Tarumae.PointShader = class extends Tarumae.Shader {
 			gl.disable(gl.BLEND);
 			gl.enable(gl.DEPTH_TEST);
 		}
+		gl.disable(gl.BLEND);
 	
 		super.endObject.apply(this, arguments);
 	}
