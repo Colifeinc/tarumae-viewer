@@ -7,7 +7,7 @@
 
 import Tarumae from "../entry"
 import "../utility/event"
-import { Vec3, Color3 } from "../math/vector"
+import { Vec2, Vec3, Color3 } from "../math/vector"
 import "../math/matrix"
 import "../scene/renderer"
 import "../scene/object"
@@ -669,15 +669,16 @@ Scene.prototype.prepareObjects = function(obj, loadingSession) {
 			// 	}
 			// 	break;
 
-			case "location":
+			case "location":				
 			case "angle":
 			case "scale":
-				if (typeof value === "object" && value instanceof Array) {
+				if (typeof value === "object" && Array.isArray(value)) {
 					switch (value.length) {
 						default: break;
-						case 2: obj[name] = new Vec2(value[0], value[1]); break;
-						case 3: obj[name] = new Vec3(value[0], value[1], value[2]); break;
-						case 4: obj[name] = new Vec4(value[0], value[1], value[2], value[3]); break;
+						case 3: case 4:
+							delete obj[name];
+							obj[name].set(value[0], value[1], value[2]);
+							break;
 					}
 				}
 				break;
