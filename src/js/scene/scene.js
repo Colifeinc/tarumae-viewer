@@ -30,7 +30,7 @@ Tarumae.Scene = class {
 		this.materials = {};
 		this._refmaps = {};
 		this.archives = {};
-		this._archives = {};
+		this._bundles = {};
 
 		this.resourceManager = new Tarumae.ResourceManager();
 		this.animation = false;
@@ -59,17 +59,17 @@ Tarumae.Scene = class {
 		if (manifestData) {
 			var manifest = JSON.parse(String.fromCharCode.apply(null, new Uint8Array(manifestData)));
 			
-			var _archives = manifest._archives;
+			var _bundles = manifest._bundles;
 
-			if (_archives) {
-				_archives._s3_foreach((name, arinfo) => {
+			if (_bundles) {
+				_bundles._s3_foreach((name, arinfo) => {
 
 					if (arinfo.url === "__this__") {
 						arinfo.url = archive.url;
 						arinfo.name = name;
 						arinfo.archive = archive;
 
-						this._archives[name] = arinfo;
+						this._bundles[name] = arinfo;
 					}
 				});
 			}
@@ -79,7 +79,7 @@ Tarumae.Scene = class {
 	}
 	
 	createObjectFromURL(url, handler, childName) {
-		var archive = this._archives[url];
+		var archive = this._bundles[url];
 			
 		if (archive) {
 			this.createObjectFromArchive(archive, childName);
@@ -103,9 +103,9 @@ Tarumae.Scene = class {
 	
 			if (obj === null || obj === undefined) continue;
 	
-			var _archives = obj._archives;
-			if (_archives) {
-				this.loadArchives(_archives, loadingSession);
+			var _bundles = obj._bundles;
+			if (_bundles) {
+				this.loadArchives(_bundles, loadingSession);
 			}
 			
 			var _materials = obj._materials;
@@ -141,7 +141,7 @@ Tarumae.Scene = class {
 		var loadArchive = function(aName, aValue) {
 			if (!aValue.archive) {
 				aValue.name = aName;
-				_this._archives[aName] = aValue;
+				_this._bundles[aName] = aValue;
 	
 				var archive = new Tarumae.Utility.Archive();
 				archive.isLoading = true;
@@ -704,6 +704,7 @@ Scene.prototype.prepareObjects = function(obj, loadingSession) {
 			case "_location":
 			case "_materials":
 			case "_archives":
+			case "_bundles":	
 			case "_eventListeners":
 			case "_customProperties":
 			case "shader":

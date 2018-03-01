@@ -97,7 +97,7 @@ Object.defineProperties(Tarumae.Utility.Archive, {
 		value: function(scene, value, callback) {
 			var matches = value.match(/sob:\/\/(\w+)\/(\w+)/i);
 			if (matches !== null && matches.length >= 3) {
-				var archive = scene._archives[matches[1]].archive;
+				var archive = scene._bundles[matches[1]].archive;
 				var uid = parseInt(matches[2], 16);
 				if (archive.isLoading) {
 					archive.onChunkReady(uid, function(buffer) {
