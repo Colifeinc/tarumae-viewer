@@ -580,8 +580,8 @@ Tarumae.ModelViewer = function(scene) {
   this.minRotateX = -90;
   this.maxRotateX = 90;
   this.startDragTime = 0;
-  this.enableDragAcceleration = false;
-  this.dragAccelerationAttenuation = 0.05;
+  this.enableDragAcceleration = true;
+  this.dragAccelerationAttenuation = 0.03;
   this.dragAccelerationIntensity = 5;
 
   this.sceneDragHandlerListener = undefined;
@@ -938,33 +938,35 @@ Tarumae.TouchController = function(scene) {
 
   var movementDetectingTimer = null;
 
+  scene.addEventListener('frame', () => {
+    this.detectFirstPersonMove();
+  });
+
   scene.on("keydown", function() {
-    if (!movementDetectingTimer) {
-      movementDetectingTimer = setInterval(_this.detectFirstPersonMove, 10);
-    }
+    // if (!movementDetectingTimer) {
+    //   movementDetectingTimer = setInterval(_this.detectFirstPersonMove, 10);
+    // }
+    scene.animation = true;
   });
 
   scene.on("keyup", function() {
     if (viewer.pressedKeys.length === 0) {
-      clearInterval(movementDetectingTimer);
-      movementDetectingTimer = null;
+      // clearInterval(movementDetectingTimer);
+      // movementDetectingTimer = null;
+      scene.animation = false;      
     }
   });
 
   var startDragTime;
 
   scene.on("begindrag", function() {
-    this.renderer.viewer.setCursor("none");
-
     startDragTime = Date.now();
   });
 
-  scene.on("enddrag", function() {
-    viewer.setCursor("auto");
-    
+  scene.on("enddrag", function() {    
     if ((Date.now() - startDragTime) < 300) {
       Tarumae.Utility.perforMovementAccelerationAnimation(this,
-        _this.dragAccelerationIntensity, _this.dragAccelerationAttenuation, function(xdiff, ydiff) {
+        _this.dragAccelerationIntensity, _this.dragAccelerationAttenuation, (xdiff, ydiff) => {
           scene.mainCamera.angle.y += xdiff;
           scene.mainCamera.angle.x += ydiff;;
         });
