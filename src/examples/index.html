@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Animation Demo - Tarumae</title>
+	<meta charset="utf-8" />
+	<script src="../js/examples/index.js"></script>
+	<style type="text/css">
+		#example-container .example-item {
+			display: inline-block;
+			margin: 0.5em;
+			width: 10em;
+			height: 10em;
+			border: 1px solid silver;
+			text-align: center;
+			position: relative;
+		}
+		#example-container .title {
+			position: absolute;
+			bottom: 0px;
+			text-align: center;
+			height: 1em;
+			width: 100%;
+		}
+	</style>
+</head>
+<body>
+	<div id="example-container">
+	</div>
+
+	<script>
+		var examples = [
+			{
+				title: "Animation",
+				url: "animation.html",
+			},
+			{
+				title: "Particle",
+				url: "particle.html",
+			}
+		];
+
+		var container = document.getElementById('example-container');
+
+		examples.forEach(ex => {
+			var div = document.createElement("div");
+			div.className = "example-item";
+			div.innerHTML = `<div class="preview"></div>
+				<div class="title">` + ex.title + `</div>`;
+			container.appendChild(div);
+		});
+
+	</script>
+</body>
+</html>
