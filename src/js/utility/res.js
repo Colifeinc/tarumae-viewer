@@ -5,7 +5,7 @@
 // copyright(c) 2016 bulb inc. all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
-import Tarumae from "../entry"
+import Tarumae from "../entry";
 
 Tarumae.ResourceTypes = {
 	Binary: "arraybuffer",
@@ -20,7 +20,7 @@ Tarumae.ResourceManager = class {
 		this.loadingSessionId = 1;
 		this.loadingQueueCount = {};
 		this.loadingQueueLength = {};
-		this.loadingQueueFinish = {}
+		this.loadingQueueFinish = {};
 		this.resources = {};
 		this.onprogress = function(p) { };
 	}
@@ -30,7 +30,7 @@ Tarumae.ResourceManager = class {
 		if (typeof url === "string") {
 			// single resource
 			if (typeof type === "undefined") {
-				type = ResourceTypes.Binary;
+				type = Tarumae.ResourceTypes.Binary;
 			}
 	
 			this.addSingleResource(url, type, onload, onprogress);

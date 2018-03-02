@@ -28,7 +28,7 @@ Object.assign(TarumaeEditor.prototype, {
 	},
 	
 	createObjectFromModel: function(obj, model) {
-    'use strict';
+
 		var editor = this;
 
 		var constructor;
@@ -92,77 +92,77 @@ Object.assign(TarumaeEditor.prototype, {
 
 		objPrototype._s3_foreach(function(name, value) {
 			switch (name) {
-				case "conflictWithRay":
-					obj.conflictWithRay = objPrototype.conflictWithRay;
-					break;
+			case "conflictWithRay":
+				obj.conflictWithRay = objPrototype.conflictWithRay;
+				break;
 					
-				case "location":
-				case "angle":
-				case "scale":
-					if (Array.isArray(value)) {
-						obj[name]._s3_set(value[0], value[1], value[2]);
-					}
-					break;
+			case "location":
+			case "angle":
+			case "scale":
+				if (Array.isArray(value)) {
+					obj[name]._s3_set(value[0], value[1], value[2]);
+				}
+				break;
 
 				// ignore these properties					
-				case "mesh":
-				case "model":
-					break;
+			case "mesh":
+			case "model":
+				break;
 
-				case "mat":
-					if (typeof value === "string" && value.length > 0) {
-						var mat = editor.scene.materials[value];
-						if (mat) {
-							editor.assignMaterialForObject(obj, mat);
-						} else {
-							// set material name if material object not found
-							obj.mat = value;
-						}
-					} else if (typeof value === "object") {
-						// duplicate material object to avoid reference updating
-						obj.mat = Object.assign({}, value);
+			case "mat":
+				if (typeof value === "string" && value.length > 0) {
+					var mat = editor.scene.materials[value];
+					if (mat) {
+						editor.assignMaterialForObject(obj, mat);
+					} else {
+						// set material name if material object not found
+						obj.mat = value;
 					}
-					break;
+				} else if (typeof value === "object") {
+					// duplicate material object to avoid reference updating
+					obj.mat = Object.assign({}, value);
+				}
+				break;
 				
-				case "tag":
-				case "userData":
-				case "_customProperties":
-				case "_extensionProperties":					
-				case "_bake":
-					// copy value from model prototype
-					obj[name] = Object.assign({}, value);
-					break;
+			case "tag":
+			case "userData":
+			case "_customProperties":
+			case "_extensionProperties":					
+			case "_bake":
+				// copy value from model prototype
+				obj[name] = Object.assign({}, value);
+				break;
 				
-				default:
-					if (typeof value !== "object") {
-						obj[name] = value;
-					} else if (value) {
-						var child;
+			default:
+				if (typeof value !== "object") {
+					obj[name] = value;
+				} else if (value) {
+					var child;
 
-						if (value.model) {
-							var childModel = editor.modelLibrary[value.model];
-							if (!childModel) {
-								console.warn("cannot find model by specified id: " + childModel);
-							} else {
-								child = editor.createObjectFromModel(child, childModel);
-								child.model = childModel;
-							}
+					if (value.model) {
+						var childModel = editor.modelLibrary[value.model];
+						if (!childModel) {
+							console.warn("cannot find model by specified id: " + childModel);
 						} else {
-							child = new Tarumae.SceneObject();
-							child.model = obj.model;
+							child = editor.createObjectFromModel(child, childModel);
+							child.model = childModel;
 						}
+					} else {
+						child = new Tarumae.SceneObject();
+						child.model = obj.model;
+					}
 					
-						if (child) {
-							editor.createSceneObjectFromModel(child, value);
-							child.name = name;
-							child.parentModel = obj.model;
-							child.isModelChild = true;
+					if (child) {
+						editor.createSceneObjectFromModel(child, value);
+						child.name = name;
+						child.parentModel = obj.model;
+						child.isModelChild = true;
 
-							obj.add(child);
-							editor.onobjectCreate(child);
-						}
+						obj.add(child);
+						editor.onobjectCreate(child);
 					}
-					break;
+				}
+				break;
 			}
 		});
 
@@ -187,45 +187,45 @@ Object.assign(TarumaeEditor.prototype, {
 		obj._s3_foreach(function(name, value) {
 			switch (name) {
 
-				case "location":
-				case "angle":
-				case "scale":
-					if (Array.isArray(value)) {
-						obj[name] = new Vec3(value[0], value[1], value[2]);
-					}
-					break;
+			case "location":
+			case "angle":
+			case "scale":
+				if (Array.isArray(value)) {
+					obj[name] = new Vec3(value[0], value[1], value[2]);
+				}
+				break;
 
-				case "_bake":
-					// copy value
-					obj[name] = Object.assign({}, value);
-					break;
+			case "_bake":
+				// copy value
+				obj[name] = Object.assign({}, value);
+				break;
 
 				// ignore these properties
-				case "mesh":
-				case "model":
-				case "editor":
-				case "mat":
-				case "tag":	
-				case "userData":	
-				case "_customProperties":	
-				case "_extensionProperties":	
-					break;
+			case "mesh":
+			case "model":
+			case "editor":
+			case "mat":
+			case "tag":	
+			case "userData":	
+			case "_customProperties":	
+			case "_extensionProperties":	
+				break;
 					
-				default:
-					if (typeof value === "object") {
-						var childPrototype = objPrototype[name];
+			default:
+				if (typeof value === "object") {
+					var childPrototype = objPrototype[name];
 
-						if (childPrototype) {
-							if (!(value instanceof Tarumae.SceneObject)) {
-								Object.setPrototypeOf(value, new Tarumae.SceneObject());
-							}
-
-							value.name = name;
-							editor.createInstancedObjectFromModel(value, childPrototype);
-							editor.onobjectCreate(value);
+					if (childPrototype) {
+						if (!(value instanceof Tarumae.SceneObject)) {
+							Object.setPrototypeOf(value, new Tarumae.SceneObject());
 						}
+
+						value.name = name;
+						editor.createInstancedObjectFromModel(value, childPrototype);
+						editor.onobjectCreate(value);
 					}
-					break;
+				}
+				break;
 			}
 		});
 

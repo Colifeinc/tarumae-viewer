@@ -1,5 +1,5 @@
-import Tarumae from "../entry"
-import pako from "pako"
+import Tarumae from "../entry";
+import pako from "pako";
 
 Tarumae.Utility.Archive = class {
 	constructor() {
@@ -140,5 +140,5 @@ Tarumae.Utility.ArchiveChunk = class {
 			return this.buffer;
 		}
 	}
-}
+};
 

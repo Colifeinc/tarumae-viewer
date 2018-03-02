@@ -5,15 +5,15 @@
 // Copyright(c) 2016 BULB CORP. all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
-import Tarumae from "../entry"
-import "../utility/event"
-import { Vec2, Vec3, Color3 } from "../math/vector"
-import "../math/matrix"
-import "../scene/renderer"
-import "../scene/object"
-import "../scene/camera"
-import "../webgl/texture"
-import "../webgl/cubemap"
+import Tarumae from "../entry";
+import "../utility/event";
+import { Vec2, Vec3, Color3 } from "../math/vector";
+import "../math/matrix";
+import "../scene/renderer";
+import "../scene/object";
+import "../scene/camera";
+import "../webgl/texture";
+import "../webgl/cubemap";
 
 Tarumae.Scene = class {
 	constructor(renderer) {
@@ -37,7 +37,7 @@ Tarumae.Scene = class {
 		this.requestedUpdateFrame = true;
 
 		// main camera
-		if (typeof Tarumae.Camera === 'function') {
+		if (typeof Tarumae.Camera === "function") {
 			this.mainCamera = new Tarumae.Camera();
 			this.mainCamera.location.set(0, 1.5, 6);
 			this.mainCamera.angle.x = -5;
@@ -45,7 +45,7 @@ Tarumae.Scene = class {
 		}
 
 		// sun
-		if (typeof Tarumae.Sun === 'function') {
+		if (typeof Tarumae.Sun === "function") {
 			this.sun = new Tarumae.Sun();
 			this.sun.location = new Vec3(10, 20, 5);
 		}

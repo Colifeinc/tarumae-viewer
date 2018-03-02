@@ -5,13 +5,13 @@
 // Copyright(c) 2018 unvell, all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
-import Tarumae from "./entry"
+import Tarumae from "./entry";
 
-import "./utility/*"
-import "./math/*"
-import "./scene/*"
-import "./webgl/*"
+import "./utility/*";
+import "./math/*";
+import "./scene/*";
+import "./webgl/*";
 
 export default Tarumae;
-export { Vec2, Vec3, Vec4, Color3, Color4 } from "./math/vector"
-export { Matrix3, Matrix4 } from "./math/matrix"
+export { Vec2, Vec3, Vec4, Color3, Color4 } from "./math/vector";
+export { Matrix3, Matrix4 } from "./math/matrix";
