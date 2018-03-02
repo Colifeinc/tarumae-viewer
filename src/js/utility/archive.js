@@ -94,17 +94,23 @@ Tarumae.Utility.Archive = class {
 
 Object.defineProperties(Tarumae.Utility.Archive, {
 	canLoadFromArchive: {
-		value: function(scene, value, callback) {
-			var matches = value.match(/sob:\/\/(\w+)\/(\w+)/i);
+		value: function(scene, uri, format, bundle, callback) {
+			var matches = uri.match(/sob:\/\/(\w+)\/(\w+)/i);
 			if (matches !== null && matches.length >= 3) {
-				var archive = scene._bundles[matches[1]].archive;
+				var bundleName = matches[1];
 				var uid = parseInt(matches[2], 16);
-				if (archive.isLoading) {
+
+				if (bundleName === "__this__") {
+					if (!bundle) {
+						console.warn("required data from invalid bundle");
+						return true;
+					}
+					callback.call(scene, bundle.getChunkData(uid, format), bundle, uid);
+				} else {
+					var archive = scene._bundles[bundleName].archive;
 					archive.onChunkReady(uid, function(buffer) {
 						callback.call(scene, buffer, archive, uid);
 					});
-				} else {
-					callback.call(scene, archive.getChunkData(uid), archive, uid);
 				}
 				return true;
 			}
@@ -114,7 +120,7 @@ Object.defineProperties(Tarumae.Utility.Archive, {
 
 	createFromStream: {
 		value: function(data) {		
-			var archive = new Archive();
+			var archive = new Tarumae.Utility.Archive();
 			archive.loadFromStream(data);
 			return archive;
 		}

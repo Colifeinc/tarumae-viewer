@@ -15,7 +15,7 @@ Object.assign(TarumaeEditor.prototype, {
 			modelDefine.loaded = false;
 			
 			if (typeof modelDefine.gizmoImage === "string" && modelDefine.gizmoImage.length > 0) {
-				_this.rm.add(modelDefine.gizmoImage, ResourceTypes.Image, function(img) {
+				_this.rm.add(modelDefine.gizmoImage, Tarumae.ResourceTypes.Image, function(img) {
 					modelDefine.gizmoImage = img;
 					_this.scene.requireUpdateFrame();
 				});
@@ -75,14 +75,25 @@ Object.assign(TarumaeEditor.prototype, {
 		return obj;
 	},
 
-	addObjectMeshFromModel: function(obj, url) {
+	addObjectMeshFromModel: function(obj, url, bundle) {
 		var scene = this.scene;
 
 		if (typeof url === "string") {
-			scene.createMeshFromURL(url, function(dlMesh) {
-				obj.addMesh(dlMesh);
-				scene.requireUpdateFrame();
-			});
+
+			if (!Tarumae.Utility.Archive.canLoadFromArchive(this, url, 0x6873656d, bundle, function(buffer) {
+				var mesh = scene.prepareObjectMeshFromURLStream(obj, url, buffer);
+				if (mesh) {
+					obj.addMesh(mesh);
+					scene.requireUpdateFrame();
+				}
+			})) {
+				scene.createMeshFromURL(url, function(dlMesh) {
+					if (dlMesh) {
+						obj.addMesh(dlMesh);
+						scene.requireUpdateFrame();
+					}
+				});
+			}
 		}
 	},
 	
