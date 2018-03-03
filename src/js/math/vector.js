@@ -206,7 +206,7 @@ export class Vec3 {
 		return this.add((v2.sub(this)).mul(t));
 	}
 	
-	lerp(v1, v2, t) {
+	static lerp(v1, v2, t) {
 		return v1.lerp(v2, t);
 	}
 	
