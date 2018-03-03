@@ -503,9 +503,9 @@ Tarumae.Renderer = class {
 		}
 	
 		// draw hover object
-		if (scene.hoverObject) {
-			this.drawHighlightObject(scene.hoverObject, new Color4(1.0, 0.5, 0.0, 0.5));
-		}
+		// if (scene.hoverObject) {
+		// 	this.drawHighlightObject(scene.hoverObject, new Color4(1.0, 0.5, 0.0, 0.5));
+		// }
 	
 		scene.drawFrame(this);
 	
