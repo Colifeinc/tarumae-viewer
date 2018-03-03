@@ -62,7 +62,7 @@ Tarumae.Camera = class extends Tarumae.SceneObject {
 		this.filters = [];
 	}
 
-	static calcVisibleDistanceToObject(obj, padding, out) {
+	calcVisibleDistanceToObject(obj, padding, out) {
 		if (!this.scene || !this.scene.renderer) {
 			throw "camera must be added into a scene before use this function";
 		}
