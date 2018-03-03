@@ -370,6 +370,7 @@ Object.assign(Tarumae.SceneObject.prototype, {
 
 		this.objects.push(child);
 		child.parent = this;
+		child.updateTransform();
 
 		var scene = this.scene;
 	
