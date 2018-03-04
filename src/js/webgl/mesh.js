@@ -480,7 +480,61 @@ Tarumae.Mesh = class {
 	get polygonCount() {
 		return this._polygonCount;
 	}
-	
+
+	get points() {
+		if (this._points) {
+			return this._points;
+		}
+
+		if (!this.meta || !this.vertexBuffer) {
+			return [];
+		}
+
+		this._points = new Array(this.meta.vertexCount);
+		for (let i = 0; i < this.meta.vertexCount; i++) {
+			const index = i * 3;
+			this._points[i] = new Vec3(this.vertexBuffer[index + 0],
+				this.vertexBuffer[index + 1], this.vertexBuffer[index + 2]);
+		}
+		
+		return this._points;
+	}
+
+	get uniqueVertices() {
+
+		if (this._uniqueVertices) {
+			return this._uniqueVertices;
+		}
+
+		this._uniqueVertices = new Array();
+
+		if (!this.meta || this.meta.vertexCount <= 0 || !this.vertexBuffer) {
+			return this._uniqueVertices;
+		}
+
+		for (let i = 0; i < this.meta.vertexCount; i++) {
+			const index = i * 3;
+			
+			let x = this.vertexBuffer[index + 0];
+			let y = this.vertexBuffer[index + 1];
+			let z = this.vertexBuffer[index + 2];
+
+			var found = false;
+			for (let k = 0; k < this._uniqueVertices.length; k++) {
+				var existedPoint = this._uniqueVertices[k];
+				if (existedPoint.x === x && existedPoint.y === y && existedPoint.z === z) {
+					found = true;
+					break;
+				}
+			}
+
+			if (!found) {
+				this._uniqueVertices.push(new Vec3(x, y, z));
+			}
+		}
+
+		return this._uniqueVertices;
+	}
 };
 
 Object.assign(Tarumae.Mesh.prototype, {
