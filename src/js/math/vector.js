@@ -710,70 +710,130 @@ Tarumae.Ray.MaxDistance = 999999;
 
 Tarumae.BoundingBox = class {
 	constructor(min, max) {
+		this._dirty = false;
 
 		switch (arguments.length) {
 			case 0:
-				this.min = new Vec3();
-				this.max = new Vec3();
-				this.origin = new Vec3();
+				this._min = new Vec3();
+				this._max = new Vec3();
 				break;
 
 			case 1:
-				if (typeof arguments[0] === "object") {
+				if (typeof arguments[0] === "object" && arguments[0].min && arguments[0].max) {
 					// get min and max from another boundingbox instance
-					this.max = arguments[0].max;
-					this.min = arguments[0].min;
+					this._min = arguments[0].min;
+					this._max = arguments[0].max;
 				}
 				break;
 
 			default:
 			case 2:
-				this.min = min;
-				this.max = max;
+				this._min = min;
+				this._max = max;
 				break;
 		}
 
-		this.origin = this.getOrigin();
-		this.size = this.getSize();
+		this._updateSizeAndOrigin();
+	}
+
+	get min() {
+		return this._min;
+	}
+	set min(v) {
+		this._min = v;
+		this._dirty = true;
+	}
+
+	get max() {
+		return this._max;
+	}
+	set max(v) {
+		this._max = v;
+		this._dirty = true;
+	}
+
+	_updateSizeAndOrigin() {
+		this._size = Vec3.sub(this._max, this._min);
+		this._origin = Vec3.add(this._min, Vec3.mul(this._size, 0.5));
+		this._dirty = false;
 	}
 
 	getVertexArray(bbox) {
 		return [
-			new Vec3(bbox.max.x, bbox.max.y, bbox.max.z),
-			new Vec3(bbox.max.x, bbox.max.y, bbox.min.z),
-			new Vec3(bbox.max.x, bbox.min.y, bbox.max.z),
-			new Vec3(bbox.max.x, bbox.min.y, bbox.min.z),
-			new Vec3(bbox.min.x, bbox.max.y, bbox.max.z),
-			new Vec3(bbox.min.x, bbox.max.y, bbox.min.z),
-			new Vec3(bbox.min.x, bbox.min.y, bbox.max.z),
-			new Vec3(bbox.min.x, bbox.min.y, bbox.min.z),
+			new Vec3(bbox._max.x, bbox._max.y, bbox._max.z),
+			new Vec3(bbox._max.x, bbox._max.y, bbox._min.z),
+			new Vec3(bbox._max.x, bbox._min.y, bbox._max.z),
+			new Vec3(bbox._max.x, bbox._min.y, bbox._min.z),
+			new Vec3(bbox._min.x, bbox._max.y, bbox._max.z),
+			new Vec3(bbox._min.x, bbox._max.y, bbox._min.z),
+			new Vec3(bbox._min.x, bbox._min.y, bbox._max.z),
+			new Vec3(bbox._min.x, bbox._min.y, bbox._min.z),
 		];
 	}
 
-	getSize() {
-		return Vec3.sub(this.max, this.min);
-	}
-
-	getOrigin() {
-		if (typeof this.size === "undefined") {
-			this.size = this.getSize();
+	get size() {
+		if (this._dirty) {
+			this._updateSizeAndOrigin();
 		}
 
-		return Vec3.add(this.min, Vec3.div(this.size, 2));
+		return this._size;
+	}
+
+	get origin() {
+		if (this._dirty) {
+			this._updateSizeAndOrigin();
+		}
+
+		return this._origin;
 	}
 
 	offset(off) {
-		this.max = Vec3.add(this.max, off);
-		this.min = Vec3.add(this.min, off);
-		this.origin = Vec3.add(this.origin, off);
+		this._max = Vec3.add(this._max, off);
+		this._min = Vec3.add(this._min, off);
+		this._origin = Vec3.add(this._origin, off);
 	}
 
 	contains(p) {
-		return p.x > this.min.x && p.x < this.max.x
-			&& p.y > this.min.y && p.x < this.max.y
-			&& p.z > this.min.x && p.z < this.max.z;
+		return p.x > this._min.x && p.x < this._max.x
+			&& p.y > this._min.y && p.x < this._max.y
+			&& p.z > this._min.x && p.z < this._max.z;
 	}
-}
+
+	initTo(p) {
+		this._min = p;
+		this._max = p;
+	}
+
+	expandTo(p) {
+		if (this._min.x > p.x) this._min.x = p.x;
+		if (this._min.y > p.y) this._min.y = p.y;
+		if (this._min.z > p.z) this._min.z = p.z;
+
+		if (this._max.x < p.x) this._max.x = p.x;
+		if (this._max.y < p.y) this._max.y = p.y;
+		if (this._max.z < p.z) this._max.z = p.z;
+	}
+
+	static fromPoints(points) {
+		var bbox = new Tarumae.BoundingBox();
+
+		if (points.length <= 0) {
+			return bbox;
+		}
+
+		bbox.initTo(points[0]);
+
+		if (points.length <= 1) {
+			return bbox;
+		}
+
+		for (let i = 1; i < points.length; i++) {
+			bbox.expandTo(points[i]);
+		}
+
+		return bbox;
+	}
+};
 
 Tarumae.BoundingBox.findBoundingBoxOfBoundingBoxes = function(bboxA, bboxB) {
 	if (!bboxA && !bboxB) return null;
