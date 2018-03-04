@@ -61,11 +61,11 @@ Object.assign(TarumaeEditor.prototype, {
         var p = this.findParentModelObject(obj);
           
         if (!p.isInstanced) {
-          if (!this.viewer.pressedKeys._s3_contains(Tarumae.Viewer.Keys.Alt)) {
+          if (!this.viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Alt)) {
             obj = p;
           }
         } else {
-          if (this.viewer.pressedKeys._s3_contains(Tarumae.Viewer.Keys.Alt)) {
+          if (this.viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Alt)) {
             obj = p;
           }
         }
@@ -75,11 +75,11 @@ Object.assign(TarumaeEditor.prototype, {
       if (obj.isSelected) return;
     }
 
-    if (!this.viewer.mouse.pressedButtons._s3_contains(Tarumae.Viewer.MouseButtons.Left)) {
+    if (!this.viewer.mouse.pressedButtons._t_contains(Tarumae.Viewer.MouseButtons.Left)) {
       if (!obj) return;
     }
     
-    this.selectObject(obj, this.viewer.pressedKeys._s3_contains(Tarumae.Viewer.Keys.Shift));  
+    this.selectObject(obj, this.viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Shift));  
   },
 
   selectAllObjects: function() {

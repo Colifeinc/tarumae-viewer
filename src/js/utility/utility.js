@@ -97,7 +97,7 @@ Object.defineProperties(Array.prototype, {
 		enumerable: false
 	},
 
-	_s3_arrayIndexOf: {
+	_t_arrayIndexOf: {
 		value: function(element) {
 			for (var i = 0; i < this.length; i++) {
 				var item = this[i];
@@ -112,16 +112,16 @@ Object.defineProperties(Array.prototype, {
 		enumerable: false
 	},
 
-	_s3_contains: {
+	_t_contains: {
 		value: function(element) {
-			return this._s3_arrayIndexOf(element) >= 0;
+			return this._t_arrayIndexOf(element) >= 0;
 		},
 		enumerable: false
 	},
 
 	_s3_remove: {
 		value: function(element) {
-			var index = this._s3_arrayIndexOf(element);
+			var index = this._t_arrayIndexOf(element);
 			if (index > -1) this.splice(index, 1);
 		},
 		enumerable: false
@@ -142,7 +142,7 @@ Object.defineProperties(Array.prototype, {
 
 	_s3_pushIfNotExist: {
 		value: function(element) {
-			if (!this._s3_contains(element)) {
+			if (!this._t_contains(element)) {
 				this.push(element);
 			}
 		},

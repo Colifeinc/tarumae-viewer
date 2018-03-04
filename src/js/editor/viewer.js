@@ -58,25 +58,25 @@ TarumaeEditor.ViewerHandler.prototype = {
       var dir = new Vec3();
       var Viewer = Tarumae.Viewer;
 
-      if (!viewer.pressedKeys._s3_contains(Viewer.Keys.Shift)) {
-        if (viewer.pressedKeys._s3_contains(Viewer.Keys.A)) {
+      if (!viewer.pressedKeys._t_contains(Viewer.Keys.Shift)) {
+        if (viewer.pressedKeys._t_contains(Viewer.Keys.A)) {
           dir.x = this.moveSpeed;
-        } else if (viewer.pressedKeys._s3_contains(Viewer.Keys.D)) {
+        } else if (viewer.pressedKeys._t_contains(Viewer.Keys.D)) {
           dir.x = -this.moveSpeed;
         }
 
-        if (viewer.pressedKeys._s3_contains(Viewer.Keys.W)
-          || viewer.pressedKeys._s3_contains(Viewer.Keys.Up)) {
+        if (viewer.pressedKeys._t_contains(Viewer.Keys.W)
+          || viewer.pressedKeys._t_contains(Viewer.Keys.Up)) {
           dir.z = this.moveSpeed;
-        } else if (viewer.pressedKeys._s3_contains(Viewer.Keys.S)
-          || viewer.pressedKeys._s3_contains(Viewer.Keys.Down)) {
+        } else if (viewer.pressedKeys._t_contains(Viewer.Keys.S)
+          || viewer.pressedKeys._t_contains(Viewer.Keys.Down)) {
           dir.z = -this.moveSpeed;
         }
 
-        if (viewer.pressedKeys._s3_contains(Viewer.Keys.Left)) {
+        if (viewer.pressedKeys._t_contains(Viewer.Keys.Left)) {
           viewer.angle.y += this.moveSpeed * 10;
           scene.requireUpdateFrame();
-        } else if (viewer.pressedKeys._s3_contains(Viewer.Keys.Right)) {
+        } else if (viewer.pressedKeys._t_contains(Viewer.Keys.Right)) {
           viewer.angle.y -= this.moveSpeed * 10;
           scene.requireUpdateFrame();
         }

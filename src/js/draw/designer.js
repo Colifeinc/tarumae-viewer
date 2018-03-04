@@ -146,7 +146,7 @@ Object.assign(PlanDesigner.prototype, {
     }
 
     if (obj) {
-      if (!this.selectedObjects._s3_contains(obj)) {
+      if (!this.selectedObjects._t_contains(obj)) {
         this.selectedObjects.push(obj);
 
         var aps = this.createActivePointsForObject(obj);
@@ -168,7 +168,7 @@ Object.assign(PlanDesigner.prototype, {
   },
 
   deselectObject: function(obj) {
-    if (this.selectedObjects._s3_contains(obj)) {
+    if (this.selectedObjects._t_contains(obj)) {
       this.removeActivePointsBelongToObject(obj);
       this.scene.requireUpdateFrame();
     }

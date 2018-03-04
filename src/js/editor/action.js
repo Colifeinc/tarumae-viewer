@@ -143,11 +143,11 @@ Object.assign(TarumaeEditor.prototype, {
     scene.on("drag", function() {
     switch (editor.operationMode) {
         default:
-          if (viewer.pressedKeys._s3_contains(Tarumae.Viewer.Keys.Shift)
-            || viewer.mouse.pressedButtons._s3_contains(Tarumae.Viewer.MouseButtons.Right)
-            || viewer.mouse.pressedButtons._s3_contains(Tarumae.Viewer.MouseButtons.Middle)) {
+          if (viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Shift)
+            || viewer.mouse.pressedButtons._t_contains(Tarumae.Viewer.MouseButtons.Right)
+            || viewer.mouse.pressedButtons._t_contains(Tarumae.Viewer.MouseButtons.Middle)) {
             editor.modelViewer.panViewByMouseMove();
-          } else if (viewer.pressedKeys._s3_contains(Tarumae.Viewer.Keys.Control)) {
+          } else if (viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Control)) {
             editor.modelViewer.zoomViewByMouseButton();
           } else {
             editor.modelViewer.dragToRotateScene();
@@ -435,7 +435,7 @@ Object.assign(TarumaeEditor.prototype, {
         case Viewer.Keys.E:
         case Viewer.Keys.R:
           if ( editor.cursor['onkeydown'] ){
-            editor.cursor.onkeydown(key,(viewer.pressedKeys._s3_contains(Viewer.Keys.Shift)));
+            editor.cursor.onkeydown(key,(viewer.pressedKeys._t_contains(Viewer.Keys.Shift)));
           }
           isProcessed = true;
           break;
@@ -451,13 +451,13 @@ Object.assign(TarumaeEditor.prototype, {
           break;
 
         case Viewer.Keys.Z:
-          if (viewer.pressedKeys._s3_contains(Viewer.Keys.Control)
-            || viewer.pressedKeys._s3_contains(Viewer.Keys.MacCommand_Firefox)
-            || viewer.pressedKeys._s3_contains(Viewer.Keys.MacCommand_Opera)
-            || viewer.pressedKeys._s3_contains(Viewer.Keys.MacCommand_Left)
-            || viewer.pressedKeys._s3_contains(Viewer.Keys.MacCommand_Right)
+          if (viewer.pressedKeys._t_contains(Viewer.Keys.Control)
+            || viewer.pressedKeys._t_contains(Viewer.Keys.MacCommand_Firefox)
+            || viewer.pressedKeys._t_contains(Viewer.Keys.MacCommand_Opera)
+            || viewer.pressedKeys._t_contains(Viewer.Keys.MacCommand_Left)
+            || viewer.pressedKeys._t_contains(Viewer.Keys.MacCommand_Right)
           ) {
-            if (viewer.pressedKeys._s3_contains(Viewer.Keys.Shift)) {
+            if (viewer.pressedKeys._t_contains(Viewer.Keys.Shift)) {
               editor.redo();
             } else {
               editor.undo();
@@ -467,11 +467,11 @@ Object.assign(TarumaeEditor.prototype, {
           break;
 
         case Viewer.Keys.Y:
-          if (viewer.pressedKeys._s3_contains(Viewer.Keys.Control)
-            || viewer.pressedKeys._s3_contains(Viewer.Keys.MacCommand_Firefox)
-            || viewer.pressedKeys._s3_contains(Viewer.Keys.MacCommand_Opera)
-            || viewer.pressedKeys._s3_contains(Viewer.Keys.MacCommand_Left)
-            || viewer.pressedKeys._s3_contains(Viewer.Keys.MacCommand_Right)
+          if (viewer.pressedKeys._t_contains(Viewer.Keys.Control)
+            || viewer.pressedKeys._t_contains(Viewer.Keys.MacCommand_Firefox)
+            || viewer.pressedKeys._t_contains(Viewer.Keys.MacCommand_Opera)
+            || viewer.pressedKeys._t_contains(Viewer.Keys.MacCommand_Left)
+            || viewer.pressedKeys._t_contains(Viewer.Keys.MacCommand_Right)
           ) {
             editor.redo();
             isProcessed = true;
@@ -509,7 +509,7 @@ Object.assign(TarumaeEditor.prototype, {
 
         case Viewer.Keys.Tab:
 
-          if (viewer.pressedKeys._s3_contains(Viewer.Keys.Shift)) {
+          if (viewer.pressedKeys._t_contains(Viewer.Keys.Shift)) {
             editor.displayMode = TarumaeEditor.DisplayModes.All;
             editor.renderer.options.enableCustomDraw = true;
             editor.renderer.options.enableDrawMesh = true;

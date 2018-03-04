@@ -355,7 +355,7 @@ Scene.prototype.remove = function(obj) {
 	// if object has parent, remove from its parent
 	if (obj.parent) {
 		obj.parent.remove(obj);
-	} else if (this.objects._s3_contains(obj)) {
+	} else if (this.objects._t_contains(obj)) {
 		// else remove from current scene
 		this.objects._s3_remove(obj);
 		obj.parent = null;
@@ -1032,8 +1032,8 @@ Scene.prototype.mousedown = function(scrpos) {
 		var renderer = this.renderer;
 		
 		if (renderer.debugger
-			&& renderer.viewer.pressedKeys._s3_contains(Tarumae.Viewer.Keys.Shift)
-			&& renderer.viewer.pressedKeys._s3_contains(Tarumae.Viewer.Keys.Control)) {
+			&& renderer.viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Shift)
+			&& renderer.viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Control)) {
 			renderer.debugger.showObjectInfoPanel(obj);
 		}
 

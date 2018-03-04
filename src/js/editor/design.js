@@ -155,7 +155,7 @@ Object.assign(TarumaeEditor.prototype, {
 
           editor.addingObject.designParent = wall;
 
-          if (!wall.objects._s3_contains(editor.addingObject)) {
+          if (!wall.objects._t_contains(editor.addingObject)) {
             wall.add(editor.addingObject);
           }
 

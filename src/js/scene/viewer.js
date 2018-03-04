@@ -148,12 +148,12 @@ Tarumae.Viewer = function(renderer) {
         if (renderer.debugMode) {
           if ((e.keyCode == Viewer.Keys.Z
             || e.keyCode == Viewer.Keys.P)
-            && !viewer.pressedKeys._s3_contains(Viewer.Keys.Control)
-            && !viewer.pressedKeys._s3_contains(Viewer.Keys.Shift)
-            && !viewer.pressedKeys._s3_contains(Viewer.Keys.MacCommand_Firefox)
-            && !viewer.pressedKeys._s3_contains(Viewer.Keys.MacCommand_Opera)
-            && !viewer.pressedKeys._s3_contains(Viewer.Keys.MacCommand_Left)
-            && !viewer.pressedKeys._s3_contains(Viewer.Keys.MacCommand_Right)) {
+            && !viewer.pressedKeys._t_contains(Viewer.Keys.Control)
+            && !viewer.pressedKeys._t_contains(Viewer.Keys.Shift)
+            && !viewer.pressedKeys._t_contains(Viewer.Keys.MacCommand_Firefox)
+            && !viewer.pressedKeys._t_contains(Viewer.Keys.MacCommand_Opera)
+            && !viewer.pressedKeys._t_contains(Viewer.Keys.MacCommand_Left)
+            && !viewer.pressedKeys._t_contains(Viewer.Keys.MacCommand_Right)) {
             
             switch (e.keyCode) {
               case Viewer.Keys.Z:
@@ -181,8 +181,8 @@ Tarumae.Viewer = function(renderer) {
             isProcessed = true;
           }
 
-          if (viewer.pressedKeys._s3_contains(Viewer.Keys.Shift)
-            && viewer.pressedKeys._s3_contains(Viewer.Keys.Control)) {
+          if (viewer.pressedKeys._t_contains(Viewer.Keys.Shift)
+            && viewer.pressedKeys._t_contains(Viewer.Keys.Control)) {
 
             if (e.keyCode == Viewer.Keys.K) {
               renderer.debugger.showDebugPanel = !renderer.debugger.showDebugPanel;
@@ -629,9 +629,9 @@ Tarumae.ModelViewer.prototype = {
   },
 
   sceneDragHandler: function() {
-    if (this.viewer.pressedKeys._s3_contains(Tarumae.Viewer.Keys.Shift)) {
+    if (this.viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Shift)) {
       this.panViewByMouseMove();
-    } else if (this.viewer.pressedKeys._s3_contains(Tarumae.Viewer.Keys.Control)) {
+    } else if (this.viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Control)) {
       this.zoomViewByMouseButton();
     } else {
       this.dragToRotateScene();
@@ -733,17 +733,17 @@ Tarumae.FPSController = function(scene) {
     var camera = this.mainCamera;
     
     if (viewer && camera) {
-      if (viewer.mouse.pressedButtons._s3_contains(Tarumae.Viewer.MouseButtons.Left)
+      if (viewer.mouse.pressedButtons._t_contains(Tarumae.Viewer.MouseButtons.Left)
         || viewer.touch.fingers == 1) {
           
-        if (viewer.pressedKeys._s3_contains(Tarumae.Viewer.Keys.Shift)) {
+        if (viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Shift)) {
           _this.dragToMoveCamera();
         } else {
           _this.dragToRotateCamera();
         }
       }
 
-      if (viewer.mouse.pressedButtons._s3_contains(Tarumae.Viewer.MouseButtons.Right)
+      if (viewer.mouse.pressedButtons._t_contains(Tarumae.Viewer.MouseButtons.Right)
         || viewer.touch.fingers == 2) {
         _this.dragToMoveCamera();
       }
@@ -805,23 +805,23 @@ Tarumae.FPSController.prototype = {
 
         dir.setToZero();
 
-        if (viewer.pressedKeys._s3_contains(Viewer.Keys.A)) {
+        if (viewer.pressedKeys._t_contains(Viewer.Keys.A)) {
           dir.x = -1;
-        } else if (viewer.pressedKeys._s3_contains(Viewer.Keys.D)) {
+        } else if (viewer.pressedKeys._t_contains(Viewer.Keys.D)) {
           dir.x = 1;
         }
 
-        if (viewer.pressedKeys._s3_contains(Viewer.Keys.W)
-          || viewer.pressedKeys._s3_contains(Viewer.Keys.Up)) {
-          if (viewer.pressedKeys._s3_contains(Viewer.Keys.Shift)) {
+        if (viewer.pressedKeys._t_contains(Viewer.Keys.W)
+          || viewer.pressedKeys._t_contains(Viewer.Keys.Up)) {
+          if (viewer.pressedKeys._t_contains(Viewer.Keys.Shift)) {
             camera.location.y += this.moveSpeed;
             scene.requireUpdateFrame();
           } else {
             dir.z = -1;
           }
-        } else if (viewer.pressedKeys._s3_contains(Viewer.Keys.S)
-          || viewer.pressedKeys._s3_contains(Viewer.Keys.Down)) {
-          if (viewer.pressedKeys._s3_contains(Viewer.Keys.Shift)) {
+        } else if (viewer.pressedKeys._t_contains(Viewer.Keys.S)
+          || viewer.pressedKeys._t_contains(Viewer.Keys.Down)) {
+          if (viewer.pressedKeys._t_contains(Viewer.Keys.Shift)) {
             camera.location.y -= this.moveSpeed;
             scene.requireUpdateFrame();
           } else {
@@ -829,10 +829,10 @@ Tarumae.FPSController.prototype = {
           }
         }
       
-        if (viewer.pressedKeys._s3_contains(Viewer.Keys.Left)) {
+        if (viewer.pressedKeys._t_contains(Viewer.Keys.Left)) {
           camera.angle.y += this.moveSpeed * 10;
           scene.requireUpdateFrame();
-        } else if (viewer.pressedKeys._s3_contains(Viewer.Keys.Right)) {
+        } else if (viewer.pressedKeys._t_contains(Viewer.Keys.Right)) {
           camera.angle.y -= this.moveSpeed * 10;
           scene.requireUpdateFrame();
         }
@@ -885,23 +885,23 @@ Tarumae.TouchController = function(scene) {
 
       dir.setToZero();
 
-      if (viewer.pressedKeys._s3_contains(Viewer.Keys.A)) {
+      if (viewer.pressedKeys._t_contains(Viewer.Keys.A)) {
         dir.x = -1;
-      } else if (viewer.pressedKeys._s3_contains(Viewer.Keys.D)) {
+      } else if (viewer.pressedKeys._t_contains(Viewer.Keys.D)) {
         dir.x = 1;
       }
 
-      if (viewer.pressedKeys._s3_contains(Viewer.Keys.W)
-        || viewer.pressedKeys._s3_contains(Viewer.Keys.Up)) {
-        if (viewer.pressedKeys._s3_contains(Viewer.Keys.Shift)) {
+      if (viewer.pressedKeys._t_contains(Viewer.Keys.W)
+        || viewer.pressedKeys._t_contains(Viewer.Keys.Up)) {
+        if (viewer.pressedKeys._t_contains(Viewer.Keys.Shift)) {
           camera.location.y += _this.moveSpeed;
           scene.requireUpdateFrame();
         } else {
           dir.z = -1;
         }
-      } else if (viewer.pressedKeys._s3_contains(Viewer.Keys.S)
-        || viewer.pressedKeys._s3_contains(Viewer.Keys.Down)) {
-        if (viewer.pressedKeys._s3_contains(Viewer.Keys.Shift)) {
+      } else if (viewer.pressedKeys._t_contains(Viewer.Keys.S)
+        || viewer.pressedKeys._t_contains(Viewer.Keys.Down)) {
+        if (viewer.pressedKeys._t_contains(Viewer.Keys.Shift)) {
           camera.location.y -= _this.moveSpeed;
           scene.requireUpdateFrame();
         } else {
@@ -909,10 +909,10 @@ Tarumae.TouchController = function(scene) {
         }
       }
     
-      if (viewer.pressedKeys._s3_contains(Viewer.Keys.Left)) {
+      if (viewer.pressedKeys._t_contains(Viewer.Keys.Left)) {
         camera.angle.y += _this.moveSpeed * 20;
         scene.requireUpdateFrame();
-      } else if (viewer.pressedKeys._s3_contains(Viewer.Keys.Right)) {
+      } else if (viewer.pressedKeys._t_contains(Viewer.Keys.Right)) {
         camera.angle.y -= _this.moveSpeed * 20;
         scene.requireUpdateFrame();
       }
@@ -976,8 +976,8 @@ Tarumae.TouchController = function(scene) {
   this.scene.on("mouseup", function() {
     var camera = this.mainCamera;
     if (camera) {
-      if (viewer.pressedKeys._s3_contains(Viewer.Keys.Shift)
-      || viewer.mouse.pressedButtons._s3_contains(Viewer.MouseButtons.Right)) {
+      if (viewer.pressedKeys._t_contains(Viewer.Keys.Shift)
+      || viewer.mouse.pressedButtons._t_contains(Viewer.MouseButtons.Right)) {
         camera.backward(_this.moveDistance);
       } else {
         camera.forward(_this.moveDistance);
@@ -993,7 +993,7 @@ Tarumae.TouchController = function(scene) {
       var camera = this.mainCamera;
   
       if (viewer && camera) {
-        if (viewer.mouse.pressedButtons._s3_contains(Viewer.MouseButtons.Left)
+        if (viewer.mouse.pressedButtons._t_contains(Viewer.MouseButtons.Left)
           || viewer.touch.fingers === 1) {
           camera.angle.x += viewer.mouse.movement.y * 200 / viewer.renderer.renderSize.width;
           camera.angle.y += viewer.mouse.movement.x * 200 / viewer.renderer.renderSize.height;
@@ -1006,7 +1006,7 @@ Tarumae.TouchController = function(scene) {
           this.requireUpdateFrame();
         }
 
-        if (viewer.mouse.pressedButtons._s3_contains(Viewer.MouseButtons.Right)
+        if (viewer.mouse.pressedButtons._t_contains(Viewer.MouseButtons.Right)
           || viewer.touch.fingers == 2) {
 
           m.loadIdentity().rotate(camera.angle);
