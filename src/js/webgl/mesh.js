@@ -543,7 +543,7 @@ Object.assign(Tarumae.Mesh.prototype, {
 		"use strict";
 
 		var vertices = undefined, vertexElementCount = 0;
-		var normals = undefined, normalCount = 0;
+		var normals = undefined;
 
 		if (Array.isArray(this.vertices)) {
 			vertices = this.vertices;
@@ -759,27 +759,6 @@ Object.assign(Tarumae.Mesh.prototype, {
 	clearNavmeshDataCache: function() {
 		this.cachedNavmeshBorders = undefined;
 	},
-
-	getCacheTransformedVertexBorderPolygon: (function() {
-
-		var isSameEdge = function(v1, v2, v3, v4) {
-			return (Vec3.sub(v3, v1) < 0.00001 && Vec3.sub(v4, v2) < 0.00001);
-		};
-
-		return function() {
-			var transformedVertices = this.getTranformedVerticesFromCache(transform);
-
-			var points = [];
-
-			for (var i = 0; i < transformedVertices.length; i += 3) {
-				var v1 = transformedVertices[i], v2 = transformedVertices[i + 1], v3 = transformedVertices[i + 2];
-
-				for (var k = 0; k < transformedVertices.length; k += 3) {
-					var vv1 = transformedVertices[i], vv2 = transformedVertices[i + 1], vv3 = transformedVertices[i + 2];
-				}
-			}
-		};
-	})(),
 	
 	containsPointHorizontally: (function() {
 		var cp1 = { x: 0, y: 0 }, cv1 = { x: 0, y: 0 }, cv2 = { x: 0, y: 0 }, cv3 = { x: 0, y: 0 };

@@ -736,7 +736,7 @@ Object.assign(Tarumae.SceneObject.prototype, {
 		}
 	},
 
-	getBounds: function() {
+	getBounds: function(options) {
 		var bbox, i;
 
 		// scan meshes
