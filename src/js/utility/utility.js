@@ -160,6 +160,17 @@ Object.defineProperties(Array.prototype, {
 		enumerable: false
 	},
 
+	_t_any: {
+		value: function(handler) {
+			for (var i = 0; i < this.length; i++) {
+				var item = this[i];
+		
+				if (handler(item)) {
+					return true;
+				}
+			}
+		}
+	}
 });
 
 Object.defineProperties(Float32Array.prototype, {
