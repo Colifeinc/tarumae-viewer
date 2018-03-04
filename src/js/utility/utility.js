@@ -213,19 +213,10 @@ if (typeof Object.assign !== "function") {
   };
 }
 
-/*
- * Define new JavaScript object with specified prototype and constructor.
- * (This function simulates a class definition like other programming languages.)
- */
-function _s3_Class(Name, SuperClass, Constructor) {
-	Tarumae[Name] = Constructor;
-	Tarumae[Name].prototype = new SuperClass();
-}
+		var to = Object(target);
 
-Tarumae.Make_Inheritable_Object = (function() {
-	var $super = function() {
-		this.constructor.prototype.constructor.call(this);
-	};
+		for (var index = 1; index < arguments.length; index++) {
+			var nextSource = arguments[index];
 
 	return function(proto) {
 		Object.defineProperty(proto, 'super', {
