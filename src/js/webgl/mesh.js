@@ -5,9 +5,9 @@
 // Copyright(c) 2016 BULB CORP. all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
-import Tarumae from "../entry"
-import { Vec3, Vec4 } from "../math/vector"
-import "../math/matrix"
+import Tarumae from "../entry";
+import { Vec2, Vec3, Vec4 } from "../math/vector";
+import "../math/matrix";
 
 Tarumae.Mesh = class {
 	constructor() {
@@ -358,8 +358,6 @@ Tarumae.Mesh = class {
 	}
 
 	draw(renderer) {
-		'use strict';
-
 		if (!this.meta || !this.meta.vertexBufferId) {
 			if (!this.bind(renderer)) {
 				return;
@@ -488,7 +486,7 @@ Tarumae.Mesh = class {
 Object.assign(Tarumae.Mesh.prototype, {
 
 	hitTestByRay: function(ray, maxt, session, options) {
-		'use strict';
+		"use strict";
 
 		var vertices = undefined, vertexElementCount = 0;
 		var normals = undefined, normalCount = 0;
@@ -563,8 +561,6 @@ Object.assign(Tarumae.Mesh.prototype, {
 	},
 
 	hitTestByRayUsingVertexIndex: (function() {
-		'use strict';
-
 		var nmat = new Tarumae.Matrix4();
 
 		return function(ray, vertices, normals, i1, i2, i3, maxt, session, options) {
@@ -629,7 +625,7 @@ Object.assign(Tarumae.Mesh.prototype, {
 			}
 			
 			return null;
-		}
+		};
 	})(),
 
 	scaleTexcoords: function(scaleX, scaleY) {
@@ -823,7 +819,7 @@ Object.assign(Tarumae.Mesh.prototype, {
 						hits.sort(function(a, b) { return a.ta - b.ta; });
 					}
 
-					var border = hits[0];
+					border = hits[0];
 					
 					var vmove = new Vec2(movement.x, movement.z);
 					var movedir = vmove.normalize();
@@ -849,7 +845,7 @@ Object.assign(Tarumae.Mesh.prototype, {
 			}
 
 			return true;
-		}
+		};
 	})(),
 });
 
@@ -903,7 +899,7 @@ Object.assign(Tarumae.Mesh, {
 		}
 	},
 
-	extend2d: function(vertices, axis) {
+	extend2d: function() {
 		// todo
 	},
 
@@ -920,16 +916,17 @@ Object.assign(Tarumae.Mesh, {
 			}
 	
 			var rotateMatrix = m.loadIdentity().rotate(x, y, z);
+			var i;
 
 			// vertex
-			for (var i = 0; i < vertices.length; i += 3) {
+			for (i = 0; i < vertices.length; i += 3) {
 				v.x = vertices[i]; v.y = vertices[i + 1]; v.z = vertices[i + 2];
 				v = v.mulMat(rotateMatrix);
 				vertices[i] = v.x; vertices[i + 1] = v.y; vertices[i + 2] = v.z;
 			}
 
 			// normal
-			for (var i = 0; i < normals.length; i += 3) {
+			for (i = 0; i < normals.length; i += 3) {
 				v.x = normals[i]; v.y = normals[i + 1]; v.z = normals[i + 2];
 				v = v.mulMat(rotateMatrix);
 				normals[i] = v.x; normals[i + 1] = v.y; normals[i + 2] = v.z;

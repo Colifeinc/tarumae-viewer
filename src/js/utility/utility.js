@@ -188,43 +188,30 @@ Object.defineProperties(Float32Array.prototype, {
 	
 // IE ployfill
 if (typeof Object.assign !== "function") {
-  Object.assign = function(target, varArgs) { // .length of function is 2
+	Object.assign = function(target, varArgs) { // .length of function is 2
 		"use strict";
 
-    if (target === undefined || target === null) { // TypeError if undefined or null
-      throw new TypeError("cannot convert undefined or null to object");
-    }
-
-    var to = Object(target);
-
-    for (var index = 1; index < arguments.length; index++) {
-      var nextSource = arguments[index];
-
-      if (nextSource !== undefined && nextSource !== null) { // Skip over if undefined or null
-        for (var nextKey in nextSource) {
-          // Avoid bugs when hasOwnProperty is shadowed
-          if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
-            to[nextKey] = nextSource[nextKey];
-          }
-        }
-      }
-    }
-    return to;
-  };
-}
+		if (target === undefined || target === null) { // TypeError if undefined or null
+			throw new TypeError("cannot convert undefined or null to object");
+		}
 
 		var to = Object(target);
 
 		for (var index = 1; index < arguments.length; index++) {
 			var nextSource = arguments[index];
 
-	return function(proto) {
-		Object.defineProperty(proto, 'super', {
-			value: $super,
-			enumerable: false,
-		});
+			if (nextSource !== undefined && nextSource !== null) { // Skip over if undefined or null
+				for (var nextKey in nextSource) {
+					// Avoid bugs when hasOwnProperty is shadowed
+					if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
+						to[nextKey] = nextSource[nextKey];
+					}
+				}
+			}
+		}
+		return to;
 	};
-})();
+}
 
 Object.defineProperties(Tarumae.Utility, {
 	invokeIfExist: {

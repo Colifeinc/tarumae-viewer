@@ -5,11 +5,11 @@
 // Copyright(c) 2016 BULB CORP. all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
-import Tarumae from "../entry"
-import "../utility/event"
-import { Vec3, Vec4, Matrix4 } from "../math/vector"
-import "../math/matrix"
-import { Mesh } from "../webgl/mesh"
+import Tarumae from "../entry";
+import "../utility/event";
+import { Vec3, Vec4, Color3, Matrix4 } from "../math/vector";
+import "../math/matrix";
+import { Mesh } from "../webgl/mesh";
 
 Tarumae.CollisionModes = {
 	None: 0,

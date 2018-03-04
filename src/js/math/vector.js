@@ -688,7 +688,7 @@ Tarumae.Quaternion = class {
 	constructor() {
 		throw "not available yet";
 	}
-}
+};
 
 ////////// Ray //////////
 
@@ -702,7 +702,7 @@ Tarumae.Ray = class {
 			this.dir = dir;
 		}
 	}
-}
+};
 
 Tarumae.Ray.MaxDistance = 999999;
 
@@ -832,7 +832,7 @@ Object.assign(Point.prototype, {
 		return new Point(this.x, this.y);
 	},
 
-	mulMat: function() {
+	mulMat: function(m) {
 		return new Point(
 			this.x * m.a1 + this.y * m.a2 + m.a3,
 			this.x * m.b1 + this.y * m.b2 + m.b3);
@@ -861,7 +861,7 @@ Tarumae.Size = class {
 					this.height = obj.height;
 				}
 				break;
-			
+		
 			case 2:
 				this.width = w;
 				this.height = h;
@@ -872,7 +872,7 @@ Tarumae.Size = class {
 	clone() {
 		return new Tarumae.Size(this.width, this.height);
 	}
-}
+};
 
 ////////// Rect //////////
 
@@ -930,7 +930,7 @@ Tarumae.Rect = class {
 	}
 
 	get bottom() {
-			return this.y + this.height;
+		return this.y + this.height;
 	}
 	
 	set bottom(v) {
@@ -945,7 +945,7 @@ Tarumae.Rect = class {
 	
 	set origin(p) {
 		this.x = p.x - this.width / 2;
-		this.y = p.y - this.height / 2;	
+		this.y = p.y - this.height / 2;
 	}
 	
 	set(x, y, width, height) {
@@ -954,7 +954,7 @@ Tarumae.Rect = class {
 		this.width = width;
 		this.height = height;
 	}
-}	
+};
 
 Tarumae.Rect.createFromPoints = function(p1, p2) {
 	var minx = Math.min(p1.x, p2.x);

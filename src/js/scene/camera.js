@@ -1,8 +1,8 @@
 ////////////////////////// Camera //////////////////////////
 
-import Tarumae from "../entry"
-import { Size } from "../math/vector"
-import "../scene/renderer"
+import Tarumae from "../entry";
+import { Vec3 } from "../math/vector";
+import "../scene/renderer";
 
 Tarumae.CameraMesh = class extends Tarumae.Mesh {
 	constructor() {
