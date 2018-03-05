@@ -316,7 +316,7 @@ Vec3.createFromEulers = (function() {
 		m.loadIdentity().rotate(ex, ey, ez);
 		
 		return new Vec3(-m.a3, -m.b3, -m.c3);
-	}
+	};
 })();
 
 Vec3.fromArray = function(arr) {
@@ -354,7 +354,7 @@ export function Vec4(x, y, z, w) {
 			break;
 			
 		case 1:
-			var obj = arguments[0];
+			let obj = arguments[0];
 			
 			if (typeof obj === "object") {
 				if (obj instanceof Vec3) {
@@ -372,7 +372,7 @@ export function Vec4(x, y, z, w) {
 			break;
 
 		case 2:
-			var obj = arguments[0];
+			let obj = arguments[0];
 			
 			if (typeof obj === "object") {
 				this.x = obj.x;
@@ -409,7 +409,7 @@ Vec4.prototype.equals = function() {
 			var obj = arguments[0];
 			return (typeof obj === "object")
 				&& this.x == obj.x && this.y == obj.y && this.z == obj.z && this.w == obj.w;
-				 
+
 		case 4:
 			return this.x == arguments[0] && this.y == arguments[1]
 				&& this.z == arguments[2] && this.w == arguments[3];
