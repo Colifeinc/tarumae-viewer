@@ -442,16 +442,6 @@ Object.assign(Tarumae.SceneObject.prototype, {
 		return arr;
 	},
 
-	filterChildren: function(iterator) {
-		console.warn("filterChildren is deprecated, use eachChild instead");
-		return this.eachChild(iterator);
-	},
-	
-	eachChildren: function(iterator) {
-		console.warn("eachChildren is deprecated, use eachChild instead");
-		return this.eachChild(iterator);
-	},
-
 	/*
 	 * itearte over all children of this object,
 	 * pass the object to specified iterator function.
