@@ -1428,8 +1428,9 @@ Tarumae.ProgressBarObject = class extends Tarumae.SceneObject {
 					rectpb.set(this.left + 1, this.top + 1, this.width * this.progressRate - 2, this.height - 2);
 					tpos.set(this.left + this.width / 2, this.top + this.height / 2);
 
-					g.drawRect2D(rectbg, 2, 'gray');
-					g.drawText2D(tpos, Math.round(this.progressRate * 100) + " %", 'black', 'center');
+					g.drawRect2D(rectbg, 2, "gray");
+					g.drawRect2D(rectpb, 0, null, "#6666ff");
+					g.drawText2D(tpos, Math.round(this.progressRate * 100) + " %", "black", "center");
 				}
 			};
 		})());
