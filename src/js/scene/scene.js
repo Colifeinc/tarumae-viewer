@@ -545,56 +545,56 @@ Scene.prototype.prepareMaterialObject = function(mat, rm, loadingSession) {
 		
 	mat._s3_foreach(function(name, value) {
 		switch (name) {
-		case "color":
-			if (typeof value === "object" && value instanceof Array) {
-				switch (value.length) {
-				case 3:
-					mat[name] = new Color3(value[0], value[1], value[2]);
-					break;
-				case 4:
-					mat[name] = new Color4(value[0], value[1], value[2], value[3]);
-					break;
+			case "color":
+				if (typeof value === "object" && value instanceof Array) {
+					switch (value.length) {
+						case 3:
+							mat[name] = new Color3(value[0], value[1], value[2]);
+							break;
+						case 4:
+							mat[name] = new Color4(value[0], value[1], value[2], value[3]);
+							break;
+					}
 				}
-			}
-			break;
+				break;
 
-		case "tex":
-		case "normalmap":
-			if (typeof value === "string" && value.length > 0) {
-				if (scene.renderer.cachedTextures.hasOwnProperty(value)) {
-					obj[name] = scene.renderer.cachedTextures[value];
-				} else {
-					if (loadingSession) loadingSession.resourceTextureCount++;
+			case "tex":
+			case "normalmap":
+				if (typeof value === "string" && value.length > 0) {
+					if (scene.renderer.cachedTextures.hasOwnProperty(value)) {
+						obj[name] = scene.renderer.cachedTextures[value];
+					} else {
+						if (loadingSession) loadingSession.resourceTextureCount++;
 
-					rm.add(value, Tarumae.ResourceTypes.Image, function(image) {
-						if (loadingSession) {
-							loadingSession.downloadTextureCount++;
-							loadingSession.progress();
-						}
-
-						if (image) {
-							if (scene.renderer.cachedTextures.hasOwnProperty(value)) {
-								obj[name] = scene.renderer.cachedTextures[value];
-							} else {
-								mat[name] = new Tarumae.Texture(image);
-								scene.requireUpdateFrame();
+						rm.add(value, Tarumae.ResourceTypes.Image, function(image) {
+							if (loadingSession) {
+								loadingSession.downloadTextureCount++;
+								loadingSession.progress();
 							}
-						}
-					});
-				}
-			}
-			break;
 
-		case "texTiling":
-			if (typeof value === "object" && value instanceof Array) {
-				switch (value.length) {
-				default: break;
-				case 2: mat[name] = new Vec2(value[0], value[1]); break;
-				case 3: mat[name] = new Vec3(value[0], value[1], value[2]); break;
-				case 4: mat[name] = new Vec4(value[0], value[1], value[2], value[3]); break;
+							if (image) {
+								if (scene.renderer.cachedTextures.hasOwnProperty(value)) {
+									obj[name] = scene.renderer.cachedTextures[value];
+								} else {
+									mat[name] = new Tarumae.Texture(image);
+									scene.requireUpdateFrame();
+								}
+							}
+						});
+					}
 				}
-			}
-			break;
+				break;
+
+			case "texTiling":
+				if (typeof value === "object" && value instanceof Array) {
+					switch (value.length) {
+						default: break;
+						case 2: mat[name] = new Vec2(value[0], value[1]); break;
+						case 3: mat[name] = new Vec3(value[0], value[1], value[2]); break;
+						case 4: mat[name] = new Vec4(value[0], value[1], value[2], value[3]); break;
+					}
+				}
+				break;
 		}
 	});
 };
@@ -615,12 +615,12 @@ Scene.prototype.prepareObjects = function(obj, loadingSession, bundle) {
 	var prepareObjectProperties = function(obj, loadingSession, bundle) {
 		obj._s3_foreach(function(name, value) {
 			switch (name) {
-			case "_models":
-				value._s3_foreach(function(mName, mValue) {
-					scene.models[mName] = mValue;
-				});
-				scene.prepareObjects(value, loadingSession, bundle);
-				break;
+				case "_models":
+					value._s3_foreach(function(mName, mValue) {
+						scene.models[mName] = mValue;
+					});
+					scene.prepareObjects(value, loadingSession, bundle);
+					break;
 
 				// since always read _materials before reading scene objects 
 				// the following code can be ignored
@@ -636,70 +636,70 @@ Scene.prototype.prepareObjects = function(obj, loadingSession, bundle) {
 				// 	});
 				// 	break;
 
-			case "model":
-				var model = scene.models[value];
-				if (!(model instanceof Tarumae.SceneObject)) {
-					scene.prepareObjects(model, loadingSession, bundle);
-				}
-				Object.setPrototypeOf(obj, model);
-				break;
-
-			case "mesh":
-				if (typeof value === "string" && value.length > 0) {
-					scene.prepareObjectMesh(obj, "mesh", value, loadingSession, bundle);
-				} else if (typeof value === "object") {
-					if (value instanceof Array) {
-						for (var i = 0; i < value.length; i++) {
-							var mesh = value[i];
-							scene.prepareObjectMesh(obj, null, mesh, loadingSession, bundle);
-						}
-					} else if (value instanceof Tarumae.Mesh) {
-						obj.addMesh(value);
+				case "model":
+					var model = scene.models[value];
+					if (!(model instanceof Tarumae.SceneObject)) {
+						scene.prepareObjects(model, loadingSession, bundle);
 					}
-				}
-				break;
+					Object.setPrototypeOf(obj, model);
+					break;
 
-			case "lightmap":
-				if (typeof value === "string" && value.length > 0) {
-					if (loadingSession) loadingSession.resourceLightmapCount++;
-
-					rm.add(value, Tarumae.ResourceTypes.Image, function(image) {
-
-						if (loadingSession) {
-							loadingSession.downloadLightmapCount++;
-							loadingSession.progress();
+				case "mesh":
+					if (typeof value === "string" && value.length > 0) {
+						scene.prepareObjectMesh(obj, "mesh", value, loadingSession, bundle);
+					} else if (typeof value === "object") {
+						if (value instanceof Array) {
+							for (var i = 0; i < value.length; i++) {
+								var mesh = value[i];
+								scene.prepareObjectMesh(obj, null, mesh, loadingSession, bundle);
+							}
+						} else if (value instanceof Tarumae.Mesh) {
+							obj.addMesh(value);
 						}
+					}
+					break;
+
+				case "lightmap":
+					if (typeof value === "string" && value.length > 0) {
+						if (loadingSession) loadingSession.resourceLightmapCount++;
+
+						rm.add(value, Tarumae.ResourceTypes.Image, function(image) {
+
+							if (loadingSession) {
+								loadingSession.downloadLightmapCount++;
+								loadingSession.progress();
+							}
 						
-						if (image) {
-							var lmapTex = new Tarumae.Texture(image);
-							lmapTex.enableRepeat = false;
-							obj[name] = lmapTex;
-							scene.requireUpdateFrame();
+							if (image) {
+								var lmapTex = new Tarumae.Texture(image);
+								lmapTex.enableRepeat = false;
+								obj[name] = lmapTex;
+								scene.requireUpdateFrame();
+							}
+						});
+					}
+					break;
+
+				case "refmap":
+					if (typeof value === "string" && value.length > 0) {
+						if (scene._refmaps && scene._refmaps.hasOwnProperty(value)) {
+							obj.refmap = scene._refmaps[value].cubemap;
 						}
-					});
-				}
-				break;
-
-			case "refmap":
-				if (typeof value === "string" && value.length > 0) {
-					if (scene._refmaps && scene._refmaps.hasOwnProperty(value)) {
-						obj.refmap = scene._refmaps[value].cubemap;
 					}
-				}
-				break;
+					break;
 
-			case "mat":
-				if (typeof value === "string" && value.length > 0) {
-					var material = scene.materials[value];
-					if (material) {
-						obj.mat = material;
-					} else if (scene.renderer.debugMode) {
-						console.warn("material not found: " + value);
+				case "mat":
+					if (typeof value === "string" && value.length > 0) {
+						var material = scene.materials[value];
+						if (material) {
+							obj.mat = material;
+						} else if (scene.renderer.debugMode) {
+							console.warn("material not found: " + value);
+						}
+					} else if (typeof value === "object") {
+						scene.prepareMaterialObject(value, rm, loadingSession, bundle);
 					}
-				} else if (typeof value === "object") {
-					scene.prepareMaterialObject(value, rm, loadingSession, bundle);
-				}
-				break;
+					break;
 
 				// case "location":
 				// 	delete obj[name];
@@ -716,65 +716,65 @@ Scene.prototype.prepareObjects = function(obj, loadingSession, bundle) {
 				// 	}
 				// 	break;
 
-			case "location":
-			case "angle":
-			case "scale":
-				if (typeof value === "object" && Array.isArray(value)) {
-					switch (value.length) {
-					default: break;
-					case 3: case 4:
-						delete obj[name];
-						obj[name].set(value[0], value[1], value[2]);
-						break;
+				case "location":
+				case "angle":
+				case "scale":
+					if (typeof value === "object" && Array.isArray(value)) {
+						switch (value.length) {
+							default: break;
+							case 3: case 4:
+								delete obj[name];
+								obj[name].set(value[0], value[1], value[2]);
+								break;
+						}
 					}
-				}
-				break;
+					break;
 
-			case "innerHTML":
-				var div = document.createElement("div");
-				div.style.position = "absolute";
-				div.innerHTML = value;
-				obj._htmlObject = div;
-				obj.type = Tarumae.ObjectTypes.Div;
-				scene.renderer.surface.appendChild(div);
-				break;
+				case "innerHTML":
+					var div = document.createElement("div");
+					div.style.position = "absolute";
+					div.innerHTML = value;
+					obj._htmlObject = div;
+					obj.type = Tarumae.ObjectTypes.Div;
+					scene.renderer.surface.appendChild(div);
+					break;
 
-			case "mainCamera":
-				if (!scene.mainCamera) {
-					scene.mainCamera = new Tarumae.Camera();
-					scene.add(scene.mainCamera);
-				} else {
-					Object.setPrototypeOf(value, scene.mainCamera);
-				}
-				scene.prepareObjects(value, loadingSession);
-				break;
+				case "mainCamera":
+					if (!scene.mainCamera) {
+						scene.mainCamera = new Tarumae.Camera();
+						scene.add(scene.mainCamera);
+					} else {
+						Object.setPrototypeOf(value, scene.mainCamera);
+					}
+					scene.prepareObjects(value, loadingSession);
+					break;
 
-			case "scene":
-			case "_scene":
-			case "parent":
-			case "_parent":
-			case "_location":
-			case "_materials":
-			case "_archives":
-			case "_bundles":
-			case "_eventListeners":
-			case "_customProperties":
-			case "shader":
-			case "viewSize":
-			case "texTiling":
-			case "color":
-			case "renderTexture":
-			case "collisionTarget":
-			case "collisionOption":
-			case "radiyBody":
-			case "envmap":
-			case "tag":
-			case "userData":
+				case "scene":
+				case "_scene":
+				case "parent":
+				case "_parent":
+				case "_location":
+				case "_materials":
+				case "_archives":
+				case "_bundles":
+				case "_eventListeners":
+				case "_customProperties":
+				case "shader":
+				case "viewSize":
+				case "texTiling":
+				case "color":
+				case "renderTexture":
+				case "collisionTarget":
+				case "collisionOption":
+				case "radiyBody":
+				case "envmap":
+				case "tag":
+				case "userData":
 				// ignore these properties
-				break;
+					break;
 
-			default:
-				if ((typeof value === "object")
+				default:
+					if ((typeof value === "object")
 						&& value
 						&& !(value instanceof Tarumae.Mesh)
 						&& !(value instanceof Tarumae.Texture)
@@ -783,11 +783,11 @@ Scene.prototype.prepareObjects = function(obj, loadingSession, bundle) {
 						&& !(value instanceof Vec3)
 						&& !(value instanceof Color3)
 						&& !(value instanceof Array)) {
-					scene.prepareObjects(value, loadingSession, bundle);
-					value.name = name;
-					obj.add(value);
-				}
-				break;
+						scene.prepareObjects(value, loadingSession, bundle);
+						value.name = name;
+						obj.add(value);
+					}
+					break;
 			}
 		});
 	};	
@@ -1150,26 +1150,26 @@ Scene.prototype.animate = function(options, onframe, onfinish) {
 
 	if (typeof options.effect === "string") {
 		switch (options.effect) {
-		default:
-		case "normal":
-			options.effect = Tarumae.Animation.Effects.Normal;
-			break;
+			default:
+			case "normal":
+				options.effect = Tarumae.Animation.Effects.Normal;
+				break;
 
-		case "smooth":
-			options.effect = Tarumae.Animation.Effects.Smooth;
-			break;
+			case "smooth":
+				options.effect = Tarumae.Animation.Effects.Smooth;
+				break;
 
-		case "sharp":
-			options.effect = Tarumae.Animation.Effects.Sharp;
-			break;
+			case "sharp":
+				options.effect = Tarumae.Animation.Effects.Sharp;
+				break;
 
-		case "fadein":
-			options.effect = Tarumae.Animation.Effects.FadeIn;
-			break;
+			case "fadein":
+				options.effect = Tarumae.Animation.Effects.FadeIn;
+				break;
 
-		case "fadeout":
-			options.effect = Tarumae.Animation.Effects.FadeOut;
-			break;
+			case "fadeout":
+				options.effect = Tarumae.Animation.Effects.FadeOut;
+				break;
 		}
 	}
 
