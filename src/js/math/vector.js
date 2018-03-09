@@ -345,6 +345,8 @@ Vec3.Back = new Vec3(0, 0, 1);
 //////////////////// Vec4 //////////////////////
 
 export function Vec4(x, y, z, w) {
+	let obj;
+
 	switch (arguments.length) {
 		default:
 			this.x = 0;
@@ -354,7 +356,7 @@ export function Vec4(x, y, z, w) {
 			break;
 			
 		case 1:
-			let obj = arguments[0];
+			obj = arguments[0];
 			
 			if (typeof obj === "object") {
 				if (obj instanceof Vec3) {
@@ -372,7 +374,7 @@ export function Vec4(x, y, z, w) {
 			break;
 
 		case 2:
-			let obj = arguments[0];
+			obj = arguments[0];
 			
 			if (typeof obj === "object") {
 				this.x = obj.x;
