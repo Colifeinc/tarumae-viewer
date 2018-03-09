@@ -557,8 +557,8 @@ Object.assign(Tarumae.SceneObject.prototype, {
 				}
 			});
 		} else {
-			obj.location = endLocation;
-			obj.lookAt(endDirection, endUpLook);
+			this.location = endLocation;
+			this.lookAt(endDirection, endUplook);
 		}
 	},
 
