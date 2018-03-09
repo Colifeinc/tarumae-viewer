@@ -7,7 +7,7 @@
 
 import Tarumae from "../entry";
 import "../utility/event";
-import { Vec3, Vec4, Color3, Matrix4 } from "../math/vector";
+import { Vec3, Vec4, Color3, Color4 } from "../math/vector";
 import "../math/matrix";
 import { Mesh } from "../webgl/mesh";
 
@@ -584,12 +584,10 @@ Object.assign(Tarumae.SceneObject.prototype, {
 
 		if (selfTransform) {
 			return this._transform;
-		} else {
-			return this._parent ? this._parent._transform : Tarumae.Matrix4.Identity;
 		}
-
-		return;
-
+			
+		return this._parent ? this._parent._transform : Tarumae.Matrix4.Identity;
+		
 		// var plist = [];
 		// var parent = this.parent;
 
@@ -658,10 +656,10 @@ Object.assign(Tarumae.SceneObject.prototype, {
 
 	setWorldRotation: function(rot) {
 		var m = this.getRotationMatrix().inverse();
-        m.rotateZ(-rot.z);
-        m.rotateY(-rot.y);
-        m.rotateX(-rot.x);
-        this.angle = m.inverse().extractEulerAngles();
+		m.rotateZ(-rot.z);
+		m.rotateY(-rot.y);
+		m.rotateX(-rot.x);
+		this.angle = m.inverse().extractEulerAngles();
 	},
 
 	/*
@@ -686,7 +684,7 @@ Object.assign(Tarumae.SceneObject.prototype, {
 						if (Array.isArray(triangle)) {
 							triangle = { v1: triangle[0], v2: triangle[1], v3: triangle[2] };
 						}
- 						
+					
 						var planeVectors = {
 							v1: new Vec4(triangle.v1, 1.0).mulMat(this._transform).xyz(),
 							v2: new Vec4(triangle.v2, 1.0).mulMat(this._transform).xyz(),
@@ -807,7 +805,7 @@ Tarumae.Plane = class extends Tarumae.SceneObject {
 		super();
 		this.addMesh(new Tarumae.PlaneMesh(width, height));
 	}
-}
+};
 
 Tarumae.PlaneMesh = class extends Tarumae.Mesh {
 	constructor(width, height) {
@@ -973,7 +971,7 @@ Tarumae.Billboard = class extends Tarumae.SceneObject {
 		this.mat = { tex: null };
 	
 		if (typeof image === "string" && image.length > 0) {
-			ResourceManager.download(image, ResourceTypes.Image, img => {
+			Tarumae.ResourceManager.download(image, Tarumae.ResourceTypes.Image, img => {
 				this.mat.tex = new Tarumae.Texture(img, false);
 				if (this.scene) {
 					this.scene.requireUpdateFrame();
@@ -1042,7 +1040,7 @@ Tarumae.BillboardMesh = class extends Tarumae.Mesh {
 		this.vertexBuffer = Tarumae.BillboardMesh.VertexBuffer;
 		this.composeMode = Tarumae.Mesh.ComposeModes.TriangleStrip;
 	}
-}	
+};
 
 Tarumae.BillboardMesh.instance = null;
 
@@ -1067,7 +1065,7 @@ Tarumae.Shapes.Line = class extends Tarumae.SceneObject {
 		this.mesh = new Tarumae.Shapes.LineMesh(this._start, this._end, this._width);
 		this.addMesh(this.mesh);
 	}
-}	
+};
 
 // Tarumae.Shapes.Line.prototype = new Tarumae.SceneObject();
 
@@ -1121,7 +1119,7 @@ Tarumae.Shapes.LineMesh = class extends Tarumae.SceneObject {
 
 		this.composeMode = Tarumae.Mesh.ComposeModes.TriangleStrip;
 	}
-}	
+};
 
 Tarumae.Shapes.LineMesh.prototype.update = function(start, end, width) {
 	this.destroy();
@@ -1151,12 +1149,11 @@ Tarumae.Shapes.Sphere = class extends Tarumae.SceneObject {
 	
 		this.generateMesh(segments, rings);
 	}
-}	
+};
 
 // Tarumae.Shapes.Sphere.prototype = new Tarumae.SceneObject();
 
 Tarumae.Shapes.Sphere.prototype.generateMesh = function(segments, rings, composeMode) {
-	'use strict';
 
 	for (var i = 0; i < this.meshes.length; i++) {
 		this.meshes[i].destroy();
@@ -1306,7 +1303,7 @@ Tarumae.Circle = class extends Tarumae.SceneObject {
 
 		this.addMesh(this.Parameters.mesh);
 	}
-}
+};
 
 Tarumae.CircleMesh = class extends Tarumae.SceneObject {
 	constructor(segments, circleSize) {
@@ -1325,7 +1322,7 @@ Tarumae.CircleMesh = class extends Tarumae.SceneObject {
 		// ポリゴン構成方法（三角形FAN）
 		this.composeMode = Tarumae.Mesh.ComposeModes.TriangleFan;
 	}
-}	
+};
 
 ///////////////// ParticleGenerator /////////////////
 
@@ -1340,7 +1337,7 @@ Tarumae.ParticleGenerator = class extends Tarumae.SceneObject {
 
 		this.ondraw = this.frameRender;
 	}
-}	
+};
 
 // Tarumae.ParticleGenerator.prototype = new Tarumae.SceneObject();
 
@@ -1442,13 +1439,12 @@ Tarumae.ProgressBarObject = class extends Tarumae.SceneObject {
 					tpos.set(this.left + this.width / 2, this.top + this.height / 2);
 
 					g.drawRect2D(rectbg, 2, 'gray');
-					g.drawRect2D(rectpb, 0, null, '#6666ff');
 					g.drawText2D(tpos, Math.round(this.progressRate * 100) + " %", 'black', 'center');
 				}
 			};
 		})());
 	}
-}	
+};
 
 //////////////////// ParticleObject ////////////////////
 
@@ -1456,6 +1452,4 @@ Tarumae.ParticleObject = class extends Tarumae.SceneObject {
 	constructor() {
 		super();
 	}
-
-
 };
