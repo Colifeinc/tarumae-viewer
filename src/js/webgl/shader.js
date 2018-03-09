@@ -7,9 +7,9 @@
 
 ////////////////// Shader ///////////////////////
 
-import Tarumae from "../entry"
-import { Vec2, Vec3, Vec4, Color3, Color4 } from "../math/vector"
-import "../math/matrix"
+import Tarumae from "../entry";
+import { Vec2, Vec3, Vec4, Color3, Color4 } from "../math/vector";
+import "../math/matrix";
 
 Tarumae.Shader = class {
 	constructor(renderer, vertShaderSrc, fragShaderSrc) {
@@ -19,18 +19,18 @@ Tarumae.Shader = class {
 		}
 
 		// for call 'super' function
-		Object.defineProperty(this, 'defaultColor', {
+		Object.defineProperty(this, "defaultColor", {
 			value: [0.7, 0.7, 0.7],
 			enumerable: false,
 		});
 
-		Object.defineProperty(this, 'defaultTexTiling', {
+		Object.defineProperty(this, "defaultTexTiling", {
 			value: [1, 1],
 			enumerable: false,
 		});
 	
 		this.defaultSunColor = new Vec3(0.21, 0.14, 0.05);
-		this.emptyTexture = null;
+		this.emptyTexture = undefined;
 
 		this.sceneStack = [];
 		this.objectStack = [];
@@ -59,7 +59,7 @@ Tarumae.Shader = class {
 			this.link();
 		}
 
-		if (this.emptyTexture == null) {
+		if (!this.emptyTexture) {
 			this.emptyTexture = Tarumae.Texture.createEmpty();
 		}
 	}
@@ -102,7 +102,7 @@ Tarumae.Shader = class {
 		this.currentMesh = mesh;
 	}
 
-	endMesh(mesh) {
+	endMesh() {
 		this.currentMesh = undefined;
 	}
 
@@ -171,7 +171,7 @@ Tarumae.ShaderUniform = class {
 				uniform.address = uniform.register(shader, name);
 				uniform.set = function(val) {
 					gl.uniform2fv(uniform.address, val);
-				}
+				};
 				break;
 
 			case "vec3":
@@ -182,7 +182,7 @@ Tarumae.ShaderUniform = class {
 					} else {
 						gl.uniform3fv(uniform.address, val.toArray());
 					}
-				}
+				};
 				break;
 
 			case "vec4":
@@ -193,14 +193,14 @@ Tarumae.ShaderUniform = class {
 					} else {
 						gl.uniform4fv(uniform.address, val.toArray());
 					}
-				}
+				};
 				break;
 
 			case "mat3":
 				uniform.address = uniform.register(shader, name);
 				uniform.set = function(val) {
 					gl.uniformMatrix3fv(uniform.address, false, val);
-				}
+				};
 				break;
 
 			case "mat4":
@@ -211,7 +211,7 @@ Tarumae.ShaderUniform = class {
 					} else {
 						gl.uniformMatrix4fv(uniform.address, false, val.toArray());
 					}
-				}
+				};
 				break;
 
 			case "tex2d":
@@ -465,12 +465,12 @@ Tarumae.ViewerShader = class extends Tarumae.Shader {
 		this.use();
 
 		// vertex
-		this.vertexPositionAttribute = this.findAttribute('vertexPosition');
-		this.vertexNormalAttribute = this.findAttribute('vertexNormal');
-		this.vertexTexcoordAttribute = this.findAttribute('vertexTexcoord');
+		this.vertexPositionAttribute = this.findAttribute("vertexPosition");
+		this.vertexNormalAttribute = this.findAttribute("vertexNormal");
+		this.vertexTexcoordAttribute = this.findAttribute("vertexTexcoord");
 
 		// projection
-		this.projectViewModelMatrixUniform = this.findUniform('projectViewModelMatrix');
+		this.projectViewModelMatrixUniform = this.findUniform("projectViewModelMatrix");
 
 		// material
 		this.colorUniform = this.findUniform("color");
@@ -620,8 +620,6 @@ Tarumae.SimpleShader = class extends Tarumae.Shader {
 Tarumae.SimpleShader.prototype.beginScene = function(scene) {
 	Tarumae.Shader.prototype.beginScene.call(this, scene);
 
-	var gl = this.gl;
-
 	// render matrix;
 	this.projectViewMatrixUniform.set(this.renderer.projectionViewMatrixArray);
 
@@ -736,9 +734,9 @@ Tarumae.BillboardShader = class extends Tarumae.Shader {
 		this.create(renderer, vertShaderSrc, fragShaderSrc);
 		this.use();
 
-		this.vertexPositionAttribute = this.findAttribute('vertexPosition');
-		this.vertexTexcoordAttribute = this.findAttribute('vertexTexcoord');
-		this.projectViewModelMatrixUniform = this.findUniform('projectViewModelMatrix');
+		this.vertexPositionAttribute = this.findAttribute("vertexPosition");
+		this.vertexTexcoordAttribute = this.findAttribute("vertexTexcoord");
+		this.projectViewModelMatrixUniform = this.findUniform("projectViewModelMatrix");
 		this.colorUniform = this.findUniform("color");
 		this.textureUniform = this.findUniform("texture");
 		this.opacityUniform = this.bindUniform("opacity", "float");
@@ -759,8 +757,8 @@ Tarumae.BillboardShader.prototype.beginObject = function(obj) {
 	var mat = obj.mat;
 
 	var texture = null;
-  var color = this.defaultColor;
-	var texTiling = null;
+	var color = this.defaultColor;
+	// var texTiling = null;
 
 	if (typeof mat === "object" && mat != null) {
 		// texture
@@ -778,13 +776,13 @@ Tarumae.BillboardShader.prototype.beginObject = function(obj) {
 		}
 
 		// texture tiling		
-		if (typeof mat.texTiling === "object") {
-			if (Array.isArray(mat.texTiling)) {
-				texTiling = mat.texTiling;
-			} else if (mat.texTiling instanceof Vec2) {
-				texTiling = mat.texTiling.toArray();
-			}	
-		}
+		// if (typeof mat.texTiling === "object") {
+		// 	if (Array.isArray(mat.texTiling)) {
+		// 		texTiling = mat.texTiling;
+		// 	} else if (mat.texTiling instanceof Vec2) {
+		// 		texTiling = mat.texTiling.toArray();
+		// 	}	
+		// }
 	}
 	
 	// texture
@@ -830,7 +828,7 @@ Tarumae.SolidColorShader = class extends Tarumae.Shader {
 
 		this.defaultColor4 = [0.8, 0.8, 0.8, 1.0];
 	}
-}
+};
 
 Tarumae.SolidColorShader.prototype.beginObject = function(obj) {
 	Tarumae.Shader.prototype.beginObject.call(this, obj);
@@ -857,8 +855,8 @@ Tarumae.SolidColorShader.prototype.beginObject = function(obj) {
 
 	var modelMatrix = obj._transform;
 	
- 	this.projectViewModelMatrixUniform.set(
-			(modelMatrix.mul(this.renderer.projectionViewMatrix)).toArray());
+	this.projectViewModelMatrixUniform.set(
+		(modelMatrix.mul(this.renderer.projectionViewMatrix)).toArray());
 	
 	gl.enable(gl.BLEND);
 	gl.disable(gl.DEPTH_TEST);
@@ -945,8 +943,8 @@ Tarumae.PanoramaShader.prototype.beginObject = function(obj) {
 	var mat = obj.mat;
 
 	var texture = null;
-	var color = null;
-	var texTiling = null;
+	// var color = null;
+	// var texTiling = null;
 
 	if (mat) {
 		// texture
@@ -955,22 +953,22 @@ Tarumae.PanoramaShader.prototype.beginObject = function(obj) {
 		}
 	
 		// color
-		if (typeof mat.color === "object") {
-			if (Array.isArray(mat.color)) {
-				color = mat.color;
-			} else if (mat.color instanceof Color3) {
-				color = mat.color.toArray();
-			}
-		}
+		// if (typeof mat.color === "object") {
+		// 	if (Array.isArray(mat.color)) {
+		// 		color = mat.color;
+		// 	} else if (mat.color instanceof Color3) {
+		// 		color = mat.color.toArray();
+		// 	}
+		// }
 
 		// texture tiling		
-		if (typeof mat.texTiling === "object") {
-			if (Array.isArray(mat.texTiling)) {
-				texTiling = mat.texTiling;
-			} else if (mat.texTiling instanceof Vec2) {
-				texTiling = mat.texTiling.toArray();
-			}	
-		}
+		// if (typeof mat.texTiling === "object") {
+		// 	if (Array.isArray(mat.texTiling)) {
+		// 		texTiling = mat.texTiling;
+		// 	} else if (mat.texTiling instanceof Vec2) {
+		// 		texTiling = mat.texTiling.toArray();
+		// 	}	
+		// }
 	}
 
 	// texture
@@ -1028,18 +1026,18 @@ Tarumae.StandardShader = class extends Tarumae.Shader {
 		this.create(renderer, vertShaderSrc, fragShaderSrc);
 		this.use();
 
-		this.vertexPositionAttribute = this.findAttribute('vertexPosition');
-		this.vertexNormalAttribute = this.findAttribute('vertexNormal');
-		this.vertexTexcoordAttribute = this.findAttribute('vertexTexcoord');
-		this.vertexTexcoord2Attribute = this.findAttribute('vertexTexcoord2');
-		this.vertexTangentAttribute = this.findAttribute('vertexTangent');
-		this.vertexBitangentAttribute = this.findAttribute('vertexBitangent');
-		this.vertexColorAttribute = this.findAttribute('vertexColor');
+		this.vertexPositionAttribute = this.findAttribute("vertexPosition");
+		this.vertexNormalAttribute = this.findAttribute("vertexNormal");
+		this.vertexTexcoordAttribute = this.findAttribute("vertexTexcoord");
+		this.vertexTexcoord2Attribute = this.findAttribute("vertexTexcoord2");
+		this.vertexTangentAttribute = this.findAttribute("vertexTangent");
+		this.vertexBitangentAttribute = this.findAttribute("vertexBitangent");
+		this.vertexColorAttribute = this.findAttribute("vertexColor");
 		
-		this.projectViewMatrixUniform = this.findUniform('projectViewMatrix');
-		this.modelMatrixUniform = this.findUniform('modelMatrix');
-		this.modelMatrix3x3Uniform = this.findUniform('modelMatrix3x3');
-		this.normalMatrixUniform = this.findUniform('normalMatrix');
+		this.projectViewMatrixUniform = this.findUniform("projectViewMatrix");
+		this.modelMatrixUniform = this.findUniform("modelMatrix");
+		this.modelMatrix3x3Uniform = this.findUniform("modelMatrix3x3");
+		this.normalMatrixUniform = this.findUniform("normalMatrix");
 
 		this.shadowMapUniform = {
 			boundingBox: this.bindUniform("shadowMapBox", "bbox"),
@@ -1308,7 +1306,7 @@ Tarumae.StandardShader.prototype.beginObject = function(obj) {
 	var roughness = 0.5;
 	var glossy = null;
 	var emission = null;
-	var transparency = 0;
+	// var transparency = 0;
 	var normalMipmap = 0;
 	var normalIntensity = 1.0;
 
@@ -1352,10 +1350,10 @@ Tarumae.StandardShader.prototype.beginObject = function(obj) {
 			glossy = mat.glossy;
 		}
 
-		// transparency
-		if (typeof mat.transparency !== "undefined" && mat.transparency > 0) {
-			transparency = mat.transparency;
-		}
+		// // transparency
+		// if (typeof mat.transparency !== "undefined" && mat.transparency > 0) {
+		// 	transparency = mat.transparency;
+		// }
 
 		// emission
 		if (typeof mat.emission !== "undefined") {
