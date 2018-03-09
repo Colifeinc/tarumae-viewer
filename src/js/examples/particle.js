@@ -31,9 +31,9 @@ window.addEventListener("load", function() {
 			oy: Math.random() * 20 - 10,
 			oz: Math.random() * 20 - 10,
 			r: 1.0, //Math.random(),
-			g: Math.random(),
+			g: Math.random() * 0.5,
 			b: Math.random(),
-			size: Math.random() * 3,
+			size: Math.random() * 1 + 2,
 		};
 	}
 
@@ -82,14 +82,16 @@ window.addEventListener("load", function() {
 		});
 	};
 
-	var collapse = () => {
-		if (mesh) {
-			setAll(p => {
-				var vertexIndex = parseInt(Math.random() * mesh.meta.vertexCount) * 3;
+	var mountainVertices;
 
-				p.ox = mesh.vertexBuffer[vertexIndex];
-				p.oy = mesh.vertexBuffer[vertexIndex + 1];
-				p.oz = mesh.vertexBuffer[vertexIndex + 2];
+	var collapse = () => {
+		if (mountainVertices) {
+			setAll(p => {
+				var mv = mountainVertices[parseInt(Math.random() * mountainVertices.length)];
+
+				p.ox = mv.x;
+				p.oy = mv.y;
+				p.oz = mv.z;
 			});
 		} else {
 			setAll(p => {
@@ -107,12 +109,9 @@ window.addEventListener("load", function() {
 
 	scene.animation = true;
 
-	var mesh;
-
 	scene.createObjectFromURL("models/mountain2.mod", mountain => {
-		mesh = mountain.meshes[0];
-
-		console.log(mesh.meta);
+		let mesh = mountain.meshes[0];
+		mountainVertices = mesh.points;
 		
 		collapse();
 
