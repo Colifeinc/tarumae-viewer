@@ -644,14 +644,14 @@ Tarumae.ModelViewer.prototype = {
 
 	zoomViewByMouseWheel: function() {
 		var s = this.viewer.originDistance - this.viewer.mouse.wheeldelta / 3000;
-		if (s > 50) s = 50; else if (s < 0.55) s = 0.55;
+		if (s > 50) s = 50; else if (s < 0) s = 0;
 		this.viewer.originDistance = s;
 		this.scene.requireUpdateFrame();
 	},
 
 	zoomViewByMouseButton: function() {
 		var s = this.viewer.originDistance - (this.viewer.mouse.movement.x + this.viewer.mouse.movement.y) / -100;
-		if (s > 50) s = 50; else if (s < 0.55) s = 0.55;
+		if (s > 50) s = 50; else if (s < 0) s = 0;
 		this.viewer.originDistance = s;
 		this.scene.requireUpdateFrame();
 	},
