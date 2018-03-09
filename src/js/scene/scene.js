@@ -7,7 +7,7 @@
 
 import Tarumae from "../entry";
 import "../utility/event";
-import { Vec2, Vec3, Color3 } from "../math/vector";
+import { Vec2, Vec3, Color3, Color4 } from "../math/vector";
 import "../math/matrix";
 import "../scene/renderer";
 import "../scene/object";
@@ -127,7 +127,7 @@ Tarumae.Scene = class {
 
 	createObjectFromURL(url, callback) {
 		this.createObjectFromBundle(url, (bundle, manifest)  => {
-			this.prepareObjects(manifest, null, bundle);
+			this.loadObject(manifest, undefined, bundle);
 
 			if (typeof callback === "function") {
 				var obj = manifest;
@@ -144,29 +144,11 @@ Tarumae.Scene = class {
 		var loadingSession = new Tarumae.ObjectsLoadingSession(this.resourceManager);
 		
 		for (var i = 0; i < arguments.length; i++) {
-			var obj = arguments[i];
+			let obj = arguments[i];
 	
-			if (obj === null || obj === undefined) continue;
-	
-			var _bundles = obj._bundles;
-			if (_bundles) {
-				this.loadArchives(_bundles, loadingSession);
-			}
-			
-			var _materials = obj._materials;
-			if (_materials) {
-				this.loadMaterials(_materials, loadingSession);
-			}
-	
-			var _refmaps = obj._refmaps;
-			if (_refmaps) {
-				this.loadReflectionMaps(_refmaps, loadingSession);
-			}
-	
-			this.prepareObjects(obj, loadingSession);
-			this.objects.push(obj);
-			obj.scene = this;
-			obj.updateTransform();
+			if (obj) {
+				this.loadObject(obj, loadingSession);
+			}	
 		}
 	
 		this.resourceManager.load();
@@ -179,6 +161,28 @@ Tarumae.Scene = class {
 		}
 	
 		return loadingSession;
+	}
+
+	loadObject(obj, loadingSession, bundle) {
+		var _bundles = obj._bundles;
+		if (_bundles) {
+			this.loadArchives(_bundles, loadingSession);
+		}
+			
+		var _materials = obj._materials;
+		if (_materials) {
+			this.loadMaterials(_materials, loadingSession, bundle);
+		}
+	
+		var _refmaps = obj._refmaps;
+		if (_refmaps) {
+			this.loadReflectionMaps(_refmaps, loadingSession, bundle);
+		}
+	
+		this.prepareObjects(obj, loadingSession, bundle);
+		this.objects.push(obj);
+		obj.scene = this;
+		obj.updateTransform();
 	}
 
 	// loadArchives(archs, loadingSession) {
@@ -272,13 +276,13 @@ Scene.prototype.requireUpdateFrame = function() {
 	this.requestedUpdateFrame = true;
 };
 
-Scene.prototype.loadMaterials = function(mats, loadingSession) {
+Scene.prototype.loadMaterials = function(mats, loadingSession, bundle) {
 	var _this = this;
 
 	var iterateMaterials = function(mName, mValue) {
 		mValue.name = mName;
 		_this.materials[mName] = mValue;
-		_this.prepareMaterialObject(mValue, loadingSession.rm, loadingSession);
+		_this.prepareMaterialObject(mValue, loadingSession ? loadingSession.rm : undefined, loadingSession, bundle);
 	};
 	
 	mats._s3_foreach(iterateMaterials);
@@ -475,7 +479,7 @@ Scene.prototype.prepareObjectMesh = function(obj, name, value, loadingSession, b
 							var img;
 
 							if (typeof Blob === "function" && typeof URL === "function") {
-								var blob = new Blob([new Uint8Array(lightmapData)], {type: 'image/jpeg'});
+								var blob = new Blob([new Uint8Array(lightmapData)], {type: "image/jpeg"});
 
 								img = new Image();
 								img.src = URL.createObjectURL(blob);
@@ -536,13 +540,44 @@ Scene.prototype.prepareObjectMeshFromURLStream = function(obj, url, buffer, load
 	return mesh;
 };
 
-Scene.prototype.prepareMaterialObject = function(mat, rm, loadingSession) {
+Scene.prototype.prepareMaterialObject = function(mat, rm, loadingSession, bundle) {
 	var scene = this;
 
 	if (rm === undefined) {
 		rm = this.resourceManager;
 	}
-		
+
+	function setTextureImage(name, buffer, bundle, uid) {
+		if (loadingSession) {
+			loadingSession.downloadTextureCount++;
+			loadingSession.progress();
+		}
+
+		if (buffer instanceof ArrayBuffer) {
+			var image;
+
+			if (typeof Blob === "function" && typeof URL === "function") {
+				var blob = new Blob([new Uint8Array(buffer)], { type: "image/jpeg" });
+
+				image = new Image();
+				image.src = URL.createObjectURL(blob);
+			} else {
+				var imageDataBase64 = Tarumae.Utility.byteArrayToBase64(new Uint8Array(buffer));
+
+				image = new Image();
+				image.src = "data:image/jpeg;base64," + imageDataBase64;
+			}
+
+			image.onload = () => {
+				mat[name] = new Tarumae.Texture(image);
+				scene.requireUpdateFrame();
+			};
+		} else if (buffer instanceof Image) {
+			mat[name] = new Tarumae.Texture(buffer);
+			scene.requireUpdateFrame();
+		}
+	}
+
 	mat._s3_foreach(function(name, value) {
 		switch (name) {
 			case "color":
@@ -562,25 +597,17 @@ Scene.prototype.prepareMaterialObject = function(mat, rm, loadingSession) {
 			case "normalmap":
 				if (typeof value === "string" && value.length > 0) {
 					if (scene.renderer.cachedTextures.hasOwnProperty(value)) {
-						obj[name] = scene.renderer.cachedTextures[value];
+						mat[name] = scene.renderer.cachedTextures[value];
 					} else {
 						if (loadingSession) loadingSession.resourceTextureCount++;
 
-						rm.add(value, Tarumae.ResourceTypes.Image, function(image) {
-							if (loadingSession) {
-								loadingSession.downloadTextureCount++;
-								loadingSession.progress();
-							}
-
-							if (image) {
-								if (scene.renderer.cachedTextures.hasOwnProperty(value)) {
-									obj[name] = scene.renderer.cachedTextures[value];
-								} else {
-									mat[name] = new Tarumae.Texture(image);
-									scene.requireUpdateFrame();
-								}
-							}
-						});
+						if (!Tarumae.Utility.Archive.canLoadFromArchive(this, value, 0x20786574, bundle, (buffer, bundle, uid) => {
+							setTextureImage(name, buffer, bundle, uid);
+						})) {
+							rm.add(value, Tarumae.ResourceTypes.Image, (image) => {
+								setTextureImage(name, image);
+							});
+						}
 					}
 				}
 				break;
