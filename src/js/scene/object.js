@@ -1038,6 +1038,21 @@ Tarumae.BillboardMesh.VertexBuffer = new Float32Array([
 	-1, 1, 0, -1, -1, 0, 1, 1, 0, 1, -1, 0, 0, 0, 0, 1, 1, 0, 1, 1
 ]);
 
+////////////////////////// Light //////////////////////////
+
+Tarumae.PointLight = class extends Tarumae.SceneObject {
+	constructor() {
+		super();
+
+		this.mat = {
+			emission: 1.0,
+			color: new Color3(1.0, 0.95, 0.9),
+		};
+
+		this.type = Tarumae.ObjectTypes.PointLight;
+	}
+};
+
 ////////////////////////// Line //////////////////////////
 
 Tarumae.Shapes = {};
