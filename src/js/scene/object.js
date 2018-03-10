@@ -962,7 +962,7 @@ Tarumae.Billboard = class extends Tarumae.SceneObject {
 	
 		if (typeof image === "string" && image.length > 0) {
 			Tarumae.ResourceManager.download(image, Tarumae.ResourceTypes.Image, img => {
-				this.mat.tex = new Tarumae.Texture(img, false);
+				this.mat.tex = new Tarumae.Texture(img);
 				if (this.scene) {
 					this.scene.requireUpdateFrame();
 				}

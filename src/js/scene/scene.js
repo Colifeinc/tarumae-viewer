@@ -491,6 +491,7 @@ Scene.prototype.prepareObjectMesh = function(obj, name, value, loadingSession, b
 							if (img) {
 								img.onload = function() {
 									var tex = new Tarumae.Texture(img);
+									tex.enableMipmapped = false;
 									tex.enableRepeat = false;
 									mesh._lightmap = tex;
 									scene.requireUpdateFrame();
@@ -697,7 +698,6 @@ Scene.prototype.prepareObjects = function(obj, loadingSession, bundle) {
 						
 							if (image) {
 								var lmapTex = new Tarumae.Texture(image);
-								lmapTex.enableRepeat = false;
 								obj[name] = lmapTex;
 								scene.requireUpdateFrame();
 							}
