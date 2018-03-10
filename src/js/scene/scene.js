@@ -7,7 +7,7 @@
 
 import Tarumae from "../entry";
 import "../utility/event";
-import { Vec2, Vec3, Color3, Color4 } from "../math/vector";
+import { Vec2, Vec3, Vec4, Color3, Color4 } from "../math/vector";
 import "../math/matrix";
 import "../scene/renderer";
 import "../scene/object";
@@ -126,7 +126,7 @@ Tarumae.Scene = class {
 	}
 
 	createObjectFromURL(url, callback) {
-		this.createObjectFromBundle(url, (bundle, manifest)  => {
+		this.createObjectFromBundle(url, (bundle, manifest) => {
 			this.loadObject(manifest, undefined, bundle);
 
 			if (typeof callback === "function") {
@@ -148,7 +148,7 @@ Tarumae.Scene = class {
 	
 			if (obj) {
 				this.loadObject(obj, loadingSession);
-			}	
+			}
 		}
 	
 		this.resourceManager.load();
@@ -234,8 +234,7 @@ Tarumae.Scene = class {
 		this.requireUpdateFrame();
 	}
 
-
-}
+};
 
 // Event declarations
 new Tarumae.EventDispatcher(Tarumae.Scene).registerEvents(
@@ -262,7 +261,6 @@ Scene.prototype.destroy = function() {
 };
 
 Scene.prototype.drawSky = function() {
-	var gl = this.renderer.gl;
 	var x = this.renderer.canvas.width / this.renderer.canvas.height;
 	this.projectMatrix.ortho(-x, x, -1, 1, -1, 1);
 };
@@ -464,7 +462,7 @@ Scene.prototype.prepareObjectMesh = function(obj, name, value, loadingSession, b
 		} else {
 			if (loadingSession) loadingSession.resourceMeshCount++;
 
-			var loadedHandler = function(buffer, archive, uid) {
+			var loadedHandler = function(buffer, archive) {
 				if (loadingSession) {
 					loadingSession.downloadMeshCount++;
 					loadingSession.progress();
@@ -547,7 +545,7 @@ Scene.prototype.prepareMaterialObject = function(mat, rm, loadingSession, bundle
 		rm = this.resourceManager;
 	}
 
-	function setTextureImage(name, buffer, bundle, uid) {
+	function setTextureImage(name, buffer) {
 		if (loadingSession) {
 			loadingSession.downloadTextureCount++;
 			loadingSession.progress();
@@ -834,13 +832,15 @@ Scene.prototype.prepareObjects = function(obj, loadingSession, bundle) {
  * Finds objects and children in this scene by specified name. Returns null if nothing found.
  */ 
 Scene.prototype.findObjectByName = function(name) {
+	var obj;
+
 	for (var i = 0; i < this.objects.length; i++) {
-		var obj = this.objects[i];
+		obj = this.objects[i];
 		if (obj.name == name) return obj;
 	}
 
 	for (var k = 0; k < this.objects.length; k++) {
-		var obj = this.objects[k];
+		obj = this.objects[k];
 
 		var child = obj.findObjectByName(name);
 		if (child) return child;
@@ -1024,14 +1024,14 @@ Scene.prototype.hitTestObjectByRay = function(obj, ray, out, session, options) {
 /*
  * Get the bounds of this scene.
  */
-Scene.prototype.getBounds = function() {
+Scene.prototype.getBounds = function(options) {
 	var bbox = null;
 
 	for (var i = 0; i < this.objects.length; i++) {
 		var object = this.objects[i];
 		if (typeof object.visible !== "undefined" && object.visible) {
 
-			var objectBBox = object.getBounds();
+			var objectBBox = object.getBounds(options);
 		
 			if (!options || !options.filter || options.filter(object)) {
 				bbox = Tarumae.BoundingBox.findBoundingBoxOfBoundingBoxes(bbox, objectBBox);
@@ -1047,7 +1047,7 @@ Scene.prototype.getBounds = function() {
 	}
 
 	return bbox;
-}
+};
 
 Scene.prototype.mousedown = function(scrpos) {
 

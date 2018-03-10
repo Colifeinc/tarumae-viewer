@@ -5,10 +5,10 @@
 // Copyright(c) 2016 BULB CORP. all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
-import Tarumae from "../entry"
+import Tarumae from "../entry";
 
 Tarumae.Utility.isPowerOf2 = function(value) {
-  return (value & (value - 1)) == 0;
+	return (value & (value - 1)) == 0;
 };
 
 Tarumae.Texture = function(image, enableMipmapped, linearInterpolation, enableRepeat) {
