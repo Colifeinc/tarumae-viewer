@@ -27,6 +27,8 @@ Tarumae.Utility.Archive = class {
 	}
 
 	loadFromStream(data) {
+		if (!data) return;
+
 		var headerBuffer = new Uint32Array(data.slice(0, 32));
 		
 		if (headerBuffer[0] != 0x61626f73) return null;
@@ -44,7 +46,7 @@ Tarumae.Utility.Archive = class {
 	
 		if (chunkCount > 0x1FFFE) {
 			// invalid chunk count
-			return null;
+			return;
 		}
 		
 		var archive = this;
@@ -79,12 +81,14 @@ Tarumae.Utility.Archive = class {
 	}
 
 	getChunkData(uid, format) {
+		if (!this.chunks) return;
+
 		var chunk = this.chunks[uid];
-		if (!chunk) return null;
+		if (!chunk) return;
 
 		if (format) {
 			if (chunk.format != format) {
-				return null;
+				return;
 			}
 		}
 

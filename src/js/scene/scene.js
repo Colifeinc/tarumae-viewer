@@ -807,6 +807,9 @@ Scene.prototype.prepareObjects = function(obj, loadingSession, bundle) {
 						&& !(value instanceof Scene)
 						&& !(value instanceof Vec3)
 						&& !(value instanceof Color3)
+						&& !(value instanceof Color4)
+						&& !(value instanceof Tarumae.Matrix3)
+						&& !(value instanceof Tarumae.Matrix4)
 						&& !(value instanceof Array)) {
 						scene.prepareObjects(value, loadingSession, bundle);
 						value.name = name;
