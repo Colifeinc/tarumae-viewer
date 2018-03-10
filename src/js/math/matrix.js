@@ -5,9 +5,9 @@
 // Copyright(c) 2016 BULB CORP. all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
-import Tarumae from "../entry"
-import { Vec3 } from "./vector"
-import "./functions"
+import Tarumae from "../entry";
+import { Vec3 } from "./vector";
+import "./functions";
 
 ///////////////////// Matrix3 //////////////////////
 
@@ -154,7 +154,7 @@ Tarumae.Matrix3 = class {
 	clone() {
 		return new Tarumae.Matrix3(this);
 	}
-}
+};
 
 ///////////////////// Matrix4 //////////////////////
 
@@ -603,6 +603,6 @@ Tarumae.Matrix4 = class {
 	toFloat32Array() {
 		return new Float32Array(this.toArray());
 	}
-}
+};
 
 Tarumae.Matrix4.Identity = new Tarumae.Matrix4().loadIdentity();
