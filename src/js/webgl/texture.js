@@ -119,13 +119,19 @@ Tarumae.Texture = class {
 	use(renderer) {
 		if (!this.renderer) {
 			this.renderer = renderer;
-		}	
+		}
+
+		if (this.isLoading && this.image && !this.image.complete) {
+			return false;
+		}
 
 		if (!this.glTexture) {
 			this.bind(this.renderer);
 		}
 
 		this.renderer.gl.bindTexture(this.renderer.gl.TEXTURE_2D, this.glTexture);
+
+		return true;
 	}
 
 	disuse() {

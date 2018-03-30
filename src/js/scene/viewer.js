@@ -938,22 +938,22 @@ Tarumae.TouchController = function(scene) {
 
 	var movementDetectingTimer = null;
 
-	scene.addEventListener('frame', () => {
+	scene.addEventListener("frame", () => {
 		this.detectFirstPersonMove();
 	});
 
 	scene.on("keydown", function() {
-		// if (!movementDetectingTimer) {
-		//   movementDetectingTimer = setInterval(_this.detectFirstPersonMove, 10);
-		// }
-		scene.animation = true;
+		if (!movementDetectingTimer) {
+			movementDetectingTimer = setInterval(_this.detectFirstPersonMove, 10);
+		}
+		// scene.animation = true;
 	});
 
 	scene.on("keyup", function() {
 		if (viewer.pressedKeys.length === 0) {
-			// clearInterval(movementDetectingTimer);
-			// movementDetectingTimer = null;
-			scene.animation = false;      
+			clearInterval(movementDetectingTimer);
+			movementDetectingTimer = null;
+			// scene.animation = false;      
 		}
 	});
 
@@ -968,7 +968,7 @@ Tarumae.TouchController = function(scene) {
 			Tarumae.Utility.perforMovementAccelerationAnimation(this,
 				_this.dragAccelerationIntensity, _this.dragAccelerationAttenuation, (xdiff, ydiff) => {
 					scene.mainCamera.angle.y += xdiff;
-					scene.mainCamera.angle.x += ydiff;;
+					scene.mainCamera.angle.x += ydiff;
 				});
 		}
 	});

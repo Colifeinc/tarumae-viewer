@@ -312,7 +312,7 @@ Vec3.createFromEulers = (function() {
 	return function(ex, ey, ez) {
 		
 		// TODO: might be replaced by Quaternion	
-		if (m == undefined) m = new Tarumae.Matrix4();
+		if (m === undefined) m = new Tarumae.Matrix4();
 		m.loadIdentity().rotate(ex, ey, ez);
 		
 		return new Vec3(-m.a3, -m.b3, -m.c3);

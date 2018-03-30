@@ -24,7 +24,7 @@ Tarumae.CollisionModes = {
 
 Tarumae.SceneObject = class {
 	constructor() {
-		this._parent = null;
+		this._parent = undefined;
 		this._scene = undefined;
 		this._transform = new Tarumae.Matrix4().loadIdentity();
 
@@ -121,6 +121,45 @@ Tarumae.SceneObject = class {
 			this.objects[i].updateTransform();
 		}
 
+	}
+
+	clone() {
+		return Tarumae.SceneObject.clone(this);
+	}
+
+	static clone(obj) {
+		let newObj = new Tarumae.SceneObject();
+		
+		newObj._suspendTransformUpdate = true;
+
+		newObj.location = obj.location;
+		newObj.angle = obj.angle;
+		newObj.scale = obj.scale;
+
+		newObj.visible = obj.visible;
+		newObj.shadowCast = obj.shadowCast;
+		newObj.receiveLight = obj.receiveLight;
+
+		newObj.collisionMode = obj.collisionMode;
+		newObj.collisionTarget = obj.collisionTarget;
+		newObj.radiyBody = obj.radiyBody;
+		newObj.isSelected = obj.isSelected;
+
+		newObj._transform = obj._transform;
+		
+		for (var i = 0; i < obj.meshes.length; i++) {
+			newObj.addMesh(obj.meshes[i]);
+		}
+
+		for (var k = 0; k < obj.objects.length; k++) {
+			var newChild = obj.objects[k].clone();
+			newObj.add(newChild);
+		}
+
+		newObj._suspendTransformUpdate = false;		
+		newObj.updateTransform();
+
+		return newObj;
 	}
 };
 

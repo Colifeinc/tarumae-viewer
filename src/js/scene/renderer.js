@@ -107,6 +107,8 @@ Tarumae.Renderer = class {
 		this.aspectRate = 1.0;
 		this.transparencyList = [];
 
+		this.respool = new Tarumae.ResourcePool();
+
 		// matrices
 		this.projectMatrix = new Tarumae.Matrix4();
 		this.viewMatrix = new Tarumae.Matrix4();
@@ -154,6 +156,7 @@ Tarumae.Renderer = class {
 
 		this.cachedMeshes = {};
 		this.cachedTextures = {};
+		this.cachedImages = {};
 
 		var downloader = new Tarumae.ResourceManager();
 		downloader.downloadShaders = [];
@@ -416,16 +419,16 @@ Tarumae.Renderer = class {
 					: (this.options.perspective.method));
 	
 				switch (projectionMethod) {
-				default:
-				case Tarumae.ProjectionMethods.Persp:
-				case "persp":
-					this.perspectiveProject(this.projectMatrix);
-					break;
+					default:
+					case Tarumae.ProjectionMethods.Persp:
+					case "persp":
+						this.perspectiveProject(this.projectMatrix);
+						break;
 	
-				case Tarumae.ProjectionMethods.Ortho:
-				case "ortho":
-					this.orthographicProject(this.projectMatrix);
-					break;
+					case Tarumae.ProjectionMethods.Ortho:
+					case "ortho":
+						this.orthographicProject(this.projectMatrix);
+						break;
 				}
 	
 				this.drawSceneFrame(scene);
@@ -482,16 +485,16 @@ Tarumae.Renderer = class {
 		this.currentShader.beginScene(scene);
 	
 		// draw transparency objects
-		for (var i = 0; i < this.transparencyList.length; i++) {
-			this.drawObject(this.transparencyList[i], true);
+		for (var j = 0; i < this.transparencyList.length; j++) {
+			this.drawObject(this.transparencyList[j], true);
 		}
 	
 		// this.disuseCurrentShader();
 	
 		// draw selected objects
 		if (Array.isArray(scene.selectedObjects)) {
-			for (var i = 0; i < scene.selectedObjects.length; i++) {
-				var obj = scene.selectedObjects[i];
+			for (var k = 0; k < scene.selectedObjects.length; k++) {
+				var obj = scene.selectedObjects[k];
 				if (obj.visible) {
 					this.drawHighlightObject(obj, new Color4(0.1, 0.6, 1.0, 0.5));
 	
@@ -534,8 +537,8 @@ Tarumae.Renderer = class {
 		m.scale(1 / camera.scale.x, 1 / camera.scale.y, 1 / camera.scale.z);
 	
 		// rotate
-		for (var i = plist.length - 1; i >= 0; i--) {
-			var obj = plist[i];
+		for (let i = plist.length - 1; i >= 0; i--) {
+			let obj = plist[i];
 	
 			m.rotate(-obj.angle.x, -obj.angle.y, -obj.angle.z);
 		}
@@ -543,8 +546,8 @@ Tarumae.Renderer = class {
 		m.rotate(-camera.angle.x, -camera.angle.y, -camera.angle.z);
 	
 		// translate
-		for (var i = plist.length - 1; i >= 0; i--) {
-			var obj = plist[i];
+		for (let i = plist.length - 1; i >= 0; i--) {
+			let obj = plist[i];
 	
 			m.translate(-obj.location.x, -obj.location.y, -obj.location.z);
 		}
@@ -552,7 +555,7 @@ Tarumae.Renderer = class {
 		m.translate(-camera.location.x, -camera.location.y, -camera.location.z);
 	
 		return m;
-	};
+	}
 	
 	getCameraRotationMatrix(camera) {
 	
@@ -590,7 +593,7 @@ Tarumae.Renderer = class {
 				;
 			}
 		}
-	};
+	}
 	
 	makeProjectMatrix(projectMethod, m) {
 		var projectionMethod = projectMethod
@@ -599,16 +602,16 @@ Tarumae.Renderer = class {
 				: (this.options.perspective.method));
 	
 		switch (projectionMethod) {
-		default:
-		case Tarumae.ProjectionMethods.Persp:
-		case "persp":
-			this.perspectiveProject(m);
-			break;
+			default:
+			case Tarumae.ProjectionMethods.Persp:
+			case "persp":
+				this.perspectiveProject(m);
+				break;
 	
-		case Tarumae.ProjectionMethods.Ortho:
-		case "ortho":
-			this.orthographicProject(m);
-			break;
+			case Tarumae.ProjectionMethods.Ortho:
+			case "ortho":
+				this.orthographicProject(m);
+				break;
 		}
 	}
 	
@@ -639,8 +642,7 @@ Tarumae.Renderer = class {
 	}
 	
 	drawObject(obj, transparencyRendering) {
-		"use strict";
-	
+
 		if (obj.visible === false) {
 			return;
 		}
@@ -652,8 +654,8 @@ Tarumae.Renderer = class {
 			if (obj._opacity < 1) {
 				this.transparencyList.push(obj);
 	
-				for (var i = 0; i < obj.objects.length; i++) {
-					var child = obj.objects[i];
+				for (let i = 0; i < obj.objects.length; i++) {
+					let child = obj.objects[i];
 					this.drawObject(child, false);
 				}
 	
@@ -668,7 +670,8 @@ Tarumae.Renderer = class {
 			var objShaderName = objShader.name || null;
 	
 			if (objShaderName) {
-				var shader = this.useShader(objShaderName);
+				// var shader =
+				this.useShader(objShaderName);
 				// if (shader) {
 				// 	shader.beginScene(this.currentScene);
 				// }
@@ -688,50 +691,53 @@ Tarumae.Renderer = class {
 		}
 	
 		switch (obj.type) {
-		default:
-		case Tarumae.ObjectTypes.GenericObject:
-			{
-				for (var i = 0; i < obj.meshes.length; i++) {
-					var mesh = obj.meshes[i];
-					if (mesh && this.options.enableDrawMesh) {
-						this.currentShader.beginMesh(mesh);
-						mesh.draw(this);
-						this.currentShader.endMesh(mesh);
+			default:
+			case Tarumae.ObjectTypes.GenericObject:
+				{
+					for (let i = 0; i < obj.meshes.length; i++) {
+						var mesh = obj.meshes[i];
+						if (mesh && this.options.enableDrawMesh) {
+							if (mesh.meta && mesh.meta.vertexCount == 0) {
+								console.warn('invaliad mesh from object ' + obj.name);
+							}
+							this.currentShader.beginMesh(mesh);
+							mesh.draw(this);
+							this.currentShader.endMesh(mesh);
+						}
+					}
+	
+					if (!transparencyRendering) {
+						for (let i = 0; i < obj.objects.length; i++) {
+							let child = obj.objects[i];
+							this.drawObject(child, false);
+						}
 					}
 				}
+				break;
 	
-				if (!transparencyRendering) {
-					for (var i = 0; i < obj.objects.length; i++) {
-						var child = obj.objects[i];
-						this.drawObject(child, false);
-					}
-				}
-			}
-			break;
+			case Tarumae.ObjectTypes.Div:
+				{
+					var div = obj._htmlObject;
 	
-		case Tarumae.ObjectTypes.Div:
-			{
-				var div = obj._htmlObject;
+					var worldloc = new Vec4(0, 0, 0, 1).mulMat(obj._transform);
+					var p = this.transformPoint(worldloc);
 	
-				var worldloc = new Vec4(0, 0, 0, 1).mulMat(obj._transform);
-				var p = this.transformPoint(worldloc);
+					var w = div.scrollWidth / 2;
+					var h = div.scrollHeight / 2;
 	
-				var w = div.scrollWidth / 2;
-				var h = div.scrollHeight / 2;
+					div.style.left = (p.x - w) + "px";
+					div.style.top = (p.y - h) + "px";
 	
-				div.style.left = (p.x - w) + "px";
-				div.style.top = (p.y - h) + "px";
-	
-				if (typeof obj.enableDepthScale !== "undefined"
+					if (typeof obj.enableDepthScale !== "undefined"
 						&& obj.enableDepthScale) {
-					var pw = 1 + 1 / p.w;
-					var tw = div.scrollWidth * pw / 2;
-					var th = div.scrollHeight * pw / 2;
-					// div.style.transform = "translate(" + (tw) + "px," + (th) +"px) scale(" + pw + "," + pw +") translate(" + (-tw) + "px," + (-th) + "px)";
-					div.style.transform = "scale3d(" + pw + "," + pw + "," + pw + ")";
+						var pw = 1 + 1 / p.w;
+						// let tw = div.scrollWidth * pw / 2;
+						// let th = div.scrollHeight * pw / 2;
+						// div.style.transform = "translate(" + (tw) + "px," + (th) +"px) scale(" + pw + "," + pw +") translate(" + (-tw) + "px," + (-th) + "px)";
+						div.style.transform = "scale3d(" + pw + "," + pw + "," + pw + ")";
+					}
 				}
-			}
-			break;
+				break;
 		}
 	
 		this.currentShader.endObject(obj);
@@ -750,7 +756,7 @@ Tarumae.Renderer = class {
 			return;
 		}
 	
-		var gl = this.gl;
+		// var gl = this.gl;
 	
 		var shader = this.useShader("solidcolor");
 	
@@ -792,40 +798,40 @@ Tarumae.Renderer = class {
 			: (this.options.perspective.method);
 	
 		switch (projectMethod) {
-		default:
-		case Tarumae.ProjectionMethods.Persp:
-		case "persp":
-			{
-				var viewAngle = (this.currentScene && this.currentScene.mainCamera)
-					? (this.currentScene.mainCamera.fieldOfView)
-					: (this.options.perspective.angle);
+			default:
+			case Tarumae.ProjectionMethods.Persp:
+			case "persp":
+				{
+					var viewAngle = (this.currentScene && this.currentScene.mainCamera)
+						? (this.currentScene.mainCamera.fieldOfView)
+						: (this.options.perspective.angle);
 	
-				var viewRange = Math.tan(viewAngle * Math.PI / 2.0 / 180.0);
+					var viewRange = Math.tan(viewAngle * Math.PI / 2.0 / 180.0);
 	
-				var viewportWidth = viewRange * this.aspectRate;
-				var viewportHeight = viewRange;
+					var viewportWidth = viewRange * this.aspectRate;
+					var viewportHeight = viewRange;
 	
-				ray = new Tarumae.Ray(new Vec3(0, 0, 0), new Vec3(
-					(p.x / this.renderSize.width - 0.5) * viewportWidth,
-					-(p.y / this.renderSize.height - 0.5) * viewportHeight,
-					-0.5).normalize());
-			}
-			break;
+					ray = new Tarumae.Ray(new Vec3(0, 0, 0), new Vec3(
+						(p.x / this.renderSize.width - 0.5) * viewportWidth,
+						-(p.y / this.renderSize.height - 0.5) * viewportHeight,
+						-0.5).normalize());
+				}
+				break;
 	
-		case Tarumae.ProjectionMethods.Ortho:
-		case "ortho":
-			{
-				var viewRange = (this.viewer.originDistance - 0.5) * 10 * 2;
+			case Tarumae.ProjectionMethods.Ortho:
+			case "ortho":
+				{
+					// var viewRange = (this.viewer.originDistance - 0.5) * 10 * 2;
 	
-				var viewportWidth = viewRange * this.aspectRate;
-				var viewportHeight = viewRange;
+					// var viewportWidth = viewRange * this.aspectRate;
+					// var viewportHeight = viewRange;
 	
-				var x = (p.x / this.renderSize.width - 0.5) * viewportWidth;
-				var y = -(p.y / this.renderSize.height - 0.5) * viewportHeight;
+					var x = (p.x / this.renderSize.width - 0.5) * viewportWidth;
+					var y = -(p.y / this.renderSize.height - 0.5) * viewportHeight;
 	
-				ray = new Tarumae.Ray(new Vec3(x, y, 0), new Vec3(0, 0, -1));
-			}
-			break;
+					ray = new Tarumae.Ray(new Vec3(x, y, 0), new Vec3(0, 0, -1));
+				}
+				break;
 		}
 	
 		var m = this.viewMatrix.mul(this.cameraMatrix).inverse();
@@ -897,10 +903,10 @@ Tarumae.Renderer.prototype.toScreenPositionEx = function(pos) {
 var TarumaeRenderer = Tarumae.Renderer;
 	
 TarumaeRenderer.prototype.transformPoints = function(points) {
-	var renderHalfWidth = this.renderSize.width / 2;
-	var renderHalfHeight = this.renderSize.height / 2;
+	const renderHalfWidth = this.renderSize.width / 2;
+	const renderHalfHeight = this.renderSize.height / 2;
 	
-	var ps = new Array(points.length);
+	const ps = new Array(points.length);
 	
 	for (var i = 0; i < points.length; i++) {
 		var p = new Vec4(points[i], 1.0).mulMat(this.projectionViewMatrix);
@@ -913,19 +919,19 @@ TarumaeRenderer.prototype.transformPoints = function(points) {
 	return ps;
 };
 	
-TarumaeRenderer.prototype.transformTriangle = function(triangle) {
-	var m = this.viewMatrix.mul(this.cameraMatrix);
+TarumaeRenderer.prototype.transformTriangle = function(triangle) {
+	const m = this.viewMatrix.mul(this.cameraMatrix);
 	
-	return {
-		v1: new vec4(triangle.v1, 1.0).mulMat(m).xyz(),
-		v2: new vec4(triangle.v2, 1.0).mulMat(m).xyz(),
-		v3: new vec4(triangle.v3, 1.0).mulMat(m).xyz(),
+	return {
+		v1: new Vec4(triangle.v1, 1.0).mulMat(m).xyz(),
+		v2: new Vec4(triangle.v2, 1.0).mulMat(m).xyz(),
+		v3: new Vec4(triangle.v3, 1.0).mulMat(m).xyz(),
 	};
 };
 	
-TarumaeRenderer.prototype.viewRayHitTestPlaneInWorldSpace = function(pos, planeVertices) {
-	var ray = this.createWorldRayFromScreenPosition(pos);
-	return Tarumae.MathFunctions.rayIntersectsPlane(ray, planeVertices, Tarumae.Ray.MaxDistance);
+TarumaeRenderer.prototype.viewRayHitTestPlaneInWorldSpace = function(pos, planeVertices) {
+	const ray = this.createWorldRayFromScreenPosition(pos);
+	return Tarumae.MathFunctions.rayIntersectsPlane(ray, planeVertices, Tarumae.Ray.MaxDistance);
 };
 	
 TarumaeRenderer.prototype.drawLine = function(from, to, width, color) {
@@ -937,7 +943,7 @@ TarumaeRenderer.prototype.drawLine2D = function(from, to, width, color) {
 	this.drawLineSegments2D([from, to], width, color);
 };
 	
-TarumaeRenderer.prototype.drawLineSegments2D = function(lines, width, color) {
+TarumaeRenderer.prototype.drawLineSegments2D = function() {
 	return this.drawingContext2D.drawLines.apply(this.drawingContext2D, arguments);
 };
 	
@@ -1051,10 +1057,8 @@ TarumaeRenderer.prototype.fillArrow2D = function(from, to, size, color) {
 	ctx.beginPath();
 	
 	ctx.moveTo(to.x, to.y);
-	ctx.lineTo(to.x - size * Math.cos(angle - Math.PI / 6),
-		to.y - size * Math.sin(angle - Math.PI / 6));
-	ctx.lineTo(to.x - size * Math.cos(angle + Math.PI / 6),
-		to.y - size * Math.sin(angle + Math.PI / 6));
+	ctx.lineTo(to.x - size * Math.cos(angle - Math.PI / 6), to.y - size * Math.sin(angle - Math.PI / 6));
+	ctx.lineTo(to.x - size * Math.cos(angle + Math.PI / 6), to.y - size * Math.sin(angle + Math.PI / 6));
 	
 	ctx.fill();
 	ctx.closePath();
@@ -1071,7 +1075,7 @@ TarumaeRenderer.prototype.drawRect = function(topLeft, bottomRight, strokeWidth,
 	this.drawRect2D(new Tarumae.Rect(left, top, right - left, bottom - top), strokeWidth, strokeColor, fillColor);
 };
 	
-TarumaeRenderer.prototype.drawRect2D = function(rect, strokeWidth, strokeColor, fillColor) {
+TarumaeRenderer.prototype.drawRect2D = function() {
 	return this.drawingContext2D.drawRect.apply(this.drawingContext2D, arguments);
 };
 	
@@ -1117,7 +1121,7 @@ TarumaeRenderer.prototype.drawEllipse = function(v, size, strokeWidth, strokeCol
 };
 	
 TarumaeRenderer.prototype.drawEllipse2D = function(p, size, strokeWidth, strokeColor, fillColor) {
-	var r = new Tarumae.Rect(p.x - size / 2, p.y - size / 2, size, size)
+	var r = new Tarumae.Rect(p.x - size / 2, p.y - size / 2, size, size);
 	return this.drawingContext2D.drawEllipse(r, strokeWidth, strokeColor, fillColor);
 };
 	
@@ -1138,7 +1142,7 @@ TarumaeRenderer.prototype.drawText = function(location, text, color, halign) {
 	this.drawText2D(p, text, color, halign);
 };
 	
-TarumaeRenderer.prototype.drawText2D = function(p, text, color, halign) {
+TarumaeRenderer.prototype.drawText2D = function() {
 	return this.drawingContext2D.drawText.apply(this.drawingContext2D, arguments);
 };
 	
@@ -1222,8 +1226,21 @@ TarumaeRenderer.ContainerStyle = [
 TarumaeRenderer.DefaultOptions = {
 	debugMode: false,
 	backColor: new Color4(0.93, 0.93, 0.93, 1.0),
-
 };
+
+///////////////// DrawingContext2D /////////////////
+
+Tarumae.ResourcePool = class {
+	constructor() {
+
+	}
+
+	loadTexture(url, onload) {
+	}
+};
+
+new Tarumae.EventDispatcher(Tarumae.ResourcePool).registerEvents(
+	"texadded");
 
 ///////////////// DrawingContext2D /////////////////
 
@@ -1260,7 +1277,7 @@ Tarumae.DrawingContext2D = class {
 	drawRect(rect, strokeWidth, strokeColor, fillColor) {
 		var ctx = this.ctx;
 	
-		var fillColor = fillColor || this.fillColor;
+		fillColor = fillColor || this.fillColor;
 
 		if (fillColor !== "transparent") {
 			ctx.fillStyle = fillColor;
@@ -1389,4 +1406,4 @@ Tarumae.DrawingContext2D = class {
 	
 		ctx.fillText(text, p.x, p.y);
 	}
-}
+};

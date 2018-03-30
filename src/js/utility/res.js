@@ -71,9 +71,9 @@ Tarumae.ResourceManager = class {
 
 	get(url) {
 		var res = this.resources[url];
-		if (res == null) {
+		if (!res) {
 			console.error('resource not managed: ' + url);
-			return null;
+			return;
 		} else {
 			return res.data;
 		}

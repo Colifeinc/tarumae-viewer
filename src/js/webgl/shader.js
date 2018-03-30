@@ -29,7 +29,7 @@ Tarumae.Shader = class {
 			enumerable: false,
 		});
 	
-		this.defaultSunColor = new Vec3(0.21, 0.14, 0.05);
+		this.defaultSunColor = new Vec3(0.21, 0.18, 0.16);
 		this.emptyTexture = undefined;
 
 		this.sceneStack = [];
@@ -1318,7 +1318,8 @@ Tarumae.StandardShader.prototype.beginObject = function(obj) {
 	
 	if (typeof mat === "object" && mat != null) {
 		// texture
-		if (typeof mat.tex === "object" && mat.tex instanceof Tarumae.Texture) {	
+		if (mat.tex && typeof mat.tex === "object" && mat.tex instanceof Tarumae.Texture
+			&& !mat.tex.isLoading && mat.tex.image && mat.tex.image.complete) {
 			this.useTexture = mat.tex;
 		}
 	
@@ -1631,4 +1632,4 @@ Tarumae.GLShader.prototype = {
 			//		alert(gl.getShaderInfoLog(this.glShaderId));
 		}
 	}
-}
+};

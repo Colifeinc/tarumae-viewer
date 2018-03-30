@@ -55,7 +55,7 @@ Tarumae.Mesh = class {
 		}
 
 		// check for v1.x
-		if (header[0] == 0x6873656d /* tag: mesh */) {
+		if (header[0] === 0x6873656d /* tag: mesh */) {
 
 			var verAndFlags = header[1];
 
@@ -116,8 +116,19 @@ Tarumae.Mesh = class {
 				this.meta.tangentBasisCount = this.meta.vertexCount;
 			}
 
-			if ((flags & 0x20) == 0x20) {
+			if ((flags & 0x20) === 0x20) {
 				this.meta.hasColor = true;
+			}
+
+			if ((flags & 0x80) === 0x80) {
+				this.meta.hasGrabBoundary = true;
+
+				var grabBoundaryBuffer = new Float32Array(stream, 96, 24);
+
+				this._grabBoundary = {
+					min: new Vec3(grabBoundaryBuffer[0], grabBoundaryBuffer[1], grabBoundaryBuffer[2]),
+					max: new Vec3(grabBoundaryBuffer[3], grabBoundaryBuffer[4], grabBoundaryBuffer[5]),
+				};
 			}
 		
 			var headerLength = header[2];
@@ -196,7 +207,7 @@ Tarumae.Mesh = class {
 			meta.indexCount = this.indexes.length;
 		}
 
-		if (this.vertexBuffer === undefined) {
+		if (!this.vertexBuffer) {
 			// compose memory buffer
 			if (!Array.isArray(this.vertices) || this.vertices.length <= 0) {
 				return false;
@@ -225,7 +236,7 @@ Tarumae.Mesh = class {
 
 		// calc offset
 		if (typeof meta.structureType === "number"
-			&& meta.structureType == Tarumae.Mesh.StructureTypes.StructureArray) {
+			&& meta.structureType === Tarumae.Mesh.StructureTypes.StructureArray) {
 		
 			meta.normalOffset = 12;
 
@@ -587,9 +598,9 @@ Object.assign(Tarumae.Mesh.prototype, {
 		
 		switch (this.composeMode) {
 			case Tarumae.Mesh.ComposeModes.Triangles:
-				for (var i = 0; i < vertexElementCount; i += 9) {
-					var out = this.hitTestByRayUsingVertexIndex(ray, vertices, normals, i, i + 3, i + 6, t, session, options);
-					if (out != null) {
+				for (let i = 0; i < vertexElementCount; i += 9) {
+					let out = this.hitTestByRayUsingVertexIndex(ray, vertices, normals, i, i + 3, i + 6, t, session, options);
+					if (out) {
 						t = out.t;
 						hit = out.hit;
 						worldPosition = out.worldPosition;
@@ -599,9 +610,9 @@ Object.assign(Tarumae.Mesh.prototype, {
 				break;
 
 			case Tarumae.Mesh.ComposeModes.TriangleStrip:
-				for (var i = 0; i < vertexElementCount - 6; i += 3) {
-					var out = this.hitTestByRayUsingVertexIndex(ray, vertices, normals, i, i + 3, i + 6, t, session, options);
-					if (out != null) {
+				for (let i = 0; i < vertexElementCount - 6; i += 3) {
+					let out = this.hitTestByRayUsingVertexIndex(ray, vertices, normals, i, i + 3, i + 6, t, session, options);
+					if (out) {
 						t = out.t;
 						hit = out.hit;
 						worldPosition = out.worldPosition;
@@ -611,7 +622,7 @@ Object.assign(Tarumae.Mesh.prototype, {
 				break;
 		}
 
-		return (hit == null) ? null : { t: t, hit: hit, worldPosition: worldPosition, localPosition: localPosition };
+		return (!hit) ? null : { t: t, hit: hit, worldPosition: worldPosition, localPosition: localPosition };
 	},
 
 	hitTestByRayUsingVertexIndex: (function() {
@@ -668,7 +679,7 @@ Object.assign(Tarumae.Mesh.prototype, {
 					var normal = new Vec4(vertexNormal, 0).mulMat(nmat).xyz().normalize();
 
 					if (Vec3.dot(session.rayNormalizedNegDir, normal) < 0) {
-						return null;
+						return;
 					}
 				}
 			
@@ -678,7 +689,7 @@ Object.assign(Tarumae.Mesh.prototype, {
 				return out;
 			}
 			
-			return null;
+			return;
 		};
 	})(),
 
