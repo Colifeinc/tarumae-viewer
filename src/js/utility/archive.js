@@ -31,7 +31,8 @@ Tarumae.Utility.Archive = class {
 
 		var headerBuffer = new Uint32Array(data.slice(0, 32));
 		
-		if (headerBuffer[0] != 0x61626f73) return null;
+		if (headerBuffer[0] != 0x61626f73
+			&& headerBuffer[0] != 0x61626f74) return null;
 		
 		var verflags = headerBuffer[1];
 		var ver = verflags & 0xffff;

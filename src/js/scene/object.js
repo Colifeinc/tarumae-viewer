@@ -364,7 +364,7 @@ Object.assign(Tarumae.SceneObject.prototype, {
 		};
 
 		return function(distance, options) {
-			if (typeof options === "object" && options !== null) {
+			if (options && typeof options === "object") {
 				Object.setPrototypeOf(options, defaultOptions);
 			} else {
 				options = defaultOptions;

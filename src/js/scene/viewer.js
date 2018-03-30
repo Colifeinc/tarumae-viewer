@@ -868,8 +868,11 @@ Tarumae.TouchController = function(scene) {
 	this.scene = scene;
 	this.renderer = scene.renderer;
 
-	this.moveSpeed = 0.075;
-	this.moveDistance = 1;
+	this.moveOption = {
+		speed: 0.02,
+		distance: 1,
+	};
+
 	this.dragAccelerationAttenuation = 0.05;
 	this.dragAccelerationIntensity = 2.5;
 
@@ -879,7 +882,7 @@ Tarumae.TouchController = function(scene) {
   
 	var m = new Tarumae.Matrix4(), dir = new Vec3();  
   
-	this.detectFirstPersonMove = function() {
+	var detectFirstPersonMove = function() {
 		if (scene && scene.mainCamera) {
 			var camera = scene.mainCamera;
 
@@ -931,20 +934,20 @@ Tarumae.TouchController = function(scene) {
 				// don't allow to change y if you don't want fly :)
 				camera.move(transformedDir.x * _this.moveSpeed, 0, transformedDir.z * _this.moveSpeed);
 
-				Tarumae.Utility.invokeIfExist(this, "oncameramove");
+				Tarumae.Utility.invokeIfExist(_this, "oncameramove");
 			}
 		}
 	};
 
 	var movementDetectingTimer = null;
 
-	scene.addEventListener("frame", () => {
-		this.detectFirstPersonMove();
-	});
+	// scene.addEventListener("frame", () => {
+	// 	detectFirstPersonMove();
+	// });
 
 	scene.on("keydown", function() {
 		if (!movementDetectingTimer) {
-			movementDetectingTimer = setInterval(_this.detectFirstPersonMove, 10);
+			movementDetectingTimer = setInterval(detectFirstPersonMove, 10);
 		}
 		// scene.animation = true;
 	});
@@ -956,6 +959,13 @@ Tarumae.TouchController = function(scene) {
 			// scene.animation = false;      
 		}
 	});
+
+	// function frameDetect() {
+	// 	requestAnimationFrame(frameDetect);
+	// 	detectFirstPersonMove();
+	// }
+	
+	// requestAnimationFrame(frameDetect);
 
 	var startDragTime;
 
@@ -973,14 +983,14 @@ Tarumae.TouchController = function(scene) {
 		}
 	});
 
-	this.scene.on("mouseup", function() {
-		var camera = this.mainCamera;
+	this.scene.on("mouseup", () => {
+		var camera = scene.mainCamera;
 		if (camera) {
 			if (viewer.pressedKeys._t_contains(Viewer.Keys.Shift)
       || viewer.mouse.pressedButtons._t_contains(Viewer.MouseButtons.Right)) {
-				camera.backward(_this.moveDistance);
+				camera.backward(this.moveOption.distance, this.moveOption);
 			} else {
-				camera.forward(_this.moveDistance);
+				camera.forward(this.moveOption.distance, this.moveOption);
 			}
 		}
 	});
