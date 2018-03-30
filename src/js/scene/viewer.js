@@ -897,7 +897,7 @@ Tarumae.TouchController = function(scene) {
 			if (viewer.pressedKeys._t_contains(Viewer.Keys.W)
         || viewer.pressedKeys._t_contains(Viewer.Keys.Up)) {
 				if (viewer.pressedKeys._t_contains(Viewer.Keys.Shift)) {
-					camera.location.y += _this.moveSpeed;
+					camera.location.y += _this.moveOption.speed;
 					scene.requireUpdateFrame();
 				} else {
 					dir.z = -1;
@@ -905,7 +905,7 @@ Tarumae.TouchController = function(scene) {
 			} else if (viewer.pressedKeys._t_contains(Viewer.Keys.S)
         || viewer.pressedKeys._t_contains(Viewer.Keys.Down)) {
 				if (viewer.pressedKeys._t_contains(Viewer.Keys.Shift)) {
-					camera.location.y -= _this.moveSpeed;
+					camera.location.y -= _this.moveOption.speed;
 					scene.requireUpdateFrame();
 				} else {
 					dir.z = 1;
@@ -913,10 +913,10 @@ Tarumae.TouchController = function(scene) {
 			}
     
 			if (viewer.pressedKeys._t_contains(Viewer.Keys.Left)) {
-				camera.angle.y += _this.moveSpeed * 20;
+				camera.angle.y += _this.moveOption.speed * 20;
 				scene.requireUpdateFrame();
 			} else if (viewer.pressedKeys._t_contains(Viewer.Keys.Right)) {
-				camera.angle.y -= _this.moveSpeed * 20;
+				camera.angle.y -= _this.moveOption.speed * 20;
 				scene.requireUpdateFrame();
 			}
 
