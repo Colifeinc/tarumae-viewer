@@ -932,7 +932,8 @@ Tarumae.TouchController = function(scene) {
 				transformedDir = transformedDir.normalize();
 
 				// don't allow to change y if you don't want fly :)
-				camera.move(transformedDir.x * _this.moveSpeed, 0, transformedDir.z * _this.moveSpeed);
+				camera.move(transformedDir.x * _this.moveOption.speed * 2,
+					0, transformedDir.z * _this.moveOption.speed * 2);
 
 				Tarumae.Utility.invokeIfExist(_this, "oncameramove");
 			}
