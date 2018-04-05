@@ -5,7 +5,7 @@
 // Copyright(c) 2016 BULB CORP. all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
-import Tarumae from "../entry"
+import Tarumae from "../entry";
 
 ///////////////////// Vec2 //////////////////////
 
@@ -83,7 +83,7 @@ export class Vec2 {
 ///////////////////// Vec3 //////////////////////
 
 export class Vec3 {
-	constructor(x, y, z) {
+	constructor(x, y, z) {		
 		if (typeof x === "undefined") {
 			this.x = 0; this.y = 0; this.z = 0;
 		} else {
@@ -116,7 +116,7 @@ export class Vec3 {
 			case 3:
 				return this.x == arguments[0] && this.y == arguments[1] && this.z == arguments[2];
 		}
-	};
+	}
 	
 	almostSame() {
 		switch (arguments.length) {

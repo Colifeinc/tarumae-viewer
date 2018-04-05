@@ -114,7 +114,7 @@ Tarumae.Scene = class {
 	}
 
 	createObjectFromBundle(url, ondone, loadingSession) {
-		this.loadArchive(url, url, loadingSession, function(archive) {
+		this.loadArchive(url, url, loadingSession, archive => {
 			var manifestData = archive.getChunkData(0x1, 0x7466696d);
 			if (manifestData) {
 				var uarr = new Uint8Array(manifestData);
@@ -545,7 +545,7 @@ Scene.prototype.prepareObjectMeshFromURLStream = function(obj, url, buffer, load
 Scene.prototype.prepareMaterialObject = function(mat, rm, loadingSession, bundle) {
 	var scene = this;
 
-	if (rm === undefined) {
+	if (!rm) {
 		rm = this.resourceManager;
 	}
 
