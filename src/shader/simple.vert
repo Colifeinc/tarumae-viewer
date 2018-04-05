@@ -9,6 +9,7 @@ uniform mat4 normalMatrix;
 
 uniform vec3 sundir;
 uniform vec3 sunlight;
+uniform vec3 color;
 
 varying vec3 vertex;
 varying vec3 normal;
@@ -25,5 +26,5 @@ void main(void) {
 	normal = normalize((normalMatrix * vec4(vertexNormal, 0.0)).xyz);
 	texcoord = vertexTexcoord;
 
-	lightcolor = sunlight * max(dot(sundir, normal), 0.15) * 0.5;
+	lightcolor = color + sunlight * max(dot(sundir, normal), 0.15);
 }
