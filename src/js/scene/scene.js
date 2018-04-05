@@ -584,10 +584,11 @@ Scene.prototype.prepareMaterialObject = function(mat, rm, loadingSession, bundle
 				tex: tex,
 			};
 
+			mat[name] = tex;
+			scene.renderer.cachedTextures[url] = tex;
+
 			image.addEventListener("load", () => {
 				tex.isLoading = false;
-				mat[name] = tex;
-				scene.renderer.cachedTextures[url] = tex;
 				scene.requireUpdateFrame();
 			});
 		} else if (buffer instanceof Image) {

@@ -948,7 +948,7 @@ Tarumae.TouchController = function(scene) {
 
 	scene.on("keydown", function() {
 		if (!movementDetectingTimer) {
-			movementDetectingTimer = setInterval(detectFirstPersonMove, 10);
+			movementDetectingTimer = setInterval(detectFirstPersonMove, 2);
 		}
 		// scene.animation = true;
 	});

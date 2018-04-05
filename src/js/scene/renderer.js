@@ -643,7 +643,7 @@ Tarumae.Renderer = class {
 	
 	drawObject(obj, transparencyRendering) {
 
-		if (obj.visible === false) {
+		if (!obj || obj.visible === false) {
 			return;
 		}
 	
