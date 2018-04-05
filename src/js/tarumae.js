@@ -2,7 +2,7 @@
 // tarumae engine
 // http://tarumae.jp
 //
-// Copyright(c) 2018 unvell, all rights reserved
+// Copyright(c) 2018 bulb, all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "./entry";
