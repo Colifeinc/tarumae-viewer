@@ -1322,7 +1322,21 @@ Tarumae.StandardShader.prototype.beginObject = function(obj) {
 			&& !mat.tex.isLoading && mat.tex.image && mat.tex.image.complete) {
 			this.useTexture = mat.tex;
 		}
-	
+			
+		// normal-map
+		if (typeof mat.normalmap === "object" && mat.normalmap instanceof Tarumae.Texture
+			&& !mat.normalmap.isLoading && mat.normalmap.image && mat.normalmap.image.complete) {
+			this.useNormalmap = mat.normalmap;
+
+			if (typeof mat.normalMipmap !== "undefined") {
+				normalMipmap = -Tarumae.MathFunctions.clamp(mat.normalMipmap, 0, 5) * 5;
+			}
+			
+			if (typeof mat.normalIntensity !== "undefined") {
+				normalIntensity = mat.normalIntensity;
+			}
+		}
+
 		// color
 		if (typeof mat.color === "object") {
 			if (Array.isArray(mat.color)) {
@@ -1359,19 +1373,6 @@ Tarumae.StandardShader.prototype.beginObject = function(obj) {
 		// emission
 		if (typeof mat.emission !== "undefined") {
 			emission = mat.emission;
-		}
-		
-		// normal-map
-		if (typeof mat.normalmap === "object" && mat.normalmap instanceof Tarumae.Texture) {	
-			this.useNormalmap = mat.normalmap;
-
-			if (typeof mat.normalMipmap !== "undefined") {
-				normalMipmap = -Tarumae.MathFunctions.clamp(mat.normalMipmap, 0, 5) * 5;
-			}
-			
-			if (typeof mat.normalIntensity !== "undefined") {
-				normalIntensity = mat.normalIntensity;
-			}
 		}
 	}
 
