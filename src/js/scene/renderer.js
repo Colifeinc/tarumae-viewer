@@ -477,6 +477,11 @@ Tarumae.Renderer = class {
 			Tarumae.Utility.invokeIfExist(this.currentShader, "beginScene", scene);
 		}
 	
+		if (this.debugger) {
+			this.debugger.totalNumberOfObjectDrawed = 0;
+			this.debugger.totalNumberOfPolygonDrawed = 0;
+		}
+
 		for (var i = 0; i < scene.objects.length; i++) {
 			this.drawObject(scene.objects[i], false);
 		}
@@ -746,6 +751,9 @@ Tarumae.Renderer = class {
 			this.disuseCurrentShader();
 		}
 		
+		if (this.debugger) {
+			this.debugger.totalNumberOfObjectDrawed++;
+		}
 		// if (this.debugMode) {
 		// 	this.debugger.drawBoundingBox(obj, this.transformStack);
 		// }

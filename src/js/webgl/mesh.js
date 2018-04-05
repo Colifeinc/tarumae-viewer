@@ -11,7 +11,6 @@ import "../math/matrix";
 
 Tarumae.Mesh = class {
 	constructor() {
-		this.renderer = undefined;
 		this.meta = undefined;
 	
 		this.vertices = undefined;
@@ -110,6 +109,11 @@ Tarumae.Mesh = class {
 					min: new Vec3(boundingBoxBuffer[0], boundingBoxBuffer[1], boundingBoxBuffer[2]),
 					max: new Vec3(boundingBoxBuffer[3], boundingBoxBuffer[4], boundingBoxBuffer[5]),
 				};
+
+				var size = this._boundingBox.max.sub(this._boundingBox.min);
+				if (size.equals(Vec3.zero)) {
+					console.warn("bounding box loaded from mesh but is zero");
+				}
 			}
 
 			if ((flags & Tarumae.Mesh.HeaderFlags.HasTangentBasisData) === Tarumae.Mesh.HeaderFlags.HasTangentBasisData) {
@@ -474,6 +478,10 @@ Tarumae.Mesh = class {
 			gl.drawElements(glPrimitiveMode, meta.indexCount, gl.UNSIGNED_SHORT, 0);
 		} else {
 			gl.drawArrays(glPrimitiveMode, 0, meta.vertexCount);
+		}
+
+		if (renderer.debugger) {
+			renderer.debugger.totalNumberOfPolygonDrawed += meta.vertexCount / 3;
 		}
 	}
 
