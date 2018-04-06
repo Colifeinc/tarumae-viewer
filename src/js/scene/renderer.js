@@ -189,7 +189,12 @@ Tarumae.Renderer = class {
 		document.getElementsByTagName("head").item(0).appendChild(styleSheet);
 		var css = styleSheet.sheet;
 	
-		for (var value of Tarumae.Renderer.ContainerStyle) {
+		// for (var value of Tarumae.Renderer.ContainerStyle) {
+		// 	var rule = value.replace(/#canvas-container/g, "#" + containerId);
+		// 	css.insertRule(rule, 0);
+		// }
+		for (var i = 0; i < Tarumae.Renderer.ContainerStyle.length; i++) {
+			var value = Tarumae.Renderer.ContainerStyle[i];
 			var rule = value.replace(/#canvas-container/g, "#" + containerId);
 			css.insertRule(rule, 0);
 		}
