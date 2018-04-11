@@ -4,6 +4,7 @@
 	"description": "",
 	"main": "src/js/tarumae.js",
 	"scripts": {
+		"dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
 		"start": "parcel src/index.html",
 		"watch": "parcel watch src/index.html --public-url /tarumae/",
 		"build": "parcel build src/js/tarumae.js -d build"
@@ -11,15 +12,21 @@
 	"keywords": [],
 	"author": "BULB CORP.",
 	"license": "",
-	"devDependencies": {
-		"babel-cli": "^6.26.0",
-		"babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
-		"babel-preset-env": "^1.6.1",
-		"mocha": "^5.0.0"
-	},
 	"dependencies": {
-		"babel-polyfill": "^6.26.0",
-		"eslint": "^4.19.1",
 		"pako": "^1.0.6"
+	},
+	"devDependencies": {
+		"babel": "^6.23.0",
+		"babel-polyfill": "^6.26.0",
+		"copy-webpack-plugin": "^4.5.1",
+		"eslint": "^4.19.1",
+		"extract-text-webpack-plugin": "^3.0.2",
+		"friendly-errors-webpack-plugin": "^1.7.0",
+		"html-webpack-plugin": "^3.2.0",
+		"node-notifier": "^5.2.1",
+		"webpack": "^4.5.0",
+		"webpack-cli": "^2.0.14",
+		"webpack-dev-server": "^3.1.3",
+		"webpack-merge": "^4.1.2"
 	}
 }
