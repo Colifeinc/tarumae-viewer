@@ -11,6 +11,12 @@
 	"keywords": [],
 	"author": "BULB CORP.",
 	"license": "",
+	"devDependencies": {
+		"babel-cli": "^6.26.0",
+		"babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
+		"babel-preset-env": "^1.6.1",
+		"mocha": "^5.0.0"
+	},
 	"dependencies": {
 		"babel-polyfill": "^6.26.0",
 		"eslint": "^4.19.1",
