@@ -12,7 +12,7 @@ import "../scene/scene";
 import "../webgl/shader";
 import { Debugger } from "../utility/debug";
 
-import fs from "fs";
+//import fs from "fs";
 
 Tarumae.Renderer = class {
 	constructor(options) {
