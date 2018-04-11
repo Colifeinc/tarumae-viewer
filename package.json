@@ -12,6 +12,7 @@
 	"author": "BULB CORP.",
 	"license": "",
 	"dependencies": {
+		"babel-polyfill": "^6.26.0",
 		"eslint": "^4.18.1",
 		"pako": "^1.0.6"
 	}
