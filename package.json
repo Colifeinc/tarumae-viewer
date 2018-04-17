@@ -2,12 +2,11 @@
 	"name": "tarumae",
 	"version": "1.0.0",
 	"description": "",
-	"main": "src/js/tarumae.js",
+	"main": "./dist/js/tarumae.js",
 	"scripts": {
-		"dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
-		"start": "parcel src/index.html",
-		"watch": "parcel watch src/index.html --public-url /tarumae/",
-		"build": "parcel build src/js/tarumae.js -d build"
+		"webpack": "webpack",
+		"dev": "webpack-dev-server",
+		"pub": "npx babel src --out-dir dist"
 	},
 	"keywords": [],
 	"author": "BULB CORP.",
@@ -22,6 +21,11 @@
 		"babel-loader": "^7.1.4",
 		"babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
 		"babel-preset-env": "^1.6.1",
-		"babel-preset-es2015": "^6.24.1"
+		"babel-preset-es2015": "^6.24.1",
+		"micromatch": "^3.1.10",
+		"webpack": "^4.5.0",
+		"webpack-cli": "^2.0.14",
+		"webpack-dev-server": "^3.1.3",
+		"ws": "^5.1.1"
 	}
 }
