@@ -1,0 +1,2 @@
+mkdir -p dist
+npm pack | xargs -I@ mv @ dist/
