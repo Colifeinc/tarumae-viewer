@@ -1,2 +1,4 @@
 mkdir -p dist
+rm -rf dist/*
+npx babel src --out-dir dist
 npm pack | xargs -I@ mv @ dist/
