@@ -844,6 +844,8 @@ Object.assign(PlanDesigner.SimpleWallArea.prototype, {
 
 class Wall extends Draw2D.Object {
   constructor() {
+    super();
+    
     this.startPosition = new Tarumae.Point();
     this.endPosition = new Tarumae.Point();
   }
