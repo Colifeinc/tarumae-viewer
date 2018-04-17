@@ -1,0 +1,104 @@
+#
+# @note please define 'Application environment variables' or 'Pipeline environment variables' on werkcer
+# 
+# @env AWS_ACCESS_KEY_ID      ***
+# @env AWS_SECRET_ACCESS_KEY  ***
+# @env AWS_S3_BUCKET          s3://tarumae-assets/viewer/
+# @env SLACK_SUBDOMAIN        autofloor
+# @env SLACK_TOKEN            ***
+# @env SLACK_CHANNEL          #notifications
+# @env DEPLOY_URL_BASE        https://s3-ap-northeast-1.amazonaws.com/tarumae-assets/viewer/
+#
+box: node:8.9.4
+test:
+  steps:
+    - script:
+      name: echo nodejs information
+      code: |
+        echo "node version $(node -v) running"
+        echo "npm version $(npm -v) running"
+
+    - script:
+      name: install
+      code: |
+        npm install
+
+    - script:
+      name: test
+      code: |
+        npm run test
+
+build:
+  steps:
+    - script:
+      name: echo nodejs information
+      code: |
+        echo "node version $(node -v) running"
+        echo "npm version $(npm -v) running"
+
+    - script:
+      name: install
+      code: |
+        rm -rf node_modules
+        npm install
+
+    - script:
+      name: build
+      code: |
+        npm run pub
+        ls -al ./dist/
+
+deploy:
+  steps:
+    - script:
+      name: echo nodejs information
+      code: |
+        echo "node version $(node -v) running"
+        echo "npm version $(npm -v) running"
+
+    - script:
+      name: install
+      code: |
+        rm -rf node_modules
+        npm install
+
+    - script:
+      name: build
+      code: |
+        build/pack
+
+    - script:
+      name: version
+      code: |
+        export PACKAGE_VERSION=`node build/version.js`
+        export DEPLOY_DIR=$([ $WERCKER_GIT_BRANCH = "master" ] && echo `node build/version.js --minor` || echo $WERCKER_GIT_BRANCH)
+        export AWS_S3_BUCKET_VERSION=$AWS_S3_BUCKET$DEPLOY_DIR'/'
+        # export PACKAGE_LATEST='latest'
+
+    - s3sync:
+      key-id: $AWS_ACCESS_KEY_ID
+      key_secret: $AWS_SECRET_ACCESS_KEY
+      bucket-url: $AWS_S3_BUCKET_VERSION
+      source-dir: dist/
+      delete-removed: false
+      #opts: --acl-private
+
+  after-steps:
+    - script:
+      name: version
+      code: |
+        export PACKAGE_VERSION=`node build/version.js`
+        export DEPLOY_DIR=$([ $WERCKER_GIT_BRANCH = "master" ] && echo `node build/version.js --minor` || echo $WERCKER_GIT_BRANCH)
+        export AWS_S3_BUCKET_VERSION=$AWS_S3_BUCKET$DEPLOY_DIR'/'
+        # export PACKAGE_LATEST='latest'
+
+    - sherzberg/slack-notify:
+      subdomain: $SLACK_SUBDOMAIN
+      token: $SLACK_TOKEN
+      channel: $SLACK_CHANNEL
+      username: "Deployer"
+      icon_emoji: ":robot_face:"
+      passed_message: "*Wercker App* : <$WERCKER_APPLICATION_URL|$WERCKER_APPLICATION_OWNER_NAME/$WERCKER_APPLICATION_NAME>\n
+        *Branch*         : <https://github.com/$WERCKER_GIT_OWNER/$WERCKER_GIT_REPOSITORY/tree/$WERCKER_GIT_BRANCH|$WERCKER_GIT_BRANCH>\n
+        *Pushed by*   : $WERCKER_STARTED_BY\n
+        *Deployed to*: <$DEPLOY_URL_BASE$DEPLOY_DIR/tarumae-$PACKAGE_VERSION.tgz|/$DEPLOY_DIR/tarumae-$PACKAGE_VERSION.tgz>"
