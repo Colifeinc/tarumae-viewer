@@ -4,6 +4,5 @@
 .cache
 
 dist
-build
 node_modules
 tarumae-*.tgz
