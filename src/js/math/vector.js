@@ -964,27 +964,27 @@ Tarumae.PointBPNode = class {
 
 ////////// Point //////////
 
-export function Point(x, y) {
-	this.x = x;
-	this.y = y;
-}
+export class Point {
+	constructor(x, y) {
+		this.x = x;
+		this.y = y;
+	}
+	
+	set(x, y) {
+		this.x = x;
+		this.y = y;
+	}
 
-Object.assign(Point.prototype, {
-	clone: function() {
+	clone() {
 		return new Point(this.x, this.y);
-	},
+	}
 
-	mulMat: function(m) {
+	mulMat(m) {
 		return new Point(
 			this.x * m.a1 + this.y * m.a2 + m.a3,
 			this.x * m.b1 + this.y * m.b2 + m.b3);
-	},
-});	
-
-Point.prototype.set = function(x, y) {
-	this.x = x;
-	this.y = y;
-};
+	}
+}
 
 ////////// Size //////////
 
