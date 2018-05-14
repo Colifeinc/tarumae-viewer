@@ -1,2 +1,6 @@
+.cache
+build
+node_modules
 resources
-
+src
+wercker.yml

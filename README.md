@@ -28,6 +28,13 @@ To build a minified output:
 npm run build
 ```
 
+## Build release package
+
+```
+build/pack
+```
+
+
 # Use Tarumae-Viewer
 
 ## Hello World
