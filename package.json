@@ -5,8 +5,9 @@
 	"main": "./dist/js/tarumae.js",
 	"scripts": {
 		"webpack": "webpack",
+		"test": ":",
 		"dev": "webpack-dev-server",
-		"pub": "npx babel src --out-dir dist"
+		"pub": "npx babel src -d dist"
 	},
 	"keywords": [],
 	"author": "BULB CORP.",
