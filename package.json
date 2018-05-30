@@ -11,7 +11,8 @@
 	},
 	"keywords": [],
 	"author": "BULB CORP.",
-	"license": "",
+	"license": "MIT",
+	"repository": "git@github.com:bulbinc/tarumae-viewer.git",
 	"dependencies": {
 		"babel-polyfill": "^6.26.0",
 		"pako": "^1.0.6"
