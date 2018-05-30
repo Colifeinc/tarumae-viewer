@@ -4,9 +4,9 @@
 	"description": "",
 	"main": "./dist/js/tarumae.js",
 	"scripts": {
-		"webpack": "webpack",
+		"build": "webpack --config webpack.prod.js --mode production",
 		"test": ":",
-		"dev": "webpack-dev-server",
+		"dev": "webpack-dev-server --config webpack.dev.js --mode development",
 		"pub": "npx babel src -d dist"
 	},
 	"keywords": [],
