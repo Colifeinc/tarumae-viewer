@@ -1,8 +1,12 @@
 
 import Tarumae from "../entry";
-import "../utility/*";
-import "../scene/*";
 import { Color4 } from "../math/vector";
+
+import "../scene/scene";
+import "../scene/animation"
+import "../scene/viewer";
+import "../utility/archive";
+import "../utility/res";
 
 window.addEventListener("load", function() {
 
