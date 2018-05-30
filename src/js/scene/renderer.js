@@ -1192,51 +1192,31 @@ Tarumae.DrawMode = {
 	ShadowMap: 1,
 };
 
+import solidcolorVert from '../../shader/solidcolor.vert';
+import solidcolorFrag from '../../shader/solidcolor.frag';
+import billboardVert from '../../shader/billboard.vert';
+import billboardFrag from '../../shader/billboard.frag';
+import simpleVert from '../../shader/simple.vert';
+import simpleFrag from '../../shader/simple.frag';
+import panoramaVert from '../../shader/panorama.vert';
+import panoramaFrag from '../../shader/panorama.frag';
+import standardVert from '../../shader/standard.vert';
+import standardFrag from '../../shader/standard.frag';
+import pointVert from '../../shader/points.vert';
+import pointFrag from '../../shader/points.frag';
+
 TarumaeRenderer.Shaders = {
 	// viewer: {
 	// 	vert: fs.readFileSync(__dirname + "../../../shader/viewer.vert", "utf8"),
 	// 	frag: fs.readFileSync(__dirname + "../../../shader/viewer.frag", "utf8"), class: "ViewerShader"
 	// },
-	// solidcolor: {
-	// 	vert: fs.readFileSync(__dirname + "../../../shader/solidcolor.vert", "utf8"),
-	// 	frag: fs.readFileSync(__dirname + "../../../shader/solidcolor.frag", "utf8"), class: "SolidColorShader"
-	// },
-	// billboard: {
-	// 	vert: fs.readFileSync(__dirname + "../../../shader/billboard.vert", "utf8"),
-	// 	frag: fs.readFileSync(__dirname + "../../../shader/billboard.frag", "utf8"), class: "BillboardShader"
-	// },
-	// simple: {
-	// 	vert: fs.readFileSync(__dirname + "../../../shader/simple.vert", "utf8"),
-	// 	frag: fs.readFileSync(__dirname + "../../../shader/simple.frag", "utf8"), class: "SimpleShader"
-	// },
-	// panorama: {
-	// 	vert: fs.readFileSync(__dirname + "../../../shader/panorama.vert", "utf8"),
-	// 	frag: fs.readFileSync(__dirname + "../../../shader/panorama.frag", "utf8"), class: "PanoramaShader"
-	// },
-	// standard: {
-	// 	vert: fs.readFileSync(__dirname + "../../../shader/standard.vert", "utf8"),
-	// 	frag: fs.readFileSync(__dirname + "../../../shader/standard.frag", "utf8"), class: "StandardShader"
-	// },
-	// point: {
-	// 	vert: fs.readFileSync(__dirname + "../../../shader/points.vert", "utf8"),
-	// 	frag: fs.readFileSync(__dirname + "../../../shader/points.frag", "utf8"), class: "PointShader"
-	// },
-
-	panorama: {
-		"vert": "attribute vec3 vertexPosition;uniform mat4 projectViewModelMatrix;varying vec3 texcoord;void main(void) {texcoord = vertexPosition;texcoord.x = -texcoord.x;gl_Position = (projectViewModelMatrix * vec4(vertexPosition, 1.0)).xyww;}",
-		"frag": "precision mediump float;uniform samplerCube texture;varying vec3 texcoord;void main(void) {vec3 color = textureCube(texture, texcoord).rgb;gl_FragColor = vec4(color, 1.0);}",
-		class: "PanoramaShader"
-	},
-	"standard": {
-		"vert": "attribute vec3 vertexPosition;attribute vec3 vertexNormal;attribute vec2 vertexTexcoord;attribute vec2 vertexTexcoord2;attribute vec3 vertexTangent;attribute vec3 vertexBitangent;attribute vec3 vertexColor;uniform mat4 projectViewMatrix;uniform mat4 modelMatrix;uniform mat3 modelMatrix3x3;uniform mat4 normalMatrix;uniform bool hasNormalMap;uniform bool hasVColor;varying vec3 vertex;varying vec3 normal;varying vec2 texcoord1;varying vec2 texcoord2;varying vec3 vcolor;varying mat3 TBN;void main(void) {vec4 pos = vec4(vertexPosition, 1.0);vec4 transformPos = modelMatrix * pos;gl_Position = projectViewMatrix * transformPos;vertex = transformPos.xyz;normal = normalize((normalMatrix * vec4(vertexNormal, 0.0)).xyz);vcolor = vertexColor;texcoord1 = vertexTexcoord;texcoord2 = vertexTexcoord2;if (hasNormalMap) {TBN = modelMatrix3x3 * mat3(vertexTangent, vertexBitangent, vertexNormal);}}",
-		"frag": "precision mediump float;struct BoundingBox {vec3 min;vec3 max;vec3 origin;};struct Light {vec3 pos;vec3 color;};struct Object{vec3 loc;};uniform vec3 sundir;uniform vec3 sunlight;uniform BoundingBox refMapBox;uniform BoundingBox shadowMapBox;uniform vec3 color;uniform vec2 texTiling;uniform float opacity;uniform bool receiveLight;uniform float glossy;uniform float roughness;uniform float emission;uniform float normalMipmap;uniform sampler2D texture;uniform sampler2D normalMap;uniform sampler2D lightMap;uniform samplerCube refMap;uniform samplerCube shadowMap;uniform bool hasTexture;uniform bool hasLightMap;uniform bool hasNormalMap;uniform bool hasUV2;uniform bool hasShadowMap;uniform int refMapType;varying vec3 vertex;varying vec3 normal;varying vec2 texcoord1;varying vec2 texcoord2;varying vec3 vcolor;varying mat3 TBN;uniform Light lights[15];uniform int lightCount;uniform Object camera;struct LightReturn {vec3 diff;vec3 spec;};vec3 correctBoundingBoxIntersect(BoundingBox bbox, vec3 dir) {vec3 invdir = vec3(1.0, 1.0, 1.0) / dir;vec3 intersectMaxPointPlanes = (bbox.max - vertex) * invdir;vec3 intersectMinPointPlanes = (bbox.min - vertex) * invdir;vec3 largestRayParams = max(intersectMaxPointPlanes, intersectMinPointPlanes);float dist = min(min(largestRayParams.x, largestRayParams.y), largestRayParams.z);vec3 intersectPosition = vertex + dir * dist;return intersectPosition - bbox.origin;}vec3 traceLight(vec3 color, vec3 vertexNormal, vec3 cameraNormal) {vec3 diff = vec3(0.0);vec3 specular = vec3(0.0);for (int i = 0; i < 50; i++){if (i >= lightCount) break;vec3 lightRay = lights[i].pos - vertex;vec3 lightNormal = normalize(lightRay);float ln = dot(lightNormal, vertexNormal);if (ln > 0.0) {if (!hasLightMap) {float ld = pow(length(lightRay), -2.0);diff += lights[i].color * clamp(ln * ld * (0.5 + roughness * 0.5), 0.0, 1.0);}}if (glossy > 0.0) {vec3 reflection = reflect(lightNormal, vertexNormal);float refd = dot(reflection, cameraNormal);if (refd > 0.0) {specular += lights[i].color * (pow(refd, 400.0 * glossy)) * 0.2;}}}return color + color * diff + specular;}void main(void) {if (emission > 0.0) {gl_FragColor = vec4(normalize(color) * 1.5, opacity);return;}vec2 uv1 = texcoord1 * texTiling;vec4 textureColor = texture2D(texture, uv1);float alpha = opacity * textureColor.a;vec3 vertexNormal = normal, normalmapValue = texture2D(normalMap, uv1, normalMipmap).rgb;if (hasNormalMap) {vertexNormal = normalize(TBN * (normalmapValue * 2.0 - 1.0));}vec3 cameraRay, cameraNormal;if (lightCount > 0 || refMapType > 0) {cameraRay = vertex - camera.loc;cameraNormal = normalize(cameraRay);}vec3 finalColor = color;if (receiveLight) {if (lightCount > 0 && (!hasLightMap || glossy > 0.0)) {finalColor = traceLight(color, vertexNormal, cameraNormal);}finalColor = finalColor * (1.0 + dot(vertexNormal, sundir) * 0.2) + sunlight;}if (hasTexture) {finalColor = finalColor * textureColor.rgb;}vec2 uv2 = hasUV2 ? texcoord2 : texcoord1;vec3 lightmapColor = texture2D(lightMap, uv2).rgb;if (hasLightMap) {finalColor = finalColor * pow(lightmapColor, vec3(0.5)) + pow(lightmapColor, vec3(10.0)) * 0.1;}vec3 refmapLookup = vec3(0.0);if (glossy > 0.0) {if (refMapType == 1) {refmapLookup = reflect(cameraNormal, vertexNormal);} else if (refMapType == 2) {refmapLookup = reflect(cameraNormal, vertexNormal);refmapLookup = normalize(correctBoundingBoxIntersect(refMapBox, refmapLookup));}}vec3 refColor = textureCube(refMap, refmapLookup, (roughness - 0.5) * 5.0).rgb;if (glossy > 0.0) {if (refMapType == 1) {finalColor += pow(refColor, vec3(10.0)) * glossy;} else if (refMapType == 2) {if (dot(normal, vec3(0.0, 1.0, 0.0)) > 0.98) {refColor *= clamp(1.0 - dot(refmapLookup, normal), 0.0, 1.0);}finalColor = finalColor + pow(refColor, vec3(7.5)) * (glossy * 0.7);}if (alpha < 1.0) {alpha = max(finalColor.r, max(finalColor.g, finalColor.b)) * 0.5;}}if (alpha < 0.05) {discard;}vec3 correctedVertexToSun = vec3(0.0);if (hasShadowMap) {    correctedVertexToSun = correctBoundingBoxIntersect(shadowMapBox, sundir);}float shadow = textureCube(shadowMap, correctedVertexToSun).r;if (hasShadowMap) {shadow *= max(dot(normal, sundir), 0.0);if (shadow > 0.0) {finalColor += vec3(1.0, 1.0, 0.9) * shadow;}}gl_FragColor = vec4(finalColor, alpha);}",
-		class: "StandardShader"
-	},
-	point: {
-		"vert": "attribute vec3 vertexPosition;attribute vec3 vertexColor;attribute float vertexSize;uniform mat4 projectViewModelMatrix;uniform float defaultPointSize;varying vec4 color;void main(void) {gl_Position = projectViewModelMatrix * vec4(vertexPosition, 1.0);gl_PointSize = vertexSize;color = vec4(vertexColor, 1.0);}",
-		"frag": "precision mediump float;varying  vec4 color;void main(void) {  gl_FragColor = color;}",
-		class: "PointShader"
-	},
+	solidcolor: { vert: solidcolorVert, frag: solidcolorFrag, class: "SolidColorShader" },
+	billboard: { vert: billboardVert, frag: billboardFrag, class: "BillboardShader" },
+	simple: { vert: simpleVert, frag: simpleFrag, class: "SimpleShader" },
+	point: { vert: pointVert, frag: pointFrag, class: "PointShader" },
+	panorama: { vert: panoramaVert, frag: panoramaFrag, class: "PanoramaShader" },
+	standard: { vert: standardVert, frag: standardFrag, class: "StandardShader" },
+	point: { vert: pointVert, frag: pointFrag, class: "PointShader" },
 };
 
 TarumaeRenderer.ContainerStyle = [
