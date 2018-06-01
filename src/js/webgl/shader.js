@@ -279,7 +279,7 @@ Tarumae.ShaderUniform = class {
 // 	this.vertexNormalAttribute = this.findAttribute('vertexNormal');
 // 	this.vertexTexcoordAttribute = this.findAttribute('vertexTexcoord');
 
-// 	this.projectMatrixUniform = this.findUniform('projectMatrix');
+// 	this.projectMatrixUniform = this.findUniform('projectionMatrix');
 // 	this.viewMatrixUniform = this.findUniform('viewMatrix');
 // 	this.modelMatrixUniform = this.findUniform('modelMatrix');
 // 	this.normalMatrixUniform = this.findUniform('normalMatrix');
@@ -292,7 +292,7 @@ Tarumae.ShaderUniform = class {
 
 // 	var modelMatrix = scene.transformStack.transform;
 	
-// 	gl.uniformMatrix4fv(this.projectMatrixUniform, false, this.renderer.projectMatrix.toArray());
+// 	gl.uniformMatrix4fv(this.projectMatrixUniform, false, this.renderer.projectionMatrix.toArray());
 // 	gl.uniformMatrix4fv(this.viewMatrixUniform, false, scene.viewMatrix.toArray());	
 // 	gl.uniformMatrix4fv(this.modelMatrixUniform, false, modelMatrix.toArray());
 
@@ -356,7 +356,7 @@ Tarumae.ShaderUniform = class {
 
 // 	var modelMatrix = scene.transformStack.matrix;
 
-// 	gl.uniformMatrix4fv(this.projectViewMatrixUniform, false, scene.viewMatrix.mul(this.renderer.projectMatrix).toArray());
+// 	gl.uniformMatrix4fv(this.projectViewMatrixUniform, false, scene.viewMatrix.mul(this.renderer.projectionMatrix).toArray());
 // 	gl.uniformMatrix4fv(this.modelMatrixUniform, false, modelMatrix.toArray());
 
 // 	var normalMatrix = new Tarumae.Matrix4(modelMatrix);
