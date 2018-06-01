@@ -202,6 +202,15 @@ Tarumae.Matrix4 = class {
 
 		return this;
 	}
+
+	copyFromArray(m) {
+		this.a1 = m[0]; this.b1 = m[1]; this.c1 = m[2]; this.d1 = m[3];
+		this.a2 = m[4]; this.b2 = m[5]; this.c2 = m[6]; this.d2 = m[7];
+		this.a3 = m[8]; this.b3 = m[9]; this.c3 = m[10]; this.d3 = m[11];
+		this.a4 = m[12]; this.b4 = m[13]; this.c4 = m[14]; this.d4 = m[15];
+
+		return this;
+	}
 	
 	/*
 	 * Makes a rotation matrix by given euler angles and multiplies by this matrix.
