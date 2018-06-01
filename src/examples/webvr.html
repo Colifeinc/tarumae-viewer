@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Animation - Tarumae Examples</title>
+	<meta charset="utf-8" />
+	<link href="css/demo-fullsize.css" rel="stylesheet" type="text/css" />
+	<script src="https://webvr.info/samples/js/third-party/webvr-polyfill.js"></script>
+	<script src="https://webvr.info/samples/js/third-party/wglu/wglu-url.js"></script>
+	<script src="animationDemo.js"></script>
+	<script>
+	// Dynamically turn the polyfill on if requested by the query args.
+	if (WGLUUrl.getBool('polyfill', false)) {
+			var polyfill = new WebVRPolyfill({
+				// Ensures the polyfill is always active on mobile, due to providing
+				// a polyfilled CardboardVRDisplay when no native API is available,
+				// and also polyfilling even when the native API is available, due to
+				// providing a CardboardVRDisplay when no native VRDisplays exist.
+				PROVIDE_MOBILE_VRDISPLAY: true,
+				// Polyfill optimizations
+				DIRTY_SUBMIT_FRAME_BINDINGS: true,
+				BUFFER_SCALE: 0.75,
+			});
+		}
+		</script>
+	<style>
+		.message {
+			position: absolute;
+			top: 50px;
+			padding: 10px;
+		}
+	</style>
+</head>
+<body>
+	<div id="canvas-container">
+	</div>
+	<div class='message'></div>
+	<script>
+	
+	window.msg = document.getElementsByClassName('message')[0];
+	showMsg('ready');
+
+	function showMsg(msg) {
+		if (window.msg) window.msg.innerText = msg;
+	}
+	</script>
+</body>
+</html>
