@@ -87,5 +87,9 @@ module.exports = {
     path: path.resolve(__dirname, 'build'),
     filename: '[name].js',
     publicPath: '/examples/',
+  },
+  devServer: {
+    host: '0.0.0.0',
+    port: 8080,
   }
 };
