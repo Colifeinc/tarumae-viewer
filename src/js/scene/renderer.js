@@ -144,6 +144,8 @@ Tarumae.Renderer = class {
 		gl.cullFace(gl.BACK);
 		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
+		this.initWebVR();
+
 		window.addEventListener("resize", (function() { renderer.resetViewport(); }), false);
 
 		this.resetViewport();
@@ -272,6 +274,56 @@ Tarumae.Renderer = class {
 		// background color
 		if (typeof options.backColor === "undefined") {
 			options.backColor = new Color4(0.93, 0.93, 0.93, 1.0);
+		}
+	}
+
+	initWebVR() {
+		if (!showMsg) showMsg = function() { }
+		
+		if (navigator.getVRDisplays) {
+			this.frameData = new VRFrameData();
+
+			navigator.getVRDisplays().then(displays => {
+				if (displays.length > 0) {
+					this.renderPixelRatio = 0.5;
+
+					var vrDisplay = displays[displays.length - 1];
+					this.vrDisplay = vrDisplay;
+					// It's heighly reccommended that you set the near and far planes to
+					// something appropriate for your scene so the projection matricies
+					// WebVR produces have a well scaled depth buffer.
+					vrDisplay.depthNear = 0.1;
+					vrDisplay.depthFar = 1024.0;
+					// // Generally, you want to wait until VR support is confirmed and
+					// // you know the user has a VRDisplay capable of presenting connected
+					// // before adding UI that advertises VR features.
+					// if (vrDisplay.capabilities.canPresent)
+					// 	vrPresentButton = VRSamplesUtil.addButton("Enter VR", "E", "media/icons/cardboard64.png", onVRRequestPresent);
+					// // For the benefit of automated testing. Safe to ignore.
+					// if (vrDisplay.capabilities.canPresent && WGLUUrl.getBool('canvasClickPresents', false))
+					// 	webglCanvas.addEventListener("click", onVRRequestPresent, false);
+					// // The UA may kick us out of VR present mode for any reason, so to
+					// // ensure we always know when we begin/end presenting we need to
+					// // listen for vrdisplaypresentchange events.
+					// window.addEventListener('vrdisplaypresentchange', onVRPresentChange, false);
+					// // These events fire when the user agent has had some indication that
+					// // it would be appropariate to enter or exit VR presentation mode, such
+					// // as the user putting on a headset and triggering a proximity sensor.
+					// // You can inspect the `reason` property of the event to learn why the
+					// // event was fired, but in this case we're going to always trust the
+					// // event and enter or exit VR presentation mode when asked.
+					// window.addEventListener('vrdisplayactivate', onVRRequestPresent, false);
+					// window.addEventListener('vrdisplaydeactivate', onVRExitPresent, false);
+				} else {
+					showMsg("WebVR supported, but no VRDisplays found.");
+				}
+			}, function() {
+				showMsg("Current browser does not support WebVR. See <a href='http://webvr.info'>webvr.info</a> for assistance.");
+			});
+		} else if (navigator.getVRDevices) {
+			showMsg("Current browser supports WebVR but not the latest version. See <a href='http://webvr.info'>webvr.info</a> for more info.");
+		} else {
+			showMsg("Current browser does not support WebVR. See <a href='http://webvr.info'>webvr.info</a> for assistance.");
 		}
 	}
 
@@ -412,31 +464,60 @@ Tarumae.Renderer = class {
 			this.ctx2dCleared = false;
 	
 			var scene = this.currentScene;
-	
+
 			if (scene && (scene.animation || scene.requestedUpdateFrame)) {
 	
 				if (this.debugMode) {
 					this.debugger.beforeDrawFrame();
 				}
 	
-				var projectionMethod = ((this.currentScene && this.currentScene.mainCamera)
-					? (this.currentScene.mainCamera.projectionMethod)
-					: (this.options.perspective.method));
-	
-				switch (projectionMethod) {
-					default:
-					case Tarumae.ProjectionMethods.Persp:
-					case "persp":
-						this.perspectiveProject(this.projectMatrix);
-						break;
-	
-					case Tarumae.ProjectionMethods.Ortho:
-					case "ortho":
-						this.orthographicProject(this.projectMatrix);
-						break;
-				}
-	
-				this.drawSceneFrame(scene);
+				this.clear();
+				this.viewMatrix.loadIdentity();
+				
+				if (this.vrDisplay) {
+					const canvas = this.canvas;
+					const frameData = this.frameData;
+					const vrDisplay = this.vrDisplay;
+
+					vrDisplay.getFrameData(frameData);
+
+					var gl = this.gl;
+					gl.viewport(0, 0, canvas.width * 0.5, canvas.height);
+					this.projectionMatrix.copyFromArray(frameData.leftProjectionMatrix);
+					this.viewMatrix.copyFromArray(frameData.leftViewMatrix);
+					this.viewMatrix.translate(0, -1.5, 0);
+					this.drawSceneFrame(scene);
+		
+					gl.viewport(canvas.width * 0.5, 0, canvas.width * 0.5, canvas.height);
+					this.projectionMatrix.copyFromArray(frameData.rightProjectionMatrix);
+					this.viewMatrix.copyFromArray(frameData.rightViewMatrix);
+					this.viewMatrix.translate(0, -1.5, 0);
+					this.drawSceneFrame(scene);
+
+					this.vrDisplay.submitFrame();
+					this.currentScene.requireUpdateFrame();
+				} else {
+					var projectionMethod = ((this.currentScene && this.currentScene.mainCamera)
+						? (this.currentScene.mainCamera.projectionMethod)
+						: (this.options.perspective.method));
+		
+					switch (projectionMethod) {
+						default:
+						case Tarumae.ProjectionMethods.Persp:
+						case "persp":
+							this.perspectiveProject(this.projectionMatrix);
+							break;
+		
+						case Tarumae.ProjectionMethods.Ortho:
+						case "ortho":
+							this.orthographicProject(this.projectionMatrix);
+							break;
+					}
+
+					this.makeViewMatrix(this.viewMatrix);
+					
+					this.drawSceneFrame(scene);
+				}					
 	
 				if (this.debugMode) {
 					this.debugger.afterDrawFrame();
@@ -461,21 +542,21 @@ Tarumae.Renderer = class {
 	}
 	
 	drawSceneFrame(scene) {
-		this.clear();
 	
 		this.cameraMatrix.loadIdentity();
-		this.viewMatrix.loadIdentity();
 		this.transparencyList._s3_clear();
 	
 		if (!scene) return;
-	
+				
 		if (scene.mainCamera) {
 			this.makeCameraMatrix(scene.mainCamera, this.cameraMatrix);
+		}	
+	
+		if (this.vrDisplay) {
+			this.projectionViewMatrix = this.viewMatrix.mul(this.projectionMatrix);
+		} else {
+			this.projectionViewMatrix = this.viewMatrix.mul(this.cameraMatrix).mul(this.projectionMatrix);
 		}
-	
-		this.makeViewMatrix(this.viewMatrix);
-	
-		this.projectionViewMatrix = this.viewMatrix.mul(this.cameraMatrix).mul(this.projectMatrix);
 		this.projectionViewMatrixArray = this.projectionViewMatrix.toArray();
 	
 		if (this.currentShader) {
@@ -865,9 +946,9 @@ Tarumae.Renderer.prototype.toWorldPosition = (function() {
 	
 	return function(pos, viewMatrix, projectMethod) {
 	
-		this.makeProjectMatrix(projectMethod, projectMatrix);
+		this.makeProjectMatrix(projectMethod, projectionMatrix);
 	
-		var m = (viewMatrix || this.viewMatrix).mul(this.cameraMatrix).mul(projectMatrix);
+		var m = (viewMatrix || this.viewMatrix).mul(this.cameraMatrix).mul(projectionMatrix);
 	
 		if (Array.isArray(pos)) {
 			for (var i = 0; i < pos.length; i++) {
