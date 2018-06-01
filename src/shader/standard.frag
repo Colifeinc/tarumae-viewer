@@ -12,8 +12,7 @@ struct Light {
 	vec3 color;
 };
 
-struct Object
-{
+struct Object {
 	vec3 loc;
 };
 
@@ -66,16 +65,11 @@ struct LightReturn {
 
 vec3 correctBoundingBoxIntersect(BoundingBox bbox, vec3 dir) {
 	vec3 invdir = vec3(1.0, 1.0, 1.0) / dir;
-
 	vec3 intersectMaxPointPlanes = (bbox.max - vertex) * invdir;
 	vec3 intersectMinPointPlanes = (bbox.min - vertex) * invdir;
-
 	vec3 largestRayParams = max(intersectMaxPointPlanes, intersectMinPointPlanes);
-
 	float dist = min(min(largestRayParams.x, largestRayParams.y), largestRayParams.z);
-
 	vec3 intersectPosition = vertex + dir * dist;
-	
 	return intersectPosition - bbox.origin;
 }
 
@@ -84,8 +78,7 @@ vec3 traceLight(vec3 color, vec3 vertexNormal, vec3 cameraNormal) {
 	vec3 diff = vec3(0.0);
 	vec3 specular = vec3(0.0);
 
-	for (int i = 0; i < 50; i++)
-	{
+	for (int i = 0; i < 50; i++) {
 		if (i >= lightCount) break;
 
 		vec3 lightRay = lights[i].pos - vertex;
@@ -101,12 +94,12 @@ vec3 traceLight(vec3 color, vec3 vertexNormal, vec3 cameraNormal) {
 		}
 
 		if (glossy > 0.0) {
-				vec3 reflection = reflect(lightNormal, vertexNormal);
-				float refd = dot(reflection, cameraNormal);
+			vec3 reflection = reflect(lightNormal, vertexNormal);
+			float refd = dot(reflection, cameraNormal);
 
-				if (refd > 0.0) {
-					specular += lights[i].color * (pow(refd, 400.0 * glossy)) * 0.2;
-				}
+			if (refd > 0.0) {
+				specular += lights[i].color * (pow(refd, 400.0 * glossy)) * 0.2;
+			}
 		}
 	}
 
