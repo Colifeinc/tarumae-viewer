@@ -6,6 +6,7 @@
 	"scripts": {
 		"start": "npm run dev",
 		"build": "webpack --config webpack.prod.js --mode production",
+		"dev2": "webpack --config webpack.dev.js --mode production",
 		"test": ":",
 		"dev": "webpack-dev-server --config webpack.dev.js --mode development",
 		"pub": "npx babel src -d dist"

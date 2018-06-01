@@ -70,6 +70,12 @@ module.exports = {
     new HtmlWebpackPlugin({
       inject: false,
       hash: true,
+      template: './src/examples/webvr.html',
+      filename: 'webvr.html'
+    }),
+    new HtmlWebpackPlugin({
+      inject: false,
+      hash: true,
       template: './src/examples/showcase.html',
       filename: 'showcase.html'
     }),
@@ -87,5 +93,9 @@ module.exports = {
     path: path.resolve(__dirname, 'build'),
     filename: '[name].js',
     publicPath: '/examples/',
+  },
+  devServer: {
+    host: '0.0.0.0',
+    port: 8080,
   }
 };
