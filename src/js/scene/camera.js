@@ -68,11 +68,9 @@ Tarumae.Camera = class extends Tarumae.SceneObject {
 		}
 	
 		if (padding === undefined) padding = 0.1;
-		var paddingAngle = this.fieldOfView * padding;
-	
-		var target, size, renderer = this.scene.renderer;
-	
-		var bbox = obj.getBounds();
+		const paddingAngle = this.fieldOfView * padding;
+		const target, size, renderer = this.scene.renderer;
+		const bbox = obj.getBounds();
 	
 		if (bbox) {
 			bbox = new Tarumae.BoundingBox(bbox);
