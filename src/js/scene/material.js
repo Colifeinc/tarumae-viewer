@@ -5,66 +5,67 @@
 // Copyright(c) 2016 BULB CORP. all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
-function Material() {
-}
+import Tarumae from "../entry";
 
-Material.prototype.copyFrom = function(mat) {
-	// color
-	if (typeof mat.color === "object" && mat.color instanceof Color3) {
-		this.color = mat.color.clone();
-	}
+Tarumae.Material = class {
+	copyFrom(mat) {
+		// color
+		if (typeof mat.color === "object" && mat.color instanceof Color3) {
+			this.color = mat.color.clone();
+		}
+		
+		if (typeof mat.tex === "object" && mat.tex instanceof Tarumae.Texture) {
+			this.tex = mat.tex;
+		}
 	
-	if (typeof mat.tex === "object" && mat.tex instanceof Tarumae.Texture) {
-		this.tex = mat.tex;
-	}
-
-	// texture tiling
-	if (typeof mat.texTiling === "object") {
-		if (typeof mat.texTiling.clone === "function") {
-			this.texTiling = mat.texTiling.clone();
-		} else if (Array.isArray(mat.texTiling)) {
-			this.texTiling = mat.texTiling.slice();
+		// texture tiling
+		if (typeof mat.texTiling === "object") {
+			if (typeof mat.texTiling.clone === "function") {
+				this.texTiling = mat.texTiling.clone();
+			} else if (Array.isArray(mat.texTiling)) {
+				this.texTiling = mat.texTiling.slice();
+			}
+		}
+	
+		// glossy
+		if (typeof mat.glossy !== "undefined") {
+			this.glossy = mat.glossy;
+		}
+	
+		// roughness
+		if (typeof mat.roughness !== "undefined") {
+			this.roughness = mat.glroughnessossy;
+		}
+	
+		// emission
+		if (typeof mat.emission !== "undefined") {
+			this.emission = mat.emission;
+		}
+	
+		// transparency
+		if (typeof mat.transparency !== "undefined") {
+			this.transparency = mat.transparency;
+		}
+	
+		// spot range
+		if (typeof mat.spotRange !== "undefined") {
+			this.spotRange = mat.spotRange;
+		}
+	
+		// normal-map
+		if (typeof mat.normalmap === "object" && mat.normalmap instanceof Tarumae.Texture) {
+			this.normalmap = mat.normalmap;
+		}
+	
+		// normal mipmap	
+		if (typeof mat.normalMipmap !== "undefined") {
+			this.normalMipmap = mat.normalMipmap;
 		}
 	}
-
-	// glossy
-	if (typeof mat.glossy !== "undefined") {
-		this.glossy = mat.glossy;
+	
+	static clone() {
+		var clone = new Tarumae.Material();
+		clone.copyFrom(this);
+		return clone;
 	}
-
-	// roughness
-	if (typeof mat.roughness !== "undefined") {
-		this.roughness = mat.glroughnessossy;
-	}
-
-	// emission
-	if (typeof mat.emission !== "undefined") {
-		this.emission = mat.emission;
-	}
-
-	// transparency
-	if (typeof mat.transparency !== "undefined") {
-		this.transparency = mat.transparency;
-	}
-
-	// spot range
-	if (typeof mat.spotRange !== "undefined") {
-		this.spotRange = mat.spotRange;
-	}
-
-	// normal-map
-	if (typeof mat.normalmap === "object" && mat.normalmap instanceof Tarumae.Texture) {
-		this.normalmap = mat.normalmap;
-	}
-
-	// normal mipmap	
-	if (typeof mat.normalMipmap !== "undefined") {
-		this.normalMipmap = mat.normalMipmap;
-	}
-}
-
-Material.prototype.clone = function() {
-	var clone = new Material();
-	clone.copyFrom(this);
-	return clone;
-}
+};

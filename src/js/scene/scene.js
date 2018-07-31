@@ -431,11 +431,11 @@ Scene.prototype.createTextureFromURL = function(url, handler) {
 		return;
 	}
 
-	this.resourceManager.add(url, Tarumae.ResourceTypes.Image, function(stream) {
+	this.resourceManager.add(url, Tarumae.ResourceTypes.Image, function(img) {
 		var texture = renderer.cachedTextures[url];
 		
-		if (!texture && stream) {
-			texture = new Tarumae.Texture(stream);
+		if (!texture && img) {
+			texture = new Tarumae.Texture(img);
 		}
 
 		if (texture) {

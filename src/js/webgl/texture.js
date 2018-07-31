@@ -135,7 +135,6 @@ Tarumae.Texture = class {
 	}
 
 	disuse() {
-
 		if (this.glTexture) {
 			this.renderer.gl.bindTexture(this.renderer.gl.TEXTURE_2D, null);
 		}
@@ -156,21 +155,22 @@ Tarumae.Texture = class {
 			}
 		}
 	}
-};
 
-Tarumae.Texture.create = function(renderer, width, height) {
-	var tex = new Tarumae.Texture();
-	tex.renderer = renderer;
-	tex.width = width;
-	tex.height = height;
-	return tex;
-};
-
-Tarumae.Texture.createEmpty = function() {
-	var tex = new Tarumae.Texture(new Uint8Array([255, 255, 255, 255]), false, false);
-	tex.width = 1;
-	tex.height = 1;
-	return tex;
+	static create(renderer, width, height) {
+		var tex = new Tarumae.Texture();
+		tex.image = null;
+		tex.renderer = renderer;
+		tex.width = width;
+		tex.height = height;
+		return tex;
+	}
+	
+	static createEmpty() {
+		var tex = new Tarumae.Texture(new Uint8Array([255, 255, 255, 255]), false, false);
+		tex.width = 1;
+		tex.height = 1;
+		return tex;
+	}
 };
 
 // Tarumae.Texture.prototype = {

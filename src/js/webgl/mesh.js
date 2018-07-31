@@ -57,7 +57,6 @@ Tarumae.Mesh = class {
 		if (header[0] === 0x6873656d /* tag: mesh */) {
 
 			var verAndFlags = header[1];
-
 			var ver = verAndFlags & 0xffff;
 			var flags = verAndFlags >> 16;
 
@@ -91,6 +90,23 @@ Tarumae.Mesh = class {
 						this._lightmapTrunkId = new Uint32Array(stream, 80, 4)[0];
 						this._lightmapType = header[21];
 					}
+
+					if (ver >= 0x0104) {
+						if ((flags & Tarumae.Mesh.HeaderFlags.HasGrabBoundary) === Tarumae.Mesh.HeaderFlags.hasGrabBoundary) {
+							this.meta.hasGrabBoundary = true;
+		
+							var grabBoundaryBuffer = new Float32Array(stream, 96, 24);
+		
+							this._grabBoundary = {
+								min: new Vec3(grabBoundaryBuffer[0], grabBoundaryBuffer[1], grabBoundaryBuffer[2]),
+								max: new Vec3(grabBoundaryBuffer[3], grabBoundaryBuffer[4], grabBoundaryBuffer[5]),
+							};
+						}
+		
+						if ((flags & Tarumae.Mesh.HeaderFlags.HasWireframe) === Tarumae.Mesh.HeaderFlags.HasWireframe) {
+							this.meta.edgeCount = header[6];
+						}
+					}
 				}
 			} else {
 				this.meta = {
@@ -120,19 +136,8 @@ Tarumae.Mesh = class {
 				this.meta.tangentBasisCount = this.meta.vertexCount;
 			}
 
-			if ((flags & 0x20) === 0x20) {
+			if ((flags & Tarumae.Mesh.HeaderFlags.HasColor) === Tarumae.Mesh.HeaderFlags.HasColor) {
 				this.meta.hasColor = true;
-			}
-
-			if ((flags & 0x80) === 0x80) {
-				this.meta.hasGrabBoundary = true;
-
-				var grabBoundaryBuffer = new Float32Array(stream, 96, 24);
-
-				this._grabBoundary = {
-					min: new Vec3(grabBoundaryBuffer[0], grabBoundaryBuffer[1], grabBoundaryBuffer[2]),
-					max: new Vec3(grabBoundaryBuffer[3], grabBoundaryBuffer[4], grabBoundaryBuffer[5]),
-				};
 			}
 		
 			var headerLength = header[2];
@@ -277,6 +282,11 @@ Tarumae.Mesh = class {
 				meta.vertexColorOffset = offset;
 				offset += meta.vertexCount * 12;
 			}
+
+			if (meta.edgeCount > 0) {
+				meta.edgeDataOffset = offset;
+				offset += meta.edgeCount * 12 * 2;
+			}
 		}
 
 		if (this.indexed && !this.indexBuffer) {
@@ -379,11 +389,11 @@ Tarumae.Mesh = class {
 			}
 		}
 
-		var sp = renderer.currentShader;
+		const sp = renderer.currentShader;
 		if (!sp) return;
 
-		var meta = this.meta;
-		var gl = renderer.gl;
+		const meta = this.meta;
+		const gl = renderer.gl;
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.meta.vertexBufferId);
 
@@ -454,30 +464,36 @@ Tarumae.Mesh = class {
 			}
 		}
 
-		var glPrimitiveMode;
+		if (renderer.currentShader instanceof Tarumae.WireframeShader && meta.edgeCount > 0) {
+			gl.vertexAttribPointer(sp.vertexPositionAttribute, 3, gl.FLOAT, false, meta.stride, meta.edgeDataOffset);
+			gl.drawArrays(gl.LINES, 0, meta.edgeCount * 2);
+		}
+		else {
+			var glPrimitiveMode;
 
-		switch (this.composeMode) {
-			case Tarumae.Mesh.ComposeModes.Points: glPrimitiveMode = gl.POINTS; break;
-			case Tarumae.Mesh.ComposeModes.Lines: glPrimitiveMode = gl.LINES; break;
-			case Tarumae.Mesh.ComposeModes.LineStrip: glPrimitiveMode = gl.LINE_STRIP; break;
-			case Tarumae.Mesh.ComposeModes.LineLoop: glPrimitiveMode = gl.LINE_LOOP; break;
+			switch (this.composeMode) {
+				case Tarumae.Mesh.ComposeModes.Points: glPrimitiveMode = gl.POINTS; break;
+				case Tarumae.Mesh.ComposeModes.Lines: glPrimitiveMode = gl.LINES; break;
+				case Tarumae.Mesh.ComposeModes.LineStrip: glPrimitiveMode = gl.LINE_STRIP; break;
+				case Tarumae.Mesh.ComposeModes.LineLoop: glPrimitiveMode = gl.LINE_LOOP; break;
 		
-			default:
-			case Tarumae.Mesh.ComposeModes.Triangles: glPrimitiveMode = gl.TRIANGLES; break;
+				default:
+				case Tarumae.Mesh.ComposeModes.Triangles: glPrimitiveMode = gl.TRIANGLES; break;
 
-			case Tarumae.Mesh.ComposeModes.TriangleStrip: glPrimitiveMode = gl.TRIANGLE_STRIP; break;
-			case Tarumae.Mesh.ComposeModes.TriangleFan: glPrimitiveMode = gl.TRIANGLE_FAN; break;
-		}
+				case Tarumae.Mesh.ComposeModes.TriangleStrip: glPrimitiveMode = gl.TRIANGLE_STRIP; break;
+				case Tarumae.Mesh.ComposeModes.TriangleFan: glPrimitiveMode = gl.TRIANGLE_FAN; break;
+			}
 
-		if (renderer.wireframe && glPrimitiveMode != gl.LINES) {
-			glPrimitiveMode = gl.LINE_STRIP;
-		}
+			if (renderer.wireframe && glPrimitiveMode != gl.LINES) {
+				glPrimitiveMode = gl.LINE_LOOP;
+			}
 	
-		if (this.indexed) {
-			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.meta.indexBufferId);
-			gl.drawElements(glPrimitiveMode, meta.indexCount, gl.UNSIGNED_SHORT, 0);
-		} else {
-			gl.drawArrays(glPrimitiveMode, 0, meta.vertexCount);
+			if (this.indexed) {
+				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.meta.indexBufferId);
+				gl.drawElements(glPrimitiveMode, meta.indexCount, gl.UNSIGNED_SHORT, 0);
+			} else {
+				gl.drawArrays(glPrimitiveMode, 0, meta.vertexCount);
+			}
 		}
 
 		if (renderer.debugger) {
@@ -920,6 +936,8 @@ Object.assign(Tarumae.Mesh, {
 		HasTangentBasisData: 0x10,
 		HasColor: 0x20,
 		HasLightmap: 0x40,
+		HasGrabBoundary: 0x80,
+		HasWireframe: 0x100,
 	},
 
 	StructureTypes: {

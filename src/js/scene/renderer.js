@@ -10,6 +10,7 @@ import "../utility/utility";
 import { Vec2, Vec3, Vec4, Color3, Color4, Point } from "../math/vector";
 import "../scene/scene";
 import "../webgl/shader";
+import "../webgl/buffers";
 import { Debugger } from "../utility/debug";
 
 //import fs from "fs";
@@ -131,11 +132,11 @@ Tarumae.Renderer = class {
 		var renderer = this;
 
 		if (this.options.enableShadow && typeof Tarumae.FrameBuffer === "function") {
-			this.shadowFrameBuffer = new Tarumae.FrameBuffer(this, 2048, 2048, Color4.white);
+			// this.shadowFrameBuffer = new Tarumae.FrameBuffer(this, 2048, 2048, Color4.white);
 		}
 
 		if (typeof Tarumae.StencilBuffer === "function") {
-			this.stencilBuffer = new Tarumae.StencilBuffer(this);
+			// this.stencilBuffer = new Tarumae.StencilBuffer(this);
 		}
 
 		gl.enable(gl.DEPTH_TEST);
@@ -168,10 +169,7 @@ Tarumae.Renderer = class {
 		});
 
 		renderer.init();
-
-		requestAnimationFrame(function() {
-			renderer.drawFrame();
-		});
+		renderer.render();
 	}
 
 	setContainerStyle() {
@@ -332,26 +330,33 @@ Tarumae.Renderer = class {
 	}
 	
 	useShader(shader) {
-		if (!shader) return;
+		if (!shader || !this.initialized) return;
 	
-		if (!this.initialized) {
-			this.options.defaultShader = shader;
-		} else {
-			var shaderDefine = Tarumae.Renderer.Shaders[shader];
-	
-			if (typeof shaderDefine !== "undefined"
+		let shaderInstance;
+
+		if (typeof shader === "string") {
+			var shaderDefine = TarumaeRenderer.Shaders[shader];
+
+			if (shaderDefine
 				&& shaderDefine.instance instanceof Tarumae.Shader) {
-	
-				var shaderInstance = shaderDefine.instance;
-	
-				this.shaderStack.push(shaderInstance);
-				shaderInstance.use();
-	
-				return shaderInstance;
+				shaderInstance = shaderDefine.instance;
+			}
+		} else if (typeof shader === "object") {
+			if (shader.instance) {
+				shaderInstance = shader.instance;
+			} else if (shader instanceof Tarumae.Shader) {
+				shaderInstance = shader;
 			}
 		}
-	
-		return null;
+
+		if (shaderInstance) {
+			this.shaderStack.push(shaderInstance);
+			shaderInstance.use();
+		}
+
+		this.currentShader = shaderInstance;
+
+		return shaderInstance;	
 	}
 	
 	getCurrentShader() {
@@ -405,8 +410,7 @@ Tarumae.Renderer = class {
 		}
 	}
 	
-	drawFrame() {
-	
+	render() {
 		if (this.initialized) {
 	
 			this.ctx2dCleared = false;
@@ -414,30 +418,12 @@ Tarumae.Renderer = class {
 			var scene = this.currentScene;
 	
 			if (scene && (scene.animation || scene.requestedUpdateFrame)) {
-	
 				if (this.debugMode) {
 					this.debugger.beforeDrawFrame();
 				}
-	
-				var projectionMethod = ((this.currentScene && this.currentScene.mainCamera)
-					? (this.currentScene.mainCamera.projectionMethod)
-					: (this.options.perspective.method));
-	
-				switch (projectionMethod) {
-					default:
-					case Tarumae.ProjectionMethods.Persp:
-					case "persp":
-						this.perspectiveProject(this.projectMatrix);
-						break;
-	
-					case Tarumae.ProjectionMethods.Ortho:
-					case "ortho":
-						this.orthographicProject(this.projectMatrix);
-						break;
-				}
-	
-				this.drawSceneFrame(scene);
-	
+
+				this.renderFrame();
+
 				if (this.debugMode) {
 					this.debugger.afterDrawFrame();
 				}
@@ -453,11 +439,58 @@ Tarumae.Renderer = class {
 			}
 		}
 	
-		var renderer = this;
-	
-		requestAnimationFrame(function() {
-			renderer.drawFrame();
-		});
+		requestAnimationFrame(_ => this.render());
+	}
+
+	renderFrame() {
+
+		if (this.postprocess) {
+			if (!this.buffer1) {
+				this.buffer1 = new Tarumae.FrameBuffer(this, this.renderSize.width, this.renderSize.height);
+			}
+
+			this.buffer1.use();
+			this.drawFrame();
+			this.buffer1.disuse();
+
+			if (!this.screenPlaneMesh) {
+				this.screenPlaneMesh = new Tarumae.ScreenMesh();
+			}
+
+			const screenShader = TarumaeRenderer.Shaders["screen"].instance;
+		
+			screenShader.texture = this.buffer1.texture;
+			this.useShader(screenShader);
+			screenShader.beginMesh(this.screenPlaneMesh);
+			this.screenPlaneMesh.draw(this);
+			screenShader.endMesh();
+			this.disuseCurrentShader();
+		} else {
+			this.drawFrame();
+		}
+	}
+
+	drawFrame() {
+		const scene = this.currentScene;
+
+		const projectionMethod = ((scene && scene.mainCamera)
+			? (this.currentScene.mainCamera.projectionMethod)
+			: (this.options.perspective.method));
+
+		switch (projectionMethod) {
+			default:
+			case Tarumae.ProjectionMethods.Persp:
+			case "persp":
+				this.perspectiveProject(this.projectMatrix);
+				break;
+
+			case Tarumae.ProjectionMethods.Ortho:
+			case "ortho":
+				this.orthographicProject(this.projectMatrix);
+				break;
+		}
+
+		this.drawSceneFrame(scene);
 	}
 	
 	drawSceneFrame(scene) {
@@ -477,9 +510,13 @@ Tarumae.Renderer = class {
 	
 		this.projectionViewMatrix = this.viewMatrix.mul(this.cameraMatrix).mul(this.projectMatrix);
 		this.projectionViewMatrixArray = this.projectionViewMatrix.toArray();
-	
+
+		if (this.wireframe) {
+			this.useShader("wireframe");
+		}
+
 		if (this.currentShader) {
-			Tarumae.Utility.invokeIfExist(this.currentShader, "beginScene", scene);
+			this.currentShader.beginScene(scene);
 		}
 	
 		if (this.debugger) {
@@ -490,40 +527,41 @@ Tarumae.Renderer = class {
 		for (var i = 0; i < scene.objects.length; i++) {
 			this.drawObject(scene.objects[i], false);
 		}
-	
-		// this.useShader("simple");
-		this.currentShader.beginScene(scene);
-	
-		// draw transparency objects
-		for (var j = 0; i < this.transparencyList.length; j++) {
-			this.drawObject(this.transparencyList[j], true);
+
+		if (this.wireframe) {
+			this.disuseCurrentShader();
 		}
+
+		if (!this.wireframe) {
+			// draw transparency objects
+			for (var j = 0; i < this.transparencyList.length; j++) {
+				this.drawObject(this.transparencyList[j], true);
+			}
+
+			// draw selected objects
+			if (Array.isArray(scene.selectedObjects)) {
+				for (var k = 0; k < scene.selectedObjects.length; k++) {
+					var obj = scene.selectedObjects[k];
+					if (obj.visible) {
+						this.drawHighlightObject(obj, new Color4(0.1, 0.6, 1.0, 0.5));
 	
-		// this.disuseCurrentShader();
-	
-		// draw selected objects
-		if (Array.isArray(scene.selectedObjects)) {
-			for (var k = 0; k < scene.selectedObjects.length; k++) {
-				var obj = scene.selectedObjects[k];
-				if (obj.visible) {
-					this.drawHighlightObject(obj, new Color4(0.1, 0.6, 1.0, 0.5));
-	
-					if (this.options.enableHighlightSelectedChildren) {
-						this.drawHighlightChildren(obj, new Color4(0.1, 1.0, 0.6, 0.5));
+						if (this.options.enableHighlightSelectedChildren) {
+							this.drawHighlightChildren(obj, new Color4(0.1, 1.0, 0.6, 0.5));
+						}
 					}
 				}
 			}
-		}
 	
-		// draw hover object
-		// if (scene.hoverObject) {
-		// 	this.drawHighlightObject(scene.hoverObject, new Color4(1.0, 0.5, 0.0, 0.5));
-		// }
+			// draw hover object
+			// if (scene.hoverObject) {
+			// 	this.drawHighlightObject(scene.hoverObject, new Color4(1.0, 0.5, 0.0, 0.5));
+			// }
+		}
 	
 		scene.drawFrame(this);
 	
 		if (this.currentShader) {
-			Tarumae.Utility.invokeIfExist(this.currentShader, "endScene", scene);
+			this.currentShader.endScene(scene);
 		}
 	}
 	
@@ -673,9 +711,14 @@ Tarumae.Renderer = class {
 			}
 		}
 	
-		var shaderPushed = false;
+		let shaderPushed = false;
 	
-		var objShader = obj.shader || null;
+		if (obj.wireframe) {
+			this.useShader("wireframe");
+			shaderPushed = true;
+		}
+
+		const objShader = obj.shader || null;
 		if (objShader) {
 			var objShaderName = objShader.name || null;
 	
@@ -1198,12 +1241,18 @@ import billboardVert from '../../shader/billboard.vert';
 import billboardFrag from '../../shader/billboard.frag';
 import simpleVert from '../../shader/simple.vert';
 import simpleFrag from '../../shader/simple.frag';
+import grayscaleVert from '../../shader/simple.vert';
+import grayscaleFrag from '../../shader/simple.frag';
 import panoramaVert from '../../shader/panorama.vert';
 import panoramaFrag from '../../shader/panorama.frag';
 import standardVert from '../../shader/standard.vert';
 import standardFrag from '../../shader/standard.frag';
+import wireframeVert from '../../shader/wireframe.vert';
+import wireframeFrag from '../../shader/wireframe.frag';
 import pointVert from '../../shader/points.vert';
 import pointFrag from '../../shader/points.frag';
+import screenVert from '../../shader/screen.vert';
+import screenFrag from '../../shader/screen.frag';
 
 TarumaeRenderer.Shaders = {
 	// viewer: {
@@ -1213,10 +1262,13 @@ TarumaeRenderer.Shaders = {
 	solidcolor: { vert: solidcolorVert, frag: solidcolorFrag, class: "SolidColorShader" },
 	billboard: { vert: billboardVert, frag: billboardFrag, class: "BillboardShader" },
 	simple: { vert: simpleVert, frag: simpleFrag, class: "SimpleShader" },
+	// grayscale: { vert: grayscaleVert, frag: grayscaleFrag, class: "GrayscaleShader" },
 	point: { vert: pointVert, frag: pointFrag, class: "PointShader" },
 	panorama: { vert: panoramaVert, frag: panoramaFrag, class: "PanoramaShader" },
 	standard: { vert: standardVert, frag: standardFrag, class: "StandardShader" },
+	wireframe: { vert: wireframeVert, frag: wireframeFrag, class: "WireframeShader" },
 	point: { vert: pointVert, frag: pointFrag, class: "PointShader" },
+	screen: { vert: screenVert, frag: screenFrag, class: "ScreenShader" },
 };
 
 TarumaeRenderer.ContainerStyle = [

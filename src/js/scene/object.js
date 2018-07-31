@@ -6,10 +6,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "../entry";
-import "../utility/event";
 import { Vec3, Vec4, Color3, Color4 } from "../math/vector";
-import "../math/matrix";
-import { Mesh } from "../webgl/mesh";
+import "../webgl/mesh";
+import "../utility/event";
+import "./material";
 
 Tarumae.CollisionModes = {
 	None: 0,
@@ -23,7 +23,7 @@ Tarumae.CollisionModes = {
 };
 
 Tarumae.SceneObject = class {
-	constructor() {
+	constructor() {		
 		this._parent = undefined;
 		this._scene = undefined;
 		this._transform = new Tarumae.Matrix4().loadIdentity();
@@ -144,19 +144,21 @@ Tarumae.SceneObject = class {
 		newObj.collisionTarget = obj.collisionTarget;
 		newObj.radiyBody = obj.radiyBody;
 		newObj.isSelected = obj.isSelected;
+		newObj.wireframe = obj.wireframe;
 
 		newObj._transform = obj._transform;
+
+		newObj.mat = Tarumae.Material.clone(obj.mat);
 		
-		for (var i = 0; i < obj.meshes.length; i++) {
-			newObj.addMesh(obj.meshes[i]);
+		for (const mesh of obj.meshes) {
+			newObj.addMesh(mesh);
 		}
 
-		for (var k = 0; k < obj.objects.length; k++) {
-			var newChild = obj.objects[k].clone();
+		for (const newChild of obj.objects) {
 			newObj.add(newChild);
 		}
 
-		newObj._suspendTransformUpdate = false;		
+		newObj._suspendTransformUpdate = false;	
 		newObj.updateTransform();
 
 		return newObj;
@@ -869,9 +871,27 @@ Tarumae.PlaneMesh = class extends Tarumae.Mesh {
 	}
 };
 
-// backward compatibility
-// Object.defineProperty(window, "PlaneMesh",
-// { get: Tarumae.Utility.deprecate("PlaneMesh", "Tarumae.PlaneMesh") });
+
+Tarumae.ScreenMesh = class extends Tarumae.Mesh {
+	constructor() {
+		super();
+
+		this.vertices = [-1, 1, 0,    -1, -1, 0,   1, 1, 0,   1, -1, 0];
+		this.texcoords = [0, 1,   0, 0,   1, 1,   1, 0];
+		// this.tangents = [-1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0];
+		// this.bitangents = [0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1];
+
+		this.meta = {
+			vertexCount: 4,
+			normalCount: 0,
+			uvCount: 1,
+			texcoordCount: 4,
+			tangentBasisCount: 0,
+		};
+
+		this.composeMode = Tarumae.Mesh.ComposeModes.TriangleStrip;
+	}
+};
 
 ////////////////////////// Cube //////////////////////////
 
