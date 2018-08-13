@@ -81,14 +81,14 @@ Tarumae.CubeMap.prototype = {
     gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     //gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
+
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
   },
 
   setFaceImage: function(face, image) {
     this.use();
 
     var gl = this.gl;
-
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
 
     var faces = this.getLoadingFaces();
   

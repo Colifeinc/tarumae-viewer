@@ -871,15 +871,12 @@ Tarumae.PlaneMesh = class extends Tarumae.Mesh {
 	}
 };
 
-
 Tarumae.ScreenMesh = class extends Tarumae.Mesh {
 	constructor() {
 		super();
 
 		this.vertices = [-1, 1, 0,    -1, -1, 0,   1, 1, 0,   1, -1, 0];
-		this.texcoords = [0, 1,   0, 0,   1, 1,   1, 0];
-		// this.tangents = [-1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0];
-		// this.bitangents = [0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1];
+		this.texcoords = [0, 0,   0, 1,   1, 0,   1, 1];
 
 		this.meta = {
 			vertexCount: 4,
@@ -940,10 +937,6 @@ Tarumae.CubeMesh.VertexBuffer = new Float32Array([
 	-1.0, 0.0, 0.0, -1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
 	0.0, 0.0, 1.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
 	0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0]);
-
-// Backward compatibility
-// Object.defineProperty(window, "CubeMesh",
-// 	{ get: Tarumae.Utility.deprecate("CubeMesh", "Tarumae.CubeMesh") });
 
 Tarumae.Cube = class extends Tarumae.SceneObject {
 	constructor() {

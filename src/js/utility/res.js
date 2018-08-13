@@ -90,7 +90,7 @@ Tarumae.ResourceManager = class {
 			return val;
 		};
 	
-		this.onprogress( round( (1-p),3) );
+		this.onprogress(round((1 - p), 3));
 	}
 
 	preload(url,type,data) {
@@ -112,20 +112,20 @@ Tarumae.ResourceManager = class {
 	
 		var max_connection = 400;
 		
-		var dl = function(){
+		var dl = function() {
 			var res = self.loadingQueue.pop();
-			if ( !res ) { return; }
+			if (!res) { return; }
 	
-			if( self.resources[res.url] ) {
+			if (self.resources[res.url]) {
 				res.data = self.resources[res.url].data;
-			}else{
+			} else {
 				self.resources[res.url] = res;
 			}
 	
 			if (res.data != null) {
 				res.onload(res.data);
 				
-				if ( self.loadingQueue.length > 0 ){
+				if (self.loadingQueue.length > 0) {
 					dl();
 				}
 			} else {
@@ -135,7 +135,7 @@ Tarumae.ResourceManager = class {
 	
 						res.onload(data);
 						
-						if ( self.loadingQueue.length > 0 ){
+						if (self.loadingQueue.length > 0) {
 							dl();
 						}
 					}, res.onprogress);
@@ -143,16 +143,16 @@ Tarumae.ResourceManager = class {
 			}
 		}
 		
-		var next = function(){
-			var cnt = ( self.loadingQueue.length > max_connection ) ? max_connection : self.loadingQueue.length;
-			for( var ii = 0; ii < cnt; ii++){
+		var next = function() {
+			var cnt = (self.loadingQueue.length > max_connection) ? max_connection : self.loadingQueue.length;
+			for (var ii = 0; ii < cnt; ii++) {
 				dl();
 			}
 		}
 	
-		if ( this.loadingQueue.length <= 0) {
+		if (this.loadingQueue.length <= 0) {
 			onfinish();
-		}else{
+		} else {
 			next();
 		}
 	

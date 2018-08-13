@@ -9,5 +9,6 @@ varying vec2 texcoord;
 
 void main(void) {
 	gl_Position = projectionMatrix * vec4(vertexPosition, 1.0);
+	
 	texcoord = vertexTexcoord;
 }

@@ -100,6 +100,10 @@ export class Vec3 {
 	set(x, y, z) {
 		this.x = x; this.y = y; this.z = z;
 	}
+
+	copyFrom(v) {
+		this.x = v.x; this.y = v.y; this.z = v.z;
+	}
 	
 	setToZero() {
 		this.x = 0; this.y = 0; this.z = 0;
@@ -839,10 +843,18 @@ Tarumae.Size = class {
 				this.height = h;
 				break;
 		}
+
+		this._arr = [this.width, this.height];
 	}
 	
 	clone() {
 		return new Tarumae.Size(this.width, this.height);
+	}
+
+	toArray() {
+		this._arr[0] = this.width;
+		this._arr[1] = this.height;
+		return this._arr;
 	}
 };
 

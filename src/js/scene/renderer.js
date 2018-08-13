@@ -9,6 +9,7 @@ import Tarumae from "../entry";
 import "../utility/utility";
 import { Vec2, Vec3, Vec4, Color3, Color4, Point } from "../math/vector";
 import "../scene/scene";
+import "../scene/pipeline";
 import "../webgl/shader";
 import "../webgl/buffers";
 import { Debugger } from "../utility/debug";
@@ -22,8 +23,8 @@ Tarumae.Renderer = class {
 		this.debugMode = false;
 		this.developmentVersion = false;
 
-		if (typeof Tarumae.Renderer.Version === "object") {
-			var ver = Tarumae.Renderer.Version;
+		if (typeof Tarumae.Version === "object") {
+			var ver = Tarumae.Version;
 			ver.toString = function() {
 				return ver.major + "." + ver.minor + "." + ver.build + "." + ver.revision;
 			};
@@ -97,6 +98,10 @@ Tarumae.Renderer = class {
 		// debug mode
 		if (this.debugMode) {
 			this.debugger = new Tarumae.Debugger(this);
+
+			if (this.options.showDebugPanel) {
+				this.debugger.showDebugPanel = true;
+			}
 		}
 
 		this.drawingContext2D = new Tarumae.DrawingContext2D(this.canvas2d, this.ctx);
@@ -127,7 +132,7 @@ Tarumae.Renderer = class {
 		}
 
 		this.aspectRate = 1;
-		this.renderSize = { width: 0, height: 0 };
+		this.renderSize = new Tarumae.Size();
 
 		var renderer = this;
 
@@ -144,7 +149,9 @@ Tarumae.Renderer = class {
 		gl.enable(gl.CULL_FACE);
 		gl.cullFace(gl.BACK);
 		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
+		gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA,
+			gl.ONE_MINUS_DST_ALPHA, gl.ONE);
+		
 		window.addEventListener("resize", (function() { renderer.resetViewport(); }), false);
 
 		this.resetViewport();
@@ -158,9 +165,7 @@ Tarumae.Renderer = class {
 		this.cachedMeshes = {};
 		this.cachedTextures = {};
 		this.cachedImages = {};
-
-		var downloader = new Tarumae.ResourceManager();
-		downloader.downloadShaders = [];
+		this.resourceManager = new Tarumae.ResourceManager();
 
 		// create shader programs either from server or tarumae.js
 		Tarumae.Renderer.Shaders._s3_foreach(function(name, shaderDefine) {
@@ -282,6 +287,11 @@ Tarumae.Renderer = class {
 		this.resetViewport();
 	}
 
+	setGLViewport() {
+		const size = this.renderSize;
+		this.gl.viewport(0, 0, size.width * this.options.renderPixelRatio, size.height * this.options.renderPixelRatio);
+	}
+
 	resetViewport() {
 		var size = this.renderSize;
 	
@@ -290,15 +300,13 @@ Tarumae.Renderer = class {
 	
 		this.aspectRate = size.width / size.height;
 	
-		// 3d
 		this.canvas.width = size.width * this.options.renderPixelRatio;
 		this.canvas.height = size.height * this.options.renderPixelRatio;
-		this.gl.viewport(0, 0, size.width * this.options.renderPixelRatio, size.height * this.options.renderPixelRatio);
-	
-		// 2d
 		this.canvas2d.width = size.width;
 		this.canvas2d.height = size.height;
-	
+
+		this.setGLViewport();
+
 		if (this.currentScene) {
 			this.currentScene.requireUpdateFrame();
 		}
@@ -318,6 +326,8 @@ Tarumae.Renderer = class {
 			renderer.currentScene.requireUpdateFrame();
 		}
 	
+		this.createPipeline();
+
 		console.debug("renderer initialized.");
 	}
 	
@@ -335,7 +345,7 @@ Tarumae.Renderer = class {
 		let shaderInstance;
 
 		if (typeof shader === "string") {
-			var shaderDefine = TarumaeRenderer.Shaders[shader];
+			var shaderDefine = Tarumae.Renderer.Shaders[shader];
 
 			if (shaderDefine
 				&& shaderDefine.instance instanceof Tarumae.Shader) {
@@ -375,15 +385,11 @@ Tarumae.Renderer = class {
 			shader.use();
 		}
 	}
+
+	clearViewport() {
+		const gl = this.gl;
 	
-	clear() {
-		var gl = this.gl;
-	
-		var backColor = this.options.backColor;
-	
-		this.ctx.clearRect(0, 0, this.canvas2d.width, this.canvas2d.height);
-		this.ctx2dCleared = true;
-	
+		const backColor = this.options.backColor;
 		gl.clearColor(backColor.r, backColor.g, backColor.b, 1.0);
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	}
@@ -413,8 +419,8 @@ Tarumae.Renderer = class {
 	render() {
 		if (this.initialized) {
 	
-			this.ctx2dCleared = false;
-	
+			this.setGLViewport();
+
 			var scene = this.currentScene;
 	
 			if (scene && (scene.animation || scene.requestedUpdateFrame)) {
@@ -422,7 +428,8 @@ Tarumae.Renderer = class {
 					this.debugger.beforeDrawFrame();
 				}
 
-				this.renderFrame();
+				this.renderPipeline();
+				scene.requestedUpdateFrame = false;
 
 				if (this.debugMode) {
 					this.debugger.afterDrawFrame();
@@ -430,10 +437,7 @@ Tarumae.Renderer = class {
 			}
 	
 			if (this.current2DScene && (this.current2DScene.animation || this.current2DScene.requestedUpdateFrame)) {
-				if (!this.ctx2dCleared) {
-					this.ctx.clearRect(0, 0, this.canvas2d.width, this.canvas2d.height);
-				}
-	
+				this.ctx.clearRect(0, 0, this.canvas2d.width, this.canvas2d.height);
 				this.current2DScene.render(this.drawingContext2D);
 				this.current2DScene.requestedUpdateFrame = false;
 			}
@@ -442,35 +446,52 @@ Tarumae.Renderer = class {
 		requestAnimationFrame(_ => this.render());
 	}
 
-	renderFrame() {
+	createPipeline() {
+		this.pipelineNodes = [];
 
-		if (this.postprocess) {
-			if (!this.buffer1) {
-				this.buffer1 = new Tarumae.FrameBuffer(this, this.renderSize.width, this.renderSize.height);
-			}
-
-			this.buffer1.use();
-			this.drawFrame();
-			this.buffer1.disuse();
-
-			if (!this.screenPlaneMesh) {
-				this.screenPlaneMesh = new Tarumae.ScreenMesh();
-			}
-
-			const screenShader = TarumaeRenderer.Shaders["screen"].instance;
+		if (this.options.backgroundImage) {
+			this.createTextureFromURL(this.options.backgroundImage, tex => {
+				const bgImageSource = new Tarumae.PipelineNodes.ImageSource(this, tex);
+				this._bgImageRenderer = new Tarumae.PipelineNodes.ImageRenderer(this);
+				this._bgImageRenderer.enableAntialias = false;
+				this._bgImageRenderer.input = bgImageSource;
+			});
+		}
 		
-			screenShader.texture = this.buffer1.texture;
-			this.useShader(screenShader);
-			screenShader.beginMesh(this.screenPlaneMesh);
-			this.screenPlaneMesh.draw(this);
-			screenShader.endMesh();
-			this.disuseCurrentShader();
+		if (this.options.postprocess) {
+			const size = this.renderSize;
+			const sceneImageRenderer = new Tarumae.PipelineNodes.SceneToImageRenderer(this, {
+				imageSize: { width: size.width * 0.75, height: size.height * 0.75 }
+			});
+			const imgRenderer = new Tarumae.PipelineNodes.ImageRenderer(this);
+			imgRenderer.input = sceneImageRenderer;
+			imgRenderer.enableAntialias = false;
+	
+			this.pipelineNodes.push(imgRenderer);
 		} else {
-			this.drawFrame();
+			this.pipelineNodes.push(new Tarumae.PipelineNodes.DefaultRenderer(this));
+		}
+	}
+	
+	renderPipeline() {
+		if (this._bgImageRenderer) {
+			this._bgImageRenderer.clear();
+			this._bgImageRenderer._render();
+		} else {
+			// this.clearViewport();
+		}
+
+		for (const node of this.pipelineNodes) {
+			node.clear();
+		}
+
+		for (const node of this.pipelineNodes) {
+			node._render();
 		}
 	}
 
-	drawFrame() {
+	renderFrame() {
+
 		const scene = this.currentScene;
 
 		const projectionMethod = ((scene && scene.mainCamera)
@@ -494,8 +515,7 @@ Tarumae.Renderer = class {
 	}
 	
 	drawSceneFrame(scene) {
-		this.clear();
-	
+		
 		this.cameraMatrix.loadIdentity();
 		this.viewMatrix.loadIdentity();
 		this.transparencyList._s3_clear();
@@ -534,8 +554,8 @@ Tarumae.Renderer = class {
 
 		if (!this.wireframe) {
 			// draw transparency objects
-			for (var j = 0; i < this.transparencyList.length; j++) {
-				this.drawObject(this.transparencyList[j], true);
+			for (const tranObj of this.transparencyList) {
+				this.drawObject(tranObj, true);
 			}
 
 			// draw selected objects
@@ -695,7 +715,7 @@ Tarumae.Renderer = class {
 			return;
 		}
 	
-		if (!transparencyRendering) {	
+		if (!transparencyRendering) {
 			obj._opacity = (!isNaN(obj.opacity) ? obj.opacity : 1)
 				* (1.0 - Tarumae.MathFunctions.clamp((obj.mat && !isNaN(obj.mat.transparency)) ? obj.mat.transparency : 0));
 	
@@ -846,6 +866,32 @@ Tarumae.Renderer = class {
 		}
 	}
 	
+	createTextureFromURL(url, handler) {	
+		const cachedTexture = this.cachedTextures[url];
+		if (cachedTexture && typeof handler === "function") {
+			handler(cachedTexture);
+			return;
+		}
+	
+		this.resourceManager.add(url, Tarumae.ResourceTypes.Image, img => {
+			let texture = this.cachedTextures[url];
+			
+			if (!texture && img) {
+				texture = new Tarumae.Texture(img);
+			}
+	
+			if (texture) {
+				this.cachedTextures[url] = texture;
+			}
+	
+			if (typeof handler === "function") {
+				handler(texture);
+			}
+		});
+	
+		this.resourceManager.load();
+	}
+
 	createWorldRayFromScreenPosition(p) {
 		var ray;
 	
@@ -901,6 +947,306 @@ Tarumae.Renderer = class {
 		return this.toScreenPosition(this.toWorldPosition(pos, matrix, projectMethod), projectMethod);
 	}
 	
+	toScreenPosition(pos) {
+		var projectMethod = projectMethod
+				|| ((this.currentScene && this.currentScene.mainCamera)
+					? (this.currentScene.mainCamera.projectionMethod)
+					: (this.options.perspective.method));
+		
+		var renderHalfWidth = this.renderSize.width / 2;
+		var renderHalfHeight = this.renderSize.height / 2;
+		
+		var w = ((projectMethod == Tarumae.ProjectionMethods.Persp || projectMethod == "persp") ? pos.w : 1.0) || 1.0;
+		
+		return new Point(
+			(pos.x / w) * renderHalfWidth + renderHalfWidth,
+			-(pos.y / w) * renderHalfHeight + renderHalfHeight);
+	}
+		
+	toScreenPositionEx(pos) {
+		var projectMethod = projectMethod
+				|| ((this.currentScene && this.currentScene.mainCamera)
+					? (this.currentScene.mainCamera.projectionMethod)
+					: (this.options.perspective.method));
+		
+		var renderHalfWidth = this.renderSize.width / 2;
+		var renderHalfHeight = this.renderSize.height / 2;
+		
+		var w = ((projectMethod == Tarumae.ProjectionMethods.Persp || projectMethod == "persp") ? pos.w : 1.0) || 1.0;
+		
+		return new Vec3(
+			(pos.x / w) * renderHalfWidth + renderHalfWidth,
+			-(pos.y / w) * renderHalfHeight + renderHalfHeight,
+			1.0 / pos.z
+		);
+	}
+
+	transformPoints(points) {
+		const renderHalfWidth = this.renderSize.width / 2;
+		const renderHalfHeight = this.renderSize.height / 2;
+		
+		const ps = new Array(points.length);
+		
+		for (var i = 0; i < points.length; i++) {
+			var p = new Vec4(points[i], 1.0).mulMat(this.projectionViewMatrix);
+		
+			ps[i] = new Point(
+				(p.x / p.w) * renderHalfWidth + renderHalfWidth,
+				-(p.y / p.w) * renderHalfHeight + renderHalfHeight);
+		}
+		
+		return ps;
+	}
+		
+	transformTriangle(triangle) {
+		const m = this.viewMatrix.mul(this.cameraMatrix);
+		
+		return {
+			v1: new Vec4(triangle.v1, 1.0).mulMat(m).xyz(),
+			v2: new Vec4(triangle.v2, 1.0).mulMat(m).xyz(),
+			v3: new Vec4(triangle.v3, 1.0).mulMat(m).xyz(),
+		};
+	}
+		
+	viewRayHitTestPlaneInWorldSpace(pos, planeVertices) {
+		const ray = this.createWorldRayFromScreenPosition(pos);
+		return Tarumae.MathFunctions.rayIntersectsPlane(ray, planeVertices, Tarumae.Ray.MaxDistance);
+	};
+		
+	drawLine(from, to, width, color) {
+		var points = this.transformPoints([from, to]);
+		this.drawLine2D(points[0], points[1], width, color);
+	};
+		
+	drawLine2D(from, to, width, color) {
+		this.drawLineSegments2D([from, to], width, color);
+	};
+		
+	drawLineSegments2D() {
+		return this.drawingContext2D.drawLines.apply(this.drawingContext2D, arguments);
+	}
+		
+	drawBox(box, width, color) {
+		if (!box) return;
+		
+		var points = this.transformPoints([
+			{ x: box.min.x, y: box.min.y, z: box.min.z },
+			{ x: box.max.x, y: box.min.y, z: box.min.z },
+			{ x: box.min.x, y: box.max.y, z: box.min.z },
+			{ x: box.max.x, y: box.max.y, z: box.min.z },
+		
+			{ x: box.min.x, y: box.min.y, z: box.max.z },
+			{ x: box.max.x, y: box.min.y, z: box.max.z },
+			{ x: box.min.x, y: box.max.y, z: box.max.z },
+			{ x: box.max.x, y: box.max.y, z: box.max.z },
+		]);
+		
+		this.drawLineSegments2D([
+			points[0], points[1], points[2], points[3],
+			points[4], points[5], points[6], points[7],
+		
+			points[0], points[4], points[1], points[5],
+			points[2], points[6], points[3], points[7],
+		
+			points[0], points[4], points[1], points[5],
+			points[2], points[6], points[3], points[7],
+		
+			points[0], points[2], points[1], points[3],
+			points[4], points[6], points[5], points[7],
+		], width, color);
+	}
+		
+	drawFocusBox(box, len, width, color) {
+		if (!box) return;
+		
+		len = len || 0.1;
+		
+		var points = this.transformPoints([
+			{ x: box.min.x, y: box.min.y, z: box.min.z },
+			{ x: box.max.x, y: box.min.y, z: box.min.z },
+			{ x: box.min.x, y: box.max.y, z: box.min.z },
+			{ x: box.max.x, y: box.max.y, z: box.min.z },
+		
+			{ x: box.min.x, y: box.min.y, z: box.max.z },
+			{ x: box.max.x, y: box.min.y, z: box.max.z },
+			{ x: box.min.x, y: box.max.y, z: box.max.z },
+			{ x: box.max.x, y: box.max.y, z: box.max.z },
+		]);
+		
+		this.drawLineSegments2D([
+			points[0], points[1], points[2], points[3],
+			points[4], points[5], points[6], points[7],
+		
+			points[0], points[4], points[1], points[5],
+			points[2], points[6], points[3], points[7],
+		
+			points[0], points[4], points[1], points[5],
+			points[2], points[6], points[3], points[7],
+		
+			points[0], points[2], points[1], points[3],
+			points[4], points[6], points[5], points[7],
+		], width, color);
+	};
+		
+	drawArrow(from, to, width, color) {
+		var points = this.transformPoints([from, to]);
+		this.drawArrow2D(points[0], points[1], width, color);
+	};
+		
+	drawArrow2D(from, to, width, color, arrowSize) {
+		var ctx = this.ctx;
+		
+		if (width === undefined) width = 2;
+		if (arrowSize === undefined) arrowSize = width * 5;
+		
+		ctx.lineWidth = width;
+		ctx.strokeStyle = color || "black";
+		
+		var angle = Math.atan2(to.y - from.y, to.x - from.x);
+		
+		ctx.beginPath();
+		
+		ctx.moveTo(from.x, from.y);
+		ctx.lineTo(to.x, to.y);
+		
+		ctx.lineTo(to.x - arrowSize * Math.cos(angle - Math.PI / 6),
+			to.y - arrowSize * Math.sin(angle - Math.PI / 6));
+		
+		ctx.moveTo(to.x, to.y);
+		ctx.lineTo(to.x - arrowSize * Math.cos(angle + Math.PI / 6),
+			to.y - arrowSize * Math.sin(angle + Math.PI / 6));
+		
+		ctx.stroke();
+		ctx.closePath();
+	};
+		
+	fillArrow(from, to, size, color) {
+		var points = this.transformPoints([from, to]);
+		this.fillArrow2D(points[0], points[1], size, color);
+	}
+		
+	fillArrow2D(from, to, size, color) {
+		var ctx = this.ctx;
+		
+		size = size || 10;
+		ctx.fillStyle = color || "black";
+		
+		var angle = Math.atan2(to.y - from.y, to.x - from.x);
+		
+		ctx.beginPath();
+		
+		ctx.moveTo(to.x, to.y);
+		ctx.lineTo(to.x - size * Math.cos(angle - Math.PI / 6), to.y - size * Math.sin(angle - Math.PI / 6));
+		ctx.lineTo(to.x - size * Math.cos(angle + Math.PI / 6), to.y - size * Math.sin(angle + Math.PI / 6));
+		
+		ctx.fill();
+		ctx.closePath();
+	};
+		
+	drawRect(topLeft, bottomRight, strokeWidth, strokeColor, fillColor) {
+		var rect3d = this.transformPoints([topLeft, bottomRight]);
+		
+		var left = Math.min(rect3d[0].x, rect3d[1].x),
+			top = Math.min(rect3d[0].y, rect3d[1].y),
+			right = Math.max(rect3d[0].x, rect3d[1].x),
+			bottom = Math.max(rect3d[0].y, rect3d[1].y);
+		
+		this.drawRect2D(new Tarumae.Rect(left, top, right - left, bottom - top), strokeWidth, strokeColor, fillColor);
+	};
+		
+	drawRect2D() {
+		return this.drawingContext2D.drawRect.apply(this.drawingContext2D, arguments);
+	};
+		
+	drawPolygon(points, strokeWidth, strokeColor, fillColor) {
+		if (points.length < 2) return;
+		this.drawPolygon2D(this.transformPoints(points), strokeWidth, strokeColor, fillColor);
+	};
+		
+	drawPolygon2D(points, strokeWidth, strokeColor, fillColor) {
+		var ctx = this.ctx;
+		
+		if (points.length < 2) return;
+		
+		ctx.beginPath();
+		
+		var p0 = points[0];
+		ctx.moveTo(p0.x, p0.y);
+		
+		for (var i = 1; i < points.length; i++) {
+			var p = points[i];
+			ctx.lineTo(p.x, p.y);
+		}
+		
+		ctx.lineTo(p0.x, p0.y);
+		
+		if (fillColor) {
+			ctx.fillStyle = fillColor;
+			ctx.fill();
+		}
+		
+		if (strokeWidth || strokeColor) {
+			ctx.lineWidth = strokeWidth || 1;
+			ctx.strokeStyle = strokeColor || "black";
+		
+			ctx.stroke();
+		}
+		
+		ctx.closePath();
+	};
+		
+	drawEllipse(v, size, strokeWidth, strokeColor, fillColor) {
+		this.drawEllipse2D(this.transformPoint(v), size, strokeWidth, strokeColor, fillColor);
+	};
+		
+	drawEllipse2D(p, size, strokeWidth, strokeColor, fillColor) {
+		var r = new Tarumae.Rect(p.x - size / 2, p.y - size / 2, size, size);
+		return this.drawingContext2D.drawEllipse(r, strokeWidth, strokeColor, fillColor);
+	};
+		
+	drawImage(location, image) {		
+		var p = this.transformPoint(location);
+				
+		var x = p.x - image.width / 2;
+		var y = p.y - image.height / 2;
+				
+		if (x >= 0 && y >= 0
+				&& x < this.renderSize.width && y < this.renderSize.height) {
+			return this.drawingContext2D.drawImage({ x: x, y: y }, image);
+		}
+	};
+		
+	drawText(location, text, color, halign) {
+		var p = this.transformPoint(location);
+		this.drawText2D(p, text, color, halign);
+	};
+		
+	drawText2D() {
+		return this.drawingContext2D.drawText.apply(this.drawingContext2D, arguments);
+	};
+		
+	createSnapshotOfRenderingImage(imgformat, imgQuality) {
+		var scene = this.currentScene;
+		if (!scene || !Tarumae.FrameBuffer) return null;
+		
+		var width = this.renderSize.width, height = this.renderSize.height;
+		
+		var renderbuffer = new Tarumae.FrameBuffer(this, width, height);
+		renderbuffer.use();
+		
+		this.drawSceneFrame(scene);
+		
+		var img = null;
+		
+		try {
+			img = Tarumae.Utility.getImageDataURLFromTexture(this, renderbuffer.texture, imgformat, imgQuality);
+		} catch (e) { /* ignore exception */ }
+		
+		renderbuffer.disuse();
+		renderbuffer.destroy();
+		
+		return img;
+	};
 };
 
 Tarumae.Renderer.prototype.toWorldPosition = (function() {
@@ -921,319 +1267,18 @@ Tarumae.Renderer.prototype.toWorldPosition = (function() {
 		}
 	};
 })();
-	
-Tarumae.Renderer.prototype.toScreenPosition = function(pos) {
-	var projectMethod = projectMethod
-			|| ((this.currentScene && this.currentScene.mainCamera)
-				? (this.currentScene.mainCamera.projectionMethod)
-				: (this.options.perspective.method));
-	
-	var renderHalfWidth = this.renderSize.width / 2;
-	var renderHalfHeight = this.renderSize.height / 2;
-	
-	var w = ((projectMethod == Tarumae.ProjectionMethods.Persp || projectMethod == "persp") ? pos.w : 1.0) || 1.0;
-	
-	return new Point(
-		(pos.x / w) * renderHalfWidth + renderHalfWidth,
-		-(pos.y / w) * renderHalfHeight + renderHalfHeight);
-};
-	
-Tarumae.Renderer.prototype.toScreenPositionEx = function(pos) {
-	var projectMethod = projectMethod
-			|| ((this.currentScene && this.currentScene.mainCamera)
-				? (this.currentScene.mainCamera.projectionMethod)
-				: (this.options.perspective.method));
-	
-	var renderHalfWidth = this.renderSize.width / 2;
-	var renderHalfHeight = this.renderSize.height / 2;
-	
-	var w = ((projectMethod == Tarumae.ProjectionMethods.Persp || projectMethod == "persp") ? pos.w : 1.0) || 1.0;
-	
-	return new Vec3(
-		(pos.x / w) * renderHalfWidth + renderHalfWidth,
-		-(pos.y / w) * renderHalfHeight + renderHalfHeight,
-		1.0 / pos.z
-	);
-};
-	
-var TarumaeRenderer = Tarumae.Renderer;
-	
-TarumaeRenderer.prototype.transformPoints = function(points) {
-	const renderHalfWidth = this.renderSize.width / 2;
-	const renderHalfHeight = this.renderSize.height / 2;
-	
-	const ps = new Array(points.length);
-	
-	for (var i = 0; i < points.length; i++) {
-		var p = new Vec4(points[i], 1.0).mulMat(this.projectionViewMatrix);
-	
-		ps[i] = new Point(
-			(p.x / p.w) * renderHalfWidth + renderHalfWidth,
-			-(p.y / p.w) * renderHalfHeight + renderHalfHeight);
-	}
-	
-	return ps;
-};
-	
-TarumaeRenderer.prototype.transformTriangle = function(triangle) {
-	const m = this.viewMatrix.mul(this.cameraMatrix);
-	
-	return {
-		v1: new Vec4(triangle.v1, 1.0).mulMat(m).xyz(),
-		v2: new Vec4(triangle.v2, 1.0).mulMat(m).xyz(),
-		v3: new Vec4(triangle.v3, 1.0).mulMat(m).xyz(),
-	};
-};
-	
-TarumaeRenderer.prototype.viewRayHitTestPlaneInWorldSpace = function(pos, planeVertices) {
-	const ray = this.createWorldRayFromScreenPosition(pos);
-	return Tarumae.MathFunctions.rayIntersectsPlane(ray, planeVertices, Tarumae.Ray.MaxDistance);
-};
-	
-TarumaeRenderer.prototype.drawLine = function(from, to, width, color) {
-	var points = this.transformPoints([from, to]);
-	this.drawLine2D(points[0], points[1], width, color);
-};
-	
-TarumaeRenderer.prototype.drawLine2D = function(from, to, width, color) {
-	this.drawLineSegments2D([from, to], width, color);
-};
-	
-TarumaeRenderer.prototype.drawLineSegments2D = function() {
-	return this.drawingContext2D.drawLines.apply(this.drawingContext2D, arguments);
-};
-	
-TarumaeRenderer.prototype.drawBox = function(box, width, color) {
-	if (!box) return;
-	
-	var points = this.transformPoints([
-		{ x: box.min.x, y: box.min.y, z: box.min.z },
-		{ x: box.max.x, y: box.min.y, z: box.min.z },
-		{ x: box.min.x, y: box.max.y, z: box.min.z },
-		{ x: box.max.x, y: box.max.y, z: box.min.z },
-	
-		{ x: box.min.x, y: box.min.y, z: box.max.z },
-		{ x: box.max.x, y: box.min.y, z: box.max.z },
-		{ x: box.min.x, y: box.max.y, z: box.max.z },
-		{ x: box.max.x, y: box.max.y, z: box.max.z },
-	]);
-	
-	this.drawLineSegments2D([
-		points[0], points[1], points[2], points[3],
-		points[4], points[5], points[6], points[7],
-	
-		points[0], points[4], points[1], points[5],
-		points[2], points[6], points[3], points[7],
-	
-		points[0], points[4], points[1], points[5],
-		points[2], points[6], points[3], points[7],
-	
-		points[0], points[2], points[1], points[3],
-		points[4], points[6], points[5], points[7],
-	], width, color);
-};
-	
-TarumaeRenderer.prototype.drawFocusBox = function(box, len, width, color) {
-	if (!box) return;
-	
-	len = len || 0.1;
-	
-	var points = this.transformPoints([
-		{ x: box.min.x, y: box.min.y, z: box.min.z },
-		{ x: box.max.x, y: box.min.y, z: box.min.z },
-		{ x: box.min.x, y: box.max.y, z: box.min.z },
-		{ x: box.max.x, y: box.max.y, z: box.min.z },
-	
-		{ x: box.min.x, y: box.min.y, z: box.max.z },
-		{ x: box.max.x, y: box.min.y, z: box.max.z },
-		{ x: box.min.x, y: box.max.y, z: box.max.z },
-		{ x: box.max.x, y: box.max.y, z: box.max.z },
-	]);
-	
-	this.drawLineSegments2D([
-		points[0], points[1], points[2], points[3],
-		points[4], points[5], points[6], points[7],
-	
-		points[0], points[4], points[1], points[5],
-		points[2], points[6], points[3], points[7],
-	
-		points[0], points[4], points[1], points[5],
-		points[2], points[6], points[3], points[7],
-	
-		points[0], points[2], points[1], points[3],
-		points[4], points[6], points[5], points[7],
-	], width, color);
-};
-	
-TarumaeRenderer.prototype.drawArrow = function(from, to, width, color) {
-	var points = this.transformPoints([from, to]);
-	this.drawArrow2D(points[0], points[1], width, color);
-};
-	
-TarumaeRenderer.prototype.drawArrow2D = function(from, to, width, color, arrowSize) {
-	var ctx = this.ctx;
-	
-	if (width === undefined) width = 2;
-	if (arrowSize === undefined) arrowSize = width * 5;
-	
-	ctx.lineWidth = width;
-	ctx.strokeStyle = color || "black";
-	
-	var angle = Math.atan2(to.y - from.y, to.x - from.x);
-	
-	ctx.beginPath();
-	
-	ctx.moveTo(from.x, from.y);
-	ctx.lineTo(to.x, to.y);
-	
-	ctx.lineTo(to.x - arrowSize * Math.cos(angle - Math.PI / 6),
-		to.y - arrowSize * Math.sin(angle - Math.PI / 6));
-	
-	ctx.moveTo(to.x, to.y);
-	ctx.lineTo(to.x - arrowSize * Math.cos(angle + Math.PI / 6),
-		to.y - arrowSize * Math.sin(angle + Math.PI / 6));
-	
-	ctx.stroke();
-	ctx.closePath();
-};
-	
-TarumaeRenderer.prototype.fillArrow = function(from, to, size, color) {
-	var points = this.transformPoints([from, to]);
-	this.fillArrow2D(points[0], points[1], size, color);
-};
-	
-TarumaeRenderer.prototype.fillArrow2D = function(from, to, size, color) {
-	var ctx = this.ctx;
-	
-	size = size || 10;
-	ctx.fillStyle = color || "black";
-	
-	var angle = Math.atan2(to.y - from.y, to.x - from.x);
-	
-	ctx.beginPath();
-	
-	ctx.moveTo(to.x, to.y);
-	ctx.lineTo(to.x - size * Math.cos(angle - Math.PI / 6), to.y - size * Math.sin(angle - Math.PI / 6));
-	ctx.lineTo(to.x - size * Math.cos(angle + Math.PI / 6), to.y - size * Math.sin(angle + Math.PI / 6));
-	
-	ctx.fill();
-	ctx.closePath();
-};
-	
-TarumaeRenderer.prototype.drawRect = function(topLeft, bottomRight, strokeWidth, strokeColor, fillColor) {
-	var rect3d = this.transformPoints([topLeft, bottomRight]);
-	
-	var left = Math.min(rect3d[0].x, rect3d[1].x),
-		top = Math.min(rect3d[0].y, rect3d[1].y),
-		right = Math.max(rect3d[0].x, rect3d[1].x),
-		bottom = Math.max(rect3d[0].y, rect3d[1].y);
-	
-	this.drawRect2D(new Tarumae.Rect(left, top, right - left, bottom - top), strokeWidth, strokeColor, fillColor);
-};
-	
-TarumaeRenderer.prototype.drawRect2D = function() {
-	return this.drawingContext2D.drawRect.apply(this.drawingContext2D, arguments);
-};
-	
-TarumaeRenderer.prototype.drawPolygon = function(points, strokeWidth, strokeColor, fillColor) {
-	if (points.length < 2) return;
-	this.drawPolygon2D(this.transformPoints(points), strokeWidth, strokeColor, fillColor);
-};
-	
-TarumaeRenderer.prototype.drawPolygon2D = function(points, strokeWidth, strokeColor, fillColor) {
-	var ctx = this.ctx;
-	
-	if (points.length < 2) return;
-	
-	ctx.beginPath();
-	
-	var p0 = points[0];
-	ctx.moveTo(p0.x, p0.y);
-	
-	for (var i = 1; i < points.length; i++) {
-		var p = points[i];
-		ctx.lineTo(p.x, p.y);
-	}
-	
-	ctx.lineTo(p0.x, p0.y);
-	
-	if (fillColor) {
-		ctx.fillStyle = fillColor;
-		ctx.fill();
-	}
-	
-	if (strokeWidth || strokeColor) {
-		ctx.lineWidth = strokeWidth || 1;
-		ctx.strokeStyle = strokeColor || "black";
-	
-		ctx.stroke();
-	}
-	
-	ctx.closePath();
-};
-	
-TarumaeRenderer.prototype.drawEllipse = function(v, size, strokeWidth, strokeColor, fillColor) {
-	this.drawEllipse2D(this.transformPoint(v), size, strokeWidth, strokeColor, fillColor);
-};
-	
-TarumaeRenderer.prototype.drawEllipse2D = function(p, size, strokeWidth, strokeColor, fillColor) {
-	var r = new Tarumae.Rect(p.x - size / 2, p.y - size / 2, size, size);
-	return this.drawingContext2D.drawEllipse(r, strokeWidth, strokeColor, fillColor);
-};
-	
-TarumaeRenderer.prototype.drawImage = function(location, image) {		
-	var p = this.transformPoint(location);
-			
-	var x = p.x - image.width / 2;
-	var y = p.y - image.height / 2;
-			
-	if (x >= 0 && y >= 0
-			&& x < this.renderSize.width && y < this.renderSize.height) {
-		return this.drawingContext2D.drawImage({ x: x, y: y }, image);
-	}
-};
-	
-TarumaeRenderer.prototype.drawText = function(location, text, color, halign) {
-	var p = this.transformPoint(location);
-	this.drawText2D(p, text, color, halign);
-};
-	
-TarumaeRenderer.prototype.drawText2D = function() {
-	return this.drawingContext2D.drawText.apply(this.drawingContext2D, arguments);
-};
-	
-TarumaeRenderer.prototype.createSnapshotOfRenderingImage = function(imgformat, imgQuality) {
-	var scene = this.currentScene;
-	if (!scene || !Tarumae.FrameBuffer) return null;
-	
-	var width = this.renderSize.width, height = this.renderSize.height;
-	
-	var renderbuffer = new Tarumae.FrameBuffer(this, width, height);
-	renderbuffer.use();
-	
-	this.drawSceneFrame(scene);
-	
-	var img = null;
-	
-	try {
-		img = Tarumae.Utility.getImageDataURLFromTexture(this, renderbuffer.texture, imgformat, imgQuality);
-	} catch (e) { /* ignore exception */ }
-	
-	renderbuffer.disuse();
-	renderbuffer.destroy();
-	
-	return img;
-};
 
-Tarumae.ProjectionMethods = {
-	Persp: 0,
-	Ortho: 1,
-};
+Object.assign(Tarumae, {
+	ProjectionMethods: {
+		Persp: 0,
+		Ortho: 1,
+	},
 
-Tarumae.DrawMode = {
-	Normal: 0,
-	ShadowMap: 1,
-};
+	DrawMode: {
+		Normal: 0,
+		ShadowMap: 1,
+	}
+});
 
 import solidcolorVert from '../../shader/solidcolor.vert';
 import solidcolorFrag from '../../shader/solidcolor.frag';
@@ -1251,10 +1296,10 @@ import wireframeVert from '../../shader/wireframe.vert';
 import wireframeFrag from '../../shader/wireframe.frag';
 import pointVert from '../../shader/points.vert';
 import pointFrag from '../../shader/points.frag';
-import screenVert from '../../shader/screen.vert';
-import screenFrag from '../../shader/screen.frag';
+import imageVert from '../../shader/image.vert';
+import imageFrag from '../../shader/image.frag';
 
-TarumaeRenderer.Shaders = {
+Tarumae.Renderer.Shaders = {
 	// viewer: {
 	// 	vert: fs.readFileSync(__dirname + "../../../shader/viewer.vert", "utf8"),
 	// 	frag: fs.readFileSync(__dirname + "../../../shader/viewer.frag", "utf8"), class: "ViewerShader"
@@ -1268,10 +1313,10 @@ TarumaeRenderer.Shaders = {
 	standard: { vert: standardVert, frag: standardFrag, class: "StandardShader" },
 	wireframe: { vert: wireframeVert, frag: wireframeFrag, class: "WireframeShader" },
 	point: { vert: pointVert, frag: pointFrag, class: "PointShader" },
-	screen: { vert: screenVert, frag: screenFrag, class: "ScreenShader" },
+	screen: { vert: imageVert, frag: imageFrag, class: "ImageShader" },
 };
 
-TarumaeRenderer.ContainerStyle = [
+Tarumae.Renderer.ContainerStyle = [
 	"#canvas-container { position: relative; }",
 	"#canvas-container { width: 100%; }",
 	"#canvas-container:before { content: ''; }",
@@ -1283,11 +1328,6 @@ TarumaeRenderer.ContainerStyle = [
 	"#canvas-container canvas, #canvas-container .surface { height: 100%; }",
 	"#canvas-container .surface div { pointer-events: none; }",
 ];
-
-TarumaeRenderer.DefaultOptions = {
-	debugMode: false,
-	backColor: new Color4(0.93, 0.93, 0.93, 1.0),
-};
 
 ///////////////// DrawingContext2D /////////////////
 
@@ -1301,7 +1341,7 @@ Tarumae.ResourcePool = class {
 };
 
 new Tarumae.EventDispatcher(Tarumae.ResourcePool).registerEvents(
-	"texadded");
+	"texAdded");
 
 ///////////////// DrawingContext2D /////////////////
 

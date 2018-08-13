@@ -11,6 +11,7 @@ import Tarumae from "../entry";
 import { Vec2, Vec3, Vec4, Color3, Color4 } from "../math/vector";
 import "../math/matrix";
 import "../webgl/texture";
+import { isThursday } from "date-fns";
 
 Tarumae.Shader = class {
 	constructor(renderer, vertShaderSrc, fragShaderSrc) {
@@ -1448,6 +1449,7 @@ Tarumae.StandardShader = class extends Tarumae.Shader {
 		// opacity
 		if (obj._opacity < 1) {
 			gl.enable(gl.BLEND);
+			// gl.disable(gl.DEPTH_TEST);
 			this.opacityUniform.set(obj._opacity);
 		} else {
 			this.opacityUniform.set(1);
@@ -1499,6 +1501,7 @@ Tarumae.StandardShader = class extends Tarumae.Shader {
 		}
 
 		gl.disable(gl.BLEND);
+		gl.enable(gl.DEPTH_TEST);
 
 		super.endObject(obj);
 	}
@@ -1662,9 +1665,9 @@ Tarumae.PointShader = class extends Tarumae.Shader {
 	}
 };
 
-////////////////// ScreenShader ///////////////////////
+////////////////// ImageShader ///////////////////////
 
-Tarumae.ScreenShader = class extends Tarumae.Shader {
+Tarumae.ImageShader = class extends Tarumae.Shader {
 	constructor(renderer, vertShaderSrc, fragShaderSrc) {
 		super(renderer, vertShaderSrc, fragShaderSrc);
 
@@ -1676,11 +1679,21 @@ Tarumae.ScreenShader = class extends Tarumae.Shader {
 		this.textureUniform = this.bindUniform("texture", "tex", 0);
 		this.colorUniform = this.bindUniform("color", "color3");
 		this.opacityUniform = this.bindUniform("opacity", "float");
+		this.resolutionUniform = this.bindUniform("resolution", "vec2");
+		this.aaOffset1Uniform = this.bindUniform("aaOffset1", "vec2");
+		this.aaOffset2Uniform = this.bindUniform("aaOffset2", "vec2");
+		
+		this.enableAntialiasUniform = this.bindUniform("enableAntialias", "bool");
+		this.enableAntialias = true;
+
+		this.gammaFactorUniform = this.bindUniform("gammaFactor", "float");
+		this.gammaFactor = 1;
 
 		this.projectionMatrix = new Tarumae.Matrix4().ortho(-1, 1, -1, 1, -1, 1);
 		this.color = [1, 1, 1];
 		this.opacity = 1;
 		this.texture = undefined;
+		this.resolutionInv = [0, 0];
 	}
 
 	beginMesh(mesh) {
@@ -1690,24 +1703,39 @@ Tarumae.ScreenShader = class extends Tarumae.Shader {
 		this.colorUniform.set(this.color);
 		this.opacityUniform.set(this.opacity);
 
+		this.resolutionInv[0] = 1.0 / this.renderer.canvas.width;
+		this.resolutionInv[1] = 1.0 / this.renderer.canvas.height;
+		this.resolutionUniform.set(this.resolutionInv);
+
+		this.aaOffset1Uniform.set([this.resolutionInv[0] * 0.6, this.resolutionInv[1] * 0.4]);
+		this.aaOffset2Uniform.set([this.resolutionInv[0] * 0.4, this.resolutionInv[1] * 0.6]);
+
+		this.enableAntialiasUniform.set(this.enableAntialias);
+		this.gammaFactorUniform.set(this.gammaFactor);
+
 		if (this.texture) {
 			this.textureUniform.set(this.texture);
 		} else {
 			this.textureUniform.set(Tarumae.Shader.emptyTexture);
 		}
+
+		this.gl.depthMask(false);
+		this.gl.enable(this.gl.BLEND);
 	}
 
 	endMesh(mesh) {
 		// const gl = this.renderer.gl;
 		// gl.disable(gl.BLEND);
 		// gl.enable(gl.DEPTH_TEST);
+		this.gl.depthMask(true);
+		this.gl.disable(this.gl.BLEND);
 
 		super.endMesh(mesh);
 	}
 
 };
 
-Tarumae.GrayscaleShader = class extends Tarumae.ScreenShader {
+Tarumae.GrayscaleShader = class extends Tarumae.ImageShader {
 };
 
 ////////////////// GLShader ///////////////////////

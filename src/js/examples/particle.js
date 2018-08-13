@@ -18,7 +18,7 @@ window.addEventListener("load", function() {
 
 	window._scene = scene;
  
-	const count = 20000;
+	const count = 100000;
 	const pm = new Tarumae.ParticleMesh(count);
 
 	var particles = new Array(count);
@@ -37,7 +37,7 @@ window.addEventListener("load", function() {
 			r: 1.0, //Math.random(),
 			g: Math.random() * 0.5,
 			b: Math.random(),
-			size: Math.random() * 1 + 2,
+			size: 4,
 		};
 	}
 
@@ -113,7 +113,8 @@ window.addEventListener("load", function() {
 
 	scene.animation = true;
 
-	scene.createObjectFromURL("models/mountain2.mod", mountain => {
+	scene.createObjectFromURL("../static/models/mountain2.mod", mountain => {
+
 		let mesh = mountain.meshes[0];
 		mountainVertices = mesh.points;
 		

@@ -196,7 +196,7 @@ void main(void) {
 		}
 	
 		if (alpha < 1.0) {
-			alpha = max(finalColor.r, max(finalColor.g, finalColor.b)) * 0.5;
+			// alpha = max(finalColor.r, max(finalColor.g, finalColor.b)) * 0.5;
 		}
 	}
 

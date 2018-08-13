@@ -44,10 +44,8 @@ class AnimationDemo {
 				mat: { tex: texWood },
 
 				onmouseup: function() {
-					var cube = this;
-
-					lastAnimation = scene.animate({ duration: 1, effect: "smooth" }, function(t) {
-						cube.angle.y = t * 360;
+					lastAnimation = scene.animate({ duration: 1, effect: "smooth" }, t => {
+						this.angle.y = t * 360;
 					});
 				},
 

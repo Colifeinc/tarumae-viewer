@@ -34,7 +34,7 @@ Tarumae.Texture = class {
 	}
 
 	setupParameters() {
-		var gl = this.renderer.gl;
+		const gl = this.renderer.gl;
 
 		if (this.canMipmap) {
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
@@ -53,44 +53,46 @@ Tarumae.Texture = class {
 		} else {
 			this.clampToEdge();
 		}
+
 	}
 
 	linear() {
-		var gl = this.renderer.gl;
+		const gl = this.renderer.gl;
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 		return this;
 	}
 
 	mipMapLinearToLinear() {
-		var gl = this.renderer.gl;
+		const gl = this.renderer.gl;
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
 		return this;
 	}
 
 	repeat() {
-		var gl = this.renderer.gl;
+		const gl = this.renderer.gl;
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
 		return this;
 	}
 
 	clampToEdge() {
-		var gl = this.renderer.gl;
+		const gl = this.renderer.gl;
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 		return this;
 	}
 
 	bind(renderer) {
+		// allows this.image === null
 		if (this.image === undefined) return;
 
 		if (!this.renderer) {
 			this.renderer = renderer;
 		}
 
-		var gl = this.renderer.gl;
+		const gl = this.renderer.gl;
 
 		this.glTexture = gl.createTexture();
 
@@ -112,6 +114,7 @@ Tarumae.Texture = class {
 			gl.generateMipmap(gl.TEXTURE_2D);
 			this._mipmapped = true;
 		}
+
 	
 		this.setupParameters();
 	}
@@ -143,7 +146,7 @@ Tarumae.Texture = class {
 	destroy() {
 		if (!this.renderer) return;
 
-		var gl = this.renderer.gl;
+		const gl = this.renderer.gl;
 		if (!gl) return;
 
 		if (this.glTexture) {
@@ -157,7 +160,7 @@ Tarumae.Texture = class {
 	}
 
 	static create(renderer, width, height) {
-		var tex = new Tarumae.Texture();
+		const tex = new Tarumae.Texture();
 		tex.image = null;
 		tex.renderer = renderer;
 		tex.width = width;
@@ -166,33 +169,9 @@ Tarumae.Texture = class {
 	}
 	
 	static createEmpty() {
-		var tex = new Tarumae.Texture(new Uint8Array([255, 255, 255, 255]), false, false);
+		const tex = new Tarumae.Texture(new Uint8Array([255, 255, 255, 255]), false, false);
 		tex.width = 1;
 		tex.height = 1;
 		return tex;
 	}
 };
-
-// Tarumae.Texture.prototype = {
-
-// create: function(renderer, width, height) {
-// 	this.renderer = renderer;
-// 	this.width = width;
-// 	this.height = height;
-// 	this.gl = renderer.gl;
-// 	this.glTexture = this.gl.createTexture();
-
-// 	if (renderer.debugger) {
-// 		renderer.debugger.totalNumberOfTexturesUsed++;
-// 	}
-
-// 	this.use();
-// 	this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, width, height, 0, this.gl.RGBA, this.gl.UNSIGNED_BYTE, null);
-// 	this.linear();
-// 	this.clampToEdge();
-// 	this.disuse();
-
-// 	return this;
-// },
-
-// };

@@ -50,16 +50,8 @@ Tarumae.CommonBuffer = class {
 		gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.glFrameBuffer);
 		this.texture.use();
 
-		gl.viewport(0.0, 0.0, this.width, this.height);
-
-		let backColor = this.backColor;
-	
-		if (typeof backColor == "undefined") {
-			backColor = this.renderer.options.backColor;
-		}
-	
-		gl.clearColor(backColor.r, backColor.g, backColor.b, backColor.a);
-		gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+		gl.viewport(0, 0, this.width, this.height);
+		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	}
 
 	disuse() {
@@ -87,7 +79,7 @@ Tarumae.FrameBuffer = class extends Tarumae.CommonBuffer {
 
 		const gl = this.gl;
 		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.texture.glTexture, 0);
- 	
+	 
 		// renderbuffer
 		this.renderbuffer = gl.createRenderbuffer();
 		gl.bindRenderbuffer(gl.RENDERBUFFER, this.renderbuffer);
@@ -106,7 +98,7 @@ Tarumae.FrameBuffer = class extends Tarumae.CommonBuffer {
 	destroy() {
 		if (this.texture) {
 			this.texture.destroy();
-			this.texture = null;
+			this.texture = undefined;
 		}
 	
 		super.destroy(this);

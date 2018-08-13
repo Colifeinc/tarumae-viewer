@@ -287,7 +287,7 @@ Object.defineProperties(Tarumae.Utility, {
 
 			if (typeof onframe !== "function" || !scene) return;
 
-			var renderer = scene.renderer;
+			const renderer = scene.renderer;
 			if (!renderer) return;
 
 			var viewer = renderer.viewer;

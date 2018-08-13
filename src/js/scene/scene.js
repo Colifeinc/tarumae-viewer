@@ -84,7 +84,7 @@ Tarumae.Scene = class {
 				archive.isLoading = false;
 				if (typeof callback === "function") callback(archive);
 				this.onarchiveLoaded(url, archive);
-			}, function(e) {
+			}, e => {
 				archive.dataLength = e.total;
 				archive.loadingLength = e.loaded;
 		
@@ -129,6 +129,9 @@ Tarumae.Scene = class {
 	}
 
 	createObjectFromURL(url, callback) {
+		var rm = new Tarumae.ResourceManager();
+		const loadingSession = new Tarumae.ObjectsLoadingSession(rm);
+
 		this.createObjectFromBundle(url, (bundle, manifest) => {
 			this.loadObject(manifest, undefined, bundle);
 
@@ -139,18 +142,22 @@ Tarumae.Scene = class {
 				}
 				callback(obj);
 			}
-		});
+		}, loadingSession);
+	
+		rm.load();
+		return loadingSession;
 	}
 	
 	load() {
 	
-		var loadingSession = new Tarumae.ObjectsLoadingSession(this.resourceManager);
+		const loadingSession = new Tarumae.ObjectsLoadingSession(this.resourceManager);
 		
-		for (var i = 0; i < arguments.length; i++) {
+		for (let i = 0; i < arguments.length; i++) {
 			let obj = arguments[i];
 	
 			if (obj) {
 				this.loadObject(obj, loadingSession);
+				this.add(obj);
 			}
 		}
 	
@@ -183,9 +190,9 @@ Tarumae.Scene = class {
 		}
 	
 		this.prepareObjects(obj, loadingSession, bundle);
-		this.objects.push(obj);
-		obj.scene = this;
-		obj.updateTransform();
+		// this.objects.push(obj);
+		// obj.scene = this;
+		// obj.updateTransform();
 	}
 
 	// loadArchives(archs, loadingSession) {
@@ -423,31 +430,9 @@ Scene.prototype.createMeshFromURL = function(url, handler, rm) {
 };
 
 Scene.prototype.createTextureFromURL = function(url, handler) {
-	var renderer = this.renderer;
-
-	var cachedTexture = renderer.cachedTextures[url];
-	if (cachedTexture && typeof handler === "function") {
-		handler(cachedTexture);
-		return;
+	if (this.renderer) {
+		this.renderer.createTextureFromURL(url, handler);
 	}
-
-	this.resourceManager.add(url, Tarumae.ResourceTypes.Image, function(img) {
-		var texture = renderer.cachedTextures[url];
-		
-		if (!texture && img) {
-			texture = new Tarumae.Texture(img);
-		}
-
-		if (texture) {
-			renderer.cachedTextures[url] = texture;
-		}
-
-		if (typeof handler === "function") {
-			handler(texture);
-		}
-	});
-
-	this.resourceManager.load();
 };
 
 Scene.prototype.prepareObjectMesh = function(obj, name, value, loadingSession, bundle) {
@@ -1229,7 +1214,7 @@ Scene.prototype.animate = function(options, onframe, onfinish) {
 	return animation;
 };
 
-///////////////////////// ObjectsLoadingSession /////////////////////////
+///////////////////////// SceneObjectBundle /////////////////////////
 
 Tarumae.SceneObjectBundle = class {
 };
@@ -1273,13 +1258,13 @@ Tarumae.ObjectsLoadingSession = class {
 	}
 	
 	progress() {
-		this.onprogress();
-
 		var loaded = this.totalDownloads;
 		var total = this.totalResources;
 
 		this.progressRate = loaded / total;
 		
+		this.onprogress(this.progressRate);
+
 		if (this.progressRate >= 1) {
 			this.onfinish();
 		}

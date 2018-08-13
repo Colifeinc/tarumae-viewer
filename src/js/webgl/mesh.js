@@ -173,7 +173,7 @@ Tarumae.Mesh = class {
 	}
 
 	bind(renderer) {
-		if (this.meta === undefined) {
+		if (!this.meta) {
 			this.meta = {
 				vertexCount: 0,
 				normalCount: 0,
