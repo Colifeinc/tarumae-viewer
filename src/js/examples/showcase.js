@@ -13,6 +13,9 @@ window.addEventListener("load", function() {
 	window._scene = scene;
  
 	scene.createObjectFromURL("/static/floor.toba", obj => {
+		const bbox = new Tarumae.BoundingBox(obj.getBounds())
+		obj.location.offset(-bbox.origin.x/2, 0, -bbox.origin.z/2)
+
 		scene.add(obj);
 	});
 
