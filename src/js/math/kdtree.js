@@ -34,7 +34,7 @@ Tarumae.KDNode = class {
       return;
     }
 
-    const bbox = boundingBoxFromItems(items, itemCount);
+    let bbox = boundingBoxFromItems(items, itemCount);
         
     if (itemCount <= 3) {
       this.bbox = bbox;
@@ -63,11 +63,11 @@ Tarumae.KDNode = class {
 
     for (let i = 0; i < itemCount; i++/*, pitem++*/) {
       const item = items[i];
-      const bbox = item.bbox;
+      const _bbox = item.bbox;
 
-      if (lbox.containsBox(bbox)) {
+      if (lbox.containsBox(_bbox)) {
         litems.push(item);
-      } else if (rbox.containsBox(bbox)) {
+      } else if (rbox.containsBox(_bbox)) {
         ritems.push(item);
       } else {
         this.items.push(item);

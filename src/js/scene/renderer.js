@@ -455,6 +455,7 @@ Tarumae.Renderer = class {
 				this._bgImageRenderer = new Tarumae.PipelineNodes.ImageRenderer(this);
 				this._bgImageRenderer.enableAntialias = false;
 				this._bgImageRenderer.input = bgImageSource;
+				this._bgImageRenderer.isFlipY = false;
 			});
 		}
 		
@@ -466,6 +467,7 @@ Tarumae.Renderer = class {
 			const imgRenderer = new Tarumae.PipelineNodes.ImageRenderer(this);
 			imgRenderer.input = sceneImageRenderer;
 			imgRenderer.enableAntialias = false;
+			imgRenderer.isFlipY = true;
 	
 			this.pipelineNodes.push(imgRenderer);
 		} else {
@@ -1226,15 +1228,14 @@ Tarumae.Renderer = class {
 	};
 		
 	createSnapshotOfRenderingImage(imgformat, imgQuality) {
-		var scene = this.currentScene;
-		if (!scene || !Tarumae.FrameBuffer) return null;
+		if (!Tarumae.FrameBuffer) return null;
 		
-		var width = this.renderSize.width, height = this.renderSize.height;
+		const width = this.renderSize.width, height = this.renderSize.height;
 		
-		var renderbuffer = new Tarumae.FrameBuffer(this, width, height);
+		const renderbuffer = new Tarumae.FrameBuffer(this, width, height);
 		renderbuffer.use();
 		
-		this.drawSceneFrame(scene);
+		this.renderFrame();
 		
 		var img = null;
 		

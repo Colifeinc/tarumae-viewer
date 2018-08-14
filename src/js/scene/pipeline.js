@@ -154,6 +154,9 @@ Tarumae.PipelineNodes.ImageRenderer = class extends Tarumae.PipelineNode {
       if (typeof this.gammaFactor !== "undefined") {
         imageShader.gammaFactor = this.gammaFactor;
       }
+      if (typeof this.isFlipY !== "undefined") {
+        imageShader.isFlipY = this.isFlipY;
+      }
 
       const gl = this.renderer.gl;
       gl.viewport(0, 0, this.renderer.canvas.width, this.renderer.canvas.height);

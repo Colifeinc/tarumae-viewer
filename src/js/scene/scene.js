@@ -51,7 +51,7 @@ Tarumae.Scene = class {
 		}
 
 		this.shadowMap = null;
-		this.skycube = null;
+		this.skybox = null;
 	}
 
 	loadArchive(name, url, loadingSession, callback) {

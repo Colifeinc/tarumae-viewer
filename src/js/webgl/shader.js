@@ -1689,6 +1689,9 @@ Tarumae.ImageShader = class extends Tarumae.Shader {
 		this.gammaFactorUniform = this.bindUniform("gammaFactor", "float");
 		this.gammaFactor = 1;
 
+		this.isFlipYUniform = this.bindUniform("isFlipY", "bool");
+		this.isFlipY = false;
+
 		this.projectionMatrix = new Tarumae.Matrix4().ortho(-1, 1, -1, 1, -1, 1);
 		this.color = [1, 1, 1];
 		this.opacity = 1;
@@ -1712,6 +1715,7 @@ Tarumae.ImageShader = class extends Tarumae.Shader {
 
 		this.enableAntialiasUniform.set(this.enableAntialias);
 		this.gammaFactorUniform.set(this.gammaFactor);
+		this.isFlipYUniform.set(this.isFlipY);
 
 		if (this.texture) {
 			this.textureUniform.set(this.texture);

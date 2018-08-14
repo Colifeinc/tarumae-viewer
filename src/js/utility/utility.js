@@ -282,8 +282,7 @@ Object.defineProperties(Tarumae.Utility, {
 	},
 
 	perforMovementAccelerationAnimation: {
-		value: function(scene,
-			intensity, attenuation, onframe, onfinish) {
+		value: function(scene, intensity, attenuation, onframe, onfinish) {
 
 			if (typeof onframe !== "function" || !scene) return;
 

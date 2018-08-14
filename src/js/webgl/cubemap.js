@@ -149,9 +149,8 @@ Tarumae.CubeMap.prototype = {
       throw "cubemap must be bound before set texture images";
     }
 
-    var gl = this.gl;
-
-    var faces = this.getLoadingFaces();
+    const gl = this.gl;
+    const faces = this.getLoadingFaces();
 
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
 
@@ -159,7 +158,7 @@ Tarumae.CubeMap.prototype = {
     this.mipmapped = false;
 
     for (var i = 0; i < faces.length; i++) {
-      var image = this.images[i];
+      const image = this.images[i];
       gl.texImage2D(faces[i], 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
 
       if (this.mipmappable) {
@@ -249,53 +248,66 @@ Tarumae.CubeMap.Faces = {
 
 /////////////////// ImageCubeBox ///////////////////
 
-Tarumae.ImageCubeBox = function(renderer, imageUrls) {
-  if (renderer && Array.isArray(imageUrls)) {
-    this.createFromImageUrls(renderer, imageUrls);
-  }
-};
-
-Tarumae.ImageCubeBox.createFromImageUrls = function(renderer, imageUrls) {
-  if (!Array.isArray(imageUrls) || imageUrls.length < 6) {
-    console.warn("ImageCubeBox: not enough image URLs to create image cube box, need six image URLs.");
-    return;
+Tarumae.ImageCubeBox = class {
+  constructor(renderer, imageUrls) {
+    if (renderer && Array.isArray(imageUrls)) {
+      this.createFromImageUrls(renderer, imageUrls);
+    }
   }
 
-  this.cubemap = new Tarumae.CubeMap(renderer);
+  createFromImageUrls(renderer, imageUrls) {
+    if (!Array.isArray(imageUrls) || imageUrls.length < 6) {
+      console.warn("ImageCubeBox: not enough number of images to create cubebox, need six image URLs.");
+      return;
+    }
+
+    this.cubebox = new Tarumae.CubeMap(renderer);
   
-  _this = this;
+    var rm = new Tarumae.ResourceManager();
 
-  var rm = new ResourceManager();
-
-  rm.add([
-    imageUrls[0], ResourceTypes.Image,
-    imageUrls[1], ResourceTypes.Image,
-    imageUrls[2], ResourceTypes.Image,
-    imageUrls[3], ResourceTypes.Image,
-    imageUrls[4], ResourceTypes.Image,
-    imageUrls[5], ResourceTypes.Image,
-  ]);
-
-  rm.load(function() {
-    _this.cubemap.bindTextures([
-      rm.get(imageUrls[0]),
-      rm.get(imageUrls[1]),
-      rm.get(imageUrls[2]),
-      rm.get(imageUrls[3]),
-      rm.get(imageUrls[4]),
-      rm.get(imageUrls[5]),
+    rm.add([
+      imageUrls[0], Tarumae.ResourceTypes.Image,
+      imageUrls[1], Tarumae.ResourceTypes.Image,
+      imageUrls[2], Tarumae.ResourceTypes.Image,
+      imageUrls[3], Tarumae.ResourceTypes.Image,
+      imageUrls[4], Tarumae.ResourceTypes.Image,
+      imageUrls[5], Tarumae.ResourceTypes.Image,
     ]);
-  });
 
-  Tarumae.Utility.invokeIfExist("onload");
-}
+    rm.load(() => {
+      this.cubebox.setImages([
+        rm.get(imageUrls[0]),
+        rm.get(imageUrls[1]),
+        rm.get(imageUrls[2]),
+        rm.get(imageUrls[3]),
+        rm.get(imageUrls[4]),
+        rm.get(imageUrls[5]),
+      ]);
+    });
 
-/////////////////// SkyCube ///////////////////
+    this.onload();
+  }
 
-Tarumae.SkyCube = function(renderer, imageUrls) {
-  if (renderer && Array.isArray(imageUrls)) {
-    this.createFromImageUrls(renderer, imageUrls);
+  onload() {
   }
 };
 
-Tarumae.SkyCube.prototype = new Tarumae.ImageCubeBox();
+/////////////////// SkyBox ///////////////////
+
+Tarumae.SkyBox = class extends Tarumae.ImageCubeBox {
+  constructor(renderer, imageUrls) {
+    super();
+
+    if (!renderer) {
+      throw new Error("renderer cannot be null or undefined");
+    }
+
+    this.renderer = renderer;
+    this.size = { width: 1000, height: 1000 };
+    this.createFromImageUrls(renderer, imageUrls);
+  }
+
+  render() {
+    
+  }
+};
