@@ -1,8 +1,8 @@
-TarumaeRenderer = {};
+Tarumae = {};
 
 require("../src/js/ver.js");
 
-var version = TarumaeRenderer.Version;
+const version = Tarumae.Version;
 
 if (process.argv.includes('--major')) {
   console.log( version.major );
