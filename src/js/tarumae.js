@@ -39,4 +39,3 @@ import "./webgl/texture.js";
 
 export default Tarumae;
 export { Vec2, Vec3, Vec4, Color3, Color4 } from "./math/vector";
-export { Matrix3, Matrix4 } from "./math/matrix";
