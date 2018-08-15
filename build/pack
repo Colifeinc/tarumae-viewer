@@ -1,5 +1,6 @@
 mkdir -p dist
 rm -rf dist/*
 npm run pub
+rm -rf dist/bin
 npm pack | xargs -I@ mv @ dist/
 rm -rf dist/js
