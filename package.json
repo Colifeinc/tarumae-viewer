@@ -16,10 +16,11 @@
 	"repository": "git@github.com:bulbinc/tarumae-viewer.git",
 	"dependencies": {
 		"glslify": "^6.2.1",
-		"pako": "^1.0.6"
+		"pako": "^1.0.6",
+		"file-loader": "^1.1.11",
+		"babel-polyfill": "^6.26.0"
 	},
 	"devDependencies": {
-		"babel-polyfill": "^6.26.0",
 		"babel-cli": "^6.26.0",
 		"babel-core": "^6.26.3",
 		"babel-loader": "^7.1.4",
@@ -30,11 +31,10 @@
 		"copy-webpack-plugin": "^4.5.1",
 		"css-loader": "^0.28.11",
 		"extract-text-webpack-plugin": "^3.0.2",
-		"file-loader": "^1.1.11",
+		"raw-loader": "^0.5.1",
 		"html-loader": "^0.5.5",
 		"html-webpack-plugin": "^3.2.0",
 		"micromatch": "^3.1.10",
-		"raw-loader": "^0.5.1",
 		"style-loader": "^0.21.0",
 		"webpack": "^4.12.0",
 		"webpack-cli": "^2.1.5",

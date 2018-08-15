@@ -14,9 +14,16 @@ module.exports = {
         }
       },
       {
-        test: /\.(png|jpg|gif|frag|vert)$/,
+        test: /\.(png|jpg|gif)$/,
         use: {
           loader: 'file-loader',
+          options: {}
+        }
+      },
+      {
+        test: /\.(frag|vert|shader)$/,
+        use: {
+          loader: 'raw-loader',
           options: {}
         }
       }

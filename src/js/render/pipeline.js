@@ -1,7 +1,6 @@
 
 import Tarumae from "../entry"
 import "../webgl/buffers"
-import { AnimationFrameScheduler } from "../../../node_modules/rxjs/scheduler/AnimationFrameScheduler";
 
 Tarumae.PipelineNode = class {
   constructor(renderer) {
