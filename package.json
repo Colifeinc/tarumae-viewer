@@ -2,7 +2,7 @@
 	"name": "tarumae",
 	"version": "1.1.0",
 	"description": "",
-	"main": "./dist/js/tarumae.js",
+	"main": "src/js/tarumae.js",
 	"scripts": {
 		"start": "npm run dev",
 		"build": "webpack --config webpack.prod.js --mode production",
