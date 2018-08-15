@@ -283,10 +283,6 @@ Tarumae.DrawingContext2D = class {
 		ctx.fill();
 		ctx.closePath();
 	};
-
-	drawRect() {
-		return this.drawingContext2D.drawRect.apply(this.drawingContext2D, arguments);
-	};
 		
 	drawPolygon(points, strokeWidth, strokeColor, fillColor) {
 		var ctx = this.ctx;

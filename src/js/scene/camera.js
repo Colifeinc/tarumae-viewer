@@ -2,8 +2,8 @@
 
 import Tarumae from "../entry";
 import { Vec3 } from "../math/vector";
+import "../scene/object";
 import "../webgl/mesh";
-// import "../render/renderer";
 
 Tarumae.CameraMesh = class extends Tarumae.Mesh {
 	constructor() {
