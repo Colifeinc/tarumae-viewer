@@ -14,7 +14,7 @@ window.addEventListener("load", function() {
 
 	window._scene = scene;
  
-	Tarumae.ResourceManager.download("houses/shibaura/scene.json", "json", json => {
+	Tarumae.ResourceManager.download("../static/models/houses/shibaura/scene.json", "json", json => {
 		scene.load(json);
 
 		var panoramic = {
