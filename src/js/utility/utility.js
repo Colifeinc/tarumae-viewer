@@ -289,18 +289,15 @@ Object.defineProperties(Tarumae.Utility, {
 			const renderer = scene.renderer;
 			if (!renderer) return;
 
-			var viewer = renderer.viewer;
+			const viewer = renderer.viewer;
 			if (!viewer) return;
 
-			var movement = {
+			const movement = {
 				x: viewer.mouse.movement.x * intensity,
 				y: viewer.mouse.movement.y * intensity,
 			};
 
-			scene.animation = true;
-
-			var acc = setInterval(function() {
-
+			function updateFrame() {
 				var xvol = movement.x * attenuation;
 				var yvol = movement.y * attenuation;
 				movement.x -= xvol;
@@ -310,15 +307,16 @@ Object.defineProperties(Tarumae.Utility, {
 
 				scene.requireUpdateFrame();
 
-				if (Math.abs(movement.x) < 0.2 && Math.abs(movement.y) < 0.2) {
-					clearInterval(acc);
-          scene.animation = false;
-
+				if (Math.abs(movement.x) > 0.2 || Math.abs(movement.y) > 0.2) {
+					requestAnimationFrame(updateFrame);
+				} else {
 					if (typeof onfinish === "function") {
 						onfinish();
 					}
 				}
-			}, 5);
+			}
+			
+			requestAnimationFrame(updateFrame);
 		}
 	},
 

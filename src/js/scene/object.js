@@ -387,15 +387,15 @@ Object.assign(Tarumae.SceneObject.prototype, {
 				var stepsInv = 1 / steps;
 				var i = 0;
 
-				var ani = setInterval(function() {
+				function updateFrame() {
 					if (i++ < steps) {
 						var s = Math.sin(i * stepsInv * Math.PI);
 						s = s * s * distance * options.speed * 2;
 						obj.move(dir.x * s, 0, dir.z * s);
-					} else {
-						clearInterval(ani);
+						requestAnimationFrame(updateFrame);
 					}
-				}, 5);
+				}
+				requestAnimationFrame(updateFrame);
 			}
 		};
 	})(),	

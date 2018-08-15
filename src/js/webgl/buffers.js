@@ -48,7 +48,7 @@ Tarumae.CommonBuffer = class {
 		const gl = this.gl;
 
 		gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.glFrameBuffer);
-		this.texture.use();
+		//this.texture.use();
 
 		gl.viewport(0, 0, this.width, this.height);
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -93,6 +93,11 @@ Tarumae.FrameBuffer = class extends Tarumae.CommonBuffer {
 	createTexture() {
 		this.texture = Tarumae.Texture.create(this.renderer, this.width, this.height);
 		this.texture.bind(this.renderer);
+
+		// const w = 64;
+		// const rate = w / this.width;
+		// this.tex2 = Tarumae.Texture.create(this.renderer, w, this.height * rate);
+		//  this.text2.bind(this.renderer);
 	}
 
 	destroy() {

@@ -570,6 +570,14 @@ Tarumae.Mesh = class {
 
 		return this._uniqueVertices;
 	}
+
+	flipTexcoordY() {
+		if (!this.texcoords) return;
+
+		for (let i = 1; i < this.texcoords.length; i += 2) {
+			this.texcoords[i] = 1 - this.texcoords[i];
+		}
+	}
 };
 
 Object.assign(Tarumae.Mesh.prototype, {

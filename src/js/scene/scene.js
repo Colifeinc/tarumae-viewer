@@ -9,7 +9,7 @@ import Tarumae from "../entry";
 import "../utility/event";
 import { Vec2, Vec3, Vec4, Color3, Color4 } from "../math/vector";
 import "../math/matrix";
-import "../scene/renderer";
+import "../render/renderer";
 import "../scene/object";
 import "../scene/camera";
 import "../webgl/texture";
@@ -106,11 +106,9 @@ Tarumae.Scene = class {
 	}
 
 	loadArchives(archs, loadingSession) {
-		var _this = this;
-		var loadArchives = function(key, value) {
-			_this.loadArchive(key, value.url, loadingSession);
+		for (const [key, value] of Object.entries(loadArchives)) {
+			this.loadArchive(key, value.url, loadingSession);
 		};
-		archs._s3_foreach(loadArchives);
 	}
 
 	createObjectFromBundle(url, ondone, loadingSession) {
@@ -285,15 +283,11 @@ Scene.prototype.requireUpdateFrame = function() {
 };
 
 Scene.prototype.loadMaterials = function(mats, loadingSession, bundle) {
-	var _this = this;
-
-	var iterateMaterials = function(mName, mValue) {
+	for (const [mName, mValue] of Object.entries(mats)) {
 		mValue.name = mName;
-		_this.materials[mName] = mValue;
-		_this.prepareMaterialObject(mValue, loadingSession ? loadingSession.rm : undefined, loadingSession, bundle);
-	};
-	
-	mats._s3_foreach(iterateMaterials);
+		this.materials[mName] = mValue;
+		this.prepareMaterialObject(mValue, loadingSession ? loadingSession.rm : undefined, loadingSession, bundle);
+	}
 };
 
 Scene.prototype.loadReflectionMaps = function(refmaps, loadingSession, bundle) {
@@ -314,8 +308,8 @@ Scene.prototype.loadReflectionMaps = function(refmaps, loadingSession, bundle) {
 	// 	});
 	// });
 
-	var iterateReflectionMap = function(pName, pValue) {
-		if (pName == "_datafile") return;
+	for (const [pName, pValue] of Object.entries(refmaps)) {
+		if (pName == "_datafile") continue;
 
 		pValue.name = pName;
 		pValue.cubemap = new Tarumae.CubeMap(_this.renderer);
@@ -356,9 +350,7 @@ Scene.prototype.loadReflectionMaps = function(refmaps, loadingSession, bundle) {
 				}
 			}
 		}
-	};
-
-	refmaps._s3_foreach(iterateReflectionMap);
+	}
 };
 
 Scene.prototype.remove = function(obj) {
@@ -583,16 +575,17 @@ Scene.prototype.prepareMaterialObject = function(mat, rm, loadingSession, bundle
 		}
 	}
 
-	mat._s3_foreach(function(name, value) {
+	for (const [name, value] of Object.entries(mat)) {
+
 		switch (name) {
 			case "color":
 				if (typeof value === "object" && value instanceof Array) {
 					switch (value.length) {
 						case 3:
-							mat[name] = new Color3(value[0], value[1], value[2]);
+							mat[name] = new Color3(...value);
 							break;
 						case 4:
-							mat[name] = new Color4(value[0], value[1], value[2], value[3]);
+							mat[name] = new Color4(...value);
 							break;
 					}
 				}
@@ -621,20 +614,20 @@ Scene.prototype.prepareMaterialObject = function(mat, rm, loadingSession, bundle
 				if (typeof value === "object" && value instanceof Array) {
 					switch (value.length) {
 						default: break;
-						case 2: mat[name] = new Vec2(value[0], value[1]); break;
+						case 2: mat[name] = new Vec2(...value); break;
 						case 3: mat[name] = new Vec3(value[0], value[1], value[2]); break;
 						case 4: mat[name] = new Vec4(value[0], value[1], value[2], value[3]); break;
 					}
 				}
 				break;
 		}
-	});
+	}
 };
 
 Scene.prototype.prepareObjects = function(obj, loadingSession, bundle) {	
 
-	var scene = this;
-	var rm = loadingSession ? loadingSession.rm : this.resourceManager;
+	const scene = this;
+	const rm = loadingSession ? loadingSession.rm : this.resourceManager;
 
 	if (!(obj instanceof Tarumae.SceneObject)) {
 		if (obj.type === Tarumae.ObjectTypes.Camera) {
@@ -644,8 +637,8 @@ Scene.prototype.prepareObjects = function(obj, loadingSession, bundle) {
 		}
 	}
 	
-	var prepareObjectProperties = function(obj, loadingSession, bundle) {
-		obj._s3_foreach(function(name, value) {
+	const prepareObjectProperties = function(obj, loadingSession, bundle) {
+		for (const [name, value] of Object.entries(obj)) {
 			switch (name) {
 				case "_models":
 					value._s3_foreach(function(mName, mValue) {
@@ -732,21 +725,6 @@ Scene.prototype.prepareObjects = function(obj, loadingSession, bundle) {
 					}
 					break;
 
-				// case "location":
-				// 	delete obj[name];
-
-				// 	var loc = new SceneObject.Vector3Property(obj);
-				// 	obj._location = loc;
-				
-				// 	if (typeof value === "object") {
-				// 		if (value instanceof Vec3) {
-				// 			loc.setVector(value);
-				// 		} else if (value instanceof Array && value.length == 3) {
-				// 			loc.set(value[0], value[1], value[2]); break;
-				// 		}
-				// 	}
-				// 	break;
-
 				case "location":
 				case "angle":
 				case "scale":
@@ -801,7 +779,7 @@ Scene.prototype.prepareObjects = function(obj, loadingSession, bundle) {
 				case "envmap":
 				case "tag":
 				case "userData":
-				// ignore these properties
+					// ignore these properties
 					break;
 
 				default:
@@ -823,10 +801,10 @@ Scene.prototype.prepareObjects = function(obj, loadingSession, bundle) {
 					}
 					break;
 			}
-		});
-	};	
+		}
+	}
 
-	var _bundle = obj._bundle || obj.bundle;
+	const _bundle = obj._bundle || obj.bundle;
 	if (_bundle) {
 		this.createObjectFromBundle(_bundle, function(bundle, manifest) {
 			Object.assign(obj, manifest);

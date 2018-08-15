@@ -1,6 +1,7 @@
 
 import Tarumae from "../entry"
 import "../webgl/buffers"
+import { AnimationFrameScheduler } from "../../../node_modules/rxjs/scheduler/AnimationFrameScheduler";
 
 Tarumae.PipelineNode = class {
   constructor(renderer) {
@@ -101,6 +102,12 @@ Tarumae.PipelineNodes.SceneToImageRenderer = class extends Tarumae.PipelineNode 
     }
 
     this.renderer.renderFrame();
+
+    // const gl = this.renderer.gl;
+    // this.buffer.tex2.use();
+    // // this.renderer.gl.copyTexSubImage2D(this.renderer.gl.TEXTURE_2D, 0, 0, 0, 0, 0, 10, 10);
+    // gl.copyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, this.buffer.tex2.width, this.buffer.tex2.height, 0);
+
     this.buffer.disuse();
   }
 
@@ -129,9 +136,15 @@ Tarumae.PipelineNodes.ImageSource = class extends Tarumae.PipelineNode {
 };
 
 Tarumae.PipelineNodes.ImageRenderer = class extends Tarumae.PipelineNode {
-  constructor(renderer) {
+  constructor(renderer, options) {
     super(renderer);
+    
     this.screenPlaneMesh = new Tarumae.ScreenMesh();
+    
+    if (options && options.flipTexcoordY) {
+      this.screenPlaneMesh.flipTexcoordY();
+    }
+
     this.shader = Tarumae.Renderer.Shaders["screen"].instance;
   }
   
@@ -153,9 +166,6 @@ Tarumae.PipelineNodes.ImageRenderer = class extends Tarumae.PipelineNode {
       }
       if (typeof this.gammaFactor !== "undefined") {
         imageShader.gammaFactor = this.gammaFactor;
-      }
-      if (typeof this.isFlipY !== "undefined") {
-        imageShader.isFlipY = this.isFlipY;
       }
 
       const gl = this.renderer.gl;

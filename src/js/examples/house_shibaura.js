@@ -1,7 +1,10 @@
 
 import Tarumae from "../entry";
-import "../utility/*";
-import "../scene/*";
+import "../scene/scene";
+import "../scene/animation"
+import "../scene/viewer";
+import "../utility/archive";
+import "../utility/res";
 
 window.addEventListener("load", function() {
 

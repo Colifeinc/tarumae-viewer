@@ -9,14 +9,39 @@ import Tarumae from "../entry";
 import "../utility/utility";
 import { Vec2, Vec3, Vec4, Color3, Color4, Point } from "../math/vector";
 import "../scene/scene";
-import "../scene/pipeline";
+import { initDOM } from "./dom";
+import "./pipeline";
+import "./draw2d";
 import "../webgl/shader";
 import "../webgl/buffers";
-import { Debugger } from "../utility/debug";
-
-//import fs from "fs";
+import "../utility/debug";
 
 Tarumae.Renderer = class {
+
+	static defaultOptions() {
+		return {
+			containerId: "canvas-container",
+			renderPixelRatio: 1,
+			enableShadow: false,
+			enableEnvmap: true,
+			perspective: {
+				method: Tarumae.ProjectionMethods.Persp,
+				angle: 50.0,
+				near: 0.01,
+				far: 100.0,
+			},
+			enableDrawMesh: true,
+			enableCustomDraw: true,
+			enableLighting: true,
+			enableLightmap: true,
+			enableNormalMap: true,
+			enableEnvmap: true,
+			enableHighlightSelectedChildren: true,
+			debugMode: false,
+			backColor: new Color4(0.93, 0.93, 0.93, 1.0)
+		};
+	}
+
 	constructor(options) {
 
 		this.initialized = false;
@@ -26,7 +51,7 @@ Tarumae.Renderer = class {
 		if (typeof Tarumae.Version === "object") {
 			var ver = Tarumae.Version;
 			ver.toString = function() {
-				return ver.major + "." + ver.minor + "." + ver.build + "." + ver.revision;
+				return this.major + "." + this.minor + "." + this.build + "." + this.revision;
 			};
 			console.debug("tarumae v" + ver);
 		} else {
@@ -35,30 +60,11 @@ Tarumae.Renderer = class {
 			console.debug("tarumae (development version)");
 		}
 
-		if (typeof options === "undefined") {
-			this.options = {};
-		} else {
-			this.options = options;
-		}
+		this.options = {...Tarumae.Renderer.defaultOptions(), ...options};
 
-		// container
-		if (typeof this.options.containerId === "undefined") {
-			this.options.containerId = "canvas-container";
-		}
-
-		this.container = document.getElementById(this.options.containerId);
-
-		if (!this.container) {
-			console.error("Cannot find canvas container");
-			return;
-		}
-
-		// 3d canvas
-		var canvas3d = document.createElement("canvas");
-		this.canvas = canvas3d;
-		this.container.appendChild(this.canvas);
-
-		var gl;
+		initDOM(this);
+	
+		let gl;
 
 		try {
 			gl = this.canvas.getContext("webgl");
@@ -74,26 +80,11 @@ Tarumae.Renderer = class {
 
 		this.gl = gl;
 
-		// 2d canvas
-		this.canvas2d = document.createElement("canvas");
-		this.container.appendChild(this.canvas2d);
 		try {
 			this.ctx = this.canvas2d.getContext("2d");
 		} catch (e) {
 			this.ctx = null;
 		}
-
-		// surface div
-		this.surface = document.createElement("div");
-		this.surface.className = "surface";
-		this.surface.focus();
-		this.container.appendChild(this.surface);
-
-		// styles
-		this.setContainerStyle();
-
-		// init options
-		this.initOptions(this.options);
 
 		// debug mode
 		if (this.debugMode) {
@@ -120,8 +111,6 @@ Tarumae.Renderer = class {
 		this.viewMatrix = new Tarumae.Matrix4();
 		this.cameraMatrix = new Tarumae.Matrix4();
 		this.modelMatrix = new Tarumae.Matrix4();
-
-		this.gl = gl;
 
 		// load shaders
 		this.currentShader = null;
@@ -167,115 +156,13 @@ Tarumae.Renderer = class {
 		this.cachedImages = {};
 		this.resourceManager = new Tarumae.ResourceManager();
 
-		// create shader programs either from server or tarumae.js
-		Tarumae.Renderer.Shaders._s3_foreach(function(name, shaderDefine) {
-			// load shader source from tarumae.js
-			renderer.loadShader(shaderDefine, shaderDefine.vert, shaderDefine.frag);
-		});
+		// create shader programs
+		for (const [_, define] of Object.entries(Tarumae.Renderer.Shaders)) {
+			renderer.loadShader(define, define.vert, define.frag);
+		}
 
 		renderer.init();
 		renderer.render();
-	}
-
-	setContainerStyle() {
-		var containerId = this.options.containerId;
-		var tagId = "tarumae-stylesheet";
-	
-		if (document.getElementById(tagId) !== null) {
-			document.getElementById(tagId).remove();
-		}
-	
-		var styleSheet = document.createElement("style");
-		styleSheet.type = "text/css";
-		styleSheet.media = "screen";
-		styleSheet.id = tagId;
-		document.getElementsByTagName("head").item(0).appendChild(styleSheet);
-		var css = styleSheet.sheet;
-	
-		// for (var value of Tarumae.Renderer.ContainerStyle) {
-		// 	var rule = value.replace(/#canvas-container/g, "#" + containerId);
-		// 	css.insertRule(rule, 0);
-		// }
-		for (var i = 0; i < Tarumae.Renderer.ContainerStyle.length; i++) {
-			var value = Tarumae.Renderer.ContainerStyle[i];
-			var rule = value.replace(/#canvas-container/g, "#" + containerId);
-			css.insertRule(rule, 0);
-		}
-	}
-	
-	initOptions(options) {
-		// options
-	
-		if (typeof options.renderPixelRatio === "undefined") {
-			options.renderPixelRatio = 1;
-		}
-	
-		if (typeof options.enableShadow === "undefined") {
-			options.enableShadow = false;
-		}
-	
-		if (typeof options.enableEnvmap === "undefined") {
-			options.enableEnvmap = true;
-		}
-	
-		// perspective
-		if (typeof options.perspective === "undefined") {
-			options.perspective = {};
-		}
-	
-		if (typeof options.perspective.method === "undefined") {
-			options.perspective.method = Tarumae.ProjectionMethods.Persp;
-		}
-	
-		if (typeof options.perspective.angle === "undefined") {
-			options.perspective.angle = 50.0;
-		}
-	
-		if (typeof options.perspective.near === "undefined") {
-			options.perspective.near = 0.01;
-		}
-	
-		if (typeof options.perspective.far === "undefined") {
-			options.perspective.far = 100.0;
-		}
-	
-		// swtiches
-		if (typeof options.enableDrawMesh === "undefined") {
-			options.enableDrawMesh = true;
-		}
-	
-		if (typeof options.enableCustomDraw === "undefined") {
-			options.enableCustomDraw = true;
-		}
-	
-		if (typeof options.enableLighting === "undefined") {
-			options.enableLighting = true;
-		}
-	
-		if (typeof options.enableLightmap === "undefined") {
-			options.enableLightmap = true;
-		}
-	
-		if (typeof options.enableNormalMap === "undefined") {
-			options.enableNormalMap = true;
-		}
-	
-		if (typeof options.enableEnvmap === "undefined") {
-			options.enableEnvmap = true;
-		}
-	
-		if (typeof options.enableHighlightSelectedChildren === "undefined") {
-			options.enableHighlightSelectedChildren = true;
-		}
-	
-		if (options.debugMode === true) {
-			this.debugMode = options.debugMode;
-		}
-	
-		// background color
-		if (typeof options.backColor === "undefined") {
-			options.backColor = new Color4(0.93, 0.93, 0.93, 1.0);
-		}
 	}
 
 	get renderPixelRatio() {
@@ -455,19 +342,19 @@ Tarumae.Renderer = class {
 				this._bgImageRenderer = new Tarumae.PipelineNodes.ImageRenderer(this);
 				this._bgImageRenderer.enableAntialias = false;
 				this._bgImageRenderer.input = bgImageSource;
-				this._bgImageRenderer.isFlipY = false;
 			});
 		}
 		
 		if (this.options.postprocess) {
 			const size = this.renderSize;
 			const sceneImageRenderer = new Tarumae.PipelineNodes.SceneToImageRenderer(this, {
-				imageSize: { width: size.width * 0.75, height: size.height * 0.75 }
+				imageSize: { width: size.width, height: size.height }
 			});
-			const imgRenderer = new Tarumae.PipelineNodes.ImageRenderer(this);
+			const imgRenderer = new Tarumae.PipelineNodes.ImageRenderer(this, {
+				flipTexcoordY: true
+			});
 			imgRenderer.input = sceneImageRenderer;
 			imgRenderer.enableAntialias = false;
-			imgRenderer.isFlipY = true;
 	
 			this.pipelineNodes.push(imgRenderer);
 		} else {
@@ -745,11 +632,7 @@ Tarumae.Renderer = class {
 			var objShaderName = objShader.name || null;
 	
 			if (objShaderName) {
-				// var shader =
 				this.useShader(objShaderName);
-				// if (shader) {
-				// 	shader.beginScene(this.currentScene);
-				// }
 				shaderPushed = true;
 			}
 		}
@@ -1014,18 +897,9 @@ Tarumae.Renderer = class {
 		const ray = this.createWorldRayFromScreenPosition(pos);
 		return Tarumae.MathFunctions.rayIntersectsPlane(ray, planeVertices, Tarumae.Ray.MaxDistance);
 	};
-		
-	drawLine(from, to, width, color) {
-		var points = this.transformPoints([from, to]);
-		this.drawLine2D(points[0], points[1], width, color);
-	};
-		
-	drawLine2D(from, to, width, color) {
-		this.drawLineSegments2D([from, to], width, color);
-	};
-		
+
 	drawLineSegments2D() {
-		return this.drawingContext2D.drawLines.apply(this.drawingContext2D, arguments);
+		return this.drawingContext2D.drawLines(...arguments);
 	}
 		
 	drawBox(box, width, color) {
@@ -1092,59 +966,28 @@ Tarumae.Renderer = class {
 		
 	drawArrow(from, to, width, color) {
 		var points = this.transformPoints([from, to]);
-		this.drawArrow2D(points[0], points[1], width, color);
+		this.drawingContext2D.drawArrow(points[0], points[1], width, color);
 	};
-		
-	drawArrow2D(from, to, width, color, arrowSize) {
-		var ctx = this.ctx;
-		
-		if (width === undefined) width = 2;
-		if (arrowSize === undefined) arrowSize = width * 5;
-		
-		ctx.lineWidth = width;
-		ctx.strokeStyle = color || "black";
-		
-		var angle = Math.atan2(to.y - from.y, to.x - from.x);
-		
-		ctx.beginPath();
-		
-		ctx.moveTo(from.x, from.y);
-		ctx.lineTo(to.x, to.y);
-		
-		ctx.lineTo(to.x - arrowSize * Math.cos(angle - Math.PI / 6),
-			to.y - arrowSize * Math.sin(angle - Math.PI / 6));
-		
-		ctx.moveTo(to.x, to.y);
-		ctx.lineTo(to.x - arrowSize * Math.cos(angle + Math.PI / 6),
-			to.y - arrowSize * Math.sin(angle + Math.PI / 6));
-		
-		ctx.stroke();
-		ctx.closePath();
+
+	drawLine(from, to, width, color) {
+		var points = this.transformPoints([from, to]);
+		this.drawingContext2D.drawLine(points[0], points[1], width, color);
 	};
-		
+
 	fillArrow(from, to, size, color) {
 		var points = this.transformPoints([from, to]);
-		this.fillArrow2D(points[0], points[1], size, color);
+		this.drawingContext2D.fillArrow(points[0], points[1], size, color);
 	}
-		
-	fillArrow2D(from, to, size, color) {
-		var ctx = this.ctx;
-		
-		size = size || 10;
-		ctx.fillStyle = color || "black";
-		
-		var angle = Math.atan2(to.y - from.y, to.x - from.x);
-		
-		ctx.beginPath();
-		
-		ctx.moveTo(to.x, to.y);
-		ctx.lineTo(to.x - size * Math.cos(angle - Math.PI / 6), to.y - size * Math.sin(angle - Math.PI / 6));
-		ctx.lineTo(to.x - size * Math.cos(angle + Math.PI / 6), to.y - size * Math.sin(angle + Math.PI / 6));
-		
-		ctx.fill();
-		ctx.closePath();
+
+	drawArrow(from, to, width, color) {
+		var points = this.transformPoints([from, to]);
+		this.drawingContext2D.drawArrow(points[0], points[1], width, color);
 	};
-		
+  fillArrow(from, to, size, color) {
+		var points = this.transformPoints([from, to]);
+		this.drawingContext2D.fillArrow(points[0], points[1], size, color);
+  }
+  
 	drawRect(topLeft, bottomRight, strokeWidth, strokeColor, fillColor) {
 		var rect3d = this.transformPoints([topLeft, bottomRight]);
 		
@@ -1153,59 +996,18 @@ Tarumae.Renderer = class {
 			right = Math.max(rect3d[0].x, rect3d[1].x),
 			bottom = Math.max(rect3d[0].y, rect3d[1].y);
 		
-		this.drawRect2D(new Tarumae.Rect(left, top, right - left, bottom - top), strokeWidth, strokeColor, fillColor);
+		this.drawingContext2D.drawRect(new Tarumae.Rect(left, top, right - left, bottom - top), strokeWidth, strokeColor, fillColor);
 	};
-		
-	drawRect2D() {
-		return this.drawingContext2D.drawRect.apply(this.drawingContext2D, arguments);
-	};
-		
+
 	drawPolygon(points, strokeWidth, strokeColor, fillColor) {
 		if (points.length < 2) return;
-		this.drawPolygon2D(this.transformPoints(points), strokeWidth, strokeColor, fillColor);
+		this.drawingContext2D.drawPolygon(this.transformPoints(points), strokeWidth, strokeColor, fillColor);
 	};
-		
-	drawPolygon2D(points, strokeWidth, strokeColor, fillColor) {
-		var ctx = this.ctx;
-		
-		if (points.length < 2) return;
-		
-		ctx.beginPath();
-		
-		var p0 = points[0];
-		ctx.moveTo(p0.x, p0.y);
-		
-		for (var i = 1; i < points.length; i++) {
-			var p = points[i];
-			ctx.lineTo(p.x, p.y);
-		}
-		
-		ctx.lineTo(p0.x, p0.y);
-		
-		if (fillColor) {
-			ctx.fillStyle = fillColor;
-			ctx.fill();
-		}
-		
-		if (strokeWidth || strokeColor) {
-			ctx.lineWidth = strokeWidth || 1;
-			ctx.strokeStyle = strokeColor || "black";
-		
-			ctx.stroke();
-		}
-		
-		ctx.closePath();
-	};
-		
+
 	drawEllipse(v, size, strokeWidth, strokeColor, fillColor) {
-		this.drawEllipse2D(this.transformPoint(v), size, strokeWidth, strokeColor, fillColor);
+		this.drawingContext2D.drawEllipse(this.transformPoint(v), size, strokeWidth, strokeColor, fillColor);
 	};
-		
-	drawEllipse2D(p, size, strokeWidth, strokeColor, fillColor) {
-		var r = new Tarumae.Rect(p.x - size / 2, p.y - size / 2, size, size);
-		return this.drawingContext2D.drawEllipse(r, strokeWidth, strokeColor, fillColor);
-	};
-		
+
 	drawImage(location, image) {		
 		var p = this.transformPoint(location);
 				
@@ -1222,11 +1024,7 @@ Tarumae.Renderer = class {
 		var p = this.transformPoint(location);
 		this.drawText2D(p, text, color, halign);
 	};
-		
-	drawText2D() {
-		return this.drawingContext2D.drawText.apply(this.drawingContext2D, arguments);
-	};
-		
+
 	createSnapshotOfRenderingImage(imgformat, imgQuality) {
 		if (!Tarumae.FrameBuffer) return null;
 		
@@ -1317,24 +1115,9 @@ Tarumae.Renderer.Shaders = {
 	screen: { vert: imageVert, frag: imageFrag, class: "ImageShader" },
 };
 
-Tarumae.Renderer.ContainerStyle = [
-	"#canvas-container { position: relative; }",
-	"#canvas-container { width: 100%; }",
-	"#canvas-container:before { content: ''; }",
-	"#canvas-container:before { display: block; }",
-	"#canvas-container canvas, #canvas-container .surface { position: absolute; }",
-	"#canvas-container canvas, #canvas-container .surface { top: 0; }",
-	"#canvas-container canvas, #canvas-container .surface { left: 0; }",
-	"#canvas-container canvas, #canvas-container .surface { width: 100%; }",
-	"#canvas-container canvas, #canvas-container .surface { height: 100%; }",
-	"#canvas-container .surface div { pointer-events: none; }",
-];
-
-///////////////// DrawingContext2D /////////////////
 
 Tarumae.ResourcePool = class {
 	constructor() {
-
 	}
 
 	loadTexture(url, onload) {
@@ -1344,168 +1127,4 @@ Tarumae.ResourcePool = class {
 new Tarumae.EventDispatcher(Tarumae.ResourcePool).registerEvents(
 	"texAdded");
 
-///////////////// DrawingContext2D /////////////////
 
-Tarumae.DrawingContext2D = class {
-	constructor(canvas, ctx) {
-		this.canvas = canvas;
-		this.ctx = ctx;
-
-		this.resetDrawingStyle();
-
-		this.currentTransform = new Tarumae.Matrix3().loadIdentity();
-		this.transformStack = new Array();
-	}
-
-	pushTransform(t) {
-		this.transformStack.push(this.currentTransform.clone());
-		this.currentTransform = this.currentTransform.mul(t);
-		t = this.currentTransform;
-		this.ctx.setTransform(t.a1, t.b1, t.a2, t.b2, t.a3, t.b3);
-	}
-
-	popTransform() {
-		this.currentTransform = this.transformStack.pop();
-		var t = this.currentTransform;
-		this.ctx.setTransform(t.a1, t.b1, t.a2, t.b2, t.a3, t.b3);
-	}
-
-	resetDrawingStyle() {
-		this.strokeWidth = 1;
-		this.strokeColor = "black";
-		this.fillColor = "transparent";
-	}
-
-	drawRect(rect, strokeWidth, strokeColor, fillColor) {
-		var ctx = this.ctx;
-	
-		fillColor = fillColor || this.fillColor;
-
-		if (fillColor !== "transparent") {
-			ctx.fillStyle = fillColor;
-			ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
-		}
-		
-		if (typeof strokeWidth !== "undefined") {
-			ctx.lineWidth = strokeWidth;
-		} else {
-			ctx.lineWidth = this.strokeWidth;
-		}
-
-		if (strokeColor !== null) {
-
-			if (typeof strokeColor !== "undefined") {
-				ctx.strokeStyle = strokeColor;
-			} else {
-				ctx.strokeStyle = this.strokeColor;
-			}
-
-			if (ctx.lineWidth > 0) {
-				// ctx.beginPath();
-				ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
-				// ctx.closePath();
-			}
-		}
-	}
-
-	drawPoint(p, size = 3, color = "black") {
-		this.drawEllipse(new Tarumae.Rect(p.x - size / 2, p.y - size / 2, size, size), 0, null, color);
-	}
-
-	drawEllipse(rect, strokeWidth, strokeColor, fillColor) {
-		var ctx = this.ctx;
-		
-		strokeWidth = strokeWidth || this.strokeWidth;
-		strokeColor = strokeColor || this.strokeColor;
-		fillColor = fillColor || this.fillColor;
-
-		var w = rect.width;
-		var h = rect.height;
-		var hw = w / 2;
-		var hh = h / 2;
-		// var x = rect.x - hw;
-		// var y = rect.y - hh;
-		var x = rect.x;
-		var y = rect.y;
-	
-		var kappa = 0.5522848,
-			ox = hw * kappa,   // control point offset horizontal
-			oy = hh * kappa,   // control point offset vertical
-			xe = x + w,        // x-end
-			ye = y + h,        // y-end
-			xm = x + hw,       // x-middle
-			ym = y + hh;       // y-middle
-	
-		ctx.beginPath();
-		ctx.moveTo(x, ym);
-		ctx.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y);
-		ctx.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym);
-		ctx.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
-		ctx.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
-	
-		if (fillColor) {
-			ctx.fillStyle = fillColor;
-			ctx.fill();
-		}
-
-		if (typeof strokeWidth === "undefined") {
-			strokeWidth = 1;
-		}
-	
-		if (strokeWidth || strokeColor) {
-			ctx.lineWidth = strokeWidth || 1;
-			ctx.strokeStyle = strokeColor || "black";
-			ctx.stroke();
-		}
-	
-		ctx.closePath();
-	}
-
-	drawLines(lines, width, color) {
-		if (lines.length < 2) return;
-	
-		var ctx = this.ctx;
-	
-		if (width == undefined) width = this.strokeWidth;
-		if (color == undefined) color = this.strokeColor;
-
-		if (width > 0 && color != "transparent") {
-			ctx.lineWidth = width || 1;
-			ctx.strokeStyle = color || "black";
-	
-			ctx.beginPath();
-	
-			for (var i = 0; i < lines.length; i += 2) {
-				var from = lines[i], to = lines[i + 1];
-				ctx.moveTo(from.x, from.y);
-				ctx.lineTo(to.x, to.y);
-			}
-	
-			ctx.stroke();
-			ctx.closePath();
-		}
-	}
-
-	drawImage(p, image) {
-		var ctx = this.ctx;
-		
-		ctx.drawImage(image, p.x, p.y);
-	}
-
-	drawText(p, text, color, halign) {
-		var ctx = this.ctx;
-	
-		ctx.fillStyle = color || "black";
-	
-		var size = ctx.measureText(text);
-	
-		// TODO: get text height, allow to change text font
-		ctx.font = "12px Arial";
-	
-		if (halign == "center") {
-			p.x -= size.width / 2;
-		}
-	
-		ctx.fillText(text, p.x, p.y);
-	}
-};

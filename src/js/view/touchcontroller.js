@@ -79,23 +79,7 @@ Tarumae.TouchController = class {
 				}
 			}
 		};
-
-		var movementDetectingTimer = null;
-
-		scene.on("keydown", function() {
-			if (!movementDetectingTimer) {
-				movementDetectingTimer = setInterval(detectFirstPersonMove, 2);
-			}
-		});
-
-		scene.on("keyup", function() {
-			if (viewer.pressedKeys.length === 0) {
-				clearInterval(movementDetectingTimer);
-				movementDetectingTimer = null;
-				// scene.animation = false;      
-			}
-		});
-
+		
 		function frameDetect() {
 			requestAnimationFrame(frameDetect);
 			detectFirstPersonMove();

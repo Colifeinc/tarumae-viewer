@@ -29,10 +29,10 @@ window.addEventListener("load", function() {
 		{ name: "chair_jati.toba" },
 		{ name: "desk_study_1p.toba" },
 		// { name: "fan_vintage_ceiling.toba", scale: [3, 3, 3] },
-		{ name: "print_mfp_w1500.toba", color: [.7,.7,.7] },
-		{ name: "rice_cooker_01.toba", z:1, color:[.7,.7,.7] },
+		{ name: "print_mfp_w1500.toba", color: [.7, .7, .7] },
+		{ name: "rice_cooker_01.toba", z: 1, color: [.7, .7, .7] },
 		{ name: "sofa_leather_3s.toba" },
-		{ name: "ceo.toba", color:[.5,.5,.5] },
+		{ name: "ceo.toba", color: [.5, .5, .5] },
 	];
 
 	scene.onkeydown = function(key) {

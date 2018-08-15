@@ -250,7 +250,13 @@ Tarumae.CubeMap.Faces = {
 
 Tarumae.ImageCubeBox = class {
   constructor(renderer, imageUrls) {
-    if (renderer && Array.isArray(imageUrls)) {
+    if (!renderer) {
+      throw new Error("renderer cannot be null or undefined");
+    }
+
+    this.renderer = renderer;
+
+    if (Array.isArray(imageUrls)) {
       this.createFromImageUrls(renderer, imageUrls);
     }
   }
@@ -261,7 +267,7 @@ Tarumae.ImageCubeBox = class {
       return;
     }
 
-    this.cubebox = new Tarumae.CubeMap(renderer);
+    this.cubemap = new Tarumae.CubeMap(renderer);
   
     var rm = new Tarumae.ResourceManager();
 
@@ -275,7 +281,7 @@ Tarumae.ImageCubeBox = class {
     ]);
 
     rm.load(() => {
-      this.cubebox.setImages([
+      this.cubemap.setImages([
         rm.get(imageUrls[0]),
         rm.get(imageUrls[1]),
         rm.get(imageUrls[2]),
@@ -287,27 +293,19 @@ Tarumae.ImageCubeBox = class {
 
     this.onload();
   }
-
-  onload() {
-  }
 };
+
+new Tarumae.EventDispatcher(Tarumae.ImageCubeBox).registerEvents("load");
 
 /////////////////// SkyBox ///////////////////
 
 Tarumae.SkyBox = class extends Tarumae.ImageCubeBox {
   constructor(renderer, imageUrls) {
-    super();
-
-    if (!renderer) {
-      throw new Error("renderer cannot be null or undefined");
-    }
-
-    this.renderer = renderer;
+    super(renderer, imageUrls);
     this.size = { width: 1000, height: 1000 };
-    this.createFromImageUrls(renderer, imageUrls);
   }
 
   render() {
-    
+
   }
 };
