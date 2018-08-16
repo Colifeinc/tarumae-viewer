@@ -12,8 +12,8 @@ window.addEventListener("load", function() {
 	const renderer = new Tarumae.Renderer({
 		// renderPixelRatio: 2,
 		backColor: new Color4(0.74, .87, .85, 1),
-		// backgroundImage: "../static/textures/bg-gray-gradient.jpg",
-		backgroundImage: "../static/textures/sky.jpg",
+		backgroundImage: "../static/textures/bg-gray-gradient.jpg",
+		// backgroundImage: "../static/textures/sky.jpg",
 		// showDebugPanel: true,
 		postprocess: true,
 	});

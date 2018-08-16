@@ -32,7 +32,7 @@ Tarumae.PipelineNode = class {
 
   set input(node) { this._input = node; }
   get input() { return this._input; }
-
+  
   get output() { }
 };
 
@@ -44,7 +44,7 @@ Tarumae.PipelineNodes.DefaultRenderer = class extends Tarumae.PipelineNode {
   }
 
   render() {
-    this.renderer.clearViewport();
+    //this.renderer.clearViewport();
     this.renderer.renderFrame();
   }
 };

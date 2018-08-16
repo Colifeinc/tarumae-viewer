@@ -5,8 +5,6 @@
 // Copyright(c) 2018 BULB corp., all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
-// import "babel-polyfill";
-
 import Tarumae from "./entry";
 
 import "./utility/archive.js";
