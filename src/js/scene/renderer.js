@@ -278,7 +278,9 @@ Tarumae.Renderer = class {
 	}
 
 	initWebVR() {
-		if (!showMsg) showMsg = function() { }
+		if (!window.showMsg) window.showMsg = msg => { 
+			this.warning = msg
+		}
 		
 		if (navigator.getVRDisplays) {
 			this.frameData = new VRFrameData();
@@ -297,7 +299,16 @@ Tarumae.Renderer = class {
 					// // Generally, you want to wait until VR support is confirmed and
 					// // you know the user has a VRDisplay capable of presenting connected
 					// // before adding UI that advertises VR features.
-					// if (vrDisplay.capabilities.canPresent)
+					if (vrDisplay.capabilities.canPresent) {
+						this.warning = 'can present'
+					}
+
+					vrDisplay.requestPresent([{ source: this.renderer.canvas }])
+						.then(_ => { 
+							this.warning = 'request ok';
+						}, e => {
+							this.warning = e;
+						});
 					// 	vrPresentButton = VRSamplesUtil.addButton("Enter VR", "E", "media/icons/cardboard64.png", onVRRequestPresent);
 					// // For the benefit of automated testing. Safe to ignore.
 					// if (vrDisplay.capabilities.canPresent && WGLUUrl.getBool('canvasClickPresents', false))
@@ -480,6 +491,7 @@ Tarumae.Renderer = class {
 					const vrDisplay = this.vrDisplay;
 
 					vrDisplay.getFrameData(frameData);
+					this.warning = vrDisplay.isPresenting;
 
 					var gl = this.gl;
 					gl.viewport(0, 0, canvas.width * 0.5, canvas.height);
@@ -500,7 +512,7 @@ Tarumae.Renderer = class {
 					var projectionMethod = ((this.currentScene && this.currentScene.mainCamera)
 						? (this.currentScene.mainCamera.projectionMethod)
 						: (this.options.perspective.method));
-		
+
 					switch (projectionMethod) {
 						default:
 						case Tarumae.ProjectionMethods.Persp:
@@ -536,9 +548,15 @@ Tarumae.Renderer = class {
 	
 		var renderer = this;
 	
-		requestAnimationFrame(function() {
-			renderer.drawFrame();
-		});
+		if (this.vrDisplay) {
+			this.vrDisplay.requestAnimationFrame(function() {
+				renderer.drawFrame();
+			});
+		} else {
+			requestAnimationFrame(function() {
+				renderer.drawFrame();
+			});
+		}
 	}
 	
 	drawSceneFrame(scene) {
@@ -546,6 +564,10 @@ Tarumae.Renderer = class {
 		this.cameraMatrix.loadIdentity();
 		this.transparencyList._s3_clear();
 	
+		if (this.warning) {
+			this.drawText2D({ x: 10, y: 50 }, this.warning, 'black');
+		}
+
 		if (!scene) return;
 				
 		if (scene.mainCamera) {
