@@ -21,37 +21,18 @@ Tarumae.VertexBuffer = class {
 /////////////////////// CommonBuffer /////////////////////////
 
 Tarumae.CommonBuffer = class {
-	constructor(renderer, width, height, backColor) {
+	constructor(renderer, width, height, options) {
 		this.renderer = renderer;
 		this.width = width;
 		this.height = height;
-		this.backColor = backColor;
+		this.options = options;
 		this.gl = renderer.gl;
 		this.glFrameBuffer = null;
 
-		this.create();
-	}
-
-	create() {
 		const gl = this.gl;
 
 		this.glFrameBuffer = gl.createFramebuffer();
 		gl.bindFramebuffer(gl.FRAMEBUFFER, this.glFrameBuffer);
-
-		this.createTexture();
-	}
-
-	createTexture() {
-	}
-
-	use() {
-		const gl = this.gl;
-
-		gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.glFrameBuffer);
-		//this.texture.use();
-
-		gl.viewport(0, 0, this.width, this.height);
-		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	}
 
 	disuse() {
@@ -74,30 +55,38 @@ Tarumae.CommonBuffer = class {
 /////////////////////// FrameBuffer /////////////////////////
 
 Tarumae.FrameBuffer = class extends Tarumae.CommonBuffer {
-	constructor(renderer, width, height, backColor) {
-		super(renderer, width, height, backColor);
+	constructor(renderer, width, height, options) {
+		super(renderer, width, height, options);
 
 		const gl = this.gl;
-		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.texture.glTexture, 0);
-	 
-		// renderbuffer
-		this.renderbuffer = gl.createRenderbuffer();
-		gl.bindRenderbuffer(gl.RENDERBUFFER, this.renderbuffer);
-		gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, this.width, this.height);
-		gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, this.renderbuffer);
-		gl.bindRenderbuffer(gl.RENDERBUFFER, null);
 
+		this.texture = Tarumae.Texture.create(this.width, this.height);
+		gl.activeTexture(gl.TEXTURE0);
+		this.texture.bind(this.renderer);
+
+		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.texture.glTexture, 0);
+
+		if (!options || options.depthBuffer) {
+			this.renderbuffer = gl.createRenderbuffer();
+			gl.bindRenderbuffer(gl.RENDERBUFFER, this.renderbuffer);
+			gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, this.width, this.height);
+			gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, this.renderbuffer);
+			gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+		}
+		
 		this.disuse();
 	}
 
-	createTexture() {
-		this.texture = Tarumae.Texture.create(this.renderer, this.width, this.height);
-		this.texture.bind(this.renderer);
+	use() {
+		const gl = this.gl;
 
-		// const w = 64;
-		// const rate = w / this.width;
-		// this.tex2 = Tarumae.Texture.create(this.renderer, w, this.height * rate);
-		//  this.text2.bind(this.renderer);
+		gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.glFrameBuffer);
+		
+		// gl.activeTexture(gl.TEXTURE0);
+		// this.texture.bind(this.renderer);
+
+		gl.viewport(0, 0, this.width, this.height);
+		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	}
 
 	destroy() {
@@ -115,8 +104,13 @@ Tarumae.FrameBuffer = class extends Tarumae.CommonBuffer {
 Tarumae.CubeMapFrameBuffer = class extends Tarumae.CommonBuffer {
 	constructor(renderer, width, height, backColor) {
 		super(renderer, width, height, backColor);
-	
+
 		const gl = this.gl;
+		
+		const cubemap = new Tarumae.CubeMap(this.renderer);
+		cubemap.createEmpty(this.width, this.height);
+		this.texture = cubemap;
+
 		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_CUBE_MAP_POSITIVE_X, this.texture.glTexture, 0);
  	
 		// renderbuffer
@@ -127,12 +121,6 @@ Tarumae.CubeMapFrameBuffer = class extends Tarumae.CommonBuffer {
 		gl.bindRenderbuffer(gl.RENDERBUFFER, null);
 
 		this.disuse();
-	}
-
-	createTexture() {
-		const cubemap = new Tarumae.CubeMap(this.renderer);
-		cubemap.createEmpty(this.width, this.height);
-		this.texture = cubemap;
 	}
 	
 	changeFace(index) {

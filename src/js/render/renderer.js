@@ -346,15 +346,31 @@ Tarumae.Renderer = class {
 		}
 		
 		if (this.options.postprocess) {
-			const size = this.renderSize;
+			const width = this.canvas.width, height = this.canvas.height;
+
 			const sceneImageRenderer = new Tarumae.PipelineNodes.SceneToImageRenderer(this, {
-				imageSize: { width: size.width, height: size.height }
+				imageSize: {
+					width: width,
+					height: height,
+				}
 			});
+			
+			const imgRenderer128 = new Tarumae.PipelineNodes.MemoryImageRenderer(this, {
+				flipTexcoordY: true,
+				width: width * 0.1,
+				height: height * 0.1,
+			});
+			imgRenderer128.input = sceneImageRenderer;
+			// imgRenderer128.enableAntialias = false;
+			imgRenderer128.gammaFactor = 0.2;
+
 			const imgRenderer = new Tarumae.PipelineNodes.ImageRenderer(this, {
 				flipTexcoordY: true
 			});
 			imgRenderer.input = sceneImageRenderer;
-			imgRenderer.enableAntialias = false;
+			imgRenderer.gammaFactor = 1.4;
+			imgRenderer.tex2Input = imgRenderer128;
+			// imgRenderer.enableAntialias = false;
 	
 			this.pipelineNodes.push(imgRenderer);
 		} else {

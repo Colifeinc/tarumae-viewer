@@ -111,12 +111,16 @@ Tarumae.Texture = class {
 		this.canMipmap = this.enableMipmapped && Tarumae.Utility.isPowerOf2(this.width) && Tarumae.Utility.isPowerOf2(this.height);
 
 		if (this.canMipmap) {
-			gl.generateMipmap(gl.TEXTURE_2D);
-			this._mipmapped = true;
+			this.generateMipmap();
 		}
-
 	
 		this.setupParameters();
+	}
+
+	generateMipmap() {
+		const gl = this.renderer.gl;
+		gl.generateMipmap(gl.TEXTURE_2D);
+		this._mipmapped = true;
 	}
 
 	use(renderer) {
@@ -159,10 +163,9 @@ Tarumae.Texture = class {
 		}
 	}
 
-	static create(renderer, width, height) {
+	static create(width, height) {
 		const tex = new Tarumae.Texture();
 		tex.image = null;
-		tex.renderer = renderer;
 		tex.width = width;
 		tex.height = height;
 		return tex;

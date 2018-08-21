@@ -214,11 +214,14 @@ Tarumae.ShaderUniform = class {
 			case "texture":
 			case "tex":
 			case "texcube":
+				this.slot = slot;
+
 				gl.activeTexture(gl.TEXTURE0 + slot);
 				this.address = this.register(shader, name);
+				
 				gl.uniform1i(this.address, slot);
 
-				//this.hasUniform = shader.bindUniform("has" + name, "bool");
+				// this.hasUniform = shader.bindUniform("has" + name, "bool");
 			
 				this.set = tex => {
 					gl.activeTexture(gl.TEXTURE0 + slot);
@@ -260,6 +263,7 @@ Tarumae.ShaderUniform = class {
 			case "texture":
 			case "tex":
 			case "texcube":
+				this.shader.gl.activeTexture(this.shader.gl.TEXTURE0 + this.slot);
 				this.shader.gl.bindTexture(this.shader.gl.TEXTURE_2D, null);
 				break;
 		}
@@ -1676,7 +1680,11 @@ Tarumae.ImageShader = class extends Tarumae.Shader {
 		this.vertexPositionAttribute = this.findAttribute("vertexPosition");
 		this.vertexTexcoordAttribute = this.findAttribute("vertexTexcoord");
 		this.projectionMatrixUniform = this.bindUniform("projectionMatrix", "mat4");
+
 		this.textureUniform = this.bindUniform("texture", "tex", 0);
+		this.texture2Uniform = this.bindUniform("tex2", "tex", 1);
+		this.hasTex2Uniform = this.bindUniform("hasTex2", "bool");
+		
 		this.colorUniform = this.bindUniform("color", "color3");
 		this.opacityUniform = this.bindUniform("opacity", "float");
 		this.resolutionUniform = this.bindUniform("resolution", "vec2");
@@ -1693,7 +1701,7 @@ Tarumae.ImageShader = class extends Tarumae.Shader {
 		this.color = [1, 1, 1];
 		this.opacity = 1;
 		this.texture = undefined;
-		this.resolutionInv = [0, 0];
+		this.resolution = [0, 0];
 	}
 
 	beginMesh(mesh) {
@@ -1703,12 +1711,14 @@ Tarumae.ImageShader = class extends Tarumae.Shader {
 		this.colorUniform.set(this.color);
 		this.opacityUniform.set(this.opacity);
 
-		this.resolutionInv[0] = 1.0 / this.renderer.canvas.width;
-		this.resolutionInv[1] = 1.0 / this.renderer.canvas.height;
-		this.resolutionUniform.set(this.resolutionInv);
+		this.resolution[0] = this.renderer.canvas.width;
+		this.resolution[1] = this.renderer.canvas.height;
+		this.resolutionUniform.set(this.resolution);
 
-		this.aaOffset1Uniform.set([this.resolutionInv[0] * 0.6, this.resolutionInv[1] * 0.4]);
-		this.aaOffset2Uniform.set([this.resolutionInv[0] * 0.4, this.resolutionInv[1] * 0.6]);
+		const resXInv = 1.0 / this.renderer.canvas.width;
+		const resYInv = 1.0 / this.renderer.canvas.height;
+		this.aaOffset1Uniform.set([resXInv * 0.6, resYInv * 0.4]);
+		this.aaOffset2Uniform.set([resXInv * 0.4, resYInv * 0.6]);
 
 		this.enableAntialiasUniform.set(this.enableAntialias);
 		this.gammaFactorUniform.set(this.gammaFactor);
@@ -1717,6 +1727,14 @@ Tarumae.ImageShader = class extends Tarumae.Shader {
 			this.textureUniform.set(this.texture);
 		} else {
 			this.textureUniform.set(Tarumae.Shader.emptyTexture);
+		}
+
+		if (this.tex2) {
+			this.texture2Uniform.set(this.tex2);
+			this.hasTex2Uniform.set(true);
+		} else {
+			this.texture2Uniform.set(Tarumae.Shader.emptyTexture);
+			this.hasTex2Uniform.set(false);
 		}
 
 		this.gl.depthMask(false);
@@ -1729,6 +1747,9 @@ Tarumae.ImageShader = class extends Tarumae.Shader {
 		// gl.enable(gl.DEPTH_TEST);
 		this.gl.depthMask(true);
 		this.gl.disable(this.gl.BLEND);
+
+		this.textureUniform.unset();
+		this.texture2Uniform.unset();
 
 		super.endMesh(mesh);
 	}

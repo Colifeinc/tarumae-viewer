@@ -154,7 +154,7 @@ void main(void) {
 			finalColor = traceLight(color, vertexNormal, cameraNormal);
 		}
 
-		finalColor = finalColor * (1.0 + dot(vertexNormal, sundir) * 0.2) + sunlight;
+		finalColor = finalColor + dot(vertexNormal, sundir) * sunlight;
 	}
 
 	if (hasTexture) {
