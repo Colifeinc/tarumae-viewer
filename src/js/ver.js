@@ -1,4 +1,4 @@
 
 Tarumae.Version = {
-  "major": 1, "minor": 1, "build": 1, "revision": ""
+  "major": 1, "minor": 2, "build": 0, "revision": ""
 };

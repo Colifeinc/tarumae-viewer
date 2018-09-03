@@ -7,7 +7,11 @@ import "../utility/res";
 
 window.addEventListener("load", function() {
 
-	const renderer = new Tarumae.Renderer({});
+	const renderer = new Tarumae.Renderer({
+		// postprocess: true,
+		enableLighting: false,
+		// renderPixelRatio: window.devicePixelRatio,
+	});
 	const scene = renderer.createScene();
 
 	window._scene = scene;
@@ -19,7 +23,10 @@ window.addEventListener("load", function() {
 		scene.add(obj);
 	});
 
-	new Tarumae.TouchController(scene);
+	new Tarumae.TouchController(scene, {
+		speed: 0.1,
+		distance: 2
+	});
 
 	scene.show();
 });
