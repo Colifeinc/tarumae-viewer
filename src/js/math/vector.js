@@ -82,6 +82,9 @@ export class Vec2 {
 	}
 }	
 
+Vec2.zero = new Vec2(0, 0);
+Vec2.one = new Vec2(1, 1);
+
 ///////////////////// Vec3 //////////////////////
 
 export class Vec3 {
@@ -798,7 +801,7 @@ Tarumae.PointBPNode = class {
 
 ////////// Point //////////
 
-export class Point {
+Tarumae.Point = class {
 	constructor(x, y) {
 		this.x = x;
 		this.y = y;
@@ -810,15 +813,15 @@ export class Point {
 	}
 
 	clone() {
-		return new Point(this.x, this.y);
+		return new Tarumae.Point(this.x, this.y);
 	}
 
 	mulMat(m) {
-		return new Point(
+		return new Tarumae.Point(
 			this.x * m.a1 + this.y * m.a2 + m.a3,
 			this.x * m.b1 + this.y * m.b2 + m.b3);
 	}
-}
+};
 
 ////////// Size //////////
 
@@ -858,6 +861,30 @@ Tarumae.Size = class {
 	}
 };
 
+Tarumae.BBox2D = class {
+	constructor(min, max) {
+		this.min = min;
+		this.max = max;
+	}
+
+	static fromTwoPoints(v1, v2) {
+		const minx = Math.min(v1.x, v2.x),
+			miny = Math.min(v1.y, v2.y),
+			maxx = Math.max(v1.x, v2.x),
+			maxy = Math.max(v1.y, v2.y);
+		
+		return new Tarumae.BBox2D(
+			new Vec2(minx, miny), new Vec2(maxx, maxy));
+	}
+
+	intersectsBBox2D(box2) {
+		if (this.max.x < box2.min.x) return false;
+		if (this.min.x > box2.max.x) return false;
+		if (this.max.y < box2.min.y) return false;
+		if (this.min.y > box2.max.y) return false;
+	}
+};
+
 ////////// Rect //////////
 
 Tarumae.Rect = class {
@@ -873,8 +900,8 @@ Tarumae.Rect = class {
 			case 2:
 				this.x = arguments[0].x;
 				this.y = arguments[0].y;
-				this.width = arguments[1].x;
-				this.height = arguments[1].y;
+				this.width = arguments[1].width;
+				this.height = arguments[1].height;
 				break;
 
 			case 4:
@@ -922,7 +949,7 @@ Tarumae.Rect = class {
 	}
 
 	get origin() {
-		return new Point(
+		return new Tarumae.Point(
 			this.x + this.width / 2,
 			this.y + this.height / 2);
 	}
@@ -931,20 +958,120 @@ Tarumae.Rect = class {
 		this.x = p.x - this.width / 2;
 		this.y = p.y - this.height / 2;
 	}
+
+	get topLeft() {
+		return new Tarumae.Point(this.x, this.y);
+	}
+
+	get topRight() {
+		return new Tarumae.Point(this.right, this.y);
+	}
+
+	get bottomLeft() {
+		return new Tarumae.Point(this.x, this.bottom);
+	}
+
+	get bottomRight() {
+		return new Tarumae.Point(this.right, this.bottom);
+	}
+
+	get topEdge() {
+		return new Tarumae.LineSegment2D(this.x, this.y, this.right, this.y);
+	}
 	
+	get bottomEdge() {
+		return new Tarumae.LineSegment2D(this.x, this.bottom, this.right, this.bottom);
+	}
+
+	get leftEdge() {
+		return new Tarumae.LineSegment2D(this.x, this.y, this.x, this.bottom);
+	}
+	
+	get rightEdge() {
+		return new Tarumae.LineSegment2D(this.right, this.y, this.right, this.bottom);
+	}
+
+	strink(x, y) {
+		this.x += x;
+		this.width -= x;
+		this.y += y;
+		this.height -= y;
+	}
+
 	set(x, y, width, height) {
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
 	}
+
+	static createFromPoints(p1, p2) {
+		var minx = Math.min(p1.x, p2.x);
+		var miny = Math.min(p1.y, p2.y);
+		var maxx = Math.max(p1.x, p2.x);
+		var maxy = Math.max(p1.y, p2.y);
+	
+		return new Tarumae.Rect(minx, miny, maxx - minx, maxy - miny);
+	}
 };
 
-Tarumae.Rect.createFromPoints = function(p1, p2) {
-	var minx = Math.min(p1.x, p2.x);
-	var miny = Math.min(p1.y, p2.y);
-	var maxx = Math.max(p1.x, p2.x);
-	var maxy = Math.max(p1.y, p2.y);
+Tarumae.LineSegment2D = class {
+	constructor(x1, y1, x2, y2) {
+		this.start = { x: x1, y: y1 };
+		this.end = { x: x2, y: y2 };
 
-	return new Tarumae.Rect(minx, miny, maxx - minx, maxy - miny);
-};
+		this.bbox = new Tarumae.BBox2D(Vec2.zero, Vec2.zero);
+		this.updateBoundingBox();
+	}
+
+	get x1() {
+		return this.start.x;
+	}
+	set x1(v) {
+		this.start.x = v;
+		this.updateBoundingBoxX();
+	}
+	
+	get y1() {
+		return this.start.y;
+	}
+	set y1(v) {
+		this.start.y = v;
+		this.updateBoundingBoxY();
+	}
+
+	get x2() {
+		return this.end.x;
+	}
+	set x2(v) {
+		this.end.x = v;
+		this.updateBoundingBoxX();
+	}
+	
+	get y2() {
+		return this.end.y;
+	}
+	set y2(v) {
+		this.end.y = v;
+		this.updateBoundingBoxY();
+	}
+	
+	updateBoundingBox() {
+		this.updateBoundingBoxX();
+		this.updateBoundingBoxY();
+	}
+
+	updateBoundingBoxX() {
+		this.bbox.min.x = Math.min(this.start.x, this.end.x) - 1;
+		this.bbox.max.x = Math.max(this.start.x, this.end.x) + 1;
+	}
+
+	updateBoundingBoxY() {
+		this.bbox.min.y = Math.min(this.start.y, this.end.y) - 1;
+		this.bbox.max.y = Math.max(this.start.y, this.end.y) + 1;
+	}
+
+	intersectsLineSegment(l2) {
+
+	}
+}

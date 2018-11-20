@@ -7,6 +7,7 @@
 
 import Tarumae from "../entry"
 import { Vec3, Vec4 } from "./vector"
+import { SSL_OP_TLS_BLOCK_PADDING_BUG } from "constants";
 
 Tarumae.MathFunctions = {
   _PIAngleDelta: Math.PI / 180.0,
@@ -52,36 +53,6 @@ Tarumae.MathFunctions = {
     return t * t * (3.0 - 2.0 * t);
   },
 
-  distancePointToLine: function(lp1, lp2, p) {
-    return Tarumae.MathFunctions.distancePointToLineXY(lp1.x, lp1.y, lp2.x, lp2.y, p);
-  },
-  
-  distancePointToLineXY: function(x1, y1, x2, y2, p) {
-    var a = y2 - y1;
-    var b = x1 - x2;
-    var c = x2 * y1 - x1 * y2;
-    return Math.abs(a * p.x + b * p.y + c) / Math.sqrt(a * a + b * b);
-  },
-
-  rectContainsPoint: function(rx, ry, rw, rh, px, py) {
-    var hw = rw / 2, hy = rh / 2;
-    return rx - hw <= px && rx + hw >= px && ry - hy <= py && ry + hy >= py;
-  },
-
-  triangleContainsPoint2D: function(v1, v2, v3, p) {
-    function sign(pt, p2, p3) {
-      return (pt.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (pt.y - p3.y);
-    }
-
-    var b1, b2, b3;
-
-    b1 = sign(p, v1, v2) < 0;
-    b2 = sign(p, v2, v3) < 0;
-    b3 = sign(p, v3, v1) < 0;
-
-    return ((b1 == b2) && (b2 == b3));
-  },
-  
   eulerAnglesFromVectors: function(v1, v2) {
     var l = v1 - v2;
     
@@ -214,7 +185,110 @@ Tarumae.MathFunctions = {
     //   Tarumae.MathFunctions.degreeToAngle(z));
   },
 
-  triangleContainsPoint: function(p, v1orTriangle, v2, v3) {
+  distancePointToPoint2D: function(p1, p2) {
+
+  },
+
+  distancePointToPoint2DXY: function(p1x, p1y, p2x, p2y) {
+    const a = p2x - p1x, b = p2y - p1y;
+    return Math.sqrt(a * a + b * b);
+  },
+
+  distancePointToLine: function(p, l) {
+    return Tarumae.MathFunctions.distancePointToLineXY(p, l.x1, l.y1, l.x2, l.y2);
+  },
+  
+  distancePointToLineXY: function(p, x1, y1, x2, y2) {
+    const a = y2 - y1,
+      b = x1 - x2,
+      c = x2 * y1 - x1 * y2;
+    return Math.abs(a * p.x + b * p.y + c) / Math.sqrt(a * a + b * b);
+  },
+
+  distancePointToLineThresholdXY: function(p, x1, y1, x2, y2) {
+    var A = p.x - x1;
+    var B = p.y - y1;
+    var C = x2 - x1;
+    var D = y2 - y1;
+  
+    var dot = A * C + B * D;
+    var len_sq = C * C + D * D;
+    var param = -1;
+    if (len_sq != 0) //in case of 0 length line
+        param = dot / len_sq;
+  
+    var xx, yy;
+  
+    if (param < 0) {
+      xx = x1;
+      yy = y1;
+    }
+    else if (param > 1) {
+      xx = x2;
+      yy = y2;
+    }
+    else {
+      xx = x1 + param * C;
+      yy = y1 + param * D;
+    }
+  
+    var dx = p.x - xx;
+    var dy = p.y - yy;
+
+    return Math.sqrt(dx * dx + dy * dy);
+  },
+
+  distanceLineToLine2D: function(l1, l2) {
+    if (!this.checkParallelLines(l1, l2))
+      return 0;
+    
+    return this.distancePointToLine(l1.start, l2);
+  },
+
+  distancePointToPolygon: function(p, polygon) {
+    let minDist = Infinity;
+
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const px1 = polygon[i][0], py1 = polygon[i][1],
+        px2 = polygon[j][0], py2 = polygon[j][1];
+      
+      const dist = this.distancePointToLineThresholdXY(p, px1, py1, px2, py2);
+      console.log(dist);
+      //if (dist >= 0 && dist <= 1) {
+        if (dist < minDist) minDist = dist;
+      //}
+    }
+
+    return minDist;
+  },
+
+  rectContainsPoint: function(r, p) {
+    // const hw = r.width * 0.5, hy = r.height * 0.5;
+    // return r.x - hw <= p.x && r.x + hw >= p.x
+    //   && r.y - hy <= p.y && r.y + hy >= p.y;
+    return p.x >= r.x && p.y >= r.y && p.x <= r.right && p.y <= r.bottom;
+  },
+
+  rectContainsPointXY: function(rx, ry, rw, rh, px, py) {
+    var hw = rw / 2, hy = rh / 2;
+    return rx - hw <= px && rx + hw >= px && ry - hy <= py && ry + hy >= py;
+  },
+
+  triangleContainsPoint2D: function(v1, v2, v3, p) {
+    function sign(pt, p2, p3) {
+      return (pt.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (pt.y - p3.y);
+    }
+
+    var b1, b2, b3;
+
+    b1 = sign(p, v1, v2) < 0;
+    b2 = sign(p, v2, v3) < 0;
+    b3 = sign(p, v3, v1) < 0;
+
+    return ((b1 == b2) && (b2 == b3));
+  },
+  
+  triangleContainsPoint3D: function(p, v1orTriangle, v2, v3) {
     var v1;
 
     if (v1orTriangle instanceof Array) {
@@ -246,34 +320,83 @@ Tarumae.MathFunctions = {
     return s > 0 && t > 0 && (s + t) <= area;
   },
 
-  polygonContainsPoint2D: function(polygon, p) {
-    // refer to: http://stackoverflow.com/questions/217578/how-can-i-determine-whether-a-2d-point-is-within-a-polygon
+  polygonContainsPoint: function(polygon, p) {    
+    let inside = false;
+
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const xi = polygon[i][0], yi = polygon[i][1];
+      const xj = polygon[j][0], yj = polygon[j][1];
+        
+      const intersect = ((yi > p.y) != (yj > p.y))
+        && (p.x < (xj - xi) * (p.y - yi) / (yj - yi) + xi);
+      
+      if (intersect) inside = !inside;
+    }
     
-    var isInside = false;
-    var minX = polygon[0].x, maxX = polygon[0].x;
-    var minY = polygon[0].y, maxY = polygon[0].y;
+    return inside;
+  },
 
-    for (var n = 1; n < polygon.length; n++) {
-      var q = polygon[n];
-      minX = Math.min(q.x, minX);
-      maxX = Math.max(q.x, maxX);
-      minY = Math.min(q.y, minY);
-      maxY = Math.max(q.y, maxY);
+  polygonContainsRect: function(polygon, rect) {
+    return this.polygonContainsPoint(polygon, rect.topLeft)
+      && this.polygonContainsPoint(polygon, rect.topRight)
+      && this.polygonContainsPoint(polygon, rect.bottomLeft)
+      && this.polygonContainsPoint(polygon, rect.bottomRight);
+  },
+
+  lineIntersectsRect: function(l, r) {
+    const containsStart = this.rectContainsPoint(r, l.start),
+      containsEnd = this.rectContainsPoint(r, l.end);
+    
+    if (containsStart || containsEnd) {
+      return true;
     }
+    
+    if (this.lineIntersectsLine2D(r.topEdge, l))
+      return true;
+    
+    if (this.lineIntersectsLine2D(r.bottomEdge, l))
+      return true;
 
-    if (p.x < minX || p.x > maxX || p.y < minY || p.y > maxY) {
-      return false;
-    }
+    if (this.lineIntersectsLine2D(r.leftEdge, l))
+      return true;
+  
+    if (this.lineIntersectsLine2D(r.rightEdge, l))
+      return true;
 
-    var i = 0, j = polygon.length - 1;
-    for (i, j; i < polygon.length; j = i++) {
-      if ((polygon[i].y > p.y) != (polygon[j].y > p.y) &&
-        p.x < (polygon[j].x - polygon[i].x) * (p.y - polygon[i].y) / (polygon[j].y - polygon[i].y) + polygon[i].x) {
-        isInside = !isInside;
+    return false;
+  },
+
+  lineIntersectsPolygon: function(p, l) {
+
+  },
+
+  rectIntersectsRect: function(r1, r2) {
+    const
+      r1x1 = r1.x, r1x2 = r1.right,
+      r1y1 = r1.y, r1y2 = r1.bottom,
+      r2x1 = r2.x, r2x2 = r2.right,
+      r2y1 = r2.y, r2y2 = r2.bottom;
+
+    if (r1x2 < r2x1) return false;
+		if (r1x1 > r2x2) return false;
+		if (r1y2 < r2y1) return false;
+    if (r1y1 > r2y2) return false;
+    
+    return true;
+  },
+
+  rectIntersectsPolygon: function(rect, polygon) {
+
+    for (let i = 0; i < polygon.length - 1; i++) {
+      const px1 = polygon[i][0], py1 = polygon[i][1],
+        px2 = polygon[i + 1][0], py2 = polygon[i + 1][1];
+      
+      if (this.lineIntersectsRect(new Tarumae.LineSegment2D(px1, py1, px2, py2), rect)) {
+        return true;
       }
     }
 
-    return isInside;
+    return false;
   },
   
   angleToArc: function(width, height, angle) {
@@ -282,7 +405,27 @@ Tarumae.MathFunctions = {
       Math.cos(angle * Tarumae.MathFunctions._PIAngleDelta)));
   },
 
-  lineIntersectsLine2D: function(line1StartX, line1StartY, line1EndX, line1EndY,
+  lineIntersectsLine2D: function(l1, l2) {
+    return this.lineIntersectsLine2DXY(
+      l1.start.x, l1.start.y, l1.end.x, l1.end.y,
+      l2.start.x, l2.start.y, l2.end.x, l2.end.y);
+  },
+
+  lineIntersectsLine2DXY: function(a, b, c, d, p, q, r, s) {
+    // source: https://stackoverflow.com/questions/9043805/test-if-two-lines-intersect-javascript-function
+
+    const det = (c - a) * (s - q) - (r - p) * (d - b);
+    if (det === 0) {
+      return false;
+    } else {
+      const invdet = 1.0 / det;
+      const lambda = ((s - q) * (r - a) + (p - r) * (s - b)) * invdet;
+      const gamma = ((b - d) * (r - a) + (c - a) * (s - b)) * invdet;
+      return (lambda >= 0 && lambda <= 1) && (gamma >= 0 && gamma <= 1);
+    }
+  },
+  
+  _unused_lineIntersectsLine2DXY: function(line1StartX, line1StartY, line1EndX, line1EndY,
     line2StartX, line2StartY, line2EndX, line2EndY) {
     // original source: http://jsfiddle.net/justin_c_rounds/Gd2S2/light/
     
@@ -304,7 +447,7 @@ Tarumae.MathFunctions = {
     if ((a < 0 || a > 1) && (b < 0 || b > 1)) {
       return null;
     }
-    
+
     // if we cast these lines infinitely in both directions, they intersect here:
     var result = {
       x: line1StartX + (a * (line1EndX - line1StartX)),
@@ -314,6 +457,16 @@ Tarumae.MathFunctions = {
     };
 
     return result;
+  },
+
+  checkParallelLines: function(l1, l2) {
+    return this.checkParallelLinesXY(
+      l1.start.x, l1.start.y, l1.end.x, l1.end.y,
+      l2.start.x, l2.start.y, l2.end.x, l2.end.y);
+  },
+
+  checkParallelLinesXY: function(a, b, c, d, p, q, r, s) {
+    return Math.abs((c - a) * (s - q) - (r - p) * (d - b)) < 0.00001;
   },
 
   rayIntersectsPlane: function(ray, plane, maxt) {

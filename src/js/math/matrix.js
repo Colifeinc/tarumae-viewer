@@ -37,21 +37,19 @@ Tarumae.Matrix3 = class {
 	rotate(angle) {
 		if (angle === 0) return this;
 
-		var d = angle * Math.PI / 180;
+		const d = angle * Math.PI / 180;
+		const sin = Math.sin(d), cos = Math.cos(d);
 
-		var sin = Math.sin(d);
-		var cos = Math.cos(d);
+		const m2a1 = cos, m2b1 = sin;
+		const m2a2 = -sin, m2b2 = cos;
 
-		var m2a1 = cos, m2b1 = sin;
-		var m2a2 = -sin, m2b2 = cos;
+		const a1 = this.a1 * m2a1 + this.a2 * m2b1;
+		const b1 = this.b1 * m2a1 + this.b2 * m2b1;
+		const c1 = this.c1 * m2a1 + this.c2 * m2b1;
 
-		var a1 = this.a1 * m2a1 + this.a2 * m2b1;
-		var b1 = this.b1 * m2a1 + this.b2 * m2b1;
-		var c1 = this.c1 * m2a1 + this.c2 * m2b1;
-
-		var a2 = this.a1 * m2a2 + this.a2 * m2b2;
-		var b2 = this.b1 * m2a2 + this.b2 * m2b2;
-		var c2 = this.c1 * m2a2 + this.c2 * m2b2;
+		const a2 = this.a1 * m2a2 + this.a2 * m2b2;
+		const b2 = this.b1 * m2a2 + this.b2 * m2b2;
+		const c2 = this.c1 * m2a2 + this.c2 * m2b2;
 
 		this.a1 = a1; this.b1 = b1; this.c1 = c1;
 		this.a2 = a2; this.b2 = b2; this.c2 = c2;
@@ -65,6 +63,24 @@ Tarumae.Matrix3 = class {
 		this.c3 += this.c1 * x + this.c2 * y;
 
 		return this;
+	}
+
+	static makeTranslation(x, y) {
+		const m = new Tarumae.Matrix3();
+		m.a1 = 1, m.b1 = 0, m.c1 = 0;
+		m.a2 = 0, m.b2 = 1, m.c2 = 0;
+		m.a3 = x, m.b3 = y, m.c3 = 1;
+		return m;
+	}
+
+	static makeRotation(angle, x, y) {
+		const m = new Tarumae.Matrix3();
+		const d = angle * Math.PI / 180;
+		const sin = Math.sin(d), cos = Math.cos(d);
+		m.a1 = cos, m.b1 = sin, m.c1 = 0;
+		m.a2 = -sin, m.b2 = cos, m.c2 = 0;
+		m.a3 = x || 0, m.b3 = y || 0, m.c3 = 1;
+		return m;
 	}
 
 	scale(x, y) {

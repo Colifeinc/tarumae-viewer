@@ -1,41 +1,33 @@
+import Tarumae from "../entry"
+import "../utility/event"
+
 var Draw2D = {};
 
 ////////////// Renderer2D //////////////
 
-Draw2D.Renderer2D = function() {
+Draw2D.Renderer2D = class {
+  constructor() {
+  }
 };
-
-Object.assign(Draw2D.Renderer2D.prototype, {
-  
-});
 
 ////////////// Scene2D //////////////
 
-Draw2D.Scene2D = function() {
-  this.animation = false;
-  this.requestedUpdateFrame = false;
+Draw2D.Scene2D = class {
+  constructor() {
+    this.animation = false;
+    this.requestedUpdateFrame = false;
 
-  this.objects = [];
-  this.focusObject = null;
-  this.dragObject = null;
-};
+    this.objects = [];
+    this.focusObject = null;
+    this.dragObject = null;
+  }
 
-// Event declarations
-new EventDispatcher(Draw2D.Scene2D).registerEvents(
-	"mousedown", "mouseup", "mousemove", "mousewheel",
-  "begindrag", "drag", "enddrag",
-  "getFocus", "lostFocus",
-	"keyup", "keydown",
-	"objectAdd", "objectRemove",
-	"draw");
-
-Object.assign(Draw2D.Scene2D.prototype, {
-  show: function() {
+  show() {
     this.renderer.current2DScene = this;
     this.requireUpdateFrame();
-  },
+  }
 
-  add: function(obj) {
+  add() {
     for (var i = 0; i < arguments.length; i++) {
       var arg = arguments[i];
       if (Array.isArray(arg)) {
@@ -48,30 +40,30 @@ Object.assign(Draw2D.Scene2D.prototype, {
       }
     }
     this.requireUpdateFrame();
-  },
+  }
 
-  remove: function(obj) {
+  remove(obj) {
     this.objects.remove(obj);
-  },
+  }
 
-  render: function(ctx) {
+  render(g) {
     for (var i = 0; i < this.objects.length; i++) {
       var obj = this.objects[i];
       if (obj) {
-        this.drawObject(ctx, obj);
+        this.drawObject(g, obj);
       }
     }
 
-    this.ondraw(ctx);
-  },
+    this.ondraw(g);
+  }
 
-  drawObject: function(ctx, obj) {
+  drawObject(g, obj) {
     var style = obj.style;
     
     if (style) {
-      if (style.strokeWidth) ctx.strokeColor = style.strokeWidth;
-      if (style.strokeStyle) ctx.strokeStyle = style.strokeStyle;
-      if (style.fillColor) ctx.fillColor = style.fillColor;
+      if (style.strokeWidth) g.strokeColor = style.strokeWidth;
+      if (style.strokeStyle) g.strokeStyle = style.strokeStyle;
+      if (style.fillColor) g.fillColor = style.fillColor;
     }
     
     var transformed = false, t = undefined;
@@ -84,7 +76,7 @@ Object.assign(Draw2D.Scene2D.prototype, {
       t.rotate(obj.angle);
       t.translate(-origin.x, -origin.y);
     
-      ctx.pushTransform(t);
+      g.pushTransform(t);
       transformed = true;
     }
 
@@ -93,27 +85,27 @@ Object.assign(Draw2D.Scene2D.prototype, {
       t.scale(obj.scale.x, obj.scale.y);
     }
 
-    obj.draw(ctx);
+    obj.draw(g);
     
     for (var k = 0; k < obj.objects.length; k++) {
       var child = obj.objects[k];
       if (child) {
-        this.drawObject(ctx, child);
+        this.drawObject(g, child);
       }
     }
     
     if (transformed) {
-      ctx.popTransform();
+      g.popTransform();
     }
     
-    ctx.resetDrawingStyle();
-  },
+    g.resetDrawingStyle();
+  }
 
-  requireUpdateFrame: function() {
+  requireUpdateFrame() {
     this.requestedUpdateFrame = true;
-  },
+  }
 
-  eachObject: function(handler) {
+  eachObject(handler) {
     var ret = undefined;
 
     for (var i = 0; i < this.objects.length; i++) {
@@ -121,9 +113,9 @@ Object.assign(Draw2D.Scene2D.prototype, {
       if (handler(obj) === false) break;
       if (obj.eachChild(handler) === false) break;
     }
-  },
+  }
 
-  eachObjectInv: function(handler) {
+  eachObjectInv(handler) {
     var ret = undefined;
 
     for (var i = this.objects.length - 1; i >= 0; i--) {
@@ -131,9 +123,9 @@ Object.assign(Draw2D.Scene2D.prototype, {
       if (obj.eachChildInv(handler) === false) break;
       if (handler(obj) === false) break;
     }
-  },
+  }
 
-  eachObjectFromParentInv: function(parent, handler) {
+  eachObjectFromParentInv(parent, handler) {
     var ret = undefined;
 
     for (var i = parent.objects.length - 1; i >= 0; i--) {
@@ -142,9 +134,9 @@ Object.assign(Draw2D.Scene2D.prototype, {
 
       if (this.eachObjectFromParentInv(obj, handler) === false) return false;
     }
-  },
+  }
 
-  findObjectByPosition: function(p) {
+  findObjectByPosition(p) {
     var target = null;
 
     this.eachObjectInv(function(obj) {
@@ -155,9 +147,9 @@ Object.assign(Draw2D.Scene2D.prototype, {
     });
 
     return target;
-  },
+  }
 
-  hitTestObject: function(obj, p) {
+  hitTestObject(obj, p) {
     var target = null;
     var transformed = false;
     
@@ -185,9 +177,9 @@ Object.assign(Draw2D.Scene2D.prototype, {
     }
 
     return target;
-  },
+  }
 
-  mousedown: function(pos) {
+  mousedown(pos) {
     var obj = this.findObjectByPosition(pos);
     var isProcessed = false;
     
@@ -199,13 +191,13 @@ Object.assign(Draw2D.Scene2D.prototype, {
     if (!isProcessed) {
       this.onmousedown(this.createEventArgument());
     }  
-  },
+  }
 
-  mouseup: function() {
+  mouseup() {
     this.onmouseup(this.createEventArgument());
-  },
+  }
 
-  mousemove: function(pos) {
+  mousemove(pos) {
     var obj = this.findObjectByPosition(pos);
     
     if (obj) {
@@ -213,9 +205,9 @@ Object.assign(Draw2D.Scene2D.prototype, {
     }
     
     this.onmousemove(this.createEventArgument());
-  },
+  }
 
-  begindrag: function() {
+  begindrag() {
     var evtArg = this.createEventArgument(this.dragObject);
     
     if (this.dragObject) {
@@ -224,9 +216,9 @@ Object.assign(Draw2D.Scene2D.prototype, {
     }
     
     this.onbegindrag(evtArg);
-  },
+  }
 
-  drag: function() {
+  drag() {
     var evtArg = this.createEventArgument(this.dragObject);
 
     if (this.dragObject) {
@@ -235,9 +227,9 @@ Object.assign(Draw2D.Scene2D.prototype, {
     }
 
     this.ondrag(evtArg);
-  },
+  }
 
-  enddrag: function() {
+  enddrag() {
     var evtArg = this.createEventArgument(this.dragObject);
     
     if (this.dragObject) {
@@ -246,17 +238,17 @@ Object.assign(Draw2D.Scene2D.prototype, {
     }
     
     this.onenddrag(evtArg);
-  },
+  }
 
-  keydown: function(key) {
+  keydown(key) {
     this.onkeydown(key);
-  },
+  }
 
-  keyup: function(key) {
+  keyup(key) {
     this.onkeyup(key);
-  },
+  }
 
-  createEventArgument: function(obj) {
+  createEventArgument(obj) {
     if (!this.renderer) return;
 
     var viewer = this.renderer.viewer;
@@ -272,32 +264,41 @@ Object.assign(Draw2D.Scene2D.prototype, {
     }
 
     return arg;
-  },
-});
+  }
+};
+
+// Event declarations
+new Tarumae.EventDispatcher(Draw2D.Scene2D).registerEvents(
+	"mousedown", "mouseup", "mousemove", "mousewheel",
+  "begindrag", "drag", "enddrag",
+  "getFocus", "lostFocus",
+	"keyup", "keydown",
+	"objectAdd", "objectRemove",
+	"draw");
 
 ////////////// Style //////////////
 
-Draw2D.Style = function() {
-  this.strokeWidth = 1;
-  this.strokeColor = "black";
-  this.fillColor = "transparent";
+Draw2D.Style = class {
+  constructor() {
+    this.strokeWidth = 1;
+    this.strokeColor = "black";
+    this.fillColor = "transparent";
+  }
 };
 
 ////////////// Event //////////////
 
-Draw2D.EventArgument = function(position, movement) {
-  this.position = position;
-  this.movement = movement;
+Draw2D.EventArgument = class {
+  constructor(position, movement) {
+    this.position = position;
+    this.movement = movement;
+  }
 };
 
 ////////////// Object //////////////
 
-Draw2D.Object = function() {
-  Draw2D.Object.setup.call(this);
-};
-
-Object.assign(Draw2D.Object, {
-  setup: function() {
+Draw2D.Object = class {
+  constructor() {
     this.objects = [];
 
     this.zIndex = 0;
@@ -308,22 +309,9 @@ Object.assign(Draw2D.Object, {
     this.angle = 0;
     this.scale = { x: 1, y: 1 };
     this.transform = new Tarumae.Matrix3().loadIdentity();
-  },
-});
+  }
 
-// Event declarations
-new EventDispatcher(Draw2D.Object).registerEvents(
-	"mousedown", "mouseup", "mousemove", "mousewheel",
-  "begindrag", "drag", "enddrag",
-  "getFocus", "lostFocus",
-	"keyup", "keydown",
-  "childAdd", "childRemove",
-  "move", "rotate",
-	"draw");
-
-Object.assign(Draw2D.Object.prototype, {
-
-  add: function(obj) {
+  add() {
     for (var i = 0; i < arguments.length; i++) {
       var arg = arguments[i];
       if (Array.isArray(arg)) {
@@ -335,73 +323,73 @@ Object.assign(Draw2D.Object.prototype, {
         this.objects._s3_pushIfNotExist(arg);
       }
     }
-  },
+  }
 
-  remove: function(obj) {
+  remove(obj) {
     this.objects._s3_remove(obj);
-  },
+  }
 
-  clear: function() {
+  clear() {
     this.objects._s3_clear();
-  },
+  }
 
-  draw: function(renderer) {
-    this.ondraw(renderer);
-  },
+  draw(g) {
+    this.ondraw(g);
+  }
 
-  eachChild: function(handler) {
+  eachChild(handler) {
     for (var i = 0; i < this.objects.length; i++) {
       var child = this.objects[i];
       if (handler(child) === false) break;
       if (child.eachChild(handler) === false) break;
     }
-  },
+  }
 
-  eachChildInv: function(handler) {
+  eachChildInv(handler) {
     for (var i = this.objects.length - 1; i >= 0; i--) {
       var child = this.objects[i];
       if (child.eachChildInv(handler) === false) return false;
       if (handler(child) === false) return false;
     }
-  },
+  }
 
-  hitTestPoint: function(p) {
+  hitTestPoint(p) {
     return this.bbox.contains(p);
-  },
+  }
 
-  pointToObject: function(p) {
+  pointToObject(p) {
     return new Tarumae.Point(p.x - this.bbox.x, p.y - this.bbox.y);
-  },
+  }
 
-  getOrigin: function() {
+  getOrigin() {
     return new Tarumae.Point(this.bbox.x + this.bbox.width / 2, this.bbox.y + this.bbox.height / 2);
-  },
+  }
 
-  mousedown: function(e) {
+  mousedown(e) {
     this.onmousedown(e);
-  },
+  }
 
-  mousemove: function(e) {
+  mousemove(e) {
     this.onmousemove(e);
-  },
+  }
 
-  mouseup: function(e) {
+  mouseup(e) {
     this.onmouseup(e);
-  },
+  }
 
-  begindrag: function(e) {
+  begindrag(e) {
     this.onbegindrag(e);
-  },
+  }
 
-  drag: function(e) {
+  drag(e) {
     this.ondrag(e);
-  },
+  }
 
-  enddrag: function(e) {
+  enddrag(e) {
     this.onenddrag(e);
-  },
+  }
   
-  moveTo: function(p) {
+  moveTo(p) {
     if (arguments.length === 1) {
       this.bbox.origin = p;
       this.onmove();
@@ -409,105 +397,93 @@ Object.assign(Draw2D.Object.prototype, {
       this.bbox.origin = { x: arguments[0], y: arguments[1] };
       this.onmove();
     }
-  },
-});
+  }
+};
+
+// Event declarations
+new Tarumae.EventDispatcher(Draw2D.Object).registerEvents(
+	"mousedown", "mouseup", "mousemove", "mousewheel",
+  "begindrag", "drag", "enddrag",
+  "getFocus", "lostFocus",
+	"keyup", "keydown",
+  "childAdd", "childRemove",
+  "move", "rotate",
+	"draw");
 
 ////////////// Line //////////////
 
-Draw2D.Rect = function(x, y, w, h) {
-  Draw2D.Rect.setup.call(this, x, y, w, h);
-};
-
-Object.assign(Draw2D.Rect, {
-  prototype: new Draw2D.Object(),
-
-  setup: function(x, y, w, h) {
-    Draw2D.Object.setup.call(this);
+Draw2D.Rect = class extends Draw2D.Object {
+  constructor(x, y, w, h) {
+    super();
     this.bbox = new Tarumae.Rect(x, y, w, h);
   }
-});
+  
+  draw(g) {
+    g.drawRect(this.bbox, this.style.strokeWidth, this.style.strokeColor, this.style.fillColor);
 
-Object.assign(Draw2D.Rect.prototype, {
-  draw: function(renderer) {
-    renderer.drawRect(this.bbox, this.style.strokeWidth, this.style.strokeColor, this.style.fillColor);
-
-    this.ondraw(renderer);
+    this.ondraw(g);
   }
-});
+};
 
 ////////////// Line //////////////
 
-Draw2D.Line = function() {
-  Draw2D.Object.setup.call(this);
+Draw2D.Line = class extends Draw2D.Object {
+  constructor() {
+    super();
+  }
 };
-
-Draw2D.Line.prototype = new Draw2D.Object();
 
 ////////////// Ellipse //////////////
 
-Draw2D.Ellipse = function(x, y, w, h) {
-  Draw2D.Object.setup.call(this);
-
-  this.bbox = new Tarumae.Rect(x, y, w, h);
-};
-
-Draw2D.Ellipse.prototype = new Draw2D.Object();
-
-Object.assign(Draw2D.Ellipse.prototype, {
-  draw: function(renderer) {
-    renderer.drawEllipse(this.bbox);
-
-    this.ondraw(renderer);
+Draw2D.Ellipse = class extends Draw2D.Object {
+  constructor(x, y, w, h) {
+    super();
+    this.rect = new Tarumae.Rect(x, y, w, h);
   }
-});
+
+  draw(g) {
+    g.drawEllipse(this.rect);
+    this.ondraw(g);
+  }
+};
 
 ////////////// Image //////////////
 
-Draw2D.Image = function(img, x, y, w, h) {
-  Draw2D.Object.setup.call(this);
+Draw2D.Image = class extends Draw2D.Object {
+  constructor(img, x, y, w, h) {
+    super();
 
-  this.img = img;
-  this.bbox = new Tarumae.Rect(x, y, w, h);
-  
+    this.img = img;
+    this.bbox = new Tarumae.Rect(x, y, w, h);
+  }
+
+  draw(g) {
+    g.drawImage(this.bbox, this.img);
+  }
 };
-
-Draw2D.Image.prototype = new Draw2D.Object();
-
-Object.assign(Draw2D.Image.prototype, {
-  draw: function(renderer) {
-    renderer.drawImage(this.bbox, this.img);
-  },
-});
 
 ////////////// Active Point //////////////
 
-Draw2D.ActivePoint = function(x, y) {
-  Draw2D.Object.setup.call(this);
+Draw2D.ActivePoint = class extends Draw2D.Object {
+  constructor(x, y) {
+    super();
 
-  this.style.strokeWidth = 2;
-  this.style.strokeColor = "#385377";
-  this.style.fillColor = "rgba(150,150,255,0.3)";
-  this.bbox = new Tarumae.Rect(x - 6, y - 6, 12, 12);
-};
+    this.style.strokeWidth = 2;
+    this.style.strokeColor = "#385377";
+    this.style.fillColor = "rgba(150,150,255,0.3)";
+    this.bbox = new Tarumae.Rect(x - 6, y - 6, 12, 12);
+  }
 
-Draw2D.ActivePoint.prototype = new Draw2D.Object();
+  draw(g) {
+    g.drawEllipse(this.bbox, this.style.strokeWidth, this.style.strokeColor, this.style.fillColor);
+  }
 
-Object.assign(Draw2D.ActivePoint.prototype, {
-  draw: function(renderer) {
-    renderer.drawEllipse(this.bbox, this.style.strokeWidth, this.style.strokeColor, this.style.fillColor);
-  },
-
-  // hitTestPoint: function(p) {
-  //   return true;
-  // },
-
-  // mousemove: function(e) {
-  // },
-
-  drag: function(e) {
+  drag(e) {
     this.bbox.x += e.movement.x;
     this.bbox.y += e.movement.y;
 
     this.ondrag(e);
   }
-});
+};
+
+export default Draw2D;

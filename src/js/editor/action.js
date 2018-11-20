@@ -261,7 +261,7 @@ Object.assign(TarumaeEditor.prototype, {
 
 							// if (typeof aps !== "undefined" && aps != null) {
 							//   aps._s3_foreach(function (name, ap) {
-							//     if (Tarumae.MathFunctions.triangleContainsPoint(viewer.mouse.position,
+							//     if (Tarumae.MathFunctions.triangleContainsPoint3D(viewer.mouse.position,
 							//       renderer.transformPoints(ap.arrowPoints))) {
 
 							//       editor.focusActivePoint = ap;

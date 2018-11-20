@@ -9,7 +9,7 @@ var PlanDesigner = function(renderer) {
   this.operationMode = PlanDesigner.OperationModes.None;
   this.currentDrawingMode = 'none';
 
-  this.scene = renderer.create2DScene();
+  this.scene = renderer.createScene2D();
   this.scene.show();
 
   this.areasHolder = new Draw2D.Object();

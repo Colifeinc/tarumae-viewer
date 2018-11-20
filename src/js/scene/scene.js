@@ -171,6 +171,9 @@ Tarumae.Scene = class {
 		return loadingSession;
 	}
 
+	close() {
+	}
+
 	loadObject(obj, loadingSession, bundle) {
 		var _bundles = obj._bundles;
 		if (_bundles) {
