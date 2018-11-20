@@ -42,9 +42,9 @@ window.addEventListener("load", function() {
 	}
 
 	function update(p, i) {
-		pm.vertexBuffer._s3_set(i * 3, p.x, p.y, p.z);
-		pm.vertexBuffer._s3_set((count + i) * 3, p.r, p.g, p.b);
-		pm.vertexBuffer._s3_set((count * 2 * 3 + i), p.size);
+		pm.vertexBuffer._t_set(i * 3, p.x, p.y, p.z);
+		pm.vertexBuffer._t_set((count + i) * 3, p.r, p.g, p.b);
+		pm.vertexBuffer._t_set((count * 2 * 3 + i), p.size);
 		pm.update();
 	}
 

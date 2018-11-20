@@ -250,22 +250,22 @@ Tarumae.EditorWall.prototype.generateMeshFront = function(columns) {
   for (j = 0; j < columns.length; j++) {
     var pi = columns[j];
 
-    vertices._s3_set(i, pi.x, this.height, z); i += 3;
+    vertices._t_set(i, pi.x, this.height, z); i += 3;
 
     if (pi.y1 !== 0) {
-      vertices._s3_set(i, pi.x, pi.y1, z); i += 3;
+      vertices._t_set(i, pi.x, pi.y1, z); i += 3;
     }
 
     if (pi.y2 !== 0) {
-      vertices._s3_set(i, pi.x, pi.y2, z); i += 3;
+      vertices._t_set(i, pi.x, pi.y2, z); i += 3;
     }
 
-    vertices._s3_set(i, pi.x, 0, z); i += 3;
+    vertices._t_set(i, pi.x, 0, z); i += 3;
   }
 
   // generate normals - front
   for (j = 0, i = 0; j < vertexCount; j++ , i += 3) {
-    normals._s3_set(i, 0, 0, 1);
+    normals._t_set(i, 0, 0, 1);
   }
 
   // generate uv texcoords - front
@@ -382,22 +382,22 @@ Tarumae.EditorWall.prototype.generateMeshBack = function(columns) {
   for (j = 0; j < columns.length; j++) {
     var pi = columns[j];
 
-    vertices._s3_set(i, pi.x, this.height, z); i += 3;
+    vertices._t_set(i, pi.x, this.height, z); i += 3;
 
     if (pi.y1 !== 0) {
-      vertices._s3_set(i, pi.x, pi.y1, z); i += 3;
+      vertices._t_set(i, pi.x, pi.y1, z); i += 3;
     }
 
     if (pi.y2 !== 0) {
-      vertices._s3_set(i, pi.x, pi.y2, z); i += 3;
+      vertices._t_set(i, pi.x, pi.y2, z); i += 3;
     }
 
-    vertices._s3_set(i, pi.x, 0, z); i += 3;
+    vertices._t_set(i, pi.x, 0, z); i += 3;
   }
 
   // generate normals - back
   for (j = 0, i = 0; j < vertexCount; j++ , i += 3) {
-    normals._s3_set(i, 0, 0, -1);
+    normals._t_set(i, 0, 0, -1);
   }
 
   // generate uv texcoords - back

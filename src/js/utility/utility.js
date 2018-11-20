@@ -149,7 +149,7 @@ Object.defineProperties(Array.prototype, {
 		enumerable: false
 	},
 
-	_s3_set: {
+	_t_set: {
 		value: function(i) {
 			if (arguments.length > 1) {
 				for (var j = 0; j < arguments.length - 1; j++) {
@@ -174,7 +174,7 @@ Object.defineProperties(Array.prototype, {
 });
 
 Object.defineProperties(Float32Array.prototype, {
-	_s3_set: {
+	_t_set: {
 		value: function(i) {
 			if (arguments.length > 1) {
 				for (var j = 0; j < arguments.length - 1; j++) {

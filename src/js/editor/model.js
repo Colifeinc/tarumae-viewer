@@ -111,7 +111,7 @@ Object.assign(TarumaeEditor.prototype, {
 			case "angle":
 			case "scale":
 				if (Array.isArray(value)) {
-					obj[name]._s3_set(value[0], value[1], value[2]);
+					obj[name]._t_set(value[0], value[1], value[2]);
 				}
 				break;
 
