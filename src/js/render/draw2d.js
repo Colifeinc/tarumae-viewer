@@ -112,6 +112,11 @@ Tarumae.BBox2D = class {
 		this.max.y = Math.max(p1.y, p2.y);
 	}
 
+	contains(p) {
+		return p.x >= this.min.x && p.x <= this.max.x
+			&& p.y >= this.min.y && p.y >= this.max.y;
+	}
+
 	intersectsBBox2D(box2) {
 		if (this.max.x < box2.min.x) return false;
 		if (this.min.x > box2.max.x) return false;
@@ -380,6 +385,11 @@ Tarumae.DrawingContext2D = class {
 		const m = Tarumae.Matrix3.makeRotation(angle, x, y);
 		this.pushTransform(m);
 		return m;
+	}
+
+	resetTransform() {
+		this.currentTransform.loadIdentity();
+		this.transformStack._s3_clear();
 	}
 
 	resetDrawingStyle() {

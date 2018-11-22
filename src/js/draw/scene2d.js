@@ -292,10 +292,6 @@ Draw2D.Object = class {
     this.objects._s3_clear();
   }
 
-  draw(g) {
-    this.ondraw(g);
-  }
-
   eachChild(handler) {
     for (var i = 0; i < this.objects.length; i++) {
       var child = this.objects[i];
@@ -363,6 +359,27 @@ Draw2D.Object = class {
       if (style.fillColor) g.fillColor = style.fillColor;
     }
 
+    let t = undefined;
+  
+    if (this.origin.x !== 0 || this.origin.y !== 0) {
+      t = this.transform.loadIdentity();
+      t.translate(this.origin.x, this.origin.y);
+    }
+
+    if (this.angle !== 0) {
+      t = t || this.transform.loadIdentity();
+      t.rotate(this.angle);
+    }
+  
+    if (this.scale.x !== 1 || this.scale.y !== 1) {
+      t = t || this.transform.loadIdentity();
+      t.scale(this.scale.x, this.scale.y);
+    }
+
+    if (t) {
+      g.pushTransform(t);
+    }
+      
     this.draw(g);
 
     for (let k = 0; k < this.objects.length; k++) {
@@ -371,8 +388,16 @@ Draw2D.Object = class {
         child.render(g);
       }
     }
+
+    if (t) {
+      g.popTransform();
+    }
       
     // g.resetDrawingStyle();
+  }
+
+  draw(g) {
+    this.ondraw(g);
   }
 
   update() {
@@ -392,48 +417,6 @@ new Tarumae.EventDispatcher(Draw2D.Object).registerEvents(
   "childAdd", "childRemove",
   "move", "rotate",
   "draw");
-  
-////////////// ContainerObject //////////////
-
-Draw2D.ContainerObject = class extends Draw2D.Object {
-  constructor() {
-    super();
-
-    this.bbox = new Tarumae.Rect(0, 0, 100, 100);
-    this.scale = new Vec2(1, 1);
-  }
-
-  render(g) {
-    
-    let t = undefined;
-  
-    if (this.bbox.x !== 0 || this.bbox.y !== 0) {
-      t = this.transform.loadIdentity();
-      t.translate(this.bbox.x, this.bbox.y);
-    }
-
-    if (this.angle !== 0) {
-      t = t || this.transform.loadIdentity();
-      
-      t.rotate(this.angle, this.origin.x, this.origin.y);
-    }
-  
-    if (this.scale.x !== 1 || this.scale.y !== 1) {
-      t = t || this.transform.loadIdentity();
-      t.scale(this.scale.x, this.scale.y);
-    }
-
-    if (t) {
-      g.pushTransform(t);
-    }
-      
-    super.render(g);
-
-    if (t) {
-      g.popTransform();
-    }
-  }
-};
 
 ////////////// Line //////////////
 

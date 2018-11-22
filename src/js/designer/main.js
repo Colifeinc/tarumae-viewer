@@ -65,7 +65,6 @@ AutoFloor.LayoutDesigner = class {
     scene.renderer = renderer;
     this.scene = scene;
     renderer.scene = scene;
-    this.scene.ondraw = _ => this.draw();
 
     this.data = {
       walls: [
@@ -162,7 +161,7 @@ AutoFloor.LayoutDesigner = class {
       10
     ];
 
-    // this.generateCells();
+    this.generateCells();
   }
 
   show() {
@@ -170,14 +169,15 @@ AutoFloor.LayoutDesigner = class {
   }
 
   createLayout(data) {
-    const layout = new Drawing2d.ContainerObject();
-    layout.bbox.moveTo(200, 200);
+    const layout = new Drawing2d.Object();
+    layout.origin.set(200, 200);
     layout.scale.set(2, 2);
     this.scene.add(layout);
 
     const polygon = data.walls;
 
     const room = new Room(polygon);
+    room.ondraw = g => this.drawGrid(g);
     layout.add(room);
 
     for (let i = 0, j = 1; i < polygon.length; i++, j++) {
@@ -209,7 +209,7 @@ AutoFloor.LayoutDesigner = class {
     const walls = this.data.walls;
     const mf = Tarumae.MathFunctions;
 
-    let maxDists = {
+    const maxDists = {
       wall: 0,
       entry: 0,
       window: 0,
@@ -240,7 +240,7 @@ AutoFloor.LayoutDesigner = class {
         const wallDist = mf.distancePointToPolygon(rect.origin, walls);
         c.dists.wall = wallDist;
         if (wallDist > maxDists.wall) maxDists.wall = wallDist;
-
+        
         for (const w of this.data.windows) {
           
         }
@@ -278,107 +278,11 @@ AutoFloor.LayoutDesigner = class {
 
   makeTableCells() {
     for (const c of this.grid) {
-      if (this.entryCells.includes(c.index)) continue;
       
     }
   }
 
-  draw() {
-    // const r = this.ctx;
-    // const data = this.data;
-
-    // const walls = data.walls;
-
-    // const m = new Tarumae.Matrix3().loadIdentity();
-    // m.translate(100, 100);
-    // m.scale(2, 2);
-    // r.pushTransform(m);
-    
-    this.drawGrid();
-
-    // r.drawLines(walls, 6, "gray", true);
-    
-    // for (const [_, p] of data.pillars.entries()) {
-    //   r.drawLines(p, 0, undefined, "gray");
-    // }
-    // for (const [_, w] of walls.entries()) {
-      // r.drawLine({ x: w.from[0], y: w.from[1] }, { x: w.to[0], y: w.to[1] }, 5, "gray");
-    // }
-
-    // for (const [_, d] of data.doors.entries()) {
-    //   this.drawDoor(d);
-    // }
-
-    // for (const [_, w] of data.windows.entries()) {
-    //   this.drawWindow(w);
-    // }
-
-    // for (const [_, o] of data.objects.entries()) {
-    //   this.drawObjects(o);
-    // }
-
-
-    // r.popTransform();
-  }
-
-  // drawDoor(d) {
-  //   const g = this.ctx;
-    
-  //   const x = d.loc[0], y = d.loc[1];
-  //   const w = d.size, h = 5;
-
-  //   g.drawRect({ x: x - 2, y: y, width: h, height: w }, 1, "gray", "white");
-  //   g.drawArc({ x: x + 3, y: y, width: w, height: w }, 0, 90, 1, "gray", "white");
-  // }
-
-  drawObjects(o) {
-    switch (o.type) {
-      case "chair": this.drawChair(o); break;
-      case "table": this.drawTable(o); break;
-      case "table set": this.drawTableSet(o); break;
-    }
-  }
-
-  drawChair(c) {
-    const g = this.ctx;
-    const size = 15, hs = size / 2;
-    const x = c.loc[0] - hs, y = c.loc[1] - hs;
-
-    g.drawRoundRect({ x, y, width: size, height: size }, size * 0.7, 1, "black", "white");
-    g.drawRoundRect({ x, y: y - 2, width: size, height: 4 }, size * 0.2, 1, "black", "white");
-
-    g.drawRoundRect({ x: x - 2, y: y + hs - 4, width: 3, height: 8 }, size * 0.2, 1, "black", "white");
-    g.drawRoundRect({ x: x + size - 1, y: y + hs - 4, width: 3, height: 8 }, size * 0.2, 1, "black", "white");
-  }
-
-  drawTable(t) {
-    const g = this.ctx;
-    const w = t.size[0], h = t.size[1],
-      hw = w / 2, hh = h / 2,
-      x = t.loc[0] - hw, y = t.loc[1] - hh;
-
-    g.drawRect({ x, y, width: w, height: h }, 1, "black", "white");
-
-  }
-
-  drawTableSet(o) {
-    const g = this.ctx;
-    const x = o.loc[0], y = o.loc[1],
-      w = o.size[0], h = o.size[1],
-      ox = x + w / 2, oy = y + h / 2;
-    
-    const m = Tarumae.Matrix3.makeRotation(o.angle, ox, oy);
-    g.pushTransform(m);
-    
-    this.drawChair({ type: "chair", loc: [0, 0 - 8] });
-    this.drawTable({ type: "table", loc: [0, 0 + 8], size: [w, 18] });
-
-    g.popTransform();
-  }
-
-  drawGrid() {
-    const g = this.ctx;
-
+  drawGrid(g) {
     for (const c of this.grid) {
       let color = 'silver';
 
@@ -389,16 +293,59 @@ AutoFloor.LayoutDesigner = class {
       if (c.way) color = '#ffffc0';
       if (c.entry) color = '#ffffc0';
 
-      const p = c.dists * 255;
+      const p = c.dists.wallp * 255;
       color = `rgb(150, ${p}, ${p})`;
 
       const o = c.rect.origin;
-
+      
       g.drawRect(c.rect, 1, "white", color);
-      // g.drawRect(new Tarumae.Rect(o.x - 2, o.y - 2, 4, 4), 0, undefined, "silver");
       g.drawText(o, c.index, "silver", "center", "5px Arial");
     }
   }
+
+  // drawObjects(o) {
+  //   switch (o.type) {
+  //     case "chair": this.drawChair(o); break;
+  //     case "table": this.drawTable(o); break;
+  //     case "table set": this.drawTableSet(o); break;
+  //   }
+  // }
+
+  // drawChair(c) {
+  //   const g = this.ctx;
+  //   const size = 15, hs = size / 2;
+  //   const x = c.loc[0] - hs, y = c.loc[1] - hs;
+
+  //   g.drawRoundRect({ x, y, width: size, height: size }, size * 0.7, 1, "black", "white");
+  //   g.drawRoundRect({ x, y: y - 2, width: size, height: 4 }, size * 0.2, 1, "black", "white");
+
+  //   g.drawRoundRect({ x: x - 2, y: y + hs - 4, width: 3, height: 8 }, size * 0.2, 1, "black", "white");
+  //   g.drawRoundRect({ x: x + size - 1, y: y + hs - 4, width: 3, height: 8 }, size * 0.2, 1, "black", "white");
+  // }
+
+  // drawTable(t) {
+  //   const g = this.ctx;
+  //   const w = t.size[0], h = t.size[1],
+  //     hw = w / 2, hh = h / 2,
+  //     x = t.loc[0] - hw, y = t.loc[1] - hh;
+
+  //   g.drawRect({ x, y, width: w, height: h }, 1, "black", "white");
+  // }
+
+  // drawTableSet(o) {
+  //   const g = this.ctx;
+  //   const x = o.loc[0], y = o.loc[1],
+  //     w = o.size[0], h = o.size[1],
+  //     ox = x + w / 2, oy = y + h / 2;
+    
+  //   const m = Tarumae.Matrix3.makeRotation(o.angle, ox, oy);
+  //   g.pushTransform(m);
+    
+  //   this.drawChair({ type: "chair", loc: [0, 0 - 8] });
+  //   this.drawTable({ type: "table", loc: [0, 0 + 8], size: [w, 18] });
+
+  //   g.popTransform();
+  // }
 };
 
 window.addEventListener("load", function() {
@@ -423,10 +370,12 @@ class Room extends Drawing2d.Object {
 
     this.walls = [];
     this.polygon = polygon;
+    this.outsideWallWidth = 6;
   }
 
   draw(g) {
-    g.drawLines(this.polygon, 6, "gray", true);
+    super.draw(g);
+    g.drawLines(this.polygon, this.outsideWallWidth, "gray", true);
   }
 }
 
@@ -435,10 +384,9 @@ class Wall extends Drawing2d.Object {
     super();
   
     this.line = new Tarumae.LineSegment2D(x1, y1, x2, y2);
-    this.angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+    this.lineAngle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
 
-    this.width = 6;
-
+    this.width = 4;
     this.polygon = [];
   }
 
@@ -459,25 +407,24 @@ class WallChildObject extends Drawing2d.Line {
     this.loc = loc;
     this.size = size;
     
-    const angle = wall.angle;
+    this.origin.set(loc[0], loc[1]);
+    this.angle = this.wall.lineAngle;
 
-    const m = Tarumae.Matrix3.makeRotation(angle);
+    const m = Tarumae.Matrix3.makeRotation(this.angle);
     const hw = size * 0.5, hh = this.wall.width * 0.5;
-    const start = new Tarumae.Point(-hw, -hw).mulMat(m),
-      end = new Tarumae.Point(-hh, hh).mulMat(m);
     
-    this.line.start = start;
-    this.line.end = end;
+    this.line.start = new Tarumae.Point(-hw, -hh).mulMat(m);
+    this.line.end = new Tarumae.Point(hw, hh).mulMat(m);
   }
 
-  render(g) {
-    const m = Tarumae.Matrix3.makeTranslation(this.loc[0], this.loc[1]);
-    m.rotate(this.wall.angle);
+  // render(g) {
+  //   const m = Tarumae.Matrix3.makeTranslation(this.loc[0], this.loc[1]);
+  //   m.rotate(this.wall.angle);
 
-    g.pushTransform(m);
-    super.render(g);
-    g.popTransform();
-  }
+  //   g.pushTransform(m);
+  //   super.render(g);
+  //   g.popTransform();
+  // }
 }
 
 class Door extends WallChildObject {
