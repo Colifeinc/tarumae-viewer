@@ -744,7 +744,7 @@ Tarumae.EditorRefRange.prototype.draw = function(renderer) {
   var loc = this.getWorldLocation();
   var halfSize = this.scale.mul(0.5);
   
-  renderer.drawFocusBox({
+  renderer.drawFocusBBox({
     min: Vec3.add(loc, halfSize.neg()),
     max: Vec3.add(loc, halfSize),
   }, 0.1, 2, this.color);
@@ -771,7 +771,7 @@ Tarumae.EditorResizeGuideBoundingBox.prototype.draw = function(renderer) {
   var loc = this.getWorldLocation();
   var halfSize = this.scale.mul(0.5);
   
-  renderer.drawFocusBox({
+  renderer.drawFocusBBox({
     min: Vec3.add(loc, halfSize.neg()),
     max: Vec3.add(loc, halfSize),
   }, 0.1, 2, this.color);

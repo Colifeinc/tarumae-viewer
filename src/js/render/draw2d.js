@@ -1,5 +1,332 @@
 import Tarumae from "../entry";
-import { start } from "pretty-error";
+import { Vec2 } from "../math/vector"
+
+////////// Point //////////
+
+// Tarumae.Point = class {
+// 	constructor(x, y) {
+// 		this.x = x;
+// 		this.y = y;
+// 	}
+	
+// 	set(x, y) {
+// 		this.x = x;
+// 		this.y = y;
+// 	}
+
+// 	clone() {
+// 		return new Tarumae.Point(this.x, this.y);
+// 	}
+
+// 	mulMat(m) {
+// 		return new Tarumae.Point(
+// 			this.x * m.a1 + this.y * m.a2 + m.a3,
+// 			this.x * m.b1 + this.y * m.b2 + m.b3);
+// 	}
+// };
+
+// Tarumae.Point.zero = new Tarumae.Point(0, 0);
+
+Tarumae.Point = Vec2;
+
+////////// Size //////////
+
+Tarumae.Size = class {
+	constructor(w, h) {
+		switch (arguments.length) {
+			case 0:
+				this.width = 0;
+				this.height = 0;
+				break;
+
+			case 1:
+				var obj = arguments;
+				if (typeof obj === "object") {
+					this.width = obj.width;
+					this.height = obj.height;
+				}
+				break;
+		
+			case 2:
+				this.width = w;
+				this.height = h;
+				break;
+		}
+
+		this._arr = [this.width, this.height];
+	}
+	
+	clone() {
+		return new Tarumae.Size(this.width, this.height);
+	}
+
+	toArray() {
+		this._arr[0] = this.width;
+		this._arr[1] = this.height;
+		return this._arr;
+	}
+};
+
+////////// BBox2D //////////
+
+Tarumae.BBox2D = class {
+	constructor(a, b, c, d) {
+		switch (arguments.length) {
+			case 0:
+				this.min = Vec2.zero.clone();
+				this.max = Vec2.zero.clone();
+				break;
+			
+			case 2:
+				this.min = a;
+				this.max = b;
+				break;
+			
+			case 4:
+				this.min.x = a;
+				this.min.y = b;
+				this.max.x = c;
+				this.max.y = d;
+				break;
+			
+			default:
+				throw new Error("BBox2D: unsupported argument count");
+		}
+	}
+
+	static fromTwoPoints(v1, v2) {
+		const minx = Math.min(v1.x, v2.x),
+			miny = Math.min(v1.y, v2.y),
+			maxx = Math.max(v1.x, v2.x),
+			maxy = Math.max(v1.y, v2.y);
+		
+		return new Tarumae.BBox2D(
+			new Tarumae.Point(minx, miny), new Tarumae.Point(maxx, maxy));
+	}
+
+	intersectsBBox2D(box2) {
+		if (this.max.x < box2.min.x) return false;
+		if (this.min.x > box2.max.x) return false;
+		if (this.max.y < box2.min.y) return false;
+		if (this.min.y > box2.max.y) return false;
+	}
+};
+
+////////// Rect //////////
+
+Tarumae.Rect = class {
+	constructor(x, y, width, height) {
+		switch (arguments.length) {
+			default:
+				this.x = 0;
+				this.y = 0;
+				this.width = 0;
+				this.height = 0;
+				break;
+
+			case 2:
+				this.x = arguments[0].x;
+				this.y = arguments[0].y;
+				this.width = arguments[1].width;
+				this.height = arguments[1].height;
+				break;
+
+			case 4:
+				this.x = x;
+				this.y = y;
+				this.width = width;
+				this.height = height;
+				break;
+		}
+	}
+
+	clone() {
+		return new Tarumae.Rect(this.x, this.y, this.width, this.height);
+	}
+
+	contains(pos) {
+		return this.x <= pos.x && this.y <= pos.y
+			&& this.right >= pos.x && this.bottom >= pos.y;
+	}
+	
+	moveTo(x, y) {
+		this.x = x;
+		this.y = y;
+	}
+	
+	offset(value) {
+		this.x += value.x;
+		this.y += value.y;
+	}
+
+	get right() {
+		return this.x + this.width;
+	}
+	
+	set right(v) {
+		this.width = this.x + v;
+	}
+
+	get bottom() {
+		return this.y + this.height;
+	}
+	
+	set bottom(v) {
+		this.height = this.y + v;
+	}
+
+	get origin() {
+		return new Tarumae.Point(
+			this.x + this.width / 2,
+			this.y + this.height / 2);
+	}
+	
+	set origin(p) {
+		this.x = p.x - this.width / 2;
+		this.y = p.y - this.height / 2;
+	}
+
+	get topLeft() {
+		return new Tarumae.Point(this.x, this.y);
+	}
+
+	get topRight() {
+		return new Tarumae.Point(this.right, this.y);
+	}
+
+	get bottomLeft() {
+		return new Tarumae.Point(this.x, this.bottom);
+	}
+
+	get bottomRight() {
+		return new Tarumae.Point(this.right, this.bottom);
+	}
+
+	get topEdge() {
+		return new Tarumae.LineSegment2D(this.x, this.y, this.right, this.y);
+	}
+	
+	get bottomEdge() {
+		return new Tarumae.LineSegment2D(this.x, this.bottom, this.right, this.bottom);
+	}
+
+	get leftEdge() {
+		return new Tarumae.LineSegment2D(this.x, this.y, this.x, this.bottom);
+	}
+	
+	get rightEdge() {
+		return new Tarumae.LineSegment2D(this.right, this.y, this.right, this.bottom);
+	}
+
+	strink(x, y) {
+		this.x += x;
+		this.width -= x;
+		this.y += y;
+		this.height -= y;
+	}
+
+	set(x, y, width, height) {
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
+	}
+
+	static createFromPoints(p1, p2) {
+		var minx = Math.min(p1.x, p2.x);
+		var miny = Math.min(p1.y, p2.y);
+		var maxx = Math.max(p1.x, p2.x);
+		var maxy = Math.max(p1.y, p2.y);
+	
+		return new Tarumae.Rect(minx, miny, maxx - minx, maxy - miny);
+	}
+};
+
+////////// LineSegment2D //////////
+
+Tarumae.LineSegment2D = class {
+	constructor(x1, y1, x2, y2) {
+		this.start = { x: x1, y: y1 };
+		this.end = { x: x2, y: y2 };
+
+		this.bbox = new Tarumae.BBox2D(
+			Tarumae.Point.zero.clone(), Tarumae.Point.zero.clone());
+		this.updateBoundingBox();
+	}
+
+	get x1() {
+		return this.start.x;
+	}
+	set x1(v) {
+		this.start.x = v;
+		this.updateBoundingBoxX();
+	}
+	
+	get y1() {
+		return this.start.y;
+	}
+	set y1(v) {
+		this.start.y = v;
+		this.updateBoundingBoxY();
+	}
+
+	get x2() {
+		return this.end.x;
+	}
+	set x2(v) {
+		this.end.x = v;
+		this.updateBoundingBoxX();
+	}
+	
+	get y2() {
+		return this.end.y;
+	}
+	set y2(v) {
+		this.end.y = v;
+		this.updateBoundingBoxY();
+	}
+	
+	updateBoundingBox() {
+		this.updateBoundingBoxX();
+		this.updateBoundingBoxY();
+	}
+
+	updateBoundingBoxX() {
+		this.bbox.min.x = Math.min(this.start.x, this.end.x) - 1;
+		this.bbox.max.x = Math.max(this.start.x, this.end.x) + 1;
+	}
+
+	updateBoundingBoxY() {
+		this.bbox.min.y = Math.min(this.start.y, this.end.y) - 1;
+		this.bbox.max.y = Math.max(this.start.y, this.end.y) + 1;
+	}
+
+	intersectsLineSegment(l2) {
+
+	}
+};
+
+Tarumae.Polygon = class {
+	constructor(points) {
+		this.points = points;
+		this.bbox = new Tarumae.BBox2D();
+		this.updateBoundingBox();
+	}
+
+	updateBoundingBox() {
+		for (let i = 0; i < this.points.length; i++) {
+			const x = this.points[i][0], y = this.points[i][1];
+			
+			const min = this.bbox.min, max = this.bbox.max;
+			if (min.x > x) min.x = x;
+			if (min.y > y) min.y = y;
+			if (max.x < x) max.x = x;
+			if (max.y < y) max.y = y;
+		}
+	}
+};
+
+////////// DrawingContext2D //////////
 
 Tarumae.DrawingContext2D = class {
 	constructor(canvas, ctx) {
@@ -274,68 +601,6 @@ Tarumae.DrawingContext2D = class {
 			ctx.stroke();
 		}
 	}
-		
-	drawBox(box, width, color) {
-		if (!box) return;
-		
-		var points = this.transformPoints([
-			{ x: box.min.x, y: box.min.y, z: box.min.z },
-			{ x: box.max.x, y: box.min.y, z: box.min.z },
-			{ x: box.min.x, y: box.max.y, z: box.min.z },
-			{ x: box.max.x, y: box.max.y, z: box.min.z },
-		
-			{ x: box.min.x, y: box.min.y, z: box.max.z },
-			{ x: box.max.x, y: box.min.y, z: box.max.z },
-			{ x: box.min.x, y: box.max.y, z: box.max.z },
-			{ x: box.max.x, y: box.max.y, z: box.max.z },
-		]);
-		
-		this.drawLineSegments([
-			points[0], points[1], points[2], points[3],
-			points[4], points[5], points[6], points[7],
-		
-			points[0], points[4], points[1], points[5],
-			points[2], points[6], points[3], points[7],
-		
-			points[0], points[4], points[1], points[5],
-			points[2], points[6], points[3], points[7],
-		
-			points[0], points[2], points[1], points[3],
-			points[4], points[6], points[5], points[7],
-		], width, color);
-	}
-		
-	drawFocusBox(box, len, width, color) {
-		if (!box) return;
-		
-		len = len || 0.1;
-		
-		var points = this.transformPoints([
-			{ x: box.min.x, y: box.min.y, z: box.min.z },
-			{ x: box.max.x, y: box.min.y, z: box.min.z },
-			{ x: box.min.x, y: box.max.y, z: box.min.z },
-			{ x: box.max.x, y: box.max.y, z: box.min.z },
-		
-			{ x: box.min.x, y: box.min.y, z: box.max.z },
-			{ x: box.max.x, y: box.min.y, z: box.max.z },
-			{ x: box.min.x, y: box.max.y, z: box.max.z },
-			{ x: box.max.x, y: box.max.y, z: box.max.z },
-		]);
-		
-		this.drawLineSegments2D([
-			points[0], points[1], points[2], points[3],
-			points[4], points[5], points[6], points[7],
-		
-			points[0], points[4], points[1], points[5],
-			points[2], points[6], points[3], points[7],
-		
-			points[0], points[4], points[1], points[5],
-			points[2], points[6], points[3], points[7],
-		
-			points[0], points[2], points[1], points[3],
-			points[4], points[6], points[5], points[7],
-		], width, color);
-	};
 		
 	drawArrow(from, to, width, color, arrowSize) {
 		var ctx = this.ctx;

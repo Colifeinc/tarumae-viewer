@@ -172,6 +172,8 @@ Tarumae.Matrix3 = class {
 	}
 };
 
+Tarumae.Matrix3.identity = new Tarumae.Matrix3().loadIdentity();
+
 ///////////////////// Matrix4 //////////////////////
 
 Tarumae.Matrix4 = class {

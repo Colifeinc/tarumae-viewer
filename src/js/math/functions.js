@@ -7,7 +7,6 @@
 
 import Tarumae from "../entry"
 import { Vec3, Vec4 } from "./vector"
-import { SSL_OP_TLS_BLOCK_PADDING_BUG } from "constants";
 
 Tarumae.MathFunctions = {
   _PIAngleDelta: Math.PI / 180.0,
@@ -206,6 +205,8 @@ Tarumae.MathFunctions = {
   },
 
   distancePointToLineThresholdXY: function(p, x1, y1, x2, y2) {
+    // source: https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+
     var A = p.x - x1;
     var B = p.y - y1;
     var C = x2 - x1;
@@ -253,10 +254,7 @@ Tarumae.MathFunctions = {
         px2 = polygon[j][0], py2 = polygon[j][1];
       
       const dist = this.distancePointToLineThresholdXY(p, px1, py1, px2, py2);
-      console.log(dist);
-      //if (dist >= 0 && dist <= 1) {
-        if (dist < minDist) minDist = dist;
-      //}
+      if (dist < minDist) minDist = dist;
     }
 
     return minDist;

@@ -1,5 +1,6 @@
 import Tarumae from "../entry"
 import "../utility/event"
+import { Vec2 } from "../math/vector";
 
 var Draw2D = {};
 
@@ -49,56 +50,12 @@ Draw2D.Scene2D = class {
   render(g) {
     for (var i = 0; i < this.objects.length; i++) {
       var obj = this.objects[i];
-      if (obj) {
-        this.drawObject(g, obj);
+      if (obj && obj.visible) {
+        obj.render(g);
       }
     }
 
     this.ondraw(g);
-  }
-
-  drawObject(g, obj) {
-    var style = obj.style;
-    
-    if (style) {
-      if (style.strokeWidth) g.strokeColor = style.strokeWidth;
-      if (style.strokeStyle) g.strokeStyle = style.strokeStyle;
-      if (style.fillColor) g.fillColor = style.fillColor;
-    }
-    
-    var transformed = false, t = undefined;
-
-    if (obj.angle !== 0) {
-      t = obj.transform.loadIdentity();
-    
-      var origin = obj.getOrigin();
-      t.translate(origin.x, origin.y);
-      t.rotate(obj.angle);
-      t.translate(-origin.x, -origin.y);
-    
-      g.pushTransform(t);
-      transformed = true;
-    }
-
-    if (obj.scale.x !== 1 || obj.scale.y !== 1) {
-      t = t || obj.transform.loadIdentity();
-      t.scale(obj.scale.x, obj.scale.y);
-    }
-
-    obj.draw(g);
-    
-    for (var k = 0; k < obj.objects.length; k++) {
-      var child = obj.objects[k];
-      if (child) {
-        this.drawObject(g, child);
-      }
-    }
-    
-    if (transformed) {
-      g.popTransform();
-    }
-    
-    g.resetDrawingStyle();
   }
 
   requireUpdateFrame() {
@@ -140,7 +97,7 @@ Draw2D.Scene2D = class {
     var target = null;
 
     this.eachObjectInv(function(obj) {
-      if (obj.visible === true && obj.hitTestPoint(p)) {
+      if (obj.visible && obj.hitTestPoint(p)) {
         target = obj;
         return false;
       }
@@ -302,12 +259,12 @@ Draw2D.Object = class {
     this.objects = [];
 
     this.zIndex = 0;
-    this.bbox = new Tarumae.Rect();
+    this.rect = new Tarumae.Rect();
     this.style = new Draw2D.Style();
     this.visible = true;
 
     this.angle = 0;
-    this.scale = { x: 1, y: 1 };
+    this.scale = new Vec2(1, 1);
     this.transform = new Tarumae.Matrix3().loadIdentity();
   }
 
@@ -354,15 +311,19 @@ Draw2D.Object = class {
   }
 
   hitTestPoint(p) {
-    return this.bbox.contains(p);
+    return this.rect.contains(p);
   }
 
   pointToObject(p) {
-    return new Tarumae.Point(p.x - this.bbox.x, p.y - this.bbox.y);
+    return new Tarumae.Point(p.x - this.rect.x, p.y - this.rect.y);
   }
 
-  getOrigin() {
-    return new Tarumae.Point(this.bbox.x + this.bbox.width / 2, this.bbox.y + this.bbox.height / 2);
+  get origin() {
+    return this.rect.origin;
+  }
+
+  set origin(v) {
+    this.rect.origin = v;
   }
 
   mousedown(e) {
@@ -391,12 +352,33 @@ Draw2D.Object = class {
   
   moveTo(p) {
     if (arguments.length === 1) {
-      this.bbox.origin = p;
+      this.rect.origin = p;
       this.onmove();
     } else if (arguments.length === 2) {
-      this.bbox.origin = { x: arguments[0], y: arguments[1] };
+      this.rect.origin = { x: arguments[0], y: arguments[1] };
       this.onmove();
     }
+  }
+
+  render(g) {
+    const style = this.style;
+      
+    if (style) {
+      if (style.strokeWidth) g.strokeColor = style.strokeWidth;
+      if (style.strokeStyle) g.strokeStyle = style.strokeStyle;
+      if (style.fillColor) g.fillColor = style.fillColor;
+    }
+
+    this.draw(g);
+
+    for (let k = 0; k < this.objects.length; k++) {
+      const child = this.objects[k];
+      if (child && child.visible) {
+        child.render(g);
+      }
+    }
+      
+    // g.resetDrawingStyle();
   }
 };
 
@@ -408,18 +390,60 @@ new Tarumae.EventDispatcher(Draw2D.Object).registerEvents(
 	"keyup", "keydown",
   "childAdd", "childRemove",
   "move", "rotate",
-	"draw");
+  "draw");
+  
+////////////// ContainerObject //////////////
+
+Draw2D.ContainerObject = class extends Draw2D.Object {
+  constructor() {
+    super();
+
+    this.rect = new Tarumae.Rect(0, 0, 100, 100);
+    this.scale = new Vec2(1, 1);
+  }
+
+  render(g) {
+    
+    let t = undefined;
+  
+    if (this.rect.x !== 0 || this.rect.y !== 0) {
+      t = this.transform.loadIdentity();
+      t.translate(this.rect.x, this.rect.y);
+    }
+
+    if (this.angle !== 0) {
+      t = t || this.transform.loadIdentity();
+      
+      t.rotate(this.angle, this.origin.x, this.origin.y);
+    }
+  
+    if (this.scale.x !== 1 || this.scale.y !== 1) {
+      t = t || this.transform.loadIdentity();
+      t.scale(this.scale.x, this.scale.y);
+    }
+
+    if (t) {
+      g.pushTransform(t);
+    }
+      
+    super.render(g);
+
+    if (t) {
+      g.popTransform();
+    }
+  }
+};
 
 ////////////// Line //////////////
 
 Draw2D.Rect = class extends Draw2D.Object {
   constructor(x, y, w, h) {
     super();
-    this.bbox = new Tarumae.Rect(x, y, w, h);
+    this.rect = new Tarumae.Rect(x, y, w, h);
   }
   
   draw(g) {
-    g.drawRect(this.bbox, this.style.strokeWidth, this.style.strokeColor, this.style.fillColor);
+    g.drawRect(this.rect, this.style.strokeWidth, this.style.strokeColor, this.style.fillColor);
 
     this.ondraw(g);
   }
@@ -428,8 +452,15 @@ Draw2D.Rect = class extends Draw2D.Object {
 ////////////// Line //////////////
 
 Draw2D.Line = class extends Draw2D.Object {
-  constructor() {
+  constructor(start, end) {
     super();
+
+    this.line = new Tarumae.LineSegment2D(start, end);
+  }
+
+  draw(g) {
+    g.drawLine(this.line.start, this.line.end,
+      this.style.strokeWidth, this.style.strokeColor);
   }
 };
 
@@ -454,11 +485,11 @@ Draw2D.Image = class extends Draw2D.Object {
     super();
 
     this.img = img;
-    this.bbox = new Tarumae.Rect(x, y, w, h);
+    this.rect = new Tarumae.Rect(x, y, w, h);
   }
 
   draw(g) {
-    g.drawImage(this.bbox, this.img);
+    g.drawImage(this.rect, this.img);
   }
 };
 
@@ -471,16 +502,16 @@ Draw2D.ActivePoint = class extends Draw2D.Object {
     this.style.strokeWidth = 2;
     this.style.strokeColor = "#385377";
     this.style.fillColor = "rgba(150,150,255,0.3)";
-    this.bbox = new Tarumae.Rect(x - 6, y - 6, 12, 12);
+    this.rect = new Tarumae.Rect(x - 6, y - 6, 12, 12);
   }
 
   draw(g) {
-    g.drawEllipse(this.bbox, this.style.strokeWidth, this.style.strokeColor, this.style.fillColor);
+    g.drawEllipse(this.rect, this.style.strokeWidth, this.style.strokeColor, this.style.fillColor);
   }
 
   drag(e) {
-    this.bbox.x += e.movement.x;
-    this.bbox.y += e.movement.y;
+    this.rect.x += e.movement.x;
+    this.rect.y += e.movement.y;
 
     this.ondrag(e);
   }

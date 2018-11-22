@@ -4,6 +4,7 @@ import "../scene/viewer";
 import "../utility/archive";
 import "../utility/res";
 import Drawing2d from "../draw/scene2d";
+import { isThisSecond } from "date-fns";
 
 const TarumaeDesigner = {
 };
@@ -16,9 +17,7 @@ TarumaeDesigner.SelectableGrid = class extends Tarumae.SceneObject {
     this.groundMesh.composeMode = Tarumae.Mesh.ComposeModes.TriangleStrip;
 
     const gridCount = 10;
-    const halfGridCount = gridCount / 2;
     const stride = 0.1;
-    const gridSize = gridCount * stride;
     const start = -0.5;
 
     this.groundMesh.vertices = new Array(gridCount * 3 * 2);
@@ -61,34 +60,34 @@ AutoFloor.LayoutDesigner = class {
   constructor(renderer) {
     this.renderer = renderer;
     this.ctx = this.renderer.drawingContext2D;
-    this.scene = this.renderer.createScene();
-    this.scene.onframe = _ => this.draw();
+    // this.scene = this.renderer.createScene();
+    const scene = new Drawing2d.Scene2D();
+    scene.renderer = renderer;
+    this.scene = scene;
+    renderer.scene = scene;
+    this.scene.ondraw = _ => this.draw();
 
     this.data = {
       walls: [
-        // { from: [0, 0], to: [20, 0] },
-        // { from: [20, 0], to: [20, 30] },
-        // { from: [20, 30], to: [5, 30] },
-        // { from: [5, 30], to: [5, 10] },
-        // { from: [5, 10], to: [0, 10] },
-        // { from: [0, 10], to: [0, 0] },
         [0, 0], [400, 0], [400, 320], [160, 320], [160, 160], [0, 160],
       ],
       doors: [
-        { loc: [0, 45], size: 30, direction: [0, 0] },
+        { loc: [0, 45], size: 30, wallIndex: 5, dirs: [0, 0] },
       ],
       windows: [
-        { loc: [180, 320], size: 40, direction: [0, 0] },
-        { loc: [220, 320], size: 40, direction: [0, 0] },
-        { loc: [260, 320], size: 40, direction: [0, 0] },
-        { loc: [300, 320], size: 40, direction: [0, 0] },
-        { loc: [340, 320], size: 40, direction: [0, 0] },
+        { loc: [200, 320], size: 40, wallIndex: 3, dirs: [0, 0] },
+        { loc: [240, 320], size: 40, wallIndex: 3, dirs: [0, 0] },
+        { loc: [280, 320], size: 40, wallIndex: 3, dirs: [0, 0] },
+        { loc: [320, 320], size: 40, wallIndex: 3, dirs: [0, 0] },
+        { loc: [360, 320], size: 40, wallIndex: 3, dirs: [0, 0] },
       ],
       pillars: [
         [[0, 0], [0, 100], [100, 100], [100, 0], [0, 0]],
       ],
       objects: [],
     };
+
+    this.createLayout(this.data);
 
     this.grid = [];
 
@@ -163,22 +162,62 @@ AutoFloor.LayoutDesigner = class {
       10
     ];
 
-    this.generateCells();
+    // this.generateCells();
   }
 
   show() {
     this.scene.show();
   }
 
+  createLayout(data) {
+    const layout = new Drawing2d.ContainerObject();
+    layout.rect.moveTo(200, 200);
+    layout.scale.set(2, 2);
+    this.scene.add(layout);
+
+    const polygon = data.walls;
+
+    const room = new Room(polygon);
+    layout.add(room);
+
+    for (let i = 0, j = 0; i < polygon.length; i++ , j++) {
+      if (j >= polygon.length) j = 0;
+
+      const x1 = polygon[i][0], y1 = polygon[i][1], x2 = polygon[j][0], y2 = polygon[j][1];
+      const wall = new Wall(x1, y1, x2, y2);
+      room.walls.push(wall);
+      room.add(wall);
+    }
+
+    for (const d of data.doors) {
+      const wall = room.walls[d.wallIndex];
+      const door = new Door(wall, d.loc, d.size, d.dirs);
+      wall.add(door);
+    }
+    
+    for (const w of data.windows) {
+      const wall = room.walls[w.wallIndex];
+      const window = new Window(wall, w.loc, w.size, w.dirs);
+      wall.add(window);
+    }
+  }
+
   generateCells() {
     const gridSize = 20, halfGridSize = gridSize * 0.5;
-    let cellIndex = 0;
+    let cellIndex = -1;
 
     const walls = this.data.walls;
     const mf = Tarumae.MathFunctions;
 
+    let maxDists = {
+      wall: 0,
+      entry: 0,
+      window: 0,
+    };
+
     for (let y = 0, yi = 0; y <= 300; y += gridSize, yi++) {
       for (let x = 0, xi = 0; x < 400; x += gridSize, xi++) {
+        cellIndex++;
 
         const rect = new Tarumae.Rect(x, y, gridSize, gridSize);
 
@@ -194,22 +233,22 @@ AutoFloor.LayoutDesigner = class {
           index: cellIndex,
           //origin: new Tarumae.Point(x + gridSize * 0.5, y + gridSize * 0.5),
           rect,
-          borders: {
-            // top: new Tarumae.Rect(x, y, gridSize, 6),
-            // bottom: new Tarumae.Rect(x, y + gridSize - 6, gridSize, 6),
-            // left: new Tarumae.Rect(x, y, 6, gridSize),
-            // right: new Tarumae.Rect(x + gridSize - 6, y, 6, gridSize),
+          dists: {
           },
         };
 
-        // if (Tarumae.MathFunctions.rectIntersectsPolygon(c.rect, this.data.walls)) {
-        //   c.obstacle = true;
-        // }
+        const wallDist = mf.distancePointToPolygon(rect.origin, walls);
+        c.dists.wall = wallDist;
+        if (wallDist > maxDists.wall) maxDists.wall = wallDist;
 
-        if (mf.distancePointToPolygon(rect.origin, walls) < gridSize) {
-          c.wallAdjacent = true;
+        for (const w of this.data.windows) {
+          
         }
-        
+
+        const windowDist = mf.distancePointToLine(rect.origin, walls);
+        c.dists.window = windowDist;
+        if (windowDist > maxDists.window) maxDists.window = windowDist;
+
         // this.markupCellBorder(c);
 
         // if (xi === 0) c.left = "wall";
@@ -224,14 +263,17 @@ AutoFloor.LayoutDesigner = class {
         // if (yi == 6 && xi > 5 && xi < 8) c.way = true;
 
         this.grid.push(c);
-        cellIndex++;
       }
     }
-  }
 
-  markupCellBorder(c) {
-    const walls = this.data.walls;
-   
+    for (const c of this.grid) {
+
+      c.dists.wallp = c.dists.wall / maxDists.wall;
+
+      if (c.dist < gridSize) {
+        c.wallAdjacent = true;
+      }
+    }
   }
 
   makeTableCells() {
@@ -242,45 +284,41 @@ AutoFloor.LayoutDesigner = class {
   }
 
   draw() {
-    const r = this.ctx;
-    const data = this.data;
+    // const r = this.ctx;
+    // const data = this.data;
 
-    const walls = data.walls;
+    // const walls = data.walls;
 
-    const m = new Tarumae.Matrix3().loadIdentity();
-    m.scale(2, 2);
-    m.translate(100, 100);
-    r.pushTransform(m);
+    // const m = new Tarumae.Matrix3().loadIdentity();
+    // m.translate(100, 100);
+    // m.scale(2, 2);
+    // r.pushTransform(m);
     
     this.drawGrid();
 
-    r.drawLines(walls, 6, "gray", true);
+    // r.drawLines(walls, 6, "gray", true);
     
-    for (const [_, p] of data.pillars.entries()) {
-      r.drawLines(p, 0, undefined, "gray");
-    }
+    // for (const [_, p] of data.pillars.entries()) {
+    //   r.drawLines(p, 0, undefined, "gray");
+    // }
     // for (const [_, w] of walls.entries()) {
       // r.drawLine({ x: w.from[0], y: w.from[1] }, { x: w.to[0], y: w.to[1] }, 5, "gray");
     // }
 
-    for (const [_, d] of data.doors.entries()) {
-      this.drawDoor(d);
-    }
-
-    for (const [_, w] of data.windows.entries()) {
-      this.drawWindow(w);
-    }
+    // for (const [_, d] of data.doors.entries()) {
+    //   this.drawDoor(d);
+    // }
 
     // for (const [_, w] of data.windows.entries()) {
     //   this.drawWindow(w);
     // }
 
-    for (const [_, o] of data.objects.entries()) {
-      this.drawObjects(o);
-    }
+    // for (const [_, o] of data.objects.entries()) {
+    //   this.drawObjects(o);
+    // }
 
 
-    r.popTransform();
+    // r.popTransform();
   }
 
   drawDoor(d) {
@@ -291,14 +329,6 @@ AutoFloor.LayoutDesigner = class {
 
     g.drawRect({ x: x - 2, y: y, width: h, height: w }, 1, "gray", "white");
     g.drawArc({ x: x + 3, y: y, width: w, height: w }, 0, 90, 1, "gray", "white");
-  }
-
-  drawWindow(w) {
-    const g = this.ctx;
-    const x = w.loc[0], y = w.loc[1];
-
-    g.drawRect({ x: x, y: y - 2, width: w.size, height: 4 }, 1, "gray", "white");
-    g.drawRect({ x: x, y: y + 2, width: w.size, height: 2 }, 1, "gray", "white");
   }
 
   drawObjects(o) {
@@ -359,10 +389,13 @@ AutoFloor.LayoutDesigner = class {
       if (c.way) color = '#ffffc0';
       if (c.entry) color = '#ffffc0';
 
+      const p = c.dists * 255;
+      color = `rgb(150, ${p}, ${p})`;
+
       const o = c.rect.origin;
 
       g.drawRect(c.rect, 1, "white", color);
-      g.drawRect(new Tarumae.Rect(o.x - 2, o.y - 2, 4, 4), 0, undefined, "silver");
+      // g.drawRect(new Tarumae.Rect(o.x - 2, o.y - 2, 4, 4), 0, undefined, "silver");
       g.drawText(o, c.index, "silver", "center", "5px Arial");
     }
   }
@@ -384,23 +417,92 @@ window.addEventListener("load", function() {
   // __test__(renderer);
 });
 
-class WallLine extends Drawing2d.Object {
-  constructor(startx, starty, endx, endy) {
+class Room extends Drawing2d.Object {
+  constructor(polygon) {
     super();
 
-    this.line = new Tarumae.LineSegment2D(startx, starty, endx, endy);
+    this.walls = [];
+    this.polygon = polygon;
+  }
+
+  draw(g) {
+    g.drawLines(this.polygon, 6, "gray", true);
+  }
+}
+
+class Wall extends Drawing2d.Object {
+  constructor(x1, y1, x2, y2) {
+    super();
+  
+    this.line = new Tarumae.LineSegment2D(x1, y1, x2, y2);
+    this.angle = Math.atan2(y2 - y1, x2 - x1);
+    this.width = 6;
 
     this.polygon = [];
   }
 
   update() {
-
     this.polygon = [];
-
   }
 
   draw(g) {
     g.drawLine(this.line.start, this.line.end, 1);
+  }
+}
+
+class WallChildObject extends Drawing2d.Line {
+  constructor(wall, loc, size) {
+    super();
+
+    this.wall = wall;
+    this.loc = loc;
+    this.size = size;
+    
+    const angle = wall.angle;
+
+    const m = Tarumae.Matrix3.makeRotation(angle);
+    const hw = size * 0.5, hh = this.wall.width * 0.5;
+    const start = new Tarumae.Point(-hw, -hw).mulMat(m),
+      end = new Tarumae.Point(-hh, hh).mulMat(m);
+    
+    this.line.start = start;
+    this.line.end = end;
+  }
+}
+
+class Door extends WallChildObject {
+  constructor(wall, loc, size, dirs) {
+    super(wall, loc, size);
+
+    this.dirs = dirs;
+  }
+}
+
+class Window extends WallChildObject {
+  constructor(wall, loc, size, dirs) {
+    super(wall, loc, size);
+    
+    this.dirs = dirs;
+  }
+
+  draw(g) {
+    // const x = w.loc[0], y = w.loc[1];
+
+    // g.drawRect({ x: x, y: y - 2, width: w.size, height: 4 }, 1, "gray", "white");
+    // g.drawRect({ x: x, y: y + 2, width: w.size, height: 2 }, 1, "gray", "white");
+
+    const m = Tarumae.Matrix3.makeTranslation(this.loc[0], this.loc[1]);
+    m.rotate(this.wall.angle);
+
+    g.pushTransform(m);
+
+    const w = this.size, hw = this.size * 0.5;
+    const h = this.wall.width, hh = h * 0.5;
+
+    g.drawRect(new Tarumae.Rect(-hw, -hh, w, h), 1, "gray", "white");
+    g.drawRect(new Tarumae.Rect(-hw, h - 2, w, 2), 1, "gray", "white");
+
+    g.popTransform();
   }
 }
 

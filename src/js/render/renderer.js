@@ -602,7 +602,7 @@ Tarumae.Renderer = class {
 	}
 	
 	createScene2D() {
-		if (!Tarumae.Draw2D && !Draw2D) return null;
+		if (!Tarumae.Draw2D) return null;
 	
 		var scene = new Draw2D.Scene2D();
 		scene.renderer = this;
@@ -929,8 +929,8 @@ Tarumae.Renderer = class {
 		var points = this.transformPoints([from, to]);
 		this.drawLine2D(points[0], points[1], width, color);
 	};
-		
-	drawBox(box, width, color) {
+
+	drawBBox(box, width, color) {
 		if (!box) return;
 		
 		var points = this.transformPoints([
@@ -959,8 +959,8 @@ Tarumae.Renderer = class {
 			points[4], points[6], points[5], points[7],
 		], width, color);
 	}
-		
-	drawFocusBox(box, len, width, color) {
+
+	drawFocusBBox(box, len, width, color) {
 		if (!box) return;
 		
 		len = len || 0.1;
