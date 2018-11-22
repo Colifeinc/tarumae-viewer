@@ -75,11 +75,11 @@ AutoFloor.LayoutDesigner = class {
         { loc: [0, 45], size: 30, wallIndex: 5, dirs: [0, 0] },
       ],
       windows: [
-        { loc: [200, 320], size: 40, wallIndex: 3, dirs: [0, 0] },
-        { loc: [240, 320], size: 40, wallIndex: 3, dirs: [0, 0] },
-        { loc: [280, 320], size: 40, wallIndex: 3, dirs: [0, 0] },
-        { loc: [320, 320], size: 40, wallIndex: 3, dirs: [0, 0] },
-        { loc: [360, 320], size: 40, wallIndex: 3, dirs: [0, 0] },
+        { loc: [200, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
+        { loc: [240, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
+        { loc: [280, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
+        { loc: [320, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
+        { loc: [360, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
       ],
       pillars: [
         [[0, 0], [0, 100], [100, 100], [100, 0], [0, 0]],
@@ -171,7 +171,7 @@ AutoFloor.LayoutDesigner = class {
 
   createLayout(data) {
     const layout = new Drawing2d.ContainerObject();
-    layout.rect.moveTo(200, 200);
+    layout.bbox.moveTo(200, 200);
     layout.scale.set(2, 2);
     this.scene.add(layout);
 
@@ -180,7 +180,7 @@ AutoFloor.LayoutDesigner = class {
     const room = new Room(polygon);
     layout.add(room);
 
-    for (let i = 0, j = 0; i < polygon.length; i++ , j++) {
+    for (let i = 0, j = 1; i < polygon.length; i++, j++) {
       if (j >= polygon.length) j = 0;
 
       const x1 = polygon[i][0], y1 = polygon[i][1], x2 = polygon[j][0], y2 = polygon[j][1];
@@ -321,15 +321,15 @@ AutoFloor.LayoutDesigner = class {
     // r.popTransform();
   }
 
-  drawDoor(d) {
-    const g = this.ctx;
+  // drawDoor(d) {
+  //   const g = this.ctx;
     
-    const x = d.loc[0], y = d.loc[1];
-    const w = d.size, h = 5;
+  //   const x = d.loc[0], y = d.loc[1];
+  //   const w = d.size, h = 5;
 
-    g.drawRect({ x: x - 2, y: y, width: h, height: w }, 1, "gray", "white");
-    g.drawArc({ x: x + 3, y: y, width: w, height: w }, 0, 90, 1, "gray", "white");
-  }
+  //   g.drawRect({ x: x - 2, y: y, width: h, height: w }, 1, "gray", "white");
+  //   g.drawArc({ x: x + 3, y: y, width: w, height: w }, 0, 90, 1, "gray", "white");
+  // }
 
   drawObjects(o) {
     switch (o.type) {
@@ -435,7 +435,8 @@ class Wall extends Drawing2d.Object {
     super();
   
     this.line = new Tarumae.LineSegment2D(x1, y1, x2, y2);
-    this.angle = Math.atan2(y2 - y1, x2 - x1);
+    this.angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+
     this.width = 6;
 
     this.polygon = [];
@@ -468,6 +469,15 @@ class WallChildObject extends Drawing2d.Line {
     this.line.start = start;
     this.line.end = end;
   }
+
+  render(g) {
+    const m = Tarumae.Matrix3.makeTranslation(this.loc[0], this.loc[1]);
+    m.rotate(this.wall.angle);
+
+    g.pushTransform(m);
+    super.render(g);
+    g.popTransform();
+  }
 }
 
 class Door extends WallChildObject {
@@ -475,6 +485,13 @@ class Door extends WallChildObject {
     super(wall, loc, size);
 
     this.dirs = dirs;
+  }
+
+  draw(g) {
+    const w = this.size, hw = w * 0.5, h = this.wall.width, hh = h * 0.5;
+
+    g.drawRect(new Tarumae.Rect(-hw, -hh, w, h), 1, "gray", "white");
+    g.drawArc(new Tarumae.Rect(hw, hh, w, h), 90, 180, 1, "gray", "white");
   }
 }
 
@@ -486,23 +503,11 @@ class Window extends WallChildObject {
   }
 
   draw(g) {
-    // const x = w.loc[0], y = w.loc[1];
-
-    // g.drawRect({ x: x, y: y - 2, width: w.size, height: 4 }, 1, "gray", "white");
-    // g.drawRect({ x: x, y: y + 2, width: w.size, height: 2 }, 1, "gray", "white");
-
-    const m = Tarumae.Matrix3.makeTranslation(this.loc[0], this.loc[1]);
-    m.rotate(this.wall.angle);
-
-    g.pushTransform(m);
-
     const w = this.size, hw = this.size * 0.5;
     const h = this.wall.width, hh = h * 0.5;
 
     g.drawRect(new Tarumae.Rect(-hw, -hh, w, h), 1, "gray", "white");
-    g.drawRect(new Tarumae.Rect(-hw, h - 2, w, 2), 1, "gray", "white");
-
-    g.popTransform();
+    g.drawRect(new Tarumae.Rect(-hw, -4, w, 2), 1, "gray", "white");
   }
 }
 

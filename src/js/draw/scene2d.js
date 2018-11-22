@@ -258,11 +258,13 @@ Draw2D.Object = class {
   constructor() {
     this.objects = [];
 
-    this.zIndex = 0;
-    this.rect = new Tarumae.Rect();
-    this.style = new Draw2D.Style();
     this.visible = true;
+    this.zIndex = 0;
+    this.style = new Draw2D.Style();
 
+    this.bbox = new Tarumae.BBox2D();
+
+    this.origin = new Tarumae.Point(0, 0);
     this.angle = 0;
     this.scale = new Vec2(1, 1);
     this.transform = new Tarumae.Matrix3().loadIdentity();
@@ -311,19 +313,11 @@ Draw2D.Object = class {
   }
 
   hitTestPoint(p) {
-    return this.rect.contains(p);
+    return this.bbox.contains(p);
   }
 
   pointToObject(p) {
-    return new Tarumae.Point(p.x - this.rect.x, p.y - this.rect.y);
-  }
-
-  get origin() {
-    return this.rect.origin;
-  }
-
-  set origin(v) {
-    this.rect.origin = v;
+    return new Tarumae.Point(p.x - this.bbox.x, p.y - this.bbox.y);
   }
 
   mousedown(e) {
@@ -352,10 +346,10 @@ Draw2D.Object = class {
   
   moveTo(p) {
     if (arguments.length === 1) {
-      this.rect.origin = p;
+      this.bbox.origin = p;
       this.onmove();
     } else if (arguments.length === 2) {
-      this.rect.origin = { x: arguments[0], y: arguments[1] };
+      this.bbox.origin = { x: arguments[0], y: arguments[1] };
       this.onmove();
     }
   }
@@ -380,6 +374,13 @@ Draw2D.Object = class {
       
     // g.resetDrawingStyle();
   }
+
+  update() {
+    this.updateBoundingBox();
+  }
+  
+  updateBoundingBox() {
+  }
 };
 
 // Event declarations
@@ -398,7 +399,7 @@ Draw2D.ContainerObject = class extends Draw2D.Object {
   constructor() {
     super();
 
-    this.rect = new Tarumae.Rect(0, 0, 100, 100);
+    this.bbox = new Tarumae.Rect(0, 0, 100, 100);
     this.scale = new Vec2(1, 1);
   }
 
@@ -406,9 +407,9 @@ Draw2D.ContainerObject = class extends Draw2D.Object {
     
     let t = undefined;
   
-    if (this.rect.x !== 0 || this.rect.y !== 0) {
+    if (this.bbox.x !== 0 || this.bbox.y !== 0) {
       t = this.transform.loadIdentity();
-      t.translate(this.rect.x, this.rect.y);
+      t.translate(this.bbox.x, this.bbox.y);
     }
 
     if (this.angle !== 0) {
@@ -440,12 +441,18 @@ Draw2D.Rect = class extends Draw2D.Object {
   constructor(x, y, w, h) {
     super();
     this.rect = new Tarumae.Rect(x, y, w, h);
+    this.bbox = this.rect.bbox;
   }
   
   draw(g) {
     g.drawRect(this.rect, this.style.strokeWidth, this.style.strokeColor, this.style.fillColor);
 
     this.ondraw(g);
+  }
+
+  updateBoundingBox() {
+    this.bbox.min = this.rect.topLeft;
+    this.bbox.max = this.rect.bottomRight;
   }
 };
 
@@ -462,14 +469,17 @@ Draw2D.Line = class extends Draw2D.Object {
     g.drawLine(this.line.start, this.line.end,
       this.style.strokeWidth, this.style.strokeColor);
   }
+
+  updateBoundingBox() {
+    this.bbox.updateFromTwoPoints(this.line.start, this.line.end);
+  }
 };
 
 ////////////// Ellipse //////////////
 
-Draw2D.Ellipse = class extends Draw2D.Object {
+Draw2D.Ellipse = class extends Draw2D.Rect {
   constructor(x, y, w, h) {
     super();
-    this.rect = new Tarumae.Rect(x, y, w, h);
   }
 
   draw(g) {
@@ -480,12 +490,11 @@ Draw2D.Ellipse = class extends Draw2D.Object {
 
 ////////////// Image //////////////
 
-Draw2D.Image = class extends Draw2D.Object {
+Draw2D.Image = class extends Draw2D.Rect {
   constructor(img, x, y, w, h) {
     super();
 
     this.img = img;
-    this.rect = new Tarumae.Rect(x, y, w, h);
   }
 
   draw(g) {
@@ -495,24 +504,24 @@ Draw2D.Image = class extends Draw2D.Object {
 
 ////////////// Active Point //////////////
 
-Draw2D.ActivePoint = class extends Draw2D.Object {
+Draw2D.ActivePoint = class extends Draw2D.Rect {
   constructor(x, y) {
-    super();
+    super(new Tarumae.Rect(x - 6, y - 6, 12, 12));
 
     this.style.strokeWidth = 2;
     this.style.strokeColor = "#385377";
     this.style.fillColor = "rgba(150,150,255,0.3)";
-    this.rect = new Tarumae.Rect(x - 6, y - 6, 12, 12);
   }
 
   draw(g) {
-    g.drawEllipse(this.rect, this.style.strokeWidth, this.style.strokeColor, this.style.fillColor);
+    g.drawEllipse(this.bbox, this.style.strokeWidth, this.style.strokeColor, this.style.fillColor);
   }
 
   drag(e) {
-    this.rect.x += e.movement.x;
-    this.rect.y += e.movement.y;
+    this.bbox.x += e.movement.x;
+    this.bbox.y += e.movement.y;
 
+    this.update();
     this.ondrag(e);
   }
 };

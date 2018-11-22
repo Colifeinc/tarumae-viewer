@@ -94,14 +94,22 @@ Tarumae.BBox2D = class {
 		}
 	}
 
-	static fromTwoPoints(v1, v2) {
-		const minx = Math.min(v1.x, v2.x),
-			miny = Math.min(v1.y, v2.y),
-			maxx = Math.max(v1.x, v2.x),
-			maxy = Math.max(v1.y, v2.y);
-		
-		return new Tarumae.BBox2D(
-			new Tarumae.Point(minx, miny), new Tarumae.Point(maxx, maxy));
+	get size() {
+		return new Tarumae.Size(this.max.x - this.min.x,
+			this.max.y - this.min.y);
+	}
+
+	get origin() {
+		const size = this.size;
+		return new Tarumae.Point(this.min.x + size.width * 0.5,
+			this.min.y + size.height * 0.5);
+	}
+
+	updateFromTwoPoints(p1, p2) {
+		this.min.x = Math.min(p1.x, p2.x);
+		this.min.y = Math.min(p1.y, p2.y);
+		this.max.x = Math.max(p1.x, p2.x);
+		this.max.y = Math.max(p1.y, p2.y);
 	}
 
 	intersectsBBox2D(box2) {
@@ -109,6 +117,12 @@ Tarumae.BBox2D = class {
 		if (this.min.x > box2.max.x) return false;
 		if (this.max.y < box2.min.y) return false;
 		if (this.min.y > box2.max.y) return false;
+	}
+
+	static fromTwoPoints(v1, v2) {
+		const bbox = new Tarumae.BBox2D();
+		bbox.updateFromTwoPoints(v1, v2);
+		return bbox;
 	}
 };
 
@@ -230,6 +244,10 @@ Tarumae.Rect = class {
 		this.y = y;
 		this.width = width;
 		this.height = height;
+	}
+
+	bbox() {
+		return new Tarumae.BBox2D(this.topLeft, this.bottomRight);
 	}
 
 	static createFromPoints(p1, p2) {
