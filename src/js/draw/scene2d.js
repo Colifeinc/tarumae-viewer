@@ -173,6 +173,7 @@ Draw2D.Scene2D = class {
     
     if (this.dragObject) {
       this.dragObject.enddrag(evtArg);
+      this.dragObject = null;
       this.requireUpdateFrame();
     }
     
@@ -222,7 +223,7 @@ Draw2D.Style = class {
   constructor() {
     this.strokeWidth = 1;
     this.strokeColor = "black";
-    this.fillColor = "transparent";
+    this.fillColor = "white";
   }
 };
 
@@ -371,8 +372,8 @@ Draw2D.Object = class {
     const style = this.style;
       
     if (style) {
-      if (style.strokeWidth) g.strokeColor = style.strokeWidth;
-      if (style.strokeStyle) g.strokeStyle = style.strokeStyle;
+      if (style.strokeWidth) g.strokeWidth = style.strokeWidth;
+      if (style.strokeColor) g.strokeColor = style.strokeColor;
       if (style.fillColor) g.fillColor = style.fillColor;
     }
 

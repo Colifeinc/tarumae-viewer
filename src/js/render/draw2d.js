@@ -395,15 +395,19 @@ Tarumae.DrawingContext2D = class {
 	resetDrawingStyle() {
 		this.strokeWidth = 1;
 		this.strokeColor = "black";
-		this.fillColor = "transparent";
+		this.fillColor = "white";
 	}
 
 	drawRect(rect, strokeWidth, strokeColor, fillColor) {
 		var ctx = this.ctx;
 	
+		strokeWidth = strokeWidth || this.strokeWidth || 1;
+		strokeColor = strokeColor || this.strokeColor || "black";
 		fillColor = fillColor || this.fillColor;
 
-		if (fillColor !== "transparent") {
+		// ctx.beginPath();
+
+		if (fillColor) {
 			ctx.fillStyle = fillColor;
 			ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
 		}
@@ -423,11 +427,11 @@ Tarumae.DrawingContext2D = class {
 			}
 
 			if (ctx.lineWidth > 0) {
-				// ctx.beginPath();
 				ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
-				// ctx.closePath();
 			}
 		}
+		// ctx.closePath();
+
 	}
 
 	drawRoundRect(rect, cornerSize, strokeWidth, strokeColor, fillColor) {
@@ -435,7 +439,7 @@ Tarumae.DrawingContext2D = class {
 		
 		strokeWidth = strokeWidth || this.strokeWidth || 1;
 		strokeColor = strokeColor || this.strokeColor || "black";
-		fillColor = fillColor || this.fillColor;
+		fillColor = fillColor || this.fillColor || "white";
 
 		const minEdge = Math.min(rect.width, rect.height);
 		if (cornerSize > minEdge) cornerSize = minEdge;
