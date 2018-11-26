@@ -15,10 +15,10 @@
 	"license": "MIT",
 	"repository": "git@github.com:bulbinc/tarumae-viewer.git",
 	"dependencies": {
+		"babel-polyfill": "^6.26.0",
 		"glslify": "^6.2.1",
 		"pako": "^1.0.6",
-		"raw-loader": "^0.5.1",
-		"babel-polyfill": "^6.26.0"
+		"raw-loader": "^0.5.1"
 	},
 	"devDependencies": {
 		"babel-cli": "^6.26.0",
