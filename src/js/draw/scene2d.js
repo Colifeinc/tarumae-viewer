@@ -21,6 +21,7 @@ Draw2D.Scene2D = class {
     this.objects = [];
     this.focusObject = null;
     this.dragObject = null;
+    this.hoverObject = null;
   }
 
   show() {
@@ -129,6 +130,18 @@ Draw2D.Scene2D = class {
     if (obj) {
       obj.mousemove(this.createEventArgument(obj));
     }
+
+    if (this.hoverObject !== obj) {
+      if (this.hoverObject) {
+        this.hoverObject.mouseout(this.createEventArgument(this.hoverObject));
+      }
+
+      this.hoverObject = obj;
+
+      if (this.hoverObject) {
+        obj.mouseenter(this.createEventArgument(this.hoverObject));
+      }
+    }
     
     this.onmousemove(this.createEventArgument());
   }
@@ -220,6 +233,10 @@ Draw2D.EventArgument = class {
     this.scene = scene;
     this.position = position;
     this.movement = movement;
+  }
+
+  requireUpdateFrame() {
+    this.scene.requireUpdateFrame();
   }
 };
 
@@ -320,6 +337,14 @@ Draw2D.Object = class {
     this.onmouseup(e);
   }
 
+  mouseenter(e) {
+    this.onmouseenter(e);
+  }
+
+  mouseout(e) {
+    this.onmouseout(e);
+  }
+
   begindrag(e) {
     this.onbegindrag(e);
   }
@@ -393,7 +418,8 @@ Draw2D.Object = class {
 
 // Event declarations
 new Tarumae.EventDispatcher(Draw2D.Object).registerEvents(
-	"mousedown", "mouseup", "mousemove", "mousewheel",
+  "mousedown", "mouseup", "mousemove", "mouseenter", "mouseout",
+  "mousewheel",
   "begindrag", "drag", "enddrag",
   "getFocus", "lostFocus",
 	"keyup", "keydown",

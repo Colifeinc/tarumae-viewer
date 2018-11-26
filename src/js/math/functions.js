@@ -243,12 +243,77 @@ Tarumae.MathFunctions = {
     return Math.sqrt(dx * dx + dy * dy);
   },
 
+  nearestPointToLineSegment2D: function(p, l) {
+    return this.nearestPointToLineSegment2DXY(p, l.x1, l.y1, l.x2, l.y2);
+  },
+
+  nearestPointToLineSegment2DXY: function(p, x1, y1, x2, y2) {
+    // source: https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+
+    var A = p.x - x1;
+    var B = p.y - y1;
+    var C = x2 - x1;
+    var D = y2 - y1;
+  
+    var dot = A * C + B * D;
+    var len_sq = C * C + D * D;
+    var param = -1;
+    if (len_sq !== 0) //in case of 0 length line
+        param = dot / len_sq;
+  
+    var xx, yy;
+  
+    if (param < 0) {
+      xx = x1;
+      yy = y1;
+    }
+    else if (param > 1) {
+      xx = x2;
+      yy = y2;
+    }
+    else {
+      xx = x1 + param * C;
+      yy = y1 + param * D;
+    }
+  
+    var dx = p.x - xx;
+    var dy = p.y - yy;
+
+    return {dist: Math.sqrt(dx * dx + dy * dy), x: xx, y: yy };
+  },
+
   // distanceLineToLine2D: function(l1, l2) {
   //   if (!this.checkParallelLines(l1, l2))
   //     return 0;
     
   //   return this.distancePointToLine2D(l1.start, l2);
   // },
+
+  pointToNearestPolygon: function(p, polygon, mindist) {
+    let ret = {
+      dist: Infinity,
+      line: new Tarumae.LineSegment2D(),
+      lineIndex: undefined,
+    };
+
+    for (let i = 0, j = 1; i < polygon.length; i++, j++) {
+      if (j >= polygon.length) j = 0;
+      
+      const px1 = polygon[i][0], py1 = polygon[i][1],
+        px2 = polygon[j][0], py2 = polygon[j][1];
+      
+      const r2 = this.nearestPointToLineSegment2DXY(p, px1, py1, px2, py2);
+      if (/*(!mindist || r2.dist < mindist) &&*/ r2.dist < ret.dist) {
+        ret.dist = r2.dist;
+        ret.line.x1 = px1; ret.line.y1 = py1;
+        ret.line.x2 = px2; ret.line.y2 = py2;
+        ret.lineIndex = i;
+        ret.ip = { x: r2.x, y: r2.y };
+      }
+    }
+
+    return ret;
+  },
 
   distancePointToPolygon: function(p, polygon) {
     let minDist = Infinity;

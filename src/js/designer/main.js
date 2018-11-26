@@ -472,7 +472,7 @@ class WallChildObject extends Drawing2d.Object {
 
   pointToObject(p) {
     return new Vec2((p.x - 200) * 0.5, (p.y - 200) * 0.5);
-  } 
+  }
   
   hitTestPoint(p) {
     return this.bbox.contains(this.pointToObject(p));
@@ -481,9 +481,13 @@ class WallChildObject extends Drawing2d.Object {
   drag(e) {
     const p = this.pointToObject(e.position);
 
-    if (Tarumae.MathFunctions.distancePointToPolygon(p, window._designer.room.polygon) < 1) {
-      
-      this.location = p;
+    const ret = Tarumae.MathFunctions.pointToNearestPolygon(p, window._designer.room.polygon);
+    
+    if (ret.dist < 50) {
+      const wall = window._designer.room.walls[ret.lineIndex];
+      this.wall = wall;
+      this.angle = wall.lineAngle;
+      this.location = ret.ip;
     }
 
     e.scene.requireUpdateFrame();
@@ -500,6 +504,9 @@ class Door extends WallChildObject {
     super(wall, loc, size);
 
     this.dirs = dirs;
+
+    this.style.strokeColor = "gray";
+    this.style.fillColor = "white";
   }
 
   render(g) {
@@ -512,8 +519,20 @@ class Door extends WallChildObject {
   draw(g) {
     const w = this.size, hw = w * 0.5, h = this.wall.width, hh = h * 0.5;
 
-    g.drawRect(new Tarumae.Rect(-hw, -hh, w, h), 1, "gray", "white");
-    g.drawArc(new Tarumae.Rect(hw, hh, w, h), 90, 180, 1, "gray", "white");
+    g.drawRect(new Tarumae.Rect(-hw, -hh, w, h), this.style.strokeWidth, this.style.strokeColor, this.style.fillColor);
+    g.drawArc(new Tarumae.Rect(hw, hh, w, h), 90, 180, this.style.strokeWidth, this.style.strokeColor, this.style.fillColor);
+  }
+
+  mouseenter(e) {
+    this.style.strokeWidth = 2;
+    this.style.strokeColor = "#aaaaf0";
+    e.requireUpdateFrame();
+  }
+
+  mouseout(e) {
+    this.style.strokeWidth = 1;
+    this.style.strokeColor = "gray";
+    e.requireUpdateFrame();
   }
 }
 
