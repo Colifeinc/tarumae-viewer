@@ -18,7 +18,7 @@ window.addEventListener("load", function() {
 
 	window._scene = scene;
  
-	const count = 100000;
+	const count = 20000;
 	const pm = new Tarumae.ParticleMesh(count);
 
 	var particles = new Array(count);
@@ -37,7 +37,7 @@ window.addEventListener("load", function() {
 			r: 1.0, //Math.random(),
 			g: Math.random() * 0.5,
 			b: Math.random(),
-			size: 4,
+			size: Math.random()*4,
 		};
 	}
 

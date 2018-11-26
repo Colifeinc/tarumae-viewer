@@ -879,7 +879,8 @@ Object.assign(Tarumae.Mesh.prototype, {
 				for (var i = 0; i < _this.cachedNavmeshBorders.length; i++) {
 					var border = _this.cachedNavmeshBorders[i];
 
-					var out = Tarumae.MathFunctions.lineIntersectsLine2D(loc.x, loc.z, target.x, target.z,
+					var out = Tarumae.MathFunctions.lineIntersectsLine2DXY(
+						loc.x, loc.z, target.x, target.z,
 						border.v1.x, border.v1.z, border.v2.x, border.v2.z);
 					
 					if (out && out.ta >= 0 && out.ta <= 1 && out.tb >= 0 && out.tb <= 1) {
@@ -1013,31 +1014,19 @@ Object.assign(Tarumae.Mesh, {
 	})(),
 });
 
-Tarumae.ParticleMesh = class extends Tarumae.Mesh {
-	constructor(count = 100) {
+Tarumae.DynamicMesh = class extends Tarumae.Mesh {
+	constructor() {
 		super();
-
-		// this.vertexBuffer = new Float32Array();
-		this.meta = {
-			vertexCount: count,
-			hasColor: true,
-			hasSize: true,
-			stride: 0,
-			vertexColorOffset: count * 12,
-			vertexSizeOffset: count * 24,
-		};
-
-		this.composeMode = Tarumae.Mesh.ComposeModes.Points;
+		
 		this.bufferDirty = true;
-
-		this.vertexBuffer = new Float32Array(count * 2 * 3 + count);
+		this.fixedVertexCount = true;
 	}
-
+	
 	bind(renderer) {
 		if (!this.meta || this.meta.vertexBufferId) return;
 
 		this.meta.renderer = renderer;
-		var gl = renderer.gl;
+		const gl = renderer.gl;
 
 		this.meta.vertexBufferId = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.meta.vertexBufferId);
@@ -1046,11 +1035,11 @@ Tarumae.ParticleMesh = class extends Tarumae.Mesh {
 
 	updateBuffer() {
 		if (this.meta && this.meta.vertexBufferId) {
-			var gl = this.meta.renderer.gl;
+			const gl = this.meta.renderer.gl;
 			if (gl) {
 				gl.bindBuffer(gl.ARRAY_BUFFER, this.meta.vertexBufferId);
 				gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.vertexBuffer);
-
+	
 				this.bufferDirty = false;
 			}
 		}
@@ -1078,5 +1067,23 @@ Tarumae.ParticleMesh = class extends Tarumae.Mesh {
 		}
 
 		super.draw.apply(this, arguments);
+	}
+};
+
+Tarumae.ParticleMesh = class extends Tarumae.DynamicMesh {
+	constructor(count = 100) {
+		super();
+
+		this.meta = {
+			vertexCount: count,
+			hasColor: true,
+			hasSize: true,
+			stride: 0,
+			vertexColorOffset: count * 12,
+			vertexSizeOffset: count * 24,
+		};
+
+		this.composeMode = Tarumae.Mesh.ComposeModes.Points;
+		this.vertexBuffer = new Float32Array(count * 2 * 3 + count);
 	}
 };
