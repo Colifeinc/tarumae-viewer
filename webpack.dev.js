@@ -8,7 +8,8 @@ module.exports = {
     animationDemo: "./src/js/examples/animation.js",
     particleDemo: "./src/js/examples/particle.js",
     modelDemo: "./src/js/examples/model.js",
-    showcaseDemo: "./src/js/examples/showcase.js"
+    showcaseDemo: "./src/js/examples/showcase.js",
+    designer: "./src/js/designer/main.js"
   },
   module: {
     rules: [
@@ -71,6 +72,12 @@ module.exports = {
       hash: true,
       template: './src/examples/showcase.html',
       filename: 'showcase.html'
+    }),
+    new HtmlWebpackPlugin({
+      inject: false,
+      hash: true,
+      template: './src/designer.html',
+      filename: 'designer.html'
     }),
     new CopyWebpackPlugin([
       {from: 'src/css', to: 'css', force: true}
