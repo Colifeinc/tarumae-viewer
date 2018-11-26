@@ -73,11 +73,9 @@ Draw2D.Scene2D = class {
   }
 
   eachObjectInv(handler) {
-    var ret = undefined;
-
-    for (var i = this.objects.length - 1; i >= 0; i--) {
+    for (let i = this.objects.length - 1; i >= 0; i--) {
       var obj = this.objects[i];
-      if (obj.eachChildInv(handler) === false) break;
+      if (!obj.eachChildInv(handler)) break;
       if (handler(obj) === false) break;
     }
   }
@@ -94,10 +92,11 @@ Draw2D.Scene2D = class {
   }
 
   findObjectByPosition(p) {
-    var target = null;
+    let target = null;
+    const transformStack = [new Tarumae.Matrix3().loadIdentity()];
 
-    this.eachObjectInv(function(obj) {
-      if (obj.visible && obj.hitTestPoint(p)) {
+    this.eachObjectInv(obj => {
+      if (obj.visible && obj.hitTestPoint(p, transformStack)) {
         target = obj;
         return false;
       }
@@ -106,43 +105,13 @@ Draw2D.Scene2D = class {
     return target;
   }
 
-  hitTestObject(obj, p) {
-    var target = null;
-    var transformed = false;
-    
-    var t = new Tarumae.Matrix3().loadIdentity();
-    var transformStack = [];
-
-    if (obj.angle !== 0) {
-      transformStack.push(t.clone());
-
-      t.translate(origin.x, origin.y);
-      t.rotate(obj.angle);
-      t.translate(-origin.x, -origin.y);
-    
-      transformed = true;
-    }
-
-    if (obj.scale.x !== 1 || obj.scale.y !== 1) {
-      t.scale(obj.scale.x, obj.scale.y);
-    }
-
-    p = p.mulMat(t);
-
-    if (obj.hitTestPoint(p)) {
-      target = p;
-    }
-
-    return target;
-  }
-
   mousedown(pos) {
-    var obj = this.findObjectByPosition(pos);
-    var isProcessed = false;
+    const obj = this.findObjectByPosition(pos);
+    let isProcessed = false;
     
     if (obj) {
       this.dragObject = obj;
-      isProcessed = obj.mousedown(this.createEventArgument(obj)) === true;
+      isProcessed = obj.mousedown(this.createEventArgument(obj));
     }
 
     if (!isProcessed) {
@@ -165,7 +134,7 @@ Draw2D.Scene2D = class {
   }
 
   begindrag() {
-    var evtArg = this.createEventArgument(this.dragObject);
+    const evtArg = this.createEventArgument(this.dragObject);
     
     if (this.dragObject) {
       this.dragObject.begindrag(evtArg);
@@ -176,7 +145,7 @@ Draw2D.Scene2D = class {
   }
 
   drag() {
-    var evtArg = this.createEventArgument(this.dragObject);
+    const evtArg = this.createEventArgument(this.dragObject);
 
     if (this.dragObject) {
       this.dragObject.drag(evtArg);
@@ -187,7 +156,7 @@ Draw2D.Scene2D = class {
   }
 
   enddrag() {
-    var evtArg = this.createEventArgument(this.dragObject);
+    const evtArg = this.createEventArgument(this.dragObject);
     
     if (this.dragObject) {
       this.dragObject.enddrag(evtArg);
@@ -213,6 +182,7 @@ Draw2D.Scene2D = class {
     if (!viewer) return;
 
     var arg = new Draw2D.EventArgument(
+      this,
       viewer.mouse.position,
       viewer.mouse.movement);
     
@@ -246,7 +216,8 @@ Draw2D.Style = class {
 ////////////// Event //////////////
 
 Draw2D.EventArgument = class {
-  constructor(position, movement) {
+  constructor(scene, position, movement) {
+    this.scene = scene;
     this.position = position;
     this.movement = movement;
   }
@@ -301,8 +272,8 @@ Draw2D.Object = class {
   }
 
   eachChildInv(handler) {
-    for (var i = this.objects.length - 1; i >= 0; i--) {
-      var child = this.objects[i];
+    for (let i = this.objects.length - 1; i >= 0; i--) {
+      const child = this.objects[i];
       if (child.eachChildInv(handler) === false) return false;
       if (handler(child) === false) return false;
     }
@@ -313,7 +284,28 @@ Draw2D.Object = class {
   }
 
   pointToObject(p) {
-    return new Tarumae.Point(p.x - this.bbox.x, p.y - this.bbox.y);
+    // let m = transformStack[transformStack.length - 1];
+    // let t = undefined;
+    // if (obj.origin.x !== 0 || obj.origin.y !== 0
+    //   || obj.angle !== 0
+    //   || obj.scale.x !== 1 || obj.scale.y !== 1) {
+
+    //   t = Tarumae.Matrix3.makeTranslation(obj.origin.x, obj.origin.y);
+    //   t.rotate(obj.angle);
+    //   t.scale(obj.scale.x, obj.scale.y);
+    
+    //   transformStack.push(t.clone());
+    //   m = m.mul(t);
+    // }
+    
+    // p = p.mulMat(m);
+
+    // if (t) {
+    //   transformStack.pop();
+    // }
+
+    //return new Tarumae.Point(p.x - this.bbox.x, p.y - this.bbox.y);
+    return p;
   }
 
   mousedown(e) {
@@ -361,22 +353,13 @@ Draw2D.Object = class {
 
     let t = undefined;
   
-    if (this.origin.x !== 0 || this.origin.y !== 0) {
+    if (this.origin.x !== 0 || this.origin.y !== 0
+      || this.angle !== 0
+      || this.scale.x !== 1 || this.scale.y !== 1) {
       t = this.transform.loadIdentity();
       t.translate(this.origin.x, this.origin.y);
-    }
-
-    if (this.angle !== 0) {
-      t = t || this.transform.loadIdentity();
       t.rotate(this.angle);
-    }
-  
-    if (this.scale.x !== 1 || this.scale.y !== 1) {
-      t = t || this.transform.loadIdentity();
       t.scale(this.scale.x, this.scale.y);
-    }
-
-    if (t) {
       g.pushTransform(t);
     }
       

@@ -13,16 +13,23 @@ import "../math/bbox";
 
 export class Vec2 {
 	constructor(x, y) {
-		if (typeof x === "undefined") {
-			this.x = 0; this.y = 0;
-		} else {
-			this.x = x; this.y = y;
-		}
+		this.set(...arguments);
 	}
 	
 	set(x, y) {
-		this.x = x;
-		this.y = y;
+		switch (arguments.length) {
+			case 0:
+				this.x = 0; this.y = 0;
+				break;
+			
+			case 1:
+				this.x = arguments[0].x; this.y = arguments[0].y;
+				break;
+			
+			case 2:
+				this.x = arguments[0]; this.y = arguments[1];
+				break;
+		}
 	}
 
 	scale(scaleX, scaleY) {
@@ -30,7 +37,7 @@ export class Vec2 {
 		this.y *= scaleY;
 	}
 
-	mulMat(sx, sy) {
+	mul(sx, sy) {
 		switch (arguments.length) {
 			case 1:
 				if (typeof sx === "object") {
@@ -42,6 +49,12 @@ export class Vec2 {
 			case 2:
 				return new Vec2(this.x * sx, this.y * sy);
 		}
+	}
+
+	mulMat(m) {
+		return new Vec2(
+			this.x * m.a1 + this.y * m.a2 + m.a3,
+			this.x * m.b1 + this.y * m.b2 + m.b3);
 	}
 
 	neg() {
@@ -74,15 +87,27 @@ export class Vec2 {
 		return "[" + toStringDigits(this.x) + ", " + (this.y) + "]";
 	}
 
+	add(v2) {
+		return new Vec2(this.x + v2.x, this.y + v2.y);
+	}
+
 	static add(v1, v2) {
 		return new Vec2(v1.x + v2.x, v1.y + v2.y);
 	}
-	
-	sub(v1, v2) {
+
+	sub(v2) {
+		return new Vec2(this.x - v2.x, this.y - v2.y);
+	}
+		
+	static sub(v1, v2) {
 		return new Vec2(v1.x - v2.x, v1.y - v2.y);
 	}
-	
-	dot(v1, v2) {
+
+	dot(v2) {
+		return this.x * v2.x + this.y * v2.y;
+	}
+
+	static dot(v1, v2) {
 		return v1.x * v2.x + v1.y * v2.y;
 	}
 }	
@@ -720,7 +745,7 @@ Tarumae.Ray = class {
 	}
 };
 
-Tarumae.Ray.MaxDistance = 999999;
+Tarumae.Ray.MaxDistance = Infinity;
 
 ////////// Point BPNode //////////
 

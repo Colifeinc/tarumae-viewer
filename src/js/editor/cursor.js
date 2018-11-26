@@ -178,7 +178,7 @@ Object.assign(Tarumae.Axis3DCursor.prototype, {
 
     return arrow.enabled
       && bounds.contains(p)
-      && (Tarumae.MathFunctions.distancePointToLine(this.screenPosition, arrow.screenPosition, p) < 6);
+      && (Tarumae.MathFunctions.distancePointToLine2D(this.screenPosition, arrow.screenPosition, p) < 6);
   },
 
 });

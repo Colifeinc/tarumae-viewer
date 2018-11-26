@@ -137,5 +137,5 @@ TarumaeCompass.prototype.checkArrowHittedByPosition = function(arrow, p) {
   }
 
   return bounds.contains(p)
-    && (Tarumae.MathFunctions.distancePointToLine(this.screenPosition, arrow.screenPosition, p) < 5);
+    && (Tarumae.MathFunctions.distancePointToLine2D(this.screenPosition, arrow.screenPosition, p) < 5);
 };

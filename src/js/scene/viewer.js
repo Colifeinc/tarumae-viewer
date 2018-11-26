@@ -84,7 +84,7 @@ Tarumae.Viewer = class {
 				viewer.performSceneMouseDown();
 			});
  
-			surface.addEventListener("mousemove", function(e) {
+			surface.addEventListener("mousemove", e => {
 				var mouse = viewer.mouse;
 				var scene = viewer.renderer.currentScene;
 
@@ -125,6 +125,11 @@ Tarumae.Viewer = class {
 
 					if (scene) {
 						scene.mousemove(mouse.position);
+					}
+
+					// FIXME: integrated 2D 3D event system
+					if (this.renderer.current2DScene) {
+						this.renderer.current2DScene.mousemove(this.mouse.position);
 					}
 				}
 			});

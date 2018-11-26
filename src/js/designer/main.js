@@ -4,7 +4,7 @@ import "../scene/viewer";
 import "../utility/archive";
 import "../utility/res";
 import Drawing2d from "../draw/scene2d";
-import { isThisSecond } from "date-fns";
+import { Vec2 } from "../math/vector";
 
 const TarumaeDesigner = {
 };
@@ -66,6 +66,9 @@ AutoFloor.LayoutDesigner = class {
     this.scene = scene;
     renderer.scene = scene;
 
+    // FIXME: remove global variable
+    window._designer = this;
+
     this.data = {
       walls: [
         [0, 0], [400, 0], [400, 320], [160, 320], [160, 160], [0, 160],
@@ -86,9 +89,16 @@ AutoFloor.LayoutDesigner = class {
       objects: [],
     };
 
-    this.createLayout(this.data);
+    this.viewport = {
+      origin: new Vec2(200, 200),
+      scale: 2,
+    };
+    // this.viewport = {
+    //   origin: new Vec2(0, 0),
+    //   scale: 1,
+    // };
 
-    this.grid = [];
+    this.createLayout(this.data);
 
     // setTimeout(_ => {
     //   const gridSize = 40;
@@ -157,10 +167,6 @@ AutoFloor.LayoutDesigner = class {
     //   this.scene.requireUpdateFrame();
     // }, 4000);
 
-    this.entryCells = [
-      10
-    ];
-
     this.generateCells();
   }
 
@@ -170,8 +176,8 @@ AutoFloor.LayoutDesigner = class {
 
   createLayout(data) {
     const layout = new Drawing2d.Object();
-    layout.origin.set(200, 200);
-    layout.scale.set(2, 2);
+    layout.origin.set(this.viewport.origin);
+    layout.scale.set(this.viewport.scale, this.viewport.scale);
     this.scene.add(layout);
 
     const polygon = data.walls;
@@ -179,6 +185,7 @@ AutoFloor.LayoutDesigner = class {
     const room = new Room(polygon);
     room.ondraw = g => this.drawGrid(g);
     layout.add(room);
+    this.room = room;
 
     for (let i = 0, j = 1; i < polygon.length; i++, j++) {
       if (j >= polygon.length) j = 0;
@@ -193,16 +200,20 @@ AutoFloor.LayoutDesigner = class {
       const wall = room.walls[d.wallIndex];
       const door = new Door(wall, d.loc, d.size, d.dirs);
       wall.add(door);
+      wall.doors.push(door);
     }
     
     for (const w of data.windows) {
       const wall = room.walls[w.wallIndex];
       const window = new Window(wall, w.loc, w.size, w.dirs);
       wall.add(window);
+      wall.windows.push(window);
     }
   }
 
   generateCells() {
+    this.grid = [];
+
     const gridSize = 20, halfGridSize = gridSize * 0.5;
     let cellIndex = -1;
 
@@ -211,7 +222,7 @@ AutoFloor.LayoutDesigner = class {
 
     const maxDists = {
       wall: 0,
-      entry: 0,
+      door: 0,
       window: 0,
     };
 
@@ -241,13 +252,29 @@ AutoFloor.LayoutDesigner = class {
         c.dists.wall = wallDist;
         if (wallDist > maxDists.wall) maxDists.wall = wallDist;
         
-        for (const w of this.data.windows) {
-          
+        // door
+        let minDoorDist = Infinity;
+        for (const wall of this.room.walls) {
+          for (const d of wall.doors) {
+            const doorDist = mf.distancePointToLineSegment2D(rect.origin, d.line);
+            if (minDoorDist > doorDist) minDoorDist = doorDist;
+          }
         }
 
-        const windowDist = mf.distancePointToLine(rect.origin, walls);
-        c.dists.window = windowDist;
-        if (windowDist > maxDists.window) maxDists.window = windowDist;
+        c.dists.door = minDoorDist;
+        if (maxDists.door < minDoorDist) maxDists.door = minDoorDist; 
+
+        // window
+        let minWindowDist = Infinity;
+        for (const wall of this.room.walls) {
+          for (const w of wall.windows) {
+            const windowDist = mf.distancePointToLineSegment2D(rect.origin, w.line);
+            if (minWindowDist > windowDist) minWindowDist = windowDist;
+          }
+        }
+
+        c.dists.window = minWindowDist;
+        if (maxDists.window < minWindowDist) maxDists.window = minWindowDist;
 
         // this.markupCellBorder(c);
 
@@ -271,8 +298,11 @@ AutoFloor.LayoutDesigner = class {
       c.dists.wallp = c.dists.wall / maxDists.wall;
 
       if (c.dist < gridSize) {
-        c.wallAdjacent = true;
+        c.interior = true;
       }
+
+      c.dists.doorp = c.dists.door / maxDists.door;
+      c.dists.windowp = c.dists.window / maxDists.window;
     }
   }
 
@@ -291,10 +321,12 @@ AutoFloor.LayoutDesigner = class {
       }
       
       if (c.way) color = '#ffffc0';
-      if (c.entry) color = '#ffffc0';
+      if (c.door) color = '#ffffc0';
 
-      const p = c.dists.wallp * 255;
-      color = `rgb(150, ${p}, ${p})`;
+      const p1 = c.dists.wallp * 255;
+      const p2 = c.dists.doorp * 255;
+      const p3 = c.dists.windowp * 255;
+      color = `rgb(${p1}, ${p2}, ${p3})`;
 
       const o = c.rect.origin;
       
@@ -388,6 +420,9 @@ class Wall extends Drawing2d.Object {
 
     this.width = 4;
     this.polygon = [];
+    this.doors = [];
+    this.windows = [];
+    
   }
 
   update() {
@@ -399,32 +434,65 @@ class Wall extends Drawing2d.Object {
   }
 }
 
-class WallChildObject extends Drawing2d.Line {
+class WallChildObject extends Drawing2d.Object {
   constructor(wall, loc, size) {
     super();
 
+    this.line = new Tarumae.LineSegment2D();
+
     this.wall = wall;
-    this.loc = loc;
     this.size = size;
-    
-    this.origin.set(loc[0], loc[1]);
     this.angle = this.wall.lineAngle;
 
-    const m = Tarumae.Matrix3.makeRotation(this.angle);
-    const hw = size * 0.5, hh = this.wall.width * 0.5;
-    
-    this.line.start = new Tarumae.Point(-hw, -hh).mulMat(m);
-    this.line.end = new Tarumae.Point(hw, hh).mulMat(m);
+    this.location = new Vec2(loc[0], loc[1]);
   }
 
-  // render(g) {
-  //   const m = Tarumae.Matrix3.makeTranslation(this.loc[0], this.loc[1]);
-  //   m.rotate(this.wall.angle);
+  set location(p) {
+    this.loc = p;
+    this.origin.set(p);
 
-  //   g.pushTransform(m);
-  //   super.render(g);
-  //   g.popTransform();
-  // }
+    this.update();
+  }
+
+  updateBoundingBox() {
+    const m = Tarumae.Matrix3.makeRotation(this.angle, this.origin.x, this.origin.y);
+    const hw = this.size * 0.5, hh = this.wall.width * 0.5;
+    
+    this.line.start = new Vec2(-hw, 0).mulMat(m);
+    this.line.end = new Vec2(hw, 0).mulMat(m);
+
+    const v1 = new Vec2(-hw, -hh).mulMat(m);
+    const v2 = new Vec2(hw, hh).mulMat(m);
+
+    this.bbox.min.x = Math.min(v1.x, v2.x);
+    this.bbox.min.y = Math.min(v1.y, v2.y);
+    this.bbox.max.x = Math.max(v1.x, v2.x);
+    this.bbox.max.y = Math.max(v1.y, v2.y);
+  }
+
+  pointToObject(p) {
+    return new Vec2((p.x - 200) * 0.5, (p.y - 200) * 0.5);
+  } 
+  
+  hitTestPoint(p) {
+    return this.bbox.contains(this.pointToObject(p));
+  }
+
+  drag(e) {
+    const p = this.pointToObject(e.position);
+
+    if (Tarumae.MathFunctions.distancePointToPolygon(p, window._designer.room.polygon) < 1) {
+      
+      this.location = p;
+    }
+
+    e.scene.requireUpdateFrame();
+  }
+
+  enddrag(e) {
+    window._designer.generateCells();
+    e.scene.requireUpdateFrame();
+  }
 }
 
 class Door extends WallChildObject {
@@ -432,6 +500,13 @@ class Door extends WallChildObject {
     super(wall, loc, size);
 
     this.dirs = dirs;
+  }
+
+  render(g) {
+    super.render(g);
+    // g.drawLine(this.line.start, this.line.end, 4, "red");
+    g.drawLine({ x: this.bbox.minx, y: this.bbox.miny },
+      { x: this.bbox.maxx, y: this.bbox.maxy }, 4, "red");
   }
 
   draw(g) {
@@ -448,6 +523,11 @@ class Window extends WallChildObject {
     
     this.dirs = dirs;
   }
+
+  // render(g) {
+  //   super.render(g);
+  //   g.drawLine(this.line.start, this.line.end, 4, "blue");
+  // }
 
   draw(g) {
     const w = this.size, hw = this.size * 0.5;

@@ -114,7 +114,7 @@ Tarumae.BBox2D = class {
 
 	contains(p) {
 		return p.x >= this.min.x && p.x <= this.max.x
-			&& p.y >= this.min.y && p.y >= this.max.y;
+			&& p.y >= this.min.y && p.y <= this.max.y;
 	}
 
 	intersectsBBox2D(box2) {

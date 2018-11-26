@@ -193,18 +193,22 @@ Tarumae.MathFunctions = {
     return Math.sqrt(a * a + b * b);
   },
 
-  distancePointToLine: function(p, l) {
-    return Tarumae.MathFunctions.distancePointToLineXY(p, l.x1, l.y1, l.x2, l.y2);
+  distancePointToLine2D: function(p, l) {
+    return Tarumae.MathFunctions.distancePointToLine2DXY(p, l.x1, l.y1, l.x2, l.y2);
   },
   
-  distancePointToLineXY: function(p, x1, y1, x2, y2) {
+  distancePointToLine2DXY: function(p, x1, y1, x2, y2) {
     const a = y2 - y1,
       b = x1 - x2,
       c = x2 * y1 - x1 * y2;
     return Math.abs(a * p.x + b * p.y + c) / Math.sqrt(a * a + b * b);
   },
 
-  distancePointToLineThresholdXY: function(p, x1, y1, x2, y2) {
+  distancePointToLineSegment2D: function(p, l) {
+    return this.distancePointToLineSegment2DXY(p, l.x1, l.y1, l.x2, l.y2);
+  },
+
+  distancePointToLineSegment2DXY: function(p, x1, y1, x2, y2) {
     // source: https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
 
     var A = p.x - x1;
@@ -239,12 +243,12 @@ Tarumae.MathFunctions = {
     return Math.sqrt(dx * dx + dy * dy);
   },
 
-  distanceLineToLine2D: function(l1, l2) {
-    if (!this.checkParallelLines(l1, l2))
-      return 0;
+  // distanceLineToLine2D: function(l1, l2) {
+  //   if (!this.checkParallelLines(l1, l2))
+  //     return 0;
     
-    return this.distancePointToLine(l1.start, l2);
-  },
+  //   return this.distancePointToLine2D(l1.start, l2);
+  // },
 
   distancePointToPolygon: function(p, polygon) {
     let minDist = Infinity;
@@ -253,7 +257,7 @@ Tarumae.MathFunctions = {
       const px1 = polygon[i][0], py1 = polygon[i][1],
         px2 = polygon[j][0], py2 = polygon[j][1];
       
-      const dist = this.distancePointToLineThresholdXY(p, px1, py1, px2, py2);
+      const dist = this.distancePointToLineSegment2DXY(p, px1, py1, px2, py2);
       if (dist < minDist) minDist = dist;
     }
 
