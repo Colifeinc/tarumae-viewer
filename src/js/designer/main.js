@@ -5,9 +5,12 @@ import "../utility/archive";
 import "../utility/res";
 import Drawing2d from "../draw/scene2d";
 import { Vec2 } from "../math/vector";
+import { TimerObservable } from "rxjs/observable/TimerObservable";
 
 const TarumaeDesigner = {
 };
+
+const _mf = Tarumae.MathFunctions;
 
 TarumaeDesigner.SelectableGrid = class extends Tarumae.SceneObject {
   constructor() {
@@ -222,8 +225,11 @@ AutoFloor.LayoutDesigner = class {
     const gridSize = 20, halfGridSize = gridSize * 0.5;
     this.gridSize = gridSize;
 
+    const canvasWidth = 300, canvasHeight = 400;
+    const cellCountX = canvasWidth / gridSize;
+    const cellCountY = canvasHeight / gridSize;
+
     const wallPolygon = this.data.walls;
-    const _mf = Tarumae.MathFunctions;
 
     const maxDists = {
       wall: 0,
@@ -232,8 +238,14 @@ AutoFloor.LayoutDesigner = class {
     };
 
     let cellIndex = -1;
-    for (let y = 0, yi = 0; y <= 300; y += gridSize, yi++) {
-      for (let x = 0, xi = 0; x < 400; x += gridSize, xi++) {
+
+    this.cells = [];
+    for (let i = 0; i < cellCountY; i++) {
+      this.cells[i] = [];
+    }
+    
+    for (let y = 0, yi = 0; y <= canvasWidth; y += gridSize, yi++) {
+      for (let x = 0, xi = 0; x < canvasHeight; x += gridSize, xi++) {
         cellIndex++;
 
         const rect = new Tarumae.Rect(x, y, gridSize, gridSize);
@@ -291,6 +303,7 @@ AutoFloor.LayoutDesigner = class {
         // if (yi == 6 && xi > 5 && xi < 8) c.way = true;
 
         this.grid.push(c);
+        this.cells[yi].push(c);
       }
     }
 
@@ -308,9 +321,102 @@ AutoFloor.LayoutDesigner = class {
   }
 
   generateInterior() {
-    const c1 = new Chair();
-    c1.origin.set(10, 100);
-    this.room.add(c1);
+    const removes = [];
+    for (let i = 0; i < this.room.objects.length; i++) {
+      if (this.room.objects[i] instanceof InteriorObject) {
+        removes.push(this.room.objects[i]);
+      }
+    }
+    for (let i = 0; i < removes.length; i++) {
+      this.room.remove(removes[i]);
+    }
+
+    const width = 40, height = 40;
+
+    for (let i = 0; i < 20; i++) {
+      const list = this.findAvailableSpace(width, height);
+
+      if (list.length > 0) {
+        list.sort((a, b) => b.scores.work - a.scores.work);
+
+        const pos = list[0];
+
+        const ts1 = new TableChairSet();
+        ts1.origin.set(pos.xi * this.gridSize, pos.yi * this.gridSize);
+        this.putInterior(ts1);
+      }
+    }
+  }
+
+  findAvailableSpace(width, height) {
+    const poslist = [];
+
+    const hw = width * 0.5, hh = height * 0.5;
+    const rect = new Tarumae.Rect(0, 0, width, height);
+    // rect.inflate(size.width, size.height);
+
+    const canvasWidth = 300, canvasHeight = 400;
+    const cellCountX = canvasWidth / this.gridSize;
+    const cellCountY = canvasHeight / this.gridSize;
+
+    const cw = Math.ceil(rect.width / this.gridSize);
+    const ch = Math.ceil(rect.height / this.gridSize);
+    const needmax = cw * ch;
+
+    for (let yi = 0; yi <= cellCountY - ch; yi++) {
+      for (let xi = 0; xi <= cellCountX - cw; xi++) {
+    
+        let ctaken = false;
+        let workscore = 0;
+        let need = 0;
+
+        for (let i = 0; i < ch; i++) {
+          if (ctaken) {
+            break;
+          }
+
+          for (let k = 0; k < cw; k++) {
+            const c = this.cells[yi + i][xi + k];
+            if (!c) continue;
+
+            if (c.taken) {
+              ctaken = true;
+              break;
+            }
+
+            workscore += c.dists.doorp * c.dists.doorp;
+            need++;
+          }
+        }
+
+        if (!ctaken && need >= needmax) {
+          poslist.push({
+            xi: xi + cw * 0.5,
+            yi: yi + ch * 0.5,
+            scores: {
+              work: workscore,
+            }
+          });
+        }
+      }
+    }
+
+    return poslist;
+  }
+
+  putInterior(obj) {
+    obj.update();
+
+    const objrect = obj.bbox.rect;
+
+    for (const c of this.grid) {
+      if (_mf.rectIntersectsRect(c.rect, objrect)) {
+        c.taken = true;
+      }
+    }
+
+    this.scene.requireUpdateFrame();
+    this.room.add(obj);
   }
 
   drawGrid(g) {
@@ -332,32 +438,9 @@ AutoFloor.LayoutDesigner = class {
       const o = c.rect.origin;
       
       g.drawRect(c.rect, 1, "white", color);
-      g.drawText(o, c.index, "silver", "center", "5px Arial");
+      g.drawText(o, c.index, c.taken ? "red" : "silver", "center", "5px Arial");
     }
   }
-
-  // drawObjects(o) {
-  //   switch (o.type) {
-  //     case "chair": this.drawChair(o); break;
-  //     case "table": this.drawTable(o); break;
-  //     case "table set": this.drawTableSet(o); break;
-  //   }
-  // }
-
-  // drawTableSet(o) {
-  //   const g = this.ctx;
-  //   const x = o.loc[0], y = o.loc[1],
-  //     w = o.size[0], h = o.size[1],
-  //     ox = x + w / 2, oy = y + h / 2;
-    
-  //   const m = Tarumae.Matrix3.makeRotation(o.angle, ox, oy);
-  //   g.pushTransform(m);
-    
-  //   this.drawChair({ type: "chair", loc: [0, 0 - 8] });
-  //   this.drawTable({ type: "table", loc: [0, 0 + 8], size: [w, 18] });
-
-  //   g.popTransform();
-  // }
 };
 
 window.addEventListener("load", function() {
@@ -422,7 +505,8 @@ class LayoutObject extends Drawing2d.Object {
   }
 
   pointToObject(p) {
-    return new Vec2((p.x - 200) * 0.5, (p.y - 200) * 0.5);
+    p = new Vec2((p.x - 200) * 0.5, (p.y - 200) * 0.5);
+    return super.pointToObject(p);
   }
   
   hitTestPoint(p) {
@@ -463,19 +547,21 @@ class WallChildObject extends LayoutObject {
   }
 
   updateBoundingBox() {
-    const m = Tarumae.Matrix3.makeRotation(this.angle, this.origin.x, this.origin.y);
-    const hw = this.size * 0.5, hh = this.wall.width * 0.5;
+    if (this.wall) {
+      const m = Tarumae.Matrix3.makeRotation(this.angle, this.origin.x, this.origin.y);
+      const hw = this.size * 0.5, hh = this.wall.width * 0.5;
     
-    this.line.start = new Vec2(-hw, 0).mulMat(m);
-    this.line.end = new Vec2(hw, 0).mulMat(m);
+      this.line.start = new Vec2(-hw, 0).mulMat(m);
+      this.line.end = new Vec2(hw, 0).mulMat(m);
 
-    const v1 = new Vec2(-hw, -hh).mulMat(m);
-    const v2 = new Vec2(hw, hh).mulMat(m);
+      const v1 = new Vec2(-hw, -hh).mulMat(m);
+      const v2 = new Vec2(hw, hh).mulMat(m);
 
-    this.bbox.min.x = Math.min(v1.x, v2.x);
-    this.bbox.min.y = Math.min(v1.y, v2.y);
-    this.bbox.max.x = Math.max(v1.x, v2.x);
-    this.bbox.max.y = Math.max(v1.y, v2.y);
+      this.bbox.min.x = Math.min(v1.x, v2.x);
+      this.bbox.min.y = Math.min(v1.y, v2.y);
+      this.bbox.max.x = Math.max(v1.x, v2.x);
+      this.bbox.max.y = Math.max(v1.y, v2.y);
+    }
   }
 
   drag(e) {
@@ -513,10 +599,12 @@ class Door extends WallChildObject {
   }
 
   draw(g) {
-    const w = this.size, hw = w * 0.5, h = this.wall.width, hh = h * 0.5;
+    if (this.wall) {
+      const w = this.size, hw = w * 0.5, h = this.wall.width, hh = h * 0.5;
 
-    g.drawRect(new Tarumae.Rect(-hw, -hh, w, h));
-    g.drawArc(new Tarumae.Rect(hw, hh, w, h), 90, 180);
+      g.drawRect(new Tarumae.Rect(-hw, -hh, w, h));
+      g.drawArc(new Tarumae.Rect(hw, hh, w, h), 90, 180);
+    }
   }
 }
 
@@ -532,11 +620,13 @@ class Window extends WallChildObject {
   // }
 
   draw(g) {
-    const w = this.size, hw = this.size * 0.5;
-    const h = this.wall.width, hh = h * 0.5;
+    if (this.wall) {
+      const w = this.size, hw = this.size * 0.5;
+      const h = this.wall.width, hh = h * 0.5;
 
-    g.drawRect(new Tarumae.Rect(-hw, -hh, w, h));
-    g.drawRect(new Tarumae.Rect(-hw, -4, w, 2));
+      g.drawRect(new Tarumae.Rect(-hw, -hh, w, h));
+      g.drawRect(new Tarumae.Rect(-hw, -4, w, 2));
+    }
   }
 }
 
@@ -544,10 +634,16 @@ class InteriorObject extends LayoutObject {
   constructor(width, height) {
     super();
     this.size = new Tarumae.Size(width, height);
+
+    this.update();
   }
 
   updateBoundingBox() {
-    
+    const w = this.size.width, hw = w * 0.5,
+      h = this.size.height, hh = h * 0.5;
+
+    this.bbox.min.set(this.origin.x - hw, this.origin.y - hh);
+    this.bbox.max.set(this.origin.x + hw, this.origin.y + hh);
   }
 }
 
@@ -557,28 +653,67 @@ class Chair extends InteriorObject {
   }
 
   draw(g) {
-    const size = this.size.width, hs = this.size.height / 2;
-    const x = this.origin.x - hs, y = this.origin.y - hs;
+    const w = this.size.width, hh = this.size.height / 2;
+    const x = -hh, y = -hh;
 
-    g.drawRoundRect({ x, y, width: size, height: size }, size * 0.7);
-    g.drawRoundRect({ x, y: y - 2, width: size, height: 4 }, size * 0.2);
+    g.drawRoundRect({ x, y, width: w, height: w }, w * 0.7);
+    g.drawRoundRect({ x, y: y - 2, width: w, height: 4 }, w * 0.2);
 
-    g.drawRoundRect({ x: x - 2, y: y + hs - 4, width: 3, height: 8 }, size * 0.2);
-    g.drawRoundRect({ x: x + size - 1, y: y + hs - 4, width: 3, height: 8 }, size * 0.2);
+    g.drawRoundRect({ x: x - 2, y: y + hh - 4, width: 3, height: 8 }, w * 0.2);
+    g.drawRoundRect({ x: x + w - 1, y: y + hh - 4, width: 3, height: 8 }, w * 0.2);
   }
 }
 
 class Table extends InteriorObject {
-  constructor() {
-    super(40, 15);
+  constructor(width, height) {
+    super(width || 40, height || 15);
   }
 
   draw(g) {
-    const w = t.size.width, h = t.size.height,
+    const w = this.size.width, h = this.size.height,
       hw = w / 2, hh = h / 2,
-      x = t.origin.x - hw, y = t.origin.y - hh;
+      x = -hw, y = -hh;
 
     g.drawRect({ x, y, width: w, height: h });
+  }
+}
+
+class TableChairSet extends InteriorObject {
+  constructor() {
+    super();
+
+    this.chair = new Chair(15, 15);
+    this.table = new Table(35, 15);
+
+    this.chair.origin.set(0, -5);
+    this.table.origin.set(0, 5);
+
+    this.chair.update();
+    this.table.update();
+    
+    this.add(this.chair);
+    this.add(this.table);
+
+    this.angle = 0;
+    this.update();
+  }
+
+  update() {
+    super.update();
+  }
+
+  updateBoundingBox() {
+
+    if (this.chair && this.table) {
+      this.size = Tarumae.BBox2D.fromTwoBoundingBoxes(this.chair.bbox, this.table.bbox).size;
+
+      super.updateBoundingBox();
+    }
+  }
+
+  render(g) {
+    super.render(g);
+    // g.drawRect(this.bbox.rect, 2, "red", "white");
   }
 }
 

@@ -12,11 +12,11 @@ import "../math/bbox";
 ///////////////////// Vec2 //////////////////////
 
 export class Vec2 {
-	constructor(x, y) {
+	constructor() {
 		this.set(...arguments);
 	}
 	
-	set(x, y) {
+	set() {
 		switch (arguments.length) {
 			case 0:
 				this.x = 0; this.y = 0;

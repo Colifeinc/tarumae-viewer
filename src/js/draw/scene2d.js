@@ -252,12 +252,16 @@ Draw2D.Object = class {
     this.style = new Draw2D.Style();
 
     this.bbox = new Tarumae.BBox2D();
-
     this.origin = new Tarumae.Point(0, 0);
+
     this.angle = 0;
     this.scale = new Vec2(1, 1);
     this.transform = new Tarumae.Matrix3().loadIdentity();
   }
+
+  // set origin(v) {
+  //   this._origin.set(v);
+  // }
 
   add() {
     for (var i = 0; i < arguments.length; i++) {
@@ -322,7 +326,7 @@ Draw2D.Object = class {
     //   transformStack.pop();
     // }
 
-    //return new Tarumae.Point(p.x - this.bbox.x, p.y - this.bbox.y);
+    // return new Tarumae.Point(p.x - this.origin.x, p.y - this.origin.y);
     return p;
   }
 

@@ -105,11 +105,27 @@ Tarumae.BBox2D = class {
 			this.min.y + size.height * 0.5);
 	}
 
+	get rect() {
+		const size = this.size;
+		return new Tarumae.Rect(this.min.x, this.min.y, size.width, size.height);
+	}
+
 	updateFromTwoPoints(p1, p2) {
 		this.min.x = Math.min(p1.x, p2.x);
 		this.min.y = Math.min(p1.y, p2.y);
 		this.max.x = Math.max(p1.x, p2.x);
 		this.max.y = Math.max(p1.y, p2.y);
+	}
+
+	updateFrom4Points(p1, p2, p3, p4) {
+		this.min.x = Math.min(p1.x, Math.min(p2.x, Math.min(p3.x, p4.x)));
+		this.min.y = Math.min(p1.y, Math.min(p2.y, Math.min(p3.y, p4.y)));
+		this.max.x = Math.max(p1.x, Math.max(p2.x, Math.max(p3.x, p4.x)));
+		this.max.y = Math.max(p1.x, Math.max(p2.x, Math.max(p3.x, p4.x)));
+	}
+
+	updateFromTwoBoundingBoxes(b1, b2) {
+		this.updateFrom4Points(b1.min, b1.max, b2.min, b2.max);
 	}
 
 	contains(p) {
@@ -124,9 +140,25 @@ Tarumae.BBox2D = class {
 		if (this.min.y > box2.max.y) return false;
 	}
 
+	toString() {
+		return `[${this.min.x}, ${this.min.y}] - [${this.max.x}, ${this.max.y}]`;
+	}
+
 	static fromTwoPoints(v1, v2) {
 		const bbox = new Tarumae.BBox2D();
 		bbox.updateFromTwoPoints(v1, v2);
+		return bbox;
+	}
+
+	static from4Points(p1, p2, p3, p4) {
+		const bbox = new Tarumae.BBox2D();
+		bbox.updateFrom4Points(p1, p2, p3, p4);
+		return bbox;
+	}
+
+	static fromTwoBoundingBoxes(b1, b2) {
+		const bbox = new Tarumae.BBox2D();
+		bbox.updateFromTwoBoundingBoxes(b1, b2);
 		return bbox;
 	}
 };
@@ -237,13 +269,6 @@ Tarumae.Rect = class {
 		return new Tarumae.LineSegment2D(this.right, this.y, this.right, this.bottom);
 	}
 
-	strink(x, y) {
-		this.x += x;
-		this.width -= x;
-		this.y += y;
-		this.height -= y;
-	}
-
 	set(x, y, width, height) {
 		this.x = x;
 		this.y = y;
@@ -251,8 +276,25 @@ Tarumae.Rect = class {
 		this.height = height;
 	}
 
+	strink(x, y) {
+		this.x += x;
+		this.width -= x;
+		this.y += y;
+		this.height -= y;
+	}
+
+	inflate(w, h) {
+		const hw = w * 0.5, hh = h * 0.5;
+		this.x -= hw; this.y -= hh;
+		this.width += hw; this.height += hh;
+	}
+
 	bbox() {
 		return new Tarumae.BBox2D(this.topLeft, this.bottomRight);
+	}
+
+	toString() {
+		return `[${this.x}, ${this.y}], [${this.width}, ${this.height}]`;
 	}
 
 	static createFromPoints(p1, p2) {
