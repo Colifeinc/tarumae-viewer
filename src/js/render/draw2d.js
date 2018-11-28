@@ -128,6 +128,41 @@ Tarumae.BBox2D = class {
 		this.updateFrom4Points(b1.min, b1.max, b2.min, b2.max);
 	}
 
+	updateFromPoints() {
+		if (arguments.length < 1) {
+			throw new Error("number of arguments must be greater than 1");
+		}
+
+		this.min.x = arguments[0].x; this.min.y = arguments[0].y;
+		this.max.x = arguments[0].x; this.max.y = arguments[0].y;
+
+		for (let i = 1; i < arguments.length; i++) {
+			const x = arguments[i].x, y = arguments[i].y;
+			if (this.min.x > x) this.min.x = x;
+			if (this.min.y > y) this.min.y = y;			
+			if (this.max.x > x) this.max.x = x;
+			if (this.max.y > y) this.max.y = y;
+		}
+	}
+
+	updateFromPolygon(p) {
+		if (p.length <= 0) {
+			throw new Error("polygon doesn't contain any points");
+		}
+
+		this.min.x = p[0][0]; this.min.y = p[0][1];
+		this.max.x = p[0][0]; this.max.y = p[0][1];
+
+		for (let i = 0; i < p.length; i++) {
+      const px = p[i][0], py = p[i][1];
+			
+			if (this.min.x > px) this.min.x = px;
+			if (this.min.y > py) this.min.y = py;
+			if (this.max.x < px) this.max.x = px;
+			if (this.max.y < py) this.max.y = py;
+		}
+	}
+
 	contains(p) {
 		return p.x >= this.min.x && p.x <= this.max.x
 			&& p.y >= this.min.y && p.y <= this.max.y;
@@ -159,6 +194,18 @@ Tarumae.BBox2D = class {
 	static fromTwoBoundingBoxes(b1, b2) {
 		const bbox = new Tarumae.BBox2D();
 		bbox.updateFromTwoBoundingBoxes(b1, b2);
+		return bbox;
+	}
+
+	static fromPoints() {
+		const bbox = new Tarumae.BBox2D();
+		bbox.updateFromPoints(...arguments);
+		return bbox;
+	}
+
+	static fromPolygon(p) {
+		const bbox = new Tarumae.BBox2D();
+		bbox.updateFromPolygon(p);
 		return bbox;
 	}
 };
