@@ -4,36 +4,21 @@ Web viewer of tarumae engine using WebGL.
 
 # Prepare development environment
 
-First time to start up tarumae-viewer:
-
-```
-npm install -g parcel-bundler
+```shell
+yarn
 ```
 
-Start demo:
+Start development environment:
 
-```
-npm start
+```shell
+yarn dev
 ```
 
 # Build package
 
+```shell
+yarn build
 ```
-npm pack
-```
-
-To build a minified output:
-
-```
-npm run build
-```
-
-## Build release package
-
-```
-build/pack
-```
-
 
 # Use Tarumae-Viewer
 
