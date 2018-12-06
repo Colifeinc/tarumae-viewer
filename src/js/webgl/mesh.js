@@ -172,6 +172,38 @@ Tarumae.Mesh = class {
 		}
 	}
 
+	updateBuffer() {
+		const meta = this.meta;
+		if (!meta) return false;
+
+		// compose memory buffer
+		if (!Array.isArray(this.vertices) || this.vertices.length <= 0) {
+			return false;
+		}
+
+		let vertexBuffer = this.vertices.slice();
+
+		if (meta.normalCount > 0) {
+			vertexBuffer = vertexBuffer.concat(this.normals);
+		}
+
+		if (meta.texcoordCount > 0) {
+			vertexBuffer = vertexBuffer.concat(this.texcoords);
+		}
+
+		if (meta.tangentBasisCount > 0) {
+			vertexBuffer = vertexBuffer.concat(this.tangents).concat(this.bitangents);
+		}
+
+		if (meta.hasColor) {
+			vertexBuffer = vertexBuffer.concat(this.colors);
+		}
+
+		this.vertexBuffer = new Float32Array(vertexBuffer);
+		
+		return true;
+	}
+
 	bind(renderer) {
 		if (!this.meta) {
 			this.meta = {
@@ -190,7 +222,7 @@ Tarumae.Mesh = class {
 			};
 		}
 
-		var meta = this.meta;
+		const meta = this.meta;
 
 		meta.renderer = renderer;
 
@@ -217,30 +249,8 @@ Tarumae.Mesh = class {
 		}
 
 		if (!this.vertexBuffer) {
-			// compose memory buffer
-			if (!Array.isArray(this.vertices) || this.vertices.length <= 0) {
-				return false;
-			}
-
-			var vertexBuffer = this.vertices.slice();
-
-			if (meta.normalCount > 0) {
-				vertexBuffer = vertexBuffer.concat(this.normals);
-			}
-
-			if (meta.texcoordCount > 0) {
-				vertexBuffer = vertexBuffer.concat(this.texcoords);
-			}
-
-			if (meta.tangentBasisCount > 0) {
-				vertexBuffer = vertexBuffer.concat(this.tangents).concat(this.bitangents);
-			}
-
-			if (meta.hasColor) {
-				vertexBuffer = vertexBuffer.concat(this.colors);
-			}
-
-			this.vertexBuffer = new Float32Array(vertexBuffer);
+			const rs = this.updateBuffer();
+			if (!rs) return false;
 		}
 
 		// calc offset
@@ -366,16 +376,16 @@ Tarumae.Mesh = class {
 	destroy() {
 		this.unbind();
 
-		if(Array.isArray(this.vertices)) {
+		if (Array.isArray(this.vertices)) {
 			this.vertices.length = 0;
 		}
-		if(Array.isArray(this.normals)) {
+		if (Array.isArray(this.normals)) {
 			this.normals.length = 0;
 		}
-		if(Array.isArray(this.texcoords)) {
+		if (Array.isArray(this.texcoords)) {
 			this.texcoords.length = 0;
 		}
-		if(Array.isArray(this.indexes)) {
+		if (Array.isArray(this.indexes)) {
 			this.indexes.length = 0;
 		}
 		
@@ -578,6 +588,85 @@ Tarumae.Mesh = class {
 			this.texcoords[i] = 1 - this.texcoords[i];
 		}
 	}
+
+	scaleTexcoords(scaleX, scaleY) {
+		if (Array.isArray(this.texcoords)) {
+			for (var i = 0; i < this.texcoords.length;) {
+				this.texcoords[i++] *= scaleX;
+				this.texcoords[i++] *= scaleY;
+			}
+		}
+	}
+
+	calcBoundingBox() {
+		var vertices, vertexElementCount = 0;
+		
+		if (this.vertexBuffer && this.meta) {
+			vertices = this.vertexBuffer;
+			vertexElementCount = (this.meta.vertexCount || 0) * 3;
+		} else if (Array.isArray(this.vertices)) {
+			vertices = this.vertices;
+			vertexElementCount = this.vertices.length;
+		}
+
+		var minx = 0, miny = 0, minz = 0, maxx = 0, maxy = 0, maxz = 0;
+
+		if (vertices && vertexElementCount >= 3) {
+			minx = maxx = vertices[0];
+			miny = maxy = vertices[1];
+			minz = maxz = vertices[2];
+		
+			for (var i = 3; i < vertexElementCount; i += 3) {
+				var x = vertices[i], y = vertices[i + 1], z = vertices[i + 2];
+				if (minx > x) minx = x;
+				if (miny > y) miny = y;
+				if (minz > z) minz = z;
+				if (maxx < x) maxx = x;
+				if (maxy < y) maxy = y;
+				if (maxz < z) maxz = z;
+			}
+		}
+
+		return {
+			min: new Vec3(minx, miny, minz),
+			max: new Vec3(maxx, maxy, maxz),
+		};
+	}
+
+	getTranformedVerticesFromCache(transform) {
+		if (!this.cachedTransformedVertices) {
+			this.cachedTransformedVertices = [];
+
+			var vertices, vertexElementCount = 0;
+		
+			if (this.vertexBuffer && this.meta) {
+				vertices = this.vertexBuffer;
+				vertexElementCount = (this.meta.vertexCount || 0) * 3;
+			} else if (Array.isArray(this.vertices)) {
+				vertices = this.vertices;
+				vertexElementCount = this.vertices.length;
+			}
+
+			for (var i = 0; i < vertexElementCount; i += 9) {
+				var v1 = new Vec4(vertices[i + 0], vertices[i + 1], vertices[i + 2], 1).mulMat(transform);
+				var v2 = new Vec4(vertices[i + 3], vertices[i + 4], vertices[i + 5], 1).mulMat(transform);
+				var v3 = new Vec4(vertices[i + 6], vertices[i + 7], vertices[i + 8], 1).mulMat(transform);
+
+				this.cachedTransformedVertices.push(v1, v2, v3);
+			}
+		}
+		
+		return this.cachedTransformedVertices;
+	}
+
+	clearVertexCache() {
+		this.cachedTransformedVertices = undefined;
+	}
+
+	clearNavmeshDataCache() {
+		this.cachedNavmeshBorders = undefined;
+	}
+	
 };
 
 Object.assign(Tarumae.Mesh.prototype, {
@@ -623,38 +712,41 @@ Object.assign(Tarumae.Mesh.prototype, {
 			}
 		}
 
-		var t = maxt;
-		var hit = null;
-		var worldPosition = null;
-		var localPosition = null;
+		let t = maxt;
+		let hit = null;
+		let worldPosition = null;
+		let localPosition = null;
+		let surfaceIndex = undefined;
 		
 		switch (this.composeMode) {
 			case Tarumae.Mesh.ComposeModes.Triangles:
-				for (let i = 0; i < vertexElementCount; i += 9) {
+				for (let i = 0, si = 0; i < vertexElementCount; i += 9, si++) {
 					let out = this.hitTestByRayUsingVertexIndex(ray, vertices, normals, i, i + 3, i + 6, t, session, options);
 					if (out) {
 						t = out.t;
 						hit = out.hit;
 						worldPosition = out.worldPosition;
 						localPosition = out.localPosition;
+						surfaceIndex = si;						
 					}
 				}
 				break;
 
 			case Tarumae.Mesh.ComposeModes.TriangleStrip:
-				for (let i = 0; i < vertexElementCount - 6; i += 3) {
+				for (let i = 0, si = 0; i < vertexElementCount - 6; i += 3, si++) {
 					let out = this.hitTestByRayUsingVertexIndex(ray, vertices, normals, i, i + 3, i + 6, t, session, options);
 					if (out) {
 						t = out.t;
 						hit = out.hit;
 						worldPosition = out.worldPosition;
 						localPosition = out.localPosition;
+						surfaceIndex = si;						
 					}
 				}
 				break;
 		}
 
-		return (!hit) ? null : { t: t, hit: hit, worldPosition: worldPosition, localPosition: localPosition };
+		return (!hit) ? null : { t, hit, worldPosition, localPosition, surfaceIndex };
 	},
 
 	hitTestByRayUsingVertexIndex: (function() {
@@ -693,10 +785,10 @@ Object.assign(Tarumae.Mesh.prototype, {
 				var f2 = vv2.sub(out.hit);
 				var f3 = vv3.sub(out.hit);
 
-				var a = ((vv1.sub(vv2)).cross(vv1.sub(vv3))).length();
-				var a1 = f2.cross(f3).length() / a;
-				var a2 = f3.cross(f1).length() / a;
-				var a3 = f1.cross(f2).length() / a;
+				var a = 1 / ((vv1.sub(vv2)).cross(vv1.sub(vv3))).length();
+				var a1 = f2.cross(f3).length() * a;
+				var a2 = f3.cross(f1).length() * a;
+				var a3 = f1.cross(f2).length() * a;
 
 				if (options.cullingSurfaceBack === true && (normals instanceof Float32Array || Array.isArray(normals))) {
 				
@@ -724,84 +816,6 @@ Object.assign(Tarumae.Mesh.prototype, {
 			return;
 		};
 	})(),
-
-	scaleTexcoords: function(scaleX, scaleY) {
-		if (Array.isArray(this.texcoords)) {
-			for (var i = 0; i < this.texcoords.length;) {
-				this.texcoords[i++] *= scaleX;
-				this.texcoords[i++] *= scaleY;
-			}
-		}
-	},
-
-	calcBoundingBox: function() {
-		var vertices, vertexElementCount = 0;
-		
-		if (this.vertexBuffer && this.meta) {
-			vertices = this.vertexBuffer;
-			vertexElementCount = (this.meta.vertexCount || 0) * 3;
-		} else if (Array.isArray(this.vertices)) {
-			vertices = this.vertices;
-			vertexElementCount = this.vertices.length;
-		}
-
-		var minx = 0, miny = 0, minz = 0, maxx = 0, maxy = 0, maxz = 0;
-
-		if (vertices && vertexElementCount >= 3) {
-			minx = maxx = vertices[0];
-			miny = maxy = vertices[1];
-			minz = maxz = vertices[2];
-		
-			for (var i = 3; i < vertexElementCount; i += 3) {
-				var x = vertices[i], y = vertices[i + 1], z = vertices[i + 2];
-				if (minx > x) minx = x;
-				if (miny > y) miny = y;
-				if (minz > z) minz = z;
-				if (maxx < x) maxx = x;
-				if (maxy < y) maxy = y;
-				if (maxz < z) maxz = z;
-			}
-		}
-
-		return {
-			min: new Vec3(minx, miny, minz),
-			max: new Vec3(maxx, maxy, maxz),
-		};
-	},
-
-	getTranformedVerticesFromCache: function(transform) {
-		if (!this.cachedTransformedVertices) {
-			this.cachedTransformedVertices = [];
-
-			var vertices, vertexElementCount = 0;
-		
-			if (this.vertexBuffer && this.meta) {
-				vertices = this.vertexBuffer;
-				vertexElementCount = (this.meta.vertexCount || 0) * 3;
-			} else if (Array.isArray(this.vertices)) {
-				vertices = this.vertices;
-				vertexElementCount = this.vertices.length;
-			}
-
-			for (var i = 0; i < vertexElementCount; i += 9) {
-				var v1 = new Vec4(vertices[i + 0], vertices[i + 1], vertices[i + 2], 1).mulMat(transform);
-				var v2 = new Vec4(vertices[i + 3], vertices[i + 4], vertices[i + 5], 1).mulMat(transform);
-				var v3 = new Vec4(vertices[i + 6], vertices[i + 7], vertices[i + 8], 1).mulMat(transform);
-
-				this.cachedTransformedVertices.push(v1, v2, v3);
-			}
-		}
-		
-		return this.cachedTransformedVertices;
-	},
-
-	clearVertexCache: function() {
-		this.cachedTransformedVertices = undefined;
-	},
-
-	clearNavmeshDataCache: function() {
-		this.cachedNavmeshBorders = undefined;
-	},
 	
 	containsPointHorizontally: (function() {
 		var cp1 = { x: 0, y: 0 }, cv1 = { x: 0, y: 0 }, cv2 = { x: 0, y: 0 }, cv3 = { x: 0, y: 0 };
@@ -1013,24 +1027,13 @@ Object.assign(Tarumae.Mesh, {
 	})(),
 });
 
-Tarumae.ParticleMesh = class extends Tarumae.Mesh {
-	constructor(count = 100) {
+//////////////////////// DynamicMesh ////////////////////////
+
+Tarumae.DynamicMesh = class extends Tarumae.Mesh {
+	constructor() {
 		super();
 
-		// this.vertexBuffer = new Float32Array();
-		this.meta = {
-			vertexCount: count,
-			hasColor: true,
-			hasSize: true,
-			stride: 0,
-			vertexColorOffset: count * 12,
-			vertexSizeOffset: count * 24,
-		};
-
-		this.composeMode = Tarumae.Mesh.ComposeModes.Points;
 		this.bufferDirty = true;
-
-		this.vertexBuffer = new Float32Array(count * 2 * 3 + count);
 	}
 
 	bind(renderer) {
@@ -1078,5 +1081,25 @@ Tarumae.ParticleMesh = class extends Tarumae.Mesh {
 		}
 
 		super.draw.apply(this, arguments);
+	}
+};
+
+//////////////////////// DynamicMesh ////////////////////////
+
+Tarumae.ParticleMesh = class extends Tarumae.DynamicMesh {
+	constructor(count = 100) {
+		super();
+
+		this.meta = {
+			vertexCount: count,
+			hasColor: true,
+			hasSize: true,
+			stride: 0,
+			vertexColorOffset: count * 12,
+			vertexSizeOffset: count * 24,
+		};
+
+		this.composeMode = Tarumae.Mesh.ComposeModes.Points;
+		this.vertexBuffer = new Float32Array(count * 2 * 3 + count);
 	}
 };
