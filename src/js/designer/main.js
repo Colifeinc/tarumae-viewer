@@ -103,73 +103,6 @@ AutoFloor.LayoutDesigner = class {
 
     this.createLayout(this.data);
 
-    // setTimeout(_ => {
-    //   const gridSize = 40;
-
-    //   let cellIndex = 0;
-    //   for (let y = 0, yi = 0; y < 300; y += gridSize, yi++) {
-    //     for (let x = 0, xi = 0; x < 400; x += gridSize, xi++) {
-    //       if (y > 140 && x < 150) continue;
-    //       const c = { index: cellIndex, rect: new Tarumae.Rect(x, y, gridSize, gridSize) };
-    //       if (xi === 0) c.left = "wall";
-    //       if (xi === 9) c.right = "wall";
-    //       if (yi === 0) c.top = "wall";
-    //       if (yi === 7) c.bottom = "wall";
-    //       if (yi == 3 && xi < 4) c.bottom = "wall";
-    //       if (yi > 3 && xi === 4) c.left = "wall";
-    //       if (cellIndex == 10) c.entry = true;
-    //       if (yi == 1 && xi < 9) c.way = true;
-    //       if ((xi == 8 || xi == 5) && yi > 1 && yi < 7) c.way = true;
-    //       if (yi == 6 && xi > 5 && xi < 8) c.way = true;
-
-    //       this.grid.push(c);
-    //       cellIndex++;
-    //     }
-    //   }
-
-    //   this.scene.requireUpdateFrame();
-    // }, 2000);
-
-    // setTimeout(_ => {
-    //   this.data.objects = [
-    //     // { type: "chair", loc: [100, 100] },
-    //     // { type: "table", loc: [100, 118], size: [40, 20] },
-        
-    //     // { type: "table set", loc: [160, 280], size: [40, 40], angle: 0 },
-    //     { type: "table set", loc: [200, 280], size: [40, 40], angle: 0 },
-    //     { type: "table set", loc: [240, 280], size: [40, 40], angle: 0 },
-    //     { type: "table set", loc: [280, 280], size: [40, 40], angle: 0 },
-    //     { type: "table set", loc: [320, 280], size: [40, 40], angle: 0 },
-    //     // { type: "table set", loc: [360, 280], size: [40, 40], angle: 0 },
-
-    //     { type: "table set", loc: [40, 0], size: [40, 40], angle: 180 },
-    //     { type: "table set", loc: [80, 0], size: [40, 40], angle: 180 },
-    //     { type: "table set", loc: [120, 0], size: [40, 40], angle: 180 },
-    //     { type: "table set", loc: [160, 0], size: [40, 40], angle: 180 },
-    //     { type: "table set", loc: [200, 0], size: [40, 40], angle: 180 },
-    //     { type: "table set", loc: [240, 0], size: [40, 40], angle: 180 },
-    //     { type: "table set", loc: [280, 0], size: [40, 40], angle: 180 },
-    //     { type: "table set", loc: [320, 0], size: [40, 40], angle: 180 },
-
-    //     { type: "table set", loc: [360, 40], size: [40, 40], angle: 270 },
-    //     { type: "table set", loc: [360, 80], size: [40, 40], angle: 270 },
-    //     { type: "table set", loc: [360, 120], size: [40, 40], angle: 270 },
-    //     { type: "table set", loc: [360, 160], size: [40, 40], angle: 270 },
-    //     { type: "table set", loc: [360, 200], size: [40, 40], angle: 270 },
-    //     { type: "table set", loc: [360, 240], size: [40, 40], angle: 270 },
-
-    //     { type: "table set", loc: [40, 120], size: [40, 40], angle: 0 },
-    //     { type: "table set", loc: [80, 120], size: [40, 40], angle: 0 },
-    //     { type: "table set", loc: [120, 120], size: [40, 40], angle: 0 },
-
-    //     { type: "table set", loc: [160, 160], size: [40, 40], angle: 90 },
-    //     { type: "table set", loc: [160, 200], size: [40, 40], angle: 90 },
-    //     { type: "table set", loc: [160, 240], size: [40, 40], angle: 90 },
-    //   ];
-
-    //   this.scene.requireUpdateFrame();
-    // }, 4000);
-
     this.autoLayout();
   }
 
@@ -185,7 +118,6 @@ AutoFloor.LayoutDesigner = class {
     this.gridSize = 20;
     this.cellCountX = floorSize.width / this.gridSize;
     this.cellCountY = floorSize.height / this.gridSize;
-    console.log(this.cellCountX, this.cellCountY);
 
     const layout = new Drawing2d.Object();
     layout.origin.set(this.viewport.origin);
@@ -291,36 +223,46 @@ AutoFloor.LayoutDesigner = class {
           c.invalid = true;
         }
 
-        // this.markupCellBorder(c);
-
-        // if (xi === 0) c.left = "wall";
-        // if (xi === 9) c.right = "wall";
-        // if (yi === 0) c.top = "wall";
-        // if (yi === 7) c.bottom = "wall";
-        // if (yi == 3 && xi < 4) c.bottom = "wall";
-        // if (yi > 3 && xi === 4) c.left = "wall";
-        // if (cellIndex == 10) c.entry = true;
-        // if (yi == 1 && xi < 9) c.way = true;
-        // if ((xi == 8 || xi == 5) && yi > 1 && yi < 7) c.way = true;
-        // if (yi == 6 && xi > 5 && xi < 8) c.way = true;
-
         this.grid.push(c);
         this.cells[yi].push(c);
       }
-      console.log(yi);
     }
 
     for (const c of this.grid) {
-
       c.dists.wallp = c.dists.wall / maxDists.wall;
-
-      if (c.dist < gridSize) {
-        c.interior = true;
-      }
-
       c.dists.doorp = c.dists.door / maxDists.door;
       c.dists.windowp = c.dists.window / maxDists.window;
     }
+
+    // setTimeout(_ => {
+    //   for (const c of this.grid) {
+    //     c.dists.wallp = c.dists.wall / maxDists.wall;
+    //     // c.dists.doorp = c.dists.door / maxDists.door;
+    //     // c.dists.windowp = c.dists.window / maxDists.window;
+    //     c.dists.doorp = 1;
+    //     c.dists.windowp = 1;
+    //   }
+    //   this.scene.requireUpdateFrame();
+    // }, 5000);
+
+    // setTimeout(_ => {
+    //   for (const c of this.grid) {
+    //     // c.dists.wallp = c.dists.wall / maxDists.wall;
+    //     c.dists.doorp = c.dists.door / maxDists.door;
+    //     // c.dists.windowp = c.dists.window / maxDists.window;
+    //   }
+    //   this.scene.requireUpdateFrame();
+    // }, 10000);
+
+    // setTimeout(_ => {
+    //   for (const c of this.grid) {
+    //     // c.dists.wallp = c.dists.wall / maxDists.wall;
+    //     // c.dists.doorp = c.dists.door / maxDists.door;
+    //     c.dists.windowp = c.dists.window / maxDists.window;
+    //   }
+    //   this.scene.requireUpdateFrame();
+    // }, 15000);
+
   }
 
   generateInterior() {
@@ -334,31 +276,32 @@ AutoFloor.LayoutDesigner = class {
       this.room.remove(removes[i]);
     }
 
-    const width = 40, height = 40;
+    const gridSize = this.gridSize;
+    const horsets = 3, versets = 1, ftf = 1;
+    const protoSize = new TableChairSet(horsets, versets, ftf).bbox.size;
+    const cw = Math.ceil(protoSize.width / this.gridSize);
+    const ch = Math.ceil(protoSize.height / this.gridSize);
 
-    for (let i = 0; i < 20; i++) {
-      const list = this.findAvailableSpace(width, height);
+    for (let i = 0; i < 5; i++) {
+      const list = this.findAvailableSpace(cw, ch);
 
       if (list.length > 0) {
         list.sort((a, b) => b.scores.work - a.scores.work);
 
         const pos = list[0];
-        console.log(pos);
 
-        const ts1 = new TableChairSet(1, 1, true);
-        ts1.origin.set(pos.xi * this.gridSize, pos.yi * this.gridSize);
-        this.putInterior(ts1);
+        const ts = new TableChairSet(horsets, versets, ftf);
+
+        ts.origin.set(pos.xi * gridSize + cw * gridSize * 0.5,
+          pos.yi * gridSize + ch * gridSize * 0.5);
+        this.putInterior(ts);
       }
     }
   }
 
-  findAvailableSpace(width, height) {
+  findAvailableSpace(cw, ch) {
     const poslist = [];
 
-    const rect = new Tarumae.Rect(0, 0, width, height);
-
-    const cw = Math.ceil(rect.width / this.gridSize);
-    const ch = Math.ceil(rect.height / this.gridSize);
     const needrun = cw * ch;
 
     for (let yi = 0; yi <= this.cellCountY - ch; yi++) {
@@ -382,17 +325,21 @@ AutoFloor.LayoutDesigner = class {
               break;
             }
 
-            workscore += c.dists.doorp * c.dists.doorp
-              + (1 - c.dists.windowp) ;
+            workscore += c.dists.doorp * c.dists.doorp + (1 - c.dists.windowp) ;
             
             runs++;
           }
         }
 
         if (!ctaken && runs >= needrun) {
+          const c = this.cells[yi][xi];
+          if (c.taken) {
+            debugger;
+          }
+
           poslist.push({
-            xi: xi + cw * 0.5,
-            yi: yi + ch * 0.5,
+            xi, yi,
+            cell: c,
             scores: {
               work: workscore,
             }
@@ -412,7 +359,6 @@ AutoFloor.LayoutDesigner = class {
     for (const c of this.grid) {
       if (_mf.rectIntersectsRect(c.rect, objrect)) {
         c.taken = true;
-        console.log("taken " + c.xi + ", " + c.yi);
       }
     }
 
@@ -421,6 +367,8 @@ AutoFloor.LayoutDesigner = class {
   }
 
   drawGrid(g) {
+    if (!this.grid) return;
+
     for (const c of this.grid) {
       if (c.invalid) {
         g.drawRect(c.rect, 1, "white", "#f0f0f0");
@@ -651,6 +599,11 @@ class InteriorObject extends LayoutObject {
     this.bbox.min.set(this.origin.x - hw, this.origin.y - hh);
     this.bbox.max.set(this.origin.x + hw, this.origin.y + hh);
   }
+
+  render(g) {
+    super.render(g);
+    // g.drawRect(this.bbox.rect, 1, "red", "transparent");
+  }
 }
 
 class Chair extends InteriorObject {
@@ -688,27 +641,32 @@ class TableChairSet extends InteriorObject {
   constructor(horsets, versets, ftf) {
     super();
 
-    horsets |= 1;
-    versets |= 1;
+    horsets = horsets || 1;
+    versets = versets || 1;
+
+    const width = 37, hw = width * 0.5;
+    const totalWidth = width * horsets, htw = totalWidth * 0.5;
 
     for (let y = 0; y < versets; y++) {
       for (let x = 0; x < horsets; x++) {
 
+        const ox = x * width + hw - htw;
+
         if (ftf) {
           const chair1 = new Chair(15, 15);
-          const table1 = new Table(35, 15);
+          const table1 = new Table(width, 15);
           const chair2 = new Chair(15, 15);
-          const table2 = new Table(35, 15);
-          chair1.origin.set(0, -25);
-          table1.origin.set(0, -15);
-          table2.origin.set(0, 0);
-          chair2.origin.set(0, 10);
+          const table2 = new Table(width, 15);
+          chair1.origin.set(ox, -15);
+          table1.origin.set(ox, -5);
+          table2.origin.set(ox, 10);
+          chair2.origin.set(ox, 20);
           this.add(chair1, chair2, table1, table2);
         } else {
           const chair = new Chair(15, 15);
-          const table = new Table(35, 15);
-          chair.origin.set(0, -5);
-          table.origin.set(0, 5);
+          const table = new Table(width, 15);
+          chair.origin.set(ox, 0);
+          table.origin.set(ox, 10);
           this.add(chair, table);
         }
       }
@@ -730,12 +688,17 @@ class TableChairSet extends InteriorObject {
   }
 
   updateBoundingBox() {
+    if (this.objects.length > 0) {
+      this.bbox.set(this.objects[0].bbox);
 
-    if (this.chair && this.table) {
-      this.size = Tarumae.BBox2D.fromTwoBoundingBoxes(this.chair.bbox, this.table.bbox).size;
+      for (let i = 1; i < this.objects.length; i++) {
+        this.bbox.expendToBBox(this.objects[i].bbox);
+      }
 
-      super.updateBoundingBox();
+      this.size = this.bbox.size;
     }
+
+    super.updateBoundingBox();
   }
 
   render(g) {
