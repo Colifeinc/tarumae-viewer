@@ -308,14 +308,22 @@ Tarumae.Renderer = class {
 	
 			this.setGLViewport();
 
-			var scene = this.currentScene;
+			const scene = this.currentScene;
+
+			// FIXME: remove this
+			let clear2d = false;
 	
 			if (scene && (scene.animation || scene.requestedUpdateFrame)) {
 				if (this.debugMode) {
 					this.debugger.beforeDrawFrame();
 				}
 
-				this.renderPipeline();
+				this.ctx.clearRect(0, 0, this.canvas2d.width, this.canvas2d.height);
+				clear2d = true;
+
+				if (this.options.enable3D) {
+					this.renderPipeline();
+				}
 				scene.requestedUpdateFrame = false;
 
 				if (this.debugMode) {
@@ -324,7 +332,9 @@ Tarumae.Renderer = class {
 			}
 	
 			if (this.current2DScene && (this.current2DScene.animation || this.current2DScene.requestedUpdateFrame)) {
-				this.ctx.clearRect(0, 0, this.canvas2d.width, this.canvas2d.height);
+				if (!clear2d) {
+					this.ctx.clearRect(0, 0, this.canvas2d.width, this.canvas2d.height);
+				}
 				this.current2DScene.render(this.drawingContext2D);
 				this.current2DScene.requestedUpdateFrame = false;
 			}
@@ -342,6 +352,7 @@ Tarumae.Renderer = class {
 				this._bgImageRenderer = new Tarumae.PipelineNodes.ImageRenderer(this);
 				this._bgImageRenderer.enableAntialias = false;
 				this._bgImageRenderer.input = bgImageSource;
+				if (this.currentScene) this.currentScene.requireUpdateFrame();
 			});
 		}
 		
