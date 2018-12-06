@@ -12,7 +12,7 @@ TarumaeEditor.BuiltinObjects = {
   "1": {
     "name": "Plane",
     "preview": "images/plane.png",
-    "class": "Tarumae.Plane",
+    "class": "Tarumae.Shapes.Plane",
     "builtin": true
   },
   "2": {
@@ -55,7 +55,7 @@ TarumaeEditor.BuiltinObjects = {
     "type": 271,
     "name": "Floor",
     "preview": "images/plane.png",
-    "class": "Tarumae.Plane",
+    "class": "Tarumae.Shapes.Plane",
     "builtin": true,
     "object": { "mat": "DefaultFloor" }
   },

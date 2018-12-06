@@ -10,7 +10,7 @@ import "../utility/event";
 import { Vec2, Vec3, Vec4, Color3, Color4 } from "../math/vector";
 import "../math/matrix";
 import "../render/renderer";
-import "../scene/object";
+import "../scene/shapes";
 import "../scene/camera";
 import "../webgl/texture";
 import "../webgl/cubemap";

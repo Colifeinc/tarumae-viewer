@@ -70,7 +70,7 @@ class AnimationDemo {
 			},
 
 			floor: {
-				mesh: new Tarumae.PlaneMesh(2, 2),
+				mesh: new Tarumae.Shapes.PlaneMesh(2, 2),
 				scale: [3, 3, 3],
 				mat: { tex: texFloor },
 			},
