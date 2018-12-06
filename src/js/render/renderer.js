@@ -914,11 +914,22 @@ Tarumae.Renderer = class {
 		return Tarumae.MathFunctions.rayIntersectsPlane(ray, planeVertices, Tarumae.Ray.MaxDistance);
 	};
 
-	drawLineSegments2D() {
-		return this.drawingContext2D.drawLines(...arguments);
+	// 2D Drawing by 3D coordinates - Start
+
+	drawPoint(p, size = 3, color = "black") {
+		this.drawingContext2D.drawPoint(this.transformPoint(p), size, color);
 	}
-		
-	drawBox(box, width, color) {
+
+	drawLine(from, to, width, color) {
+		var points = this.transformPoints([from, to]);
+		this.drawLine2D(points[0], points[1], width, color);
+	};
+
+	drawRay(ray, length = 1, width = 1, color = "black") {
+		this.drawArrow(ray.origin, ray.origin.add(ray.dir.mul(length)), width, color);
+	}
+
+	drawBBox(box, width, color) {
 		if (!box) return;
 		
 		var points = this.transformPoints([
@@ -1002,7 +1013,7 @@ Tarumae.Renderer = class {
   fillArrow(from, to, size, color) {
 		var points = this.transformPoints([from, to]);
 		this.drawingContext2D.fillArrow(points[0], points[1], size, color);
-  }
+	}
   
 	drawRect(topLeft, bottomRight, strokeWidth, strokeColor, fillColor) {
 		var rect3d = this.transformPoints([topLeft, bottomRight]);
@@ -1037,8 +1048,7 @@ Tarumae.Renderer = class {
 	};
 		
 	drawText(location, text, color, halign) {
-		var p = this.transformPoint(location);
-		this.drawText2D(p, text, color, halign);
+		this.drawingContext2D.drawText(this.transformPoint(location), text, color, halign);
 	};
 
 	createSnapshotOfRenderingImage(imgformat, imgQuality) {
