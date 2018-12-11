@@ -22,6 +22,7 @@ Tarumae.Renderer = class {
 		return {
 			containerId: "canvas-container",
 			renderPixelRatio: 1,
+			enable3D: true,
 			enableShadow: false,
 			enableEnvmap: true,
 			perspective: {
