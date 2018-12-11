@@ -10,11 +10,12 @@ import { Color3, Color4 } from "../math/vector";
 window.addEventListener("load", function() {
 
 	const renderer = new Tarumae.Renderer({
-		// renderPixelRatio: 2,
+		renderPixelRatio: 1,
 		backColor: new Color4(0.74, .87, .85, 1),
 		backgroundImage: "../static/textures/bg-gray-gradient.jpg",
-		// backgroundImage: "../static/textures/sky.jpg",
 		// showDebugPanel: true,
+		enableLighting: false,
+		// postprocess: true,
 		postprocess: true,
 	});
 
@@ -25,15 +26,17 @@ window.addEventListener("load", function() {
 	// scene.add(new Tarumae.GridLine());
 	this.models = [
 		{ name: "chair_adv_01.toba" },
-		{ name: "chair_compact_01.toba" },
+		// { name: "chair_compact_01.toba" },
 		{ name: "chair_jati.toba" },
-		{ name: "desk_study_1p.toba" },
+		{ name: "desk_study_1p.toba", color: [.7, .7, .7] },
 		// { name: "fan_vintage_ceiling.toba", scale: [3, 3, 3] },
-		{ name: "print_mfp_w1500.toba", color: [.7, .7, .7] },
+		// { name: "print_mfp_w1500.toba", color: [.7, .7, .7] },
 		{ name: "rice_cooker_01.toba", z: 1, color: [.7, .7, .7] },
-		{ name: "sofa_leather_3s.toba" },
-		{ name: "ceo.toba", color: [.5, .5, .5] },
+		// { name: "sofa_leather_3s.toba" },
+		// { name: "ceo.toba", color: [.5, .5, .5] },
 	];
+
+	scene.add(new Tarumae.Shapes.Plane(2, 2));
 
 	scene.onkeydown = function(key) {
 		if (key >= Tarumae.Viewer.Keys.D1
@@ -91,7 +94,7 @@ window.addEventListener("load", function() {
 				nextObj.location.x = 3 * (1 - t);
 				nextObj.opacity = t;
 			});
-			scene.animate({ effect: "fadeout" }, t => nextObj.angle.y = -(1 - t) * 1500 + 25);
+			scene.animate({ effect: "fadeout" }, t => nextObj.angle.y = -(1 - t) * 500 + 25);
 		}
 	}
 

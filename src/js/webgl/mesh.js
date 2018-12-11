@@ -667,9 +667,69 @@ Tarumae.Mesh = class {
 		this.cachedNavmeshBorders = undefined;
 	}
 	
+	updateEdgeData() {
+		
+	}
+	
+	generateWireframe() {
+
+	}
 };
 
 Object.assign(Tarumae.Mesh.prototype, {
+
+	eachSurfaces: (function(handler) {
+		class HandlerArg {
+			constructor(buffer, i1, i2, i3) {
+				this.buffer = buffer;
+				this.i1 = i1;
+				this.i2 = i2;
+				this.i3 = i3;
+			}
+
+			get v1() {
+				return this.buffer[i1];
+			}
+
+			get v2() {
+				return this.buffer[i2];
+			}
+
+			get v3() {
+				return this.buffer[i3];
+			}
+
+			get n1() {
+
+			}
+		}
+
+		const arg = new HandlerArg();
+
+		return function(handler) {
+			const vertices = this.vertexBuffer;
+			const vertexElementCount = this.meta.vertexCount * 3;
+			const normals = new Float32Array(this.vertexBuffer.buffer, this.vertexBuffer.byteOffset + vertexElementCount * 4);
+
+			switch (this.composeMode) {
+				case Tarumae.Mesh.ComposeModes.Triangles:
+					for (let i = 0; i < vertexElementCount; i += 9) {
+						if (!handler(vertices, normals, i, i + 3, i + 6, t)) {
+							break;
+						}
+					}
+					break;
+
+				case Tarumae.Mesh.ComposeModes.TriangleStrip:
+					for (let i = 0; i < vertexElementCount - 6; i += 3) {
+						if (!handler(vertices, normals, i, i + 3, i + 6, t)) {
+							break;
+						}
+					}
+					break;
+			}
+		}
+	})(),
 
 	hitTestByRay: function(ray, maxt, session, options) {
 		"use strict";

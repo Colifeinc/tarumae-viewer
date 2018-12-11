@@ -388,6 +388,8 @@ Tarumae.Renderer = class {
 		} else {
 			this.pipelineNodes.push(new Tarumae.PipelineNodes.DefaultRenderer(this));
 		}
+
+		console.log(this.pipelineNodes.length);
 	}
 	
 	renderPipeline() {
