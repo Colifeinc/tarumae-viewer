@@ -99,3 +99,8 @@ module.exports = {
     port: 8080,
   }
 };
+
+setTimeout(function() {
+	const ip = require("ip");
+	console.dir ('network ip = ' + ip.address() );
+}, 4000);
