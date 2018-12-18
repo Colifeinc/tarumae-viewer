@@ -94,6 +94,13 @@ Tarumae.BBox2D = class {
 		}
 	}
 
+	set(bbox) {
+		this.min.x = bbox.min.x;
+		this.min.y = bbox.min.y;
+		this.max.x = bbox.max.x;
+		this.max.y = bbox.max.y;
+	}
+
 	get size() {
 		return new Tarumae.Size(this.max.x - this.min.x,
 			this.max.y - this.min.y);
@@ -108,6 +115,13 @@ Tarumae.BBox2D = class {
 	get rect() {
 		const size = this.size;
 		return new Tarumae.Rect(this.min.x, this.min.y, size.width, size.height);
+	}
+
+	expendToBBox(bbox) {
+		if (this.min.x > bbox.min.x) this.min.x = bbox.min.x;
+		if (this.min.y > bbox.min.y) this.min.y = bbox.min.y;
+		if (this.max.x < bbox.max.x) this.max.x = bbox.max.x;
+		if (this.max.y < bbox.max.y) this.max.y = bbox.max.y;
 	}
 
 	updateFromTwoPoints(p1, p2) {
@@ -563,6 +577,11 @@ Tarumae.DrawingContext2D = class {
 		this.drawEllipse(new Tarumae.Rect(p.x - size / 2, p.y - size / 2, size, size), 0, null, color);
 	}
 
+	// drawEllipse(p, size, strokeWidth, strokeColor, fillColor) {
+	// 	var r = new Tarumae.Rect(p.x - size / 2, p.y - size / 2, size, size);
+	// 	return this.drawEllipse(r, strokeWidth, strokeColor, fillColor);
+	// };
+
 	drawEllipse(rect, strokeWidth, strokeColor, fillColor) {
 		var ctx = this.ctx;
 		
@@ -799,14 +818,4 @@ Tarumae.DrawingContext2D = class {
 			ctx.stroke();
 		}
 	};
-    
-	drawEllipse(p, size, strokeWidth, strokeColor, fillColor) {
-		var r = new Tarumae.Rect(p.x - size / 2, p.y - size / 2, size, size);
-		return this.drawingContext2D.drawEllipse(r, strokeWidth, strokeColor, fillColor);
-	};
-		
-	drawText2D() {
-		return this.drawingContext2D.drawText.apply(this.drawingContext2D, arguments);
-	};
-
 };
