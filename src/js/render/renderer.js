@@ -22,6 +22,7 @@ Tarumae.Renderer = class {
 		return {
 			containerId: "canvas-container",
 			renderPixelRatio: 1,
+			enable3D: true,
 			enableShadow: false,
 			enableEnvmap: true,
 			perspective: {
@@ -394,6 +395,8 @@ Tarumae.Renderer = class {
 		} else {
 			this.pipelineNodes.push(new Tarumae.PipelineNodes.DefaultRenderer(this));
 		}
+
+		console.log(this.pipelineNodes.length);
 	}
 	
 	renderPipeline() {

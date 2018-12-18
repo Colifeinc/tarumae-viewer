@@ -13,7 +13,6 @@ window.addEventListener("load", function() {
 		renderPixelRatio: window.devicePixelRatio,
 		backColor: new Color4(0.74, .87, .85, 1),
 		backgroundImage: "../static/textures/bg-gray-gradient.jpg",
-		// backgroundImage: "../static/textures/sky.jpg",
 		// showDebugPanel: true,
 		enableLighting: false,
 		// postprocess: true,
@@ -35,6 +34,8 @@ window.addEventListener("load", function() {
 		// { name: "sofa_leather_3s.toba" },
 		// { name: "ceo.toba", color: [.5, .5, .5] },
 	];
+
+	scene.add(new Tarumae.Shapes.Plane(2, 2));
 
 	scene.onkeydown = function(key) {
 		if (key >= Tarumae.Viewer.Keys.D1

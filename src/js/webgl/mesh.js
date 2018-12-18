@@ -1095,7 +1095,6 @@ Tarumae.DynamicMesh = class extends Tarumae.Mesh {
 		super();
 		
 		this.bufferDirty = true;
-		this.fixedVertexCount = true;
 	}
 	
 	bind(renderer) {
