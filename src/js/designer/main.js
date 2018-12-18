@@ -92,11 +92,11 @@ AutoFloor.LayoutDesigner = class {
     // };
     this.data = {
       walls: [
-        [0, 0], [200, 0], [200, 200], [0, 200]
+        [0, 0], [200, 0], [200, 300], [0, 300]
       ],
-      // doors: [
-      //   { loc: [0, 45], size: 30, wallIndex: 5, dirs: [0, 0] },
-      // ],
+      doors: [
+        { loc: [0, 40], size: 40, wallIndex: 3, dirs: [0, 0], type: "one_slide" },
+      ],
       // windows: [
       //   { loc: [200, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
       //   { loc: [240, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
@@ -122,6 +122,9 @@ AutoFloor.LayoutDesigner = class {
     this.createLayout(this.data);
 
     this.autoLayout();
+
+    this.generateInterior();
+
   }
 
   show() {
@@ -159,7 +162,7 @@ AutoFloor.LayoutDesigner = class {
     if (data.doors) {
       for (const d of data.doors) {
         const wall = room.walls[d.wallIndex];
-        const door = new Door(wall, d.loc, d.size, d.dirs);
+        const door = new Door(wall, d.loc, d.size, d.dirs, d.type);
         wall.add(door);
         wall.doors.push(door);
       }
@@ -177,7 +180,6 @@ AutoFloor.LayoutDesigner = class {
 
   autoLayout() {
     this.generateCells();
-    this.generateInterior();
   }
 
   generateCells() {
@@ -295,8 +297,33 @@ AutoFloor.LayoutDesigner = class {
   }
 
   generateInterior() {
-    const sofa = new AssetObject("sofa", 100, 30);
-    sofa.origin.set(100, 100);
+
+    this.addDiningSet({ x: 157, y: 100 });
+
+  }
+
+  addDiningSet(diningset) {
+    
+    const chair1 = new AssetObject("chair", 25, 25);
+    chair1.origin.set(diningset.x - 20, diningset.y - 20);
+    this.putInterior(chair1);
+
+    const chair2 = new AssetObject("chair", 25, 25);
+    chair2.origin.set(diningset.x + 20, diningset.y - 20);
+    this.putInterior(chair2);
+
+    const chair3 = new AssetObject("chair", 25, 25);
+    chair3.origin.set(diningset.x - 20, diningset.y + 20);
+    chair3.angle = 180;
+    this.putInterior(chair3);
+
+    const chair4 = new AssetObject("chair", 25, 25);
+    chair4.origin.set(diningset.x + 20, diningset.y + 20);
+    chair4.angle = 180;
+    this.putInterior(chair4);
+
+    const sofa = new AssetObject("sofa", 80, 35);
+    sofa.origin.set(diningset.x, diningset.y);
     this.putInterior(sofa);
   }
 
@@ -429,7 +456,6 @@ AutoFloor.LayoutDesigner = class {
 
       const o = c.rect.origin;
       
-      console.log(color);
       g.drawRect(c.rect, 1, "white", color);
       g.drawText(o, c.index, c.taken ? "red" : "silver", "center", "5px Arial");
     }
@@ -491,10 +517,17 @@ class Wall extends Drawing2d.Object {
 }
 
 class LayoutObject extends Drawing2d.Object {
-  constructor() {
+  constructor(size) {
     super();
 
+    this.size = size;
+
     this.style.strokeColor = "gray";
+  }
+
+  drawDimension(g, x, y) {
+    const w = this.size.width, h = this.size.height;
+    g.drawText({ x, y }, `${w * 20} mm x ${h * 20} mm`, "black", "center", "0.3em Arial");
   }
 
   pointToObject(p) {
@@ -517,16 +550,25 @@ class LayoutObject extends Drawing2d.Object {
     this.style.strokeColor = "gray";
     e.requireUpdateFrame();
   }
+
+  drag(e) {
+    const p = e.movement;
+
+    this.origin.x += p.x * 0.5;
+    this.origin.y += p.y * 0.5;
+    this.updateBoundingBox();
+
+    e.requireUpdateFrame();
+  }
 }
 
 class WallChildObject extends LayoutObject {
   constructor(wall, loc, size) {
-    super();
+    super(new Tarumae.Size(size, wall.width));
 
     this.line = new Tarumae.LineSegment2D();
 
     this.wall = wall;
-    this.size = size;
     this.angle = this.wall.lineAngle;
 
     this.location = new Vec2(loc[0], loc[1]);
@@ -542,7 +584,7 @@ class WallChildObject extends LayoutObject {
   updateBoundingBox() {
     if (this.wall) {
       const m = Tarumae.Matrix3.makeRotation(this.angle, this.origin.x, this.origin.y);
-      const hw = this.size * 0.5, hh = this.wall.width * 0.5;
+      const hw = this.size.width * 0.5, hh = this.wall.width * 0.5;
     
       this.line.start = new Vec2(-hw, 0).mulMat(m);
       this.line.end = new Vec2(hw, 0).mulMat(m);
@@ -579,9 +621,10 @@ class WallChildObject extends LayoutObject {
 }
 
 class Door extends WallChildObject {
-  constructor(wall, loc, size, dirs) {
+  constructor(wall, loc, size, dirs, type) {
     super(wall, loc, size);
     this.dirs = dirs;
+    this.type = type || "one_side";
   }
 
   render(g) {
@@ -593,11 +636,41 @@ class Door extends WallChildObject {
 
   draw(g) {
     if (this.wall) {
-      const w = this.size, hw = w * 0.5, h = this.wall.width, hh = h * 0.5;
+      const w = this.size.width, hw = w * 0.5, h = this.wall.width, hh = h * 0.5;
 
-      g.drawRect(new Tarumae.Rect(-hw, -hh, w, h));
-      g.drawArc(new Tarumae.Rect(hw, hh, w, h), 90, 180);
+      switch (this.type) {
+        case "one_side":
+          defaut:
+          g.drawRect(new Tarumae.Rect(-hw, -hh, w, h));
+          g.drawArc(new Tarumae.Rect(hw, hh, w, h), 90, 180);
+          break;
+        
+        case "one_slide":
+          g.drawRect(new Tarumae.Rect(-w - hw, -hh, w, h));
+          g.drawRect(new Tarumae.Rect(-hw, -hh, w, h), 0, "white");
+          g.drawLine({ x: -w - hw + 2, y: 0 }, { x: hw - 2, y: 0 }, 1);
+          g.drawLine({ x: 0, y: -hh }, { x: 0, y: hh }, 1);
+          break;
+      }
+
+      super.drawDimension(g, 0, (-hh - 3));
     }
+  }
+}
+
+class WallOpen extends WallChildObject {
+  constructor(wall, loc, size, dirs) {
+    super(wall, loc, size);
+    this.dirs = dirs;
+  }
+
+  draw(g) {
+    if (this.wall) {
+      const w = this.size, hw = w * 0.5, h = this.wall.width, hh = h * 0.5;
+      g.drawRect(new Tarumae.Rect(-hw, -hh, w, h));
+    }
+
+    super.draw(g);
   }
 }
 
@@ -620,14 +693,15 @@ class Window extends WallChildObject {
       g.drawRect(new Tarumae.Rect(-hw, -hh, w, h));
       g.drawRect(new Tarumae.Rect(-hw, -4, w, 2));
     }
+
+    super.draw(g);
   }
 }
 
 class InteriorObject extends LayoutObject {
   constructor(width, height) {
-    super();
-    this.size = new Tarumae.Size(width, height);
-
+    super(new Tarumae.Size(width, height));
+    
     this.update();
   }
 
@@ -754,7 +828,23 @@ class AssetObject extends InteriorObject {
       "sofa": {
         draw: (g, w, h, hw, hh) => {
           g.drawRoundRect(new Tarumae.Rect(-hw, -hh, w, h), 5);
+          super.drawDimension(g, 0, 0);
         }
+      }, 
+      "chair": {
+        draw: (g, w, h, hw, hh) => {
+          const x = -hw, y = -hh;
+          g.drawRoundRect({ x: -hw, y: -hh, width: w, height: w }, w * 0.7);
+          g.drawRoundRect({ x: -hw, y: -hh - 2, width: w, height: h * 0.17 }, w * 0.2);
+    
+          // g.drawRoundRect({ x: x - 2, y: y + hh - 4, width: 3, height: 8 }, w * 0.2);
+          // g.drawRoundRect({ x: x + w - 1, y: y + hh - 4, width: 3, height: 8 }, w * 0.2);
+
+          super.drawDimension(g, 0, - hh - 5);
+        }
+      },
+      "sofa_1p": {
+        
       }
     }
 
@@ -762,7 +852,7 @@ class AssetObject extends InteriorObject {
 
     this.ondraw = g => {
       const w = this.size.width, hw = w * 0.5, h = this.size.height, hh = h * 0.5;
-      this.objProto.draw(g, w, h, hw, hh);
+      this.objProto.draw(g, w, h, hw, hh); 
     }
   }
 }
