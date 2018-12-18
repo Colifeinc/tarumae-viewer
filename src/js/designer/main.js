@@ -298,8 +298,9 @@ AutoFloor.LayoutDesigner = class {
       }
     }
 
-    const sofa = new AssetObject("sofa");
-    this.putInterior(sofa);
+    // const sofa = new AssetObject("sofa", 100, 30);
+    // sofa.origin.set(100, 100);
+    // this.putInterior(sofa);
   }
 
   findAvailableSpace(cw, ch) {
@@ -711,8 +712,8 @@ class TableChairSet extends InteriorObject {
 }
 
 class AssetObject extends InteriorObject {
-  constructor(objType) {
-    super();
+  constructor(objType, width, height) {
+    super(width, height);
 
     const assets = {
       "sofa": {

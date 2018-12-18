@@ -98,7 +98,7 @@ Tarumae.BBox2D = class {
 		switch (arguments.length) {
 			case 1:
 				const bbox2 = arguments[0];
-				if (bbox2 instanceof BBox2D) {
+				if (bbox2 instanceof Tarumae.BBox2D) {
 					this.min = bbox2.min.clone();
 					this.max = bbox2.max.clone();
 				}
