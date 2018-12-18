@@ -515,9 +515,9 @@ Tarumae.DrawingContext2D = class {
 
 		// ctx.beginPath();
 
+		ctx.fillStyle = fillColor;
 		if (fillColor) {
-			ctx.fillStyle = fillColor;
-			ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
+				ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
 		}
 		
 		if (typeof strokeWidth !== "undefined") {
@@ -566,8 +566,8 @@ Tarumae.DrawingContext2D = class {
 		ctx.arc(x + hc, y + hc, hc, Math.PI, Math.PI / 2 + Math.PI);
 		ctx.closePath();
 
+		ctx.fillStyle = fillColor;
 		if (fillColor) {
-			ctx.fillStyle = fillColor;
 			ctx.fill();
 		}
 

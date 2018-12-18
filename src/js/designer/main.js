@@ -5,7 +5,6 @@ import "../utility/archive";
 import "../utility/res";
 import Drawing2d from "../draw/scene2d";
 import { Vec2 } from "../math/vector";
-import { TimerObservable } from "rxjs/observable/TimerObservable";
 
 const TarumaeDesigner = {
 };
@@ -72,23 +71,42 @@ AutoFloor.LayoutDesigner = class {
     // FIXME: remove global variable
     window._designer = this;
 
+    // this.data = {
+    //   walls: [
+    //     [0, 0], [400, 0], [400, 320], [160, 320], [160, 160], [0, 160],
+    //   ],
+    //   doors: [
+    //     { loc: [0, 45], size: 30, wallIndex: 5, dirs: [0, 0] },
+    //   ],
+    //   windows: [
+    //     { loc: [200, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
+    //     { loc: [240, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
+    //     { loc: [280, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
+    //     { loc: [320, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
+    //     { loc: [360, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
+    //   ],
+    //   pillars: [
+    //     [[0, 0], [0, 100], [100, 100], [100, 0], [0, 0]],
+    //   ],
+    //   objects: [],
+    // };
     this.data = {
       walls: [
-        [0, 0], [400, 0], [400, 320], [160, 320], [160, 160], [0, 160],
+        [0, 0], [200, 0], [200, 200], [0, 200]
       ],
-      doors: [
-        { loc: [0, 45], size: 30, wallIndex: 5, dirs: [0, 0] },
-      ],
-      windows: [
-        { loc: [200, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
-        { loc: [240, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
-        { loc: [280, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
-        { loc: [320, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
-        { loc: [360, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
-      ],
-      pillars: [
-        [[0, 0], [0, 100], [100, 100], [100, 0], [0, 0]],
-      ],
+      // doors: [
+      //   { loc: [0, 45], size: 30, wallIndex: 5, dirs: [0, 0] },
+      // ],
+      // windows: [
+      //   { loc: [200, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
+      //   { loc: [240, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
+      //   { loc: [280, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
+      //   { loc: [320, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
+      //   { loc: [360, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
+      // ],
+      // pillars: [
+      //   [[0, 0], [0, 100], [100, 100], [100, 0], [0, 0]],
+      // ],
       objects: [],
     };
 
@@ -138,18 +156,22 @@ AutoFloor.LayoutDesigner = class {
       room.add(wall);
     }
 
-    for (const d of data.doors) {
-      const wall = room.walls[d.wallIndex];
-      const door = new Door(wall, d.loc, d.size, d.dirs);
-      wall.add(door);
-      wall.doors.push(door);
+    if (data.doors) {
+      for (const d of data.doors) {
+        const wall = room.walls[d.wallIndex];
+        const door = new Door(wall, d.loc, d.size, d.dirs);
+        wall.add(door);
+        wall.doors.push(door);
+      }
     }
     
-    for (const w of data.windows) {
-      const wall = room.walls[w.wallIndex];
-      const window = new Window(wall, w.loc, w.size, w.dirs);
-      wall.add(window);
-      wall.windows.push(window);
+    if (data.windows) {
+      for (const w of data.windows) {
+        const wall = room.walls[w.wallIndex];
+        const window = new Window(wall, w.loc, w.size, w.dirs);
+        wall.add(window);
+        wall.windows.push(window);
+      }
     }
   }
 
@@ -186,6 +208,9 @@ AutoFloor.LayoutDesigner = class {
           index: cellIndex, xi, yi,
           rect,
           dists: {
+            wall: 0,
+            door: 0,
+            window: 0,
           },
         };
 
@@ -204,8 +229,10 @@ AutoFloor.LayoutDesigner = class {
             }
           }
 
-          c.dists.door = minDoorDist;
-          if (maxDists.door < minDoorDist) maxDists.door = minDoorDist;
+          if (minDoorDist < Infinity) {
+            c.dists.door = minDoorDist;
+            if (maxDists.door < minDoorDist) maxDists.door = minDoorDist;
+          }
 
           // window
           let minWindowDist = Infinity;
@@ -216,8 +243,10 @@ AutoFloor.LayoutDesigner = class {
             }
           }
 
-          c.dists.window = minWindowDist;
-          if (maxDists.window < minWindowDist) maxDists.window = minWindowDist;
+          if (minWindowDist < Infinity) {
+            c.dists.window = minWindowDist;
+            if (maxDists.window < minWindowDist) maxDists.window = minWindowDist;
+          }
 
         } else {
           c.invalid = true;
@@ -266,6 +295,12 @@ AutoFloor.LayoutDesigner = class {
   }
 
   generateInterior() {
+    const sofa = new AssetObject("sofa", 100, 30);
+    sofa.origin.set(100, 100);
+    this.putInterior(sofa);
+  }
+
+  generateInteriorOffice() {
     const removes = [];
     for (let i = 0; i < this.room.objects.length; i++) {
       if (this.room.objects[i] instanceof InteriorObject) {
@@ -297,10 +332,6 @@ AutoFloor.LayoutDesigner = class {
         this.putInterior(ts);
       }
     }
-
-    // const sofa = new AssetObject("sofa", 100, 30);
-    // sofa.origin.set(100, 100);
-    // this.putInterior(sofa);
   }
 
   findAvailableSpace(cw, ch) {
@@ -381,20 +412,24 @@ AutoFloor.LayoutDesigner = class {
         
       let color = 'silver';
 
-      if (c.wallAdjacent || c.left || c.right || c.top || c.bottom) {
-        color = '#c0ffc0';
-      }
+      // if (c.wallAdjacent || c.left || c.right || c.top || c.bottom) {
+      //   color = '#c0ffc0';
+      // }
       
-      if (c.way) color = '#ffffc0';
-      if (c.door) color = '#ffffc0';
+      // if (c.way) color = '#ffffc0';
+      // if (c.door) color = '#ffffc0';
 
       const p1 = c.dists.wallp * 255;
-      const p2 = c.dists.doorp * 255;
-      const p3 = c.dists.windowp * 255;
+      const p2 = isNaN(c.dists.doorp) ? 0 : (c.dists.doorp * 255);
+      const p3 = isNaN(c.dists.windowp) ? 0 : (c.dists.windowp * 255);
+      p1 = 200 + p1 / 255 * 50;
+      p2 = 200 + p2 / 255 * 50;
+      p3 = 200 + p3 / 255 * 50;
       color = `rgb(${p1}, ${p2}, ${p3})`;
 
       const o = c.rect.origin;
       
+      console.log(color);
       g.drawRect(c.rect, 1, "white", color);
       g.drawText(o, c.index, c.taken ? "red" : "silver", "center", "5px Arial");
     }
