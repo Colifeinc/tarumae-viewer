@@ -297,6 +297,9 @@ AutoFloor.LayoutDesigner = class {
         this.putInterior(ts);
       }
     }
+
+    const sofa = new AssetObject("sofa");
+    this.putInterior(sofa);
   }
 
   findAvailableSpace(cw, ch) {
@@ -704,6 +707,27 @@ class TableChairSet extends InteriorObject {
   render(g) {
     super.render(g);
     // g.drawRect(this.bbox.rect, 2, "red", "white");
+  }
+}
+
+class AssetObject extends InteriorObject {
+  constructor(objType) {
+    super();
+
+    const assets = {
+      "sofa": {
+        draw: (g, w, h, hw, hh) => {
+          g.drawRoundRect(new Tarumae.Rect(-hw, -hh, w, h), 5);
+        }
+      }
+    }
+
+    this.objProto = assets[objType];
+
+    this.ondraw = g => {
+      const w = this.size.width, hw = w * 0.5, h = this.size.height, hh = h * 0.5;
+      this.objProto.draw(g, w, h, hw, hh);
+    }
   }
 }
 

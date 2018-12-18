@@ -94,11 +94,16 @@ Tarumae.BBox2D = class {
 		}
 	}
 
-	set(bbox) {
-		this.min.x = bbox.min.x;
-		this.min.y = bbox.min.y;
-		this.max.x = bbox.max.x;
-		this.max.y = bbox.max.y;
+	set() {
+		switch (arguments.length) {
+			case 1:
+				const bbox2 = arguments[0];
+				if (bbox2 instanceof BBox2D) {
+					this.min = bbox2.min.clone();
+					this.max = bbox2.max.clone();
+				}
+				break;
+		}
 	}
 
 	get size() {

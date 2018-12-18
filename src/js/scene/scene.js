@@ -10,7 +10,7 @@ import "../utility/event";
 import { Vec2, Vec3, Vec4, Color3, Color4 } from "../math/vector";
 import "../math/matrix";
 import "../render/renderer";
-import "../scene/object";
+import "../scene/shapes";
 import "../scene/camera";
 import "../webgl/texture";
 import "../webgl/cubemap";
@@ -932,8 +932,10 @@ Scene.prototype.findObjectsByWorldRay = function(ray, options) {
 		});
 
 		out.object = out.hits[0].object;
+		out.t = out.hits[0].t;
 		out.localPosition = out.hits[0].localPosition;
 		out.worldPosition = out.hits[0].worldPosition;
+		out.surfaceIndex = out.hits[0].surfaceIndex;
 	}
 
 	if (this.renderer.debugMode) {
@@ -1005,6 +1007,7 @@ Scene.prototype.hitTestObjectByRay = function(obj, ray, out, session, options) {
 					t: mout.t,
 					worldPosition: mout.worldPosition,
 					localPosition: mout.localPosition,
+					surfaceIndex: mout.surfaceIndex,
 				});
 			}
 		}

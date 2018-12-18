@@ -316,11 +316,17 @@ Tarumae.Renderer = class {
 			}
 
 			const scene = this.currentScene;
+
+			// FIXME: remove this
+			let clear2d = false;
 	
 			if (scene && (scene.animation || scene.requestedUpdateFrame)) {
 				if (this.debugMode) {
 					this.debugger.beforeDrawFrame();
 				}
+
+				this.ctx.clearRect(0, 0, this.canvas2d.width, this.canvas2d.height);
+				clear2d = true;
 
 				if (this.options.enable3D) {
 					this.renderPipeline();
@@ -333,7 +339,9 @@ Tarumae.Renderer = class {
 			}
 	
 			if (this.current2DScene && (this.current2DScene.animation || this.current2DScene.requestedUpdateFrame)) {
-				this.ctx.clearRect(0, 0, this.canvas2d.width, this.canvas2d.height);
+				if (!clear2d) {
+					this.ctx.clearRect(0, 0, this.canvas2d.width, this.canvas2d.height);
+				}
 				this.current2DScene.render(this.drawingContext2D);
 				this.current2DScene.requestedUpdateFrame = false;
 			}
@@ -351,6 +359,7 @@ Tarumae.Renderer = class {
 				this._bgImageRenderer = new Tarumae.PipelineNodes.ImageRenderer(this);
 				this._bgImageRenderer.enableAntialias = false;
 				this._bgImageRenderer.input = bgImageSource;
+				if (this.currentScene) this.currentScene.requireUpdateFrame();
 			});
 		}
 		
@@ -925,10 +934,18 @@ Tarumae.Renderer = class {
 
 	// 2D Drawing by 3D coordinates - Start
 
+	drawPoint(p, size = 3, color = "black") {
+		this.drawingContext2D.drawPoint(this.transformPoint(p), size, color);
+	}
+
 	drawLine(from, to, width, color) {
 		var points = this.transformPoints([from, to]);
 		this.drawLine2D(points[0], points[1], width, color);
 	};
+
+	drawRay(ray, length = 1, width = 1, color = "black") {
+		this.drawArrow(ray.origin, ray.origin.add(ray.dir.mul(length)), width, color);
+	}
 
 	drawBBox(box, width, color) {
 		if (!box) return;
@@ -1014,7 +1031,7 @@ Tarumae.Renderer = class {
   fillArrow(from, to, size, color) {
 		var points = this.transformPoints([from, to]);
 		this.drawingContext2D.fillArrow(points[0], points[1], size, color);
-  }
+	}
   
 	drawRect(topLeft, bottomRight, strokeWidth, strokeColor, fillColor) {
 		var rect3d = this.transformPoints([topLeft, bottomRight]);
@@ -1049,8 +1066,7 @@ Tarumae.Renderer = class {
 	};
 		
 	drawText(location, text, color, halign) {
-		var p = this.transformPoint(location);
-		this.drawText2D(p, text, color, halign);
+		this.drawingContext2D.drawText(this.transformPoint(location), text, color, halign);
 	};
 
 	// 2D Drawing by 3D coordinates - End

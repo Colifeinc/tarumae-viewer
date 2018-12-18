@@ -27,7 +27,7 @@ _s3_Class("EditorGround", Tarumae.EditorObject, function() {
 _s3_Class("EditorFloor", Tarumae.EditorObject, function(width, height) {
   this.super();
   
-  this.meshes.push(new Tarumae.PlaneMesh(width, height));
+  this.meshes.push(new Tarumae.Shapes.PlaneMesh(width, height));
 });
 
 //////////////// Wall ////////////////

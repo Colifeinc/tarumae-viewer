@@ -1,4 +1,5 @@
 
+import "../scene/object"
 import Tarumae from "../entry"
 import "../webgl/buffers"
 
@@ -220,6 +221,25 @@ Tarumae.PipelineNodes.ImageRenderer = class extends Tarumae.PipelineNode {
       this.renderer.disuseCurrentShader();
     }
   }
+};
+
+Tarumae.ScreenMesh = class extends Tarumae.Mesh {
+	constructor() {
+		super();
+
+		this.vertices = [-1, 1, 0,    -1, -1, 0,   1, 1, 0,   1, -1, 0];
+		this.texcoords = [0, 0,   0, 1,   1, 0,   1, 1];
+
+		this.meta = {
+			vertexCount: 4,
+			normalCount: 0,
+			uvCount: 1,
+			texcoordCount: 4,
+			tangentBasisCount: 0,
+		};
+
+		this.composeMode = Tarumae.Mesh.ComposeModes.TriangleStrip;
+	}
 };
 
 Tarumae.PipelineNodes.MemoryImageRenderer = class extends Tarumae.PipelineNode {
