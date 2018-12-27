@@ -71,44 +71,47 @@ AutoFloor.LayoutDesigner = class {
     // FIXME: remove global variable
     window._designer = this;
 
-    // this.data = {
-    //   walls: [
-    //     [0, 0], [400, 0], [400, 320], [160, 320], [160, 160], [0, 160],
-    //   ],
-    //   doors: [
-    //     { loc: [0, 45], size: 30, wallIndex: 5, dirs: [0, 0] },
-    //   ],
-    //   windows: [
-    //     { loc: [200, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
-    //     { loc: [240, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
-    //     { loc: [280, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
-    //     { loc: [320, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
-    //     { loc: [360, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
-    //   ],
-    //   pillars: [
-    //     [[0, 0], [0, 100], [100, 100], [100, 0], [0, 0]],
-    //   ],
-    //   objects: [],
-    // };
     this.data = {
       walls: [
-        [0, 0], [200, 0], [200, 300], [0, 300]
+        [0, 0], [400, 0], [400, 320], [160, 320], [160, 160], [0, 160],
       ],
       doors: [
-        { loc: [0, 40], size: 40, wallIndex: 3, dirs: [0, 0], type: "one_slide" },
+        { loc: [0, 45], size: 30, wallIndex: 5, dirs: [0, 0] },
       ],
-      // windows: [
-      //   { loc: [200, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
-      //   { loc: [240, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
-      //   { loc: [280, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
-      //   { loc: [320, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
-      //   { loc: [360, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
-      // ],
-      // pillars: [
-      //   [[0, 0], [0, 100], [100, 100], [100, 0], [0, 0]],
-      // ],
+      windows: [
+        { loc: [200, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
+        { loc: [240, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
+        { loc: [280, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
+        { loc: [320, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
+        { loc: [360, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
+      ],
+      pillars: [
+        [[0, 0], [0, 100], [100, 100], [100, 0], [0, 0]],
+      ],
       objects: [],
     };
+    
+    // this.data = {
+    //   walls: [
+    //     [0, 0], [200, 0], [200, 300], [0, 300]
+    //   ],
+    //   doors: [
+    //     { loc: [0, 40], size: 40, wallIndex: 3, dirs: [0, 0], type: "one_slide" },
+    //   ],
+    //   // windows: [
+    //   //   { loc: [200, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
+    //   //   { loc: [240, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
+    //   //   { loc: [280, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
+    //   //   { loc: [320, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
+    //   //   { loc: [360, 320], size: 40, wallIndex: 2, dirs: [0, 0] },
+    //   // ],
+    //   // pillars: [
+    //   //   [[0, 0], [0, 100], [100, 100], [100, 0], [0, 0]],
+    //   // ],
+    //   objects: [
+    //     { loc: [] }
+    //   ],
+    // };
 
     this.viewport = {
       origin: new Vec2(200, 200),
@@ -123,7 +126,7 @@ AutoFloor.LayoutDesigner = class {
 
     this.autoLayout();
 
-    this.generateInterior();
+    // this.generateInterior();
 
   }
 
@@ -180,6 +183,7 @@ AutoFloor.LayoutDesigner = class {
 
   autoLayout() {
     this.generateCells();
+    this.generateInteriorOffice();
   }
 
   generateCells() {
@@ -445,13 +449,14 @@ AutoFloor.LayoutDesigner = class {
       
       // if (c.way) color = '#ffffc0';
       // if (c.door) color = '#ffffc0';
+      const level = 100;
 
       const p1 = c.dists.wallp * 255;
       const p2 = isNaN(c.dists.doorp) ? 0 : (c.dists.doorp * 255);
       const p3 = isNaN(c.dists.windowp) ? 0 : (c.dists.windowp * 255);
-      p1 = 200 + p1 / 255 * 50;
-      p2 = 200 + p2 / 255 * 50;
-      p3 = 200 + p3 / 255 * 50;
+      p1 = level + p1 / 255 * (255 - level);
+      p2 = level + p2 / 255 * (255 - level);
+      p3 = level + p3 / 255 * (255 - level);
       color = `rgb(${p1}, ${p2}, ${p3})`;
 
       const o = c.rect.origin;
@@ -554,10 +559,23 @@ class LayoutObject extends Drawing2d.Object {
   drag(e) {
     const p = e.movement;
 
-    this.origin.x += p.x * 0.5;
-    this.origin.y += p.y * 0.5;
-    this.updateBoundingBox();
+    let x = p.x * 0.5;
+    let y = p.y * 0.5;
 
+    function snapToGrid(x) {
+      const xb = x;
+      const snapSize = 10;
+      const m = (x % 10), hm = snapSize * 0.5;
+      if (m < hm) x -= m;
+      // if (m < hm) x -= m;
+      console.log(xb, " -> ", x);
+      return x;
+    }
+
+    this.origin.x = this.origin.x + x;
+    this.origin.y = this.origin.y + y;
+
+    this.updateBoundingBox();
     e.requireUpdateFrame();
   }
 }
@@ -666,7 +684,7 @@ class WallOpen extends WallChildObject {
 
   draw(g) {
     if (this.wall) {
-      const w = this.size, hw = w * 0.5, h = this.wall.width, hh = h * 0.5;
+      const w = this.size.width, hw = w * 0.5, h = this.wall.width, hh = h * 0.5;
       g.drawRect(new Tarumae.Rect(-hw, -hh, w, h));
     }
 
@@ -687,7 +705,7 @@ class Window extends WallChildObject {
 
   draw(g) {
     if (this.wall) {
-      const w = this.size, hw = this.size * 0.5;
+      const w = this.size.width, hw = w * 0.5;
       const h = this.wall.width, hh = h * 0.5;
 
       g.drawRect(new Tarumae.Rect(-hw, -hh, w, h));
@@ -824,7 +842,7 @@ class AssetObject extends InteriorObject {
   constructor(objType, width, height) {
     super(width, height);
 
-    const assets = {
+    const assetMaster = {
       "sofa": {
         draw: (g, w, h, hw, hh) => {
           g.drawRoundRect(new Tarumae.Rect(-hw, -hh, w, h), 5);
@@ -843,12 +861,24 @@ class AssetObject extends InteriorObject {
           super.drawDimension(g, 0, - hh - 5);
         }
       },
-      "sofa_1p": {
+      "dining_set": {
         
+      },
+      "sofa_1p": {
+        draw: (g, w, h, hw, hh) => {
+          const x = -hw, y = -hh;
+          g.drawRoundRect({ x: -hw, y: -hh, width: w, height: w }, w * 0.7);
+          g.drawRoundRect({ x: -hw, y: -hh - 2, width: w, height: h * 0.17 }, w * 0.2);
+    
+          // g.drawRoundRect({ x: x - 2, y: y + hh - 4, width: 3, height: 8 }, w * 0.2);
+          // g.drawRoundRect({ x: x + w - 1, y: y + hh - 4, width: 3, height: 8 }, w * 0.2);
+
+          super.drawDimension(g, 0, - hh - 5);
+        }
       }
     }
 
-    this.objProto = assets[objType];
+    this.objProto = assetMaster[objType];
 
     this.ondraw = g => {
       const w = this.size.width, hw = w * 0.5, h = this.size.height, hh = h * 0.5;
