@@ -5,7 +5,7 @@
 // Copyright(c) 2018 unvell, all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
-var Tarumae = {
+export default Tarumae = {
   Utility: {
     NumberExtension: {},
     StringExtension: {},
@@ -15,5 +15,3 @@ var Tarumae = {
   Debugger: {},
   ImageToolkit: {},
 };
-
-export default Tarumae;
