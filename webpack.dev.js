@@ -9,7 +9,11 @@ module.exports = {
     particleDemo: "./src/js/examples/particle.js",
     modelDemo: "./src/js/examples/model.js",
     showcaseDemo: "./src/js/examples/showcase.js",
+<<<<<<< Updated upstream
     designer: "./src/js/designer/main.js",
+=======
+    radiosityTest: "./src/js/examples/radiosity.js",
+>>>>>>> Stashed changes
   },
   module: {
     rules: [
@@ -76,8 +80,13 @@ module.exports = {
     new HtmlWebpackPlugin({
       inject: false,
       hash: true,
+<<<<<<< Updated upstream
       template: './src/designer.html',
       filename: 'designer.html'
+=======
+      template: './src/examples/radiosity.html',
+      filename: 'radiosity.html'
+>>>>>>> Stashed changes
     }),
     new CopyWebpackPlugin([
       {from: 'src/css', to: 'css', force: true}
