@@ -10,7 +10,6 @@ module.exports = {
     modelDemo: "./src/js/examples/model.js",
     showcaseDemo: "./src/js/examples/showcase.js",
     designer: "./src/js/designer/main.js",
-    radiosityTest: "./src/js/examples/radiosity.js",
   },
   module: {
     rules: [
@@ -79,12 +78,6 @@ module.exports = {
       hash: true,
       template: './src/designer.html',
       filename: 'designer.html'
-    }),
-    new HtmlWebpackPlugin({
-      inject: false,
-      hash: true,
-      template: './src/examples/radiosity.html',
-      filename: 'radiosity.html'
     }),
     new CopyWebpackPlugin([
       {from: 'src/css', to: 'css', force: true}

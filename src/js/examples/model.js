@@ -10,12 +10,20 @@ import { Color3, Color4 } from "../math/vector";
 window.addEventListener("load", function() {
 
 	const renderer = new Tarumae.Renderer({
+<<<<<<< Updated upstream
 		renderPixelRatio: window.devicePixelRatio,
+=======
+		renderPixelRatio: 1,
+>>>>>>> Stashed changes
 		backColor: new Color4(0.74, .87, .85, 1),
 		backgroundImage: "../static/textures/bg-gray-gradient.jpg",
 		// showDebugPanel: true,
 		enableLighting: false,
 		// postprocess: true,
+<<<<<<< Updated upstream
+=======
+		postprocess: true,
+>>>>>>> Stashed changes
 	});
 
 	const scene = renderer.createScene();
