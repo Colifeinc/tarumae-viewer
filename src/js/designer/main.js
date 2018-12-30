@@ -365,6 +365,9 @@ AutoFloor.LayoutDesigner = class {
     }
   }
 
+  generateWorkspace() {
+  }
+
   findAvailableSpace(cw, ch) {
     const poslist = [];
 
@@ -473,7 +476,7 @@ window.addEventListener("load", function() {
     enableLighting: false,
     renderPixelRatio: window.devicePixelRatio,
   });
-    
+
   // const designer = new Tarumae.Designer(renderer);
   // designer.show();
 
@@ -875,7 +878,13 @@ class AssetObject extends InteriorObject {
 
           super.drawDimension(g, 0, - hh - 5);
         }
-      }
+      },
+      "locker": {
+        draw: (g, w, h, hw, hh) => {
+          const x = -hw, y = -hh;
+          g.drawRect({ x: -hw, y: -hh, width: w, height: w });
+        }
+      },
     }
 
     this.objProto = assetMaster[objType];
