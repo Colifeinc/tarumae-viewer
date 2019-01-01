@@ -19,6 +19,10 @@ Tarumae.PipelineNode = class {
     }
 
     this.render();
+
+    if (this.renderer.debugger) {
+      this.renderer.debugger.numberOfRenderPassesPerFrame++;
+    }
   }
 
   render() { }
@@ -85,22 +89,6 @@ Tarumae.PipelineNodes.SceneToImageRenderer = class extends Tarumae.PipelineNode 
 
   createBuffer() {
     this.buffer = new Tarumae.FrameBuffer(this.renderer, this.width, this.height);
-    // this.texture = this.buffer.texture;
-
-    // const gl = this.renderer.gl;
-    // this.tex2 = Tarumae.Texture.create(128, 128);
-		// this.tex2.glTexture = gl.createTexture();
-		// gl.bindTexture(gl.TEXTURE_2D, this.tex2.glTexture);
-    // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.tex2.width, this.tex2.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-		// gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-		// gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    // gl.bindTexture(gl.TEXTURE_2D, null);
-
-
-    //this.tex2.renderer = this.renderer;
-		// this.buf2 = gl.createFramebuffer();
   }
 
   render() {
@@ -117,17 +105,6 @@ Tarumae.PipelineNodes.SceneToImageRenderer = class extends Tarumae.PipelineNode 
     }
 
     this.renderer.renderFrame();
-
-    // const gl = this.renderer.gl;
-
-    // // gl.bindFramebuffer(gl.FRAMEBUFFER, this.buf2);
-		// // gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.buffer.texture.glTexture, 0);
-		// gl.bindTexture(gl.TEXTURE_2D, this.tex2.glTexture);
-    // gl.copyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, this.renderer.canvas.width, this.renderer.canvas.height, 0);
-    // // gl.copyTexSubImage2D(gl.TEXTURE_2D, 0, 0, 0, 0, 0, 128, 128);
-    // // this.tex2.generateMipmap();
-    // const rs = gl.getError();
-    // if (rs) console.log("error = 0x" + rs.toString(16));
     
     this.buffer.disuse();
 
@@ -158,14 +135,14 @@ Tarumae.PipelineNodes.ImageSource = class extends Tarumae.PipelineNode {
   }
 };
 
-Tarumae.PipelineNodes.ImageRenderer = class extends Tarumae.PipelineNode {
+Tarumae.PipelineNodes.ImageToScreenRenderer = class extends Tarumae.PipelineNode {
   constructor(renderer, options) {
     super(renderer);
     
     this.options = options;  
     this.screenPlaneMesh = new Tarumae.ScreenMesh();
     
-    if (options && options.flipTexcoordY) {
+    if (!options || !options.flipTexcoordY) {
       this.screenPlaneMesh.flipTexcoordY();
     }
 
@@ -191,7 +168,6 @@ Tarumae.PipelineNodes.ImageRenderer = class extends Tarumae.PipelineNode {
     if (this._input.output) {
 
       const imageShader = this.shader;
-      imageShader.texture = this._input.output;
 
       if (this.tex2Input) {
         this.tex2Input._render();
@@ -200,7 +176,7 @@ Tarumae.PipelineNodes.ImageRenderer = class extends Tarumae.PipelineNode {
         imageShader.tex2 = undefined;
       }
 
-      this.renderer.useShader(imageShader);
+      imageShader.texture = this._input.output;
 
       if (typeof enableAntialias !== "undefined") {
         imageShader.enableAntialias = this.enableAntialias;
@@ -214,7 +190,10 @@ Tarumae.PipelineNodes.ImageRenderer = class extends Tarumae.PipelineNode {
       const height = this.options && this.options.height ? this.options.height : this.renderer.canvas.height;
 
       gl.viewport(0, 0, width, height);
+      imageShader.resolution[0] = width;
+      imageShader.resolution[1] = height;
 
+      this.renderer.useShader(imageShader);
       imageShader.beginMesh(this.screenPlaneMesh);
       this.screenPlaneMesh.draw(this.renderer);
       imageShader.endMesh();
@@ -227,8 +206,10 @@ Tarumae.ScreenMesh = class extends Tarumae.Mesh {
 	constructor() {
 		super();
 
-		this.vertices = [-1, 1, 0,    -1, -1, 0,   1, 1, 0,   1, -1, 0];
-		this.texcoords = [0, 0,   0, 1,   1, 0,   1, 1];
+    const w = 1, h = 1;
+
+		this.vertices = [-w, h, 0, -w, -h, 0, w, h, 0, w, -h, 0];
+		this.texcoords = [0, 0, 0, 1, 1, 0, 1, 1];
 
 		this.meta = {
 			vertexCount: 4,
@@ -246,21 +227,21 @@ Tarumae.PipelineNodes.MemoryImageRenderer = class extends Tarumae.PipelineNode {
   constructor(renderer, options) {
     super(renderer);
 
-    this.options = options;  
+    this.options = options || {};
+    this.width = this.options.width || this.renderer.canvas.width;
+    this.height = this.options.height || this.renderer.canvas.height;
+
     this.screenPlaneMesh = new Tarumae.ScreenMesh();
     
-    if (options && options.flipTexcoordY) {
+    if (this.options.flipTexcoordY) {
       this.screenPlaneMesh.flipTexcoordY();
     }
 
-    this.shader = Tarumae.Renderer.Shaders["screen"].instance;
+    this.shader = Tarumae.Renderer.Shaders["image"].instance;
     
-    this.buffer = new Tarumae.FrameBuffer(this.renderer,
-      this.options.width || this.renderer.canvas.width,
-      this.options.height || this.renderer.canvas.height, {
-        depthBuffer: true
-      });
-
+    this.buffer = new Tarumae.FrameBuffer(this.renderer, this.width, this.height, {
+      depthBuffer: false
+    });
   }
   
   set input(node) {
@@ -279,18 +260,25 @@ Tarumae.PipelineNodes.MemoryImageRenderer = class extends Tarumae.PipelineNode {
     if (this._input.output) {
       const imageShader = this.shader;
       imageShader.texture = this._input.output;
-      this.renderer.useShader(imageShader);
+      imageShader.tex2 = undefined;
 
-      if (typeof enableAntialias !== "undefined") {
+      if (typeof this.enableAntialias !== "undefined") {
         imageShader.enableAntialias = this.enableAntialias;
       }
       if (typeof this.gammaFactor !== "undefined") {
         imageShader.gammaFactor = this.gammaFactor;
       }
-      imageShader.tex2 = undefined;
+      if (typeof this.options.resizeScale !== "undefined") {
+        imageShader.resizeScale[0] = this.options.resizeScale[0];
+        imageShader.resizeScale[1] = this.options.resizeScale[1];
+      }
+
+      this.renderer.useShader(imageShader);
       
       this.buffer.use();
-
+     
+      imageShader.resolution[0] = this.buffer.width;
+      imageShader.resolution[1] = this.buffer.height;
       imageShader.beginMesh(this.screenPlaneMesh);
       this.screenPlaneMesh.draw(this.renderer);
       imageShader.endMesh();
@@ -298,5 +286,38 @@ Tarumae.PipelineNodes.MemoryImageRenderer = class extends Tarumae.PipelineNode {
 
       this.buffer.disuse();
     }
+  }
+};
+
+Tarumae.PipelineNodes.BlurRenderer = class extends Tarumae.PipelineNode {
+  constructor(renderer, options) {
+    super(renderer);
+
+    this.blurHorRenderer = new Tarumae.PipelineNodes.MemoryImageRenderer(renderer, options); 
+    this.blurVerRenderer = new Tarumae.PipelineNodes.MemoryImageRenderer(renderer, options);
+  }
+
+  get output() {
+    return this.blurVerRenderer.buffer.texture;
+  }
+
+  _render() {
+    this.blurHorRenderer.clear();
+    this.blurVerRenderer.clear();
+    
+    if (typeof this.gammaFactor !== undefined) {
+      this.blurHorRenderer.gammaFactor = this.gammaFactor;
+      this.blurVerRenderer.gammaFactor = this.gammaFactor;
+    }
+
+    this.blurHorRenderer.input = this._input;
+    this.blurHorRenderer.shader.isVertical = false;
+    this.blurHorRenderer.shader.filterType = 2;
+    this.blurHorRenderer._render();
+
+    this.blurVerRenderer.input = this.blurHorRenderer;
+    this.blurVerRenderer.shader.isVertical = true;
+    this.blurVerRenderer.shader.filterType = 2;
+    this.blurVerRenderer._render();
   }
 };

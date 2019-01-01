@@ -61,6 +61,9 @@ Tarumae.FrameBuffer = class extends Tarumae.CommonBuffer {
 		const gl = this.gl;
 
 		this.texture = Tarumae.Texture.create(this.width, this.height);
+		this.texture.enableMipmapped = false;
+		this.texture.enableRepeat = false;
+
 		gl.activeTexture(gl.TEXTURE0);
 		this.texture.bind(this.renderer);
 

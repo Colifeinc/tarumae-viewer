@@ -357,7 +357,7 @@ Tarumae.Renderer = class {
 		if (this.options.backgroundImage) {
 			this.createTextureFromURL(this.options.backgroundImage, tex => {
 				const bgImageSource = new Tarumae.PipelineNodes.ImageSource(this, tex);
-				this._bgImageRenderer = new Tarumae.PipelineNodes.ImageRenderer(this);
+				this._bgImageRenderer = new Tarumae.PipelineNodes.ImageToScreenRenderer(this);
 				this._bgImageRenderer.enableAntialias = false;
 				this._bgImageRenderer.input = bgImageSource;
 				if (this.currentScene) this.currentScene.requireUpdateFrame();
@@ -365,38 +365,40 @@ Tarumae.Renderer = class {
 		}
 		
 		if (this.options.postprocess) {
-			const width = this.canvas.width, height = this.canvas.height;
+			const width = this.canvas.width * 1,
+				height = this.canvas.height * 1,
+				sw = width * 0.05,
+				sh = height * 0.05;
 
 			const sceneImageRenderer = new Tarumae.PipelineNodes.SceneToImageRenderer(this, {
-				imageSize: {
-					width: width,
-					height: height,
-				}
+				imageSize: { width, height },
 			});
 			
-			const imgRenderer128 = new Tarumae.PipelineNodes.MemoryImageRenderer(this, {
-				flipTexcoordY: true,
-				width: width * 0.1,
-				height: height * 0.1,
+			const imgRenderer128 = new Tarumae.PipelineNodes.BlurRenderer(this, {
+				width: sw,
+				height: sh,
 			});
 			imgRenderer128.input = sceneImageRenderer;
 			// imgRenderer128.enableAntialias = false;
-			imgRenderer128.gammaFactor = 0.2;
+			imgRenderer128.gammaFactor = 1.4;
 
-			const imgRenderer = new Tarumae.PipelineNodes.ImageRenderer(this, {
-				flipTexcoordY: true
-			});
+			// const imgRendererGlow = new Tarumae.PipelineNodes.BlurRenderer(this, {
+			// 	width: sw,
+			// 	height: sh,
+			// });
+			// imgRendererGlow.input = imgRenderer128;
+			// imgRendererGlow.gammaFactor = 0.5;
+
+			const imgRenderer = new Tarumae.PipelineNodes.ImageToScreenRenderer(this);
 			imgRenderer.input = sceneImageRenderer;
 			imgRenderer.gammaFactor = 1.4;
 			imgRenderer.tex2Input = imgRenderer128;
-			// imgRenderer.enableAntialias = false;
+			imgRenderer.enableAntialias = false;
 	
 			this.pipelineNodes.push(imgRenderer);
 		} else {
 			this.pipelineNodes.push(new Tarumae.PipelineNodes.DefaultRenderer(this));
 		}
-
-		console.log(this.pipelineNodes.length);
 	}
 	
 	renderPipeline() {
@@ -465,11 +467,6 @@ Tarumae.Renderer = class {
 			this.currentShader.beginScene(scene);
 		}
 	
-		if (this.debugger) {
-			this.debugger.totalNumberOfObjectDrawed = 0;
-			this.debugger.totalNumberOfPolygonDrawed = 0;
-		}
-
 		for (var i = 0; i < scene.objects.length; i++) {
 			this.drawObject(scene.objects[i], false);
 		}
@@ -1146,6 +1143,10 @@ import pointVert from '../../shader/points.vert';
 import pointFrag from '../../shader/points.frag';
 import imageVert from '../../shader/image.vert';
 import imageFrag from '../../shader/image.frag';
+import blurVert from '../../shader/blur.vert';
+import blurFrag from '../../shader/blur.frag';
+import screenVert from '../../shader/screen.vert';
+import screenFrag from '../../shader/screen.frag';
 
 Tarumae.Renderer.Shaders = {
 	// viewer: {
@@ -1161,7 +1162,9 @@ Tarumae.Renderer.Shaders = {
 	standard: { vert: standardVert, frag: standardFrag, class: "StandardShader" },
 	wireframe: { vert: wireframeVert, frag: wireframeFrag, class: "WireframeShader" },
 	point: { vert: pointVert, frag: pointFrag, class: "PointShader" },
-	screen: { vert: imageVert, frag: imageFrag, class: "ImageShader" },
+	image: { vert: imageVert, frag: imageFrag, class: "ImageShader" },
+	blur: { vert: blurVert, frag: blurFrag, class: "ImageShader" },
+	screen: { vert: screenVert, frag: screenFrag, class: "ScreenShader" },
 };
 
 

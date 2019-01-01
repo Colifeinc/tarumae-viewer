@@ -141,8 +141,9 @@ Tarumae.Viewer = class {
       
 				if (scene && typeof scene.onmousewheel === "function") {
 					scene.onmousewheel();
+					e.preventDefault();
 				}
-			}, { passive: true });
+			}, { passive: false });
 
 			surface.addEventListener('keydown', function(e) {
 				viewer.pressedKeys._s3_pushIfNotExist(e.keyCode);

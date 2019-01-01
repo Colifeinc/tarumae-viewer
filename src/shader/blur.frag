@@ -12,12 +12,7 @@ uniform vec2 resolution;
 uniform vec2 resStride;
 uniform bool enableAntialias;
 uniform float gammaFactor;
-uniform int filterType;
 uniform bool isVertical;
-uniform vec2 resizeScale;
-
-#define BLUR_SAMPLINGS 10
-uniform float samplingWeight[BLUR_SAMPLINGS];
 
 varying vec2 texcoord;
 
@@ -25,50 +20,43 @@ vec4 sample(sampler2D tex) {
 	return texture2D(tex, texcoord);
 }
 
-vec4 sample(sampler2D tex, vec2 uv) {
-	return texture2D(tex, uv);
-}
-
-vec4 sample(vec2 uv) {
-	return texture2D(texture, uv);
-}
-
-vec4 sample() {
-  return texture2D(texture, texcoord);
-}
-
 vec4 antialias(sampler2D tex) {
 	return sample(tex);
 }
 
 // 0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216
+uniform float samplingWeight[5];
 
 vec4 blur5(sampler2D tex, vec2 uv) {
   vec4 color = texture2D(tex, uv) * samplingWeight[0];
   
-	if (!isVertical) {
-		for (int i = 1; i < BLUR_SAMPLINGS; i++) {
-			color += texture2D(tex, uv + vec2(resStride.x * float(i), 0)) * samplingWeight[i];
-			color += texture2D(tex, uv - vec2(resStride.x * float(i), 0)) * samplingWeight[i];
+	if (isVertical) {
+		for (int i = 1; i < 5; i++) {
+			color += texture2D(tex, uv + vec2(+resStride.x, 0)) * samplingWeight[i];
+			color += texture2D(tex, uv + vec2(-resStride.x, 0)) * samplingWeight[i];
 		}
 	} else {
-		for (int i = 1; i < BLUR_SAMPLINGS; i++) {
-			color += texture2D(tex, uv + vec2(0, resStride.y * float(i))) * samplingWeight[i];
-			color += texture2D(tex, uv - vec2(0, resStride.y * float(i))) * samplingWeight[i];
+		for (int i = 1; i < 5; i++) {
+			color += texture2D(tex, uv + vec2(0, +resStride.y)) * samplingWeight[i];
+			color += texture2D(tex, uv + vec2(0, -resStride.y)) * samplingWeight[i];
 		}
 	}
-
-// float brightness = dot(FragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
-//     if(brightness > 1.0)
-//         BrightColor = vec4(FragColor.rgb, 1.0);
-//     else
-//         BrightColor = vec4(0.0, 0.0, 0.0, 1.0);
 
   return color;
 }
 
 vec4 blur5(sampler2D tex) {
 	return blur5(tex, texcoord);
+}
+
+vec4 guassBlur3(sampler2D tex, float distance) {
+	vec2 uv = texcoord;
+  vec4 color = vec4(0.0);
+  float off1 = distance;
+  float off2 = distance * 2.0;
+
+  color += texture2D(tex, uv + vec2(-off2, -off2)) * 0.01;
+	return color;
 }
 
 // 0.0625   0.125   0.0625   
@@ -144,24 +132,6 @@ vec4 guassBlur5(sampler2D tex) {
 	return color;
 }
 
-vec4 interp(sampler2D tex) {
-  vec2 uv = texcoord;
-
-  vec4 c1 = sample(uv);
-  vec4 c2 = sample(uv + vec2(0, resStride.y));
-  vec4 c3 = sample(uv + vec2(resStride.x, 0));
-  vec4 c4 = sample(uv + resStride);
-
-  return (c1 + c2 + c3 + c4) * 0.25;
-
-  // vec2 r = (texcoord * resizeScale) - p;
-  // vec4 d = c1 * (1.0 - r.x) + c3 * r.x;
-  // vec4 e = c2 * (1.0 - r.x) + c4 * r.x;
-  // vec4 f = d * (1.0 - r.y) + e * r.y;
-  
-  // return f;
-}
-
 vec3 grayscale(vec3 rgb) {
   float gray = 0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b;
 	return vec3(gray);
@@ -186,25 +156,8 @@ vec3 lighter(vec3 a, vec3 b, float factor) {
 
 void main(void) {
 
-	vec4 fc = vec4(0);
-  
-  if (filterType == 0) {
-    fc = sample(texture);
-  } else if (filterType == 1) {
-    fc = interp(texture);
-  } else if (filterType == 2) {
-    fc = blur5(texture);
-  }
+	gl_FragColor = blur5(texture);
 
-	fc = gamma(fc, gammaFactor);
+	// fc = gamma(fc, gammaFactor);
 
-	// vec3 t2c = vec3(0);
-	
-	// t2c = blur9(tex2, texcoord, vec2(0.1)).rgb;
-
-	// if (hasTex2) {
-		// fc = vec4(lighter(fc.rgb, t2c, 0.2), fc.a);
-	// }
-
-	gl_FragColor = fc;
 }

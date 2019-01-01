@@ -23,6 +23,7 @@ Tarumae.Debugger = class {
 		this.totalMeshMemoryUsed = 0;
 		this.totalNumberOfTexturesUsed = 0;
 		this.totalNumberOfPolygonBound = 0;
+		this.numberOfRenderPassesPerFrame = 0;
 
 		this._maxPathLength = 30;
 
@@ -93,6 +94,9 @@ Tarumae.Debugger = class {
   
 	beforeDrawFrame() {
 		this.elapsedTime.drawFrameBegin = Date.now();
+		this.numberOfRenderPassesPerFrame = 0;
+		this.totalNumberOfObjectDrawed = 0;
+		this.totalNumberOfPolygonDrawed = 0;
 	}
 
 	afterDrawFrame() {
@@ -213,6 +217,7 @@ Tarumae.Debugger = class {
 		return "<b>Tarumae (" + tarumaeversion + ")</b>" + newline + newline
       + "FPS: " + toStringDigits(fm.currentFPS, 2) + " (" + toStringDigits(fm.minFPS, 2) + " ~ " + toStringDigits(fm.maxFPS, 2) + ")" + newline
       + "average frame rendering time: " + toStringDigits(this.averageFrameRenderingTime, 2) + " ms." + newline
+      + "number of passes per frame: " + (this.numberOfRenderPassesPerFrame) + newline
       + "last raycast operation time: " + toStringDigits(this.lastRaycastElapsedTime, 2) + " ms." + newline
       + "current enabled lights: " + this.currentLightCount + newline
       + "light source filter time: " + this.lightSourceFilterElapsedTime + " ms." + newline

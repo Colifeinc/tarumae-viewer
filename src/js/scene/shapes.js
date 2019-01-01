@@ -104,7 +104,7 @@ Tarumae.CubeMesh.VertexBuffer = new Float32Array([
 	0.0, 0.0, 1.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
 	0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0]);
 
-Tarumae.Cube = class extends Tarumae.SceneObject {
+Tarumae.Shapes.Cube = class extends Tarumae.SceneObject {
 	constructor() {
 		super();
 

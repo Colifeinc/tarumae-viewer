@@ -9,6 +9,7 @@ module.exports = {
     particleDemo: "./src/js/examples/particle.js",
     modelDemo: "./src/js/examples/model.js",
     showcaseDemo: "./src/js/examples/showcase.js",
+    shibauraDemo: "./src/js/examples/house_shibaura.js",
     designer: "./src/js/designer/main.js",
   },
   module: {
@@ -72,6 +73,12 @@ module.exports = {
       hash: true,
       template: './src/examples/showcase.html',
       filename: 'showcase.html'
+    }),
+    new HtmlWebpackPlugin({
+      inject: false,
+      hash: true,
+      template: './src/examples/house_shibaura.html',
+      filename: 'house_shibaura.html'
     }),
     new HtmlWebpackPlugin({
       inject: false,

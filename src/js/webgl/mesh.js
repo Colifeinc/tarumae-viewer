@@ -589,6 +589,23 @@ Tarumae.Mesh = class {
 		}
 	}
 
+	flipSurfaces() {
+		const length = (this.meta.vertexCount +
+			(this.meta.HasNormal ? this.meta.vertexCount : 0)) * 3;
+		
+		for (let i = 0; i < length; i += 9) {
+			const tmp1 = this.vertexBuffer[i + 3];
+			const tmp2 = this.vertexBuffer[i + 4];
+			const tmp3 = this.vertexBuffer[i + 5];
+			this.vertexBuffer[i + 3] = this.vertexBuffer[i + 6];
+			this.vertexBuffer[i + 4] = this.vertexBuffer[i + 7];
+			this.vertexBuffer[i + 5] = this.vertexBuffer[i + 8];
+			this.vertexBuffer[i + 6] = tmp1;
+			this.vertexBuffer[i + 7] = tmp2;
+			this.vertexBuffer[i + 8] = tmp3;
+		}
+	}
+
 	scaleTexcoords(scaleX, scaleY) {
 		if (Array.isArray(this.texcoords)) {
 			for (var i = 0; i < this.texcoords.length;) {

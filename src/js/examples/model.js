@@ -10,12 +10,11 @@ import { Color3, Color4 } from "../math/vector";
 window.addEventListener("load", function() {
 
 	const renderer = new Tarumae.Renderer({
-		// renderPixelRatio: window.devicePixelRatio,
-		renderPixelRatio: 1,
+		renderPixelRatio: window.devicePixelRatio,
 		backColor: new Color4(0.74, .87, .85, 1),
 		backgroundImage: "../static/textures/bg-gray-gradient.jpg",
-		// showDebugPanel: true,
-		enableLighting: false,
+		showDebugPanel: true,
+		// enableLighting: false,
 		postprocess: true,
 	});
 
@@ -36,7 +35,11 @@ window.addEventListener("load", function() {
 		// { name: "ceo.toba", color: [.5, .5, .5] },
 	];
 
-	scene.add(new Tarumae.Shapes.Plane(2, 2));
+	const ground = {
+		mesh: new Tarumae.Shapes.PlaneMesh(2, 2),
+		// mat: { tex: "../static/textures/empty.png" }
+	};
+	scene.load(ground);
 
 	scene.onkeydown = function(key) {
 		if (key >= Tarumae.Viewer.Keys.D1
@@ -100,6 +103,10 @@ window.addEventListener("load", function() {
 
 	scene.mainCamera.location.set(0, 1, 2);
 	scene.mainCamera.angle.set(-15, 0, 0);
+	
+	const light = new Tarumae.PointLight();
+	light.location.set(1, 2, -2);
+	scene.add(light);
 	
 	// new Tarumae.TouchController(scene);
 	new Tarumae.ModelViewer(scene);

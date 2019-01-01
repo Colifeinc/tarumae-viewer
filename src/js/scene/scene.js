@@ -106,19 +106,21 @@ Tarumae.Scene = class {
 	}
 
 	loadArchives(archs, loadingSession) {
-		for (const [key, value] of Object.entries(loadArchives)) {
+		for (const [key, value] of Object.entries(archs)) {
 			this.loadArchive(key, value.url, loadingSession);
 		};
 	}
 
 	createObjectFromBundle(url, ondone, loadingSession) {
 		this.loadArchive(url, url, loadingSession, archive => {
-			var manifestData = archive.getChunkData(0x1, 0x7466696d);
+			const manifestData = archive.getChunkData(0x1, 0x7466696d);
 			if (manifestData) {
-				var uarr = new Uint8Array(manifestData);
+				const uarr = new Uint8Array(manifestData);
 				var carr = new Array(uarr.length);
-				for (var i = 0; i < uarr.length; i++) carr[i] = String.fromCharCode(uarr[i]);
-				var manifest = JSON.parse(carr.join(""));
+				for (var i = 0; i < uarr.length; i++) {
+					carr[i] = String.fromCharCode(uarr[i]);
+				}
+				const manifest = JSON.parse(carr.join(""));
 				if (typeof ondone === "function") {
 					ondone(archive, manifest);
 				}

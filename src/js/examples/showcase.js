@@ -8,18 +8,23 @@ import "../utility/res";
 window.addEventListener("load", function() {
 
 	const renderer = new Tarumae.Renderer({
-		// postprocess: true,
+		postprocess: true,
 		enableLighting: false,
-		// renderPixelRatio: window.devicePixelRatio,
+		renderPixelRatio: window.devicePixelRatio,
 	});
 	const scene = renderer.createScene();
 
 	window._scene = scene;
  
-	scene.createObjectFromURL("/static/floor.toba", obj => {
-		const bbox = new Tarumae.BoundingBox(obj.getBounds())
-		obj.location.offset(-bbox.origin.x/2, 0, -bbox.origin.z/2)
+	const cube = new Tarumae.Shapes.Cube();
+	cube.scale.set(100, 5, 100);
+	cube.location.set(0, 1, 0);
+	cube.meshes[0].flipSurfaces();
+	cube.mat = { color: [0.93, 0.97, 1] };
+	cube.receiveLight = false;
+	scene.add(cube);
 
+	scene.createObjectFromURL("/static/floor.toba", obj => {
 		scene.add(obj);
 	});
 
