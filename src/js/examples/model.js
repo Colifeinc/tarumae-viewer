@@ -27,6 +27,7 @@ window.addEventListener("load", function() {
 		{ name: "chair_adv_01.toba" },
 		// { name: "chair_compact_01.toba" },
 		{ name: "chair_jati.toba" },
+		// { name: "char_stand_01.toba", scale: [.05, .05, .05], color: [.7, .7, .7] },
 		{ name: "desk_study_1p.toba", color: [.7, .7, .7] },
 		// { name: "fan_vintage_ceiling.toba", scale: [3, 3, 3] },
 		// { name: "print_mfp_w1500.toba", color: [.7, .7, .7] },
@@ -90,7 +91,7 @@ window.addEventListener("load", function() {
 				nextObj.mat.color = mod.color;
 			}
 			if (mod.scale) {
-				obj.scale = mod.scale.clone();
+				nextObj.scale.set(mod.scale[0], mod.scale[1], mod.scale[2]);
 			}
 			nextObj.visible = true;
 			scene.animate({ effect: "fadein", duration: 0.5 }, t => {
