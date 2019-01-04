@@ -100,7 +100,7 @@ Tarumae.Utility.Archive = class {
 Object.defineProperties(Tarumae.Utility.Archive, {
 	canLoadFromArchive: {
 		value: function(scene, uri, format, bundle, callback) {
-			var matches = uri.match(/sob:\/\/(\w+)\/(\w+)/i);
+			var matches = uri.match(/^(?:sob|tob):\/\/(\w+)\/(\w+)$/i);
 			if (matches !== null && matches.length >= 3) {
 				var bundleName = matches[1];
 				var uid = parseInt(matches[2], 16);
