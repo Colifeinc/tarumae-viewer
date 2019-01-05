@@ -90,10 +90,11 @@ Tarumae.SceneObject = class {
 	get polygonCount() {
 		if (!Array.isArray(this.meshes)) return 0;
 			
-		var polygonCount = 0;
-		for (var i = 0; i < this.meshes.length; i++) {
+		let polygonCount = 0;
+		for (let i = 0; i < this.meshes.length; i++) {
 			polygonCount += this.meshes[i].polygonCount;
 		}
+
 		return polygonCount;
 	}
 

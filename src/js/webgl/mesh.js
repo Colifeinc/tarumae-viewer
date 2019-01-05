@@ -402,6 +402,10 @@ Tarumae.Mesh = class {
 		const sp = renderer.currentShader;
 		if (!sp) return;
 
+		if (renderer.debugger) {
+			renderer.debugger.beforeMeshRender(this);
+		}
+
 		const meta = this.meta;
 		const gl = renderer.gl;
 
@@ -507,7 +511,7 @@ Tarumae.Mesh = class {
 		}
 
 		if (renderer.debugger) {
-			renderer.debugger.totalNumberOfPolygonDrawed += meta.vertexCount / 3;
+			renderer.debugger.afterMeshRender(this);
 		}
 	}
 
