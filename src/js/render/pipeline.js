@@ -10,12 +10,12 @@ Tarumae.PipelineNode = class {
     this._input = undefined;
   }
 
-  _render() {
+  process() {
     if (this.isRendered) return;
     this.isRendered = true;
 
-    if (this._input && !this._input.isRendered) {
-      this._input._render();
+    if (this._input) {
+      this._input.process();
     }
 
     this.render();
@@ -49,7 +49,6 @@ Tarumae.PipelineNodes.DefaultRenderer = class extends Tarumae.PipelineNode {
   }
 
   render() {
-    //this.renderer.clearViewport();
     this.renderer.renderFrame();
   }
 };
@@ -91,7 +90,7 @@ Tarumae.PipelineNodes.SceneToImageRenderer = class extends Tarumae.PipelineNode 
     this.buffer = new Tarumae.FrameBuffer(this.renderer, this.width, this.height);
   }
 
-  render() {
+  render() {    
     if (this.autoSize && (this.buffer.width != this.renderer.canvas.width
       || this.buffer.height != this.renderer.canvas.height)) {
         this.buffer.destroy();
@@ -101,14 +100,12 @@ Tarumae.PipelineNodes.SceneToImageRenderer = class extends Tarumae.PipelineNode 
     this.buffer.use();
 
     for (const node of this.nodes) {
-      node._render();
+      node.process();
     }
 
     this.renderer.renderFrame();
     
     this.buffer.disuse();
-
-		// gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   }
 
   clear() {
@@ -170,7 +167,7 @@ Tarumae.PipelineNodes.ImageToScreenRenderer = class extends Tarumae.PipelineNode
       const imageShader = this.shader;
 
       if (this.tex2Input) {
-        this.tex2Input._render();
+        this.tex2Input.process();
         imageShader.tex2 = this.tex2Input.output;
       } else {
         imageShader.tex2 = undefined;
@@ -301,23 +298,26 @@ Tarumae.PipelineNodes.BlurRenderer = class extends Tarumae.PipelineNode {
     return this.blurVerRenderer.buffer.texture;
   }
 
-  _render() {
+  clear() {
+    super.clear();
+
     this.blurHorRenderer.clear();
     this.blurVerRenderer.clear();
-    
+  }
+
+  process() {
     if (typeof this.gammaFactor !== undefined) {
-      this.blurHorRenderer.gammaFactor = this.gammaFactor;
       this.blurVerRenderer.gammaFactor = this.gammaFactor;
     }
 
     this.blurHorRenderer.input = this._input;
     this.blurHorRenderer.shader.isVertical = false;
     this.blurHorRenderer.shader.filterType = 2;
-    this.blurHorRenderer._render();
+    this.blurHorRenderer.process();
 
     this.blurVerRenderer.input = this.blurHorRenderer;
     this.blurVerRenderer.shader.isVertical = true;
     this.blurVerRenderer.shader.filterType = 2;
-    this.blurVerRenderer._render();
+    this.blurVerRenderer.process();
   }
 };

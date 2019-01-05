@@ -379,21 +379,13 @@ Tarumae.Renderer = class {
 				height: sh,
 			});
 			imgRenderer128.input = sceneImageRenderer;
-			// imgRenderer128.enableAntialias = false;
-			imgRenderer128.gammaFactor = 1.4;
-
-			// const imgRendererGlow = new Tarumae.PipelineNodes.BlurRenderer(this, {
-			// 	width: sw,
-			// 	height: sh,
-			// });
-			// imgRendererGlow.input = imgRenderer128;
-			// imgRendererGlow.gammaFactor = 0.5;
+			imgRenderer128.gammaFactor = 2.0;
 
 			const imgRenderer = new Tarumae.PipelineNodes.ImageToScreenRenderer(this);
 			imgRenderer.input = sceneImageRenderer;
 			imgRenderer.gammaFactor = 1.4;
 			imgRenderer.tex2Input = imgRenderer128;
-			imgRenderer.enableAntialias = false;
+			imgRenderer.enableAntialias = true;
 	
 			this.pipelineNodes.push(imgRenderer);
 		} else {
@@ -404,17 +396,18 @@ Tarumae.Renderer = class {
 	renderPipeline() {
 		if (this._bgImageRenderer) {
 			this._bgImageRenderer.clear();
-			this._bgImageRenderer._render();
-		} else {
-			// this.clearViewport();
+			this._bgImageRenderer.process();
 		}
+		// else {
+			// this.clearViewport();
+		// }
 
 		for (const node of this.pipelineNodes) {
 			node.clear();
 		}
 
 		for (const node of this.pipelineNodes) {
-			node._render();
+			node.process();
 		}
 	}
 
@@ -442,8 +435,7 @@ Tarumae.Renderer = class {
 		this.drawSceneFrame(scene);
 	}
 	
-	drawSceneFrame(scene) {
-		
+	drawSceneFrame(scene) {		
 		this.cameraMatrix.loadIdentity();
 		this.viewMatrix.loadIdentity();
 		this.transparencyList._s3_clear();
