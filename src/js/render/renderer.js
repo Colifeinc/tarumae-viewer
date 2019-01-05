@@ -449,6 +449,10 @@ Tarumae.Renderer = class {
 		this.transparencyList._s3_clear();
 	
 		if (!scene) return;
+
+		if (this.debugger) {
+			this.debugger.numberOfSceneRendered++;
+		}
 	
 		if (scene.mainCamera) {
 			this.makeCameraMatrix(scene.mainCamera, this.cameraMatrix);

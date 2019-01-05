@@ -24,6 +24,7 @@ Tarumae.Debugger = class {
 		this.totalNumberOfTexturesUsed = 0;
 		this.totalNumberOfPolygonBound = 0;
 		this.numberOfRenderPassesPerFrame = 0;
+		this.numberOfSceneRendered = 0;
 
 		this._maxPathLength = 30;
 
@@ -97,6 +98,7 @@ Tarumae.Debugger = class {
 		this.numberOfRenderPassesPerFrame = 0;
 		this.totalNumberOfObjectDrawed = 0;
 		this.totalNumberOfPolygonDrawed = 0;
+		this.numberOfSceneRendered = 0;
 	}
 
 	afterDrawFrame() {
