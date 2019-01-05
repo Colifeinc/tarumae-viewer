@@ -42,30 +42,24 @@ vec4 antialias(sampler2D tex) {
   return (c1 + c2 + c3 + c4) * 0.25;
 }
 
-vec4 antialias4x(sampler2D tex) {
+vec4 antialiasCross(sampler2D tex) {
   vec2 uv = texcoord;
 
-  vec4 c1 = sample(uv);
-  vec4 c2 = sample(uv + vec2(0, resStride.y));
-  vec4 c3 = sample(uv + vec2(resStride.x, 0));
-  vec4 c4 = sample(uv + resStride);
-
-  vec4 c5 = sample(uv + vec2(0, resStride.y));
-  vec4 c6 = sample(uv + vec2(resStride.x, 0));
-  vec4 c7 = sample(uv + vec2(resStride.x, 0));
-  vec4 c8 = sample(uv + vec2(resStride.x, 0));
+  vec4 c1 = sample(uv - vec2(resStride.x * 0.6, resStride.y * 0.4));
+  vec4 c2 = sample(uv - vec2(resStride.x * 0.4, resStride.y * 0.6));
+  vec4 c3 = sample(uv + vec2(resStride.x * 0.6, resStride.y * 0.4));
+  vec4 c4 = sample(uv + vec2(resStride.x * 0.4, resStride.y * 0.6));
 
   return (c1 + c2 + c3 + c4) * 0.25;
 }
 
 vec4 antialias100(sampler2D tex) {
   vec4 c = vec4(0);
-  vec4 sc;
 
-  for (int y = 0; y < 5; y++) {
-    for (int x = 0; x < 5; x++) {
-      sc = texture2D(tex, texcoord + vec2(resStride.x * float(x), 0));
-      c += sc;
+  for (int y = -2; y <= 2; y++) {
+    for (int x = -2; x <= 2; x++) {
+      c += texture2D(tex, texcoord +
+        vec2(resStride.x * float(x), resStride.y * float(y)));
     }
   }
 
@@ -75,6 +69,10 @@ vec4 antialias100(sampler2D tex) {
 // 0.0625   0.125   0.0625   
 // 0.125     0.25    0.125
 // 0.0625   0.125   0.0625
+
+// 0.024879	0.107973	0.024879
+// 0.107973	0.468592	0.107973
+// 0.024879	0.107973	0.024879
 
 vec4 guassBlur3(sampler2D tex) {
 	vec2 uv = texcoord;
@@ -183,13 +181,10 @@ void main(void) {
 	vec4 fc;
 	
 	if (enableAntialias) {
-		fc = guassBlur3(texture);
+		fc = antialiasCross(texture);
 	} else {
 		fc = sample(texture);
 	}
-
-	// vec4 fc = guassBlur3(texture);
-	// vec4 fc = guassBlur(texture, 0.0007);
 
 	vec3 t2c = vec3(0);
 	

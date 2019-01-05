@@ -58,10 +58,10 @@ Tarumae.PipelineNodes.SceneToImageRenderer = class extends Tarumae.PipelineNode 
     super(renderer);
     this.nodes = [];
 
-    if (options && options.imageSize
-      && options.imageSize.width && options.imageSize.height) {
-      this._width = options.imageSize.width;
-      this._height = options.imageSize.height;
+    if (options && options.resolution
+      && options.resolution.width && options.resolution.height) {
+      this._width = options.resolution.width;
+      this._height = options.resolution.height;
       this.autoSize = false;
     } else {
       this.autoSize = true;
@@ -143,6 +143,14 @@ Tarumae.PipelineNodes.ImageToScreenRenderer = class extends Tarumae.PipelineNode
       this.screenPlaneMesh.flipTexcoordY();
     }
 
+    if (options && options.resolution) {
+      this.width = options.resolution.width;
+      this.height = options.resolution.height;
+    } else {
+      this.width = this.renderer.canvas.width;
+      this.height = this.renderer.canvas.height;
+    }
+
     this.shader = Tarumae.Renderer.Shaders["screen"].instance;
   }
   
@@ -186,12 +194,10 @@ Tarumae.PipelineNodes.ImageToScreenRenderer = class extends Tarumae.PipelineNode
       }
 
       const gl = this.renderer.gl;
-      const width = this.options && this.options.width ? this.options.width : this.renderer.canvas.width;
-      const height = this.options && this.options.height ? this.options.height : this.renderer.canvas.height;
 
-      gl.viewport(0, 0, width, height);
-      imageShader.resolution[0] = width;
-      imageShader.resolution[1] = height;
+      gl.viewport(0, 0, this.width, this.height);
+      imageShader.resolution[0] = this.width;
+      imageShader.resolution[1] = this.height;
 
       this.renderer.useShader(imageShader);
       imageShader.beginMesh(this.screenPlaneMesh);
@@ -228,8 +234,14 @@ Tarumae.PipelineNodes.MemoryImageRenderer = class extends Tarumae.PipelineNode {
     super(renderer);
 
     this.options = options || {};
-    this.width = this.options.width || this.renderer.canvas.width;
-    this.height = this.options.height || this.renderer.canvas.height;
+
+    if (options.resolution) {
+      this.width = options.resolution.width;
+      this.height = options.resolution.height;
+    } else {
+      this.width = this.renderer.canvas.width;
+      this.height = this.renderer.canvas.height;
+    }
 
     this.screenPlaneMesh = new Tarumae.ScreenMesh();
     

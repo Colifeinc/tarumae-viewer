@@ -372,12 +372,14 @@ Tarumae.Renderer = class {
 				sh = height * 0.1;
 
 			const sceneImageRenderer = new Tarumae.PipelineNodes.SceneToImageRenderer(this, {
-				imageSize: { width, height },
+				resolution: { width, height },
 			});
 			
 			const imgRenderer128 = new Tarumae.PipelineNodes.BlurRenderer(this, {
-				width: sw,
-				height: sh,
+				resolution: {
+					width: sw,
+					height: sh,
+				}
 			});
 			imgRenderer128.input = sceneImageRenderer;
 			imgRenderer128.gammaFactor = 2.0;
