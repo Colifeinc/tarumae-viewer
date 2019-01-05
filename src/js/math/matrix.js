@@ -178,6 +178,8 @@ Tarumae.Matrix3.identity = new Tarumae.Matrix3().loadIdentity();
 
 Tarumae.Matrix4 = class {
 	constructor(copySource) {
+		this.arr = new Array(16);
+
 		if (copySource) {
 			this.copyFrom(copySource);
 		}
@@ -190,6 +192,8 @@ Tarumae.Matrix4 = class {
 		this.a2 = 0; this.b2 = 1; this.c2 = 0; this.d2 = 0;
 		this.a3 = 0; this.b3 = 0; this.c3 = 1; this.d3 = 0;
 		this.a4 = 0; this.b4 = 0; this.c4 = 0; this.d4 = 1;
+		
+		this.updateArray();
 
 		return this;
 	}
@@ -199,6 +203,8 @@ Tarumae.Matrix4 = class {
 		this.a2 = m.a2; this.b2 = m.b2; this.c2 = m.c2; this.d2 = m.d2;
 		this.a3 = m.a3; this.b3 = m.b3; this.c3 = m.c3; this.d3 = m.d3;
 		this.a4 = m.a4; this.b4 = m.b4; this.c4 = m.c4; this.d4 = m.d4;
+
+		this.updateArray();
 
 		return this;
 	}
@@ -257,6 +263,8 @@ Tarumae.Matrix4 = class {
 
 		this.a2 = a2; this.b2 = b2; this.c2 = c2; this.d2 = d2;
 		this.a3 = a3; this.b3 = b3; this.c3 = c3; this.d3 = d3;
+		
+		this.updateArray();
 
 		return this;
 	}
@@ -284,6 +292,8 @@ Tarumae.Matrix4 = class {
 
 		this.a1 = a1; this.b1 = b1; this.c1 = c1; this.d1 = d1;
 		this.a3 = a3; this.b3 = b3; this.c3 = c3; this.d3 = d3;
+		
+		this.updateArray();
 
 		return this;
 	}
@@ -311,7 +321,9 @@ Tarumae.Matrix4 = class {
 
 		this.a1 = a1; this.b1 = b1; this.c1 = c1; this.d1 = d1;
 		this.a2 = a2; this.b2 = b2; this.c2 = c2; this.d2 = d2;
-	
+			
+		this.updateArray();
+
 		return this;
 	}
 
@@ -349,6 +361,8 @@ Tarumae.Matrix4 = class {
 		this.a1 = a1; this.b1 = b1; this.c1 = c1; this.d1 = d1;
 		this.a2 = a2; this.b2 = b2; this.c2 = c2; this.d2 = d2;
 		this.a3 = a3; this.b3 = b3; this.c3 = c3; this.d3 = d3;
+		
+		this.updateArray();
 
 		return this;
 	}
@@ -358,6 +372,8 @@ Tarumae.Matrix4 = class {
 		this.b4 += this.b1 * x + this.b2 * y + this.b3 * z;
 		this.c4 += this.c1 * x + this.c2 * y + this.c3 * z;
 		this.d4 += this.d1 * x + this.d2 * y + this.d3 * z;
+		
+		this.updateArray();
 
 		return this;
 	}
@@ -367,6 +383,8 @@ Tarumae.Matrix4 = class {
 		this.b4 += this.b3 * z;
 		this.c4 += this.c3 * z;
 		this.d4 += this.d3 * z;
+		
+		this.updateArray();
 
 		return this;
 	}
@@ -377,6 +395,8 @@ Tarumae.Matrix4 = class {
 		this.a1 *= x; this.b1 *= x; this.c1 *= x; this.d1 *= x;
 		this.a2 *= y; this.b2 *= y; this.c2 *= y; this.d2 *= y;
 		this.a3 *= z; this.b3 *= z; this.c3 *= z; this.d3 *= z;
+		
+		this.updateArray();
 
 		return this;
 	}
@@ -446,6 +466,8 @@ Tarumae.Matrix4 = class {
 		this.a2 = m3a2 * detM; this.b2 = m3b2 * detM; this.c2 = m3c2 * detM; this.d2 = m3d2 * detM;
 		this.a3 = m3a3 * detM; this.b3 = m3b3 * detM; this.c3 = m3c3 * detM; this.d3 = m3d3 * detM;
 		this.a4 = m3a4 * detM; this.b4 = m3b4 * detM; this.c4 = m3c4 * detM; this.d4 = m3d4 * detM;
+		
+		this.updateArray();
 
 		return this;
 	}
@@ -460,6 +482,8 @@ Tarumae.Matrix4 = class {
 		this.a2 = a2; this.c2 = c2; this.d2 = d2;
 		this.a3 = a3; this.b3 = b3; this.d3 = d3;
 		this.a4 = a4; this.b4 = b4; this.c4 = c4;
+		
+		this.updateArray();
 
 		return this;
 	}
@@ -487,6 +511,8 @@ Tarumae.Matrix4 = class {
 		m3.d2 = m1.a2 * m2.d1 + m1.b2 * m2.d2 + m1.c2 * m2.d3 + m1.d2 * m2.d4;
 		m3.d3 = m1.a3 * m2.d1 + m1.b3 * m2.d2 + m1.c3 * m2.d3 + m1.d3 * m2.d4;
 		m3.d4 = m1.a4 * m2.d1 + m1.b4 * m2.d2 + m1.c4 * m2.d3 + m1.d4 * m2.d4;
+		
+		m3.updateArray();
 
 		return m3;
 	}
@@ -514,7 +540,9 @@ Tarumae.Matrix4 = class {
 		m3.d2 = m1.d1 * m2.a2 + m1.d2 * m2.b2 + m1.d3 * m2.c2 + m1.d4 * m2.d2;
 		m3.d3 = m1.d1 * m2.a3 + m1.d2 * m2.b3 + m1.d3 * m2.c3 + m1.d4 * m2.d3;
 		m3.d4 = m1.d1 * m2.a4 + m1.d2 * m2.b4 + m1.d3 * m2.c4 + m1.d4 * m2.d4;
-	
+			
+		m3.updateArray();
+
 		return m3;
 	}
 
@@ -532,6 +560,8 @@ Tarumae.Matrix4 = class {
 		this.a2 = 0; this.b2 = near * 2 / y; this.c2 = 0; this.d2 = 0;
 		this.a3 = (right + left) / x; this.b3 = (bottom + top) / y; this.c3 = -(far + near) / z; this.d3 = -1;
 		this.a4 = 0; this.b4 = 0; this.c4 = -(far * near * 2) / z; this.d4 = 0;
+		
+		this.updateArray();
 
 		return this;
 	}
@@ -540,6 +570,8 @@ Tarumae.Matrix4 = class {
 		const topRate = near * Math.tan(angle * Math.PI / 360);
 		widthRate = topRate * widthRate;
 		this.frustum(-widthRate, widthRate, -topRate, topRate, near, far);
+		
+		this.updateArray();
 
 		return this;
 	}
@@ -555,6 +587,8 @@ Tarumae.Matrix4 = class {
 		this.b4 = -(top + bottom) / y;
 		this.c4 = -(far + near) / z;
 		this.d4 = 1;
+		
+		this.updateArray();
 
 		return this;
 	}
@@ -575,6 +609,8 @@ Tarumae.Matrix4 = class {
 	
 		// maybe we can ignore the row 4 like below to get more better performance
 		this.a4 = 0; this.b4 = 0; this.c4 = 0; this.d4 = 1;
+		
+		this.updateArray();
 
 		return this;
 	}
@@ -610,12 +646,29 @@ Tarumae.Matrix4 = class {
 	}
 
 	toArray() {
-		return [
-			this.a1, this.b1, this.c1, this.d1,
-			this.a2, this.b2, this.c2, this.d2,
-			this.a3, this.b3, this.c3, this.d3,
-			this.a4, this.b4, this.c4, this.d4
-		];
+		return this.arr;
+	}
+
+	updateArray() {
+		this.arr[0] = this.a1;
+		this.arr[1] = this.b1;
+		this.arr[2] = this.c1;
+		this.arr[3] = this.d1;
+
+		this.arr[4] = this.a2;
+		this.arr[5] = this.b2;
+		this.arr[6] = this.c2;
+		this.arr[7] = this.d2;
+
+		this.arr[8] = this.a3;
+		this.arr[9] = this.b3;
+		this.arr[10] = this.c3;
+		this.arr[11] = this.d3;
+
+		this.arr[12] = this.a4;
+		this.arr[13] = this.b4;
+		this.arr[14] = this.c4;
+		this.arr[15] = this.d4;
 	}
 
 	toFloat32Array() {
