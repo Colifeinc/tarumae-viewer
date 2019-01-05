@@ -28,7 +28,7 @@ vec4 sample() {
   return texture2D(texture, texcoord);
 }
 
-vec4 interp(sampler2D tex) {
+vec4 antialias(sampler2D tex) {
   vec2 uv = texcoord;
 
   vec4 c1 = sample(uv);
@@ -147,7 +147,14 @@ vec3 lighter2(vec3 a, vec3 b, float factor) {
 
 void main(void) {
 
-	vec4 fc = sample(texture);
+	vec4 fc;
+	
+	if (enableAntialias) {
+		fc = antialias(texture);
+	} else {
+		fc = sample(texture);
+	}
+
 	// vec4 fc = guassBlur3(texture);
 	// vec4 fc = guassBlur(texture, 0.0007);
 
@@ -157,11 +164,8 @@ void main(void) {
 	
 	if (hasTex2) {
 		t2c = sample(tex2).rgb;
-		t2c = lighter(fc.rgb, t2c, 0.8);
-		// t2c = clamp(t2c, 0.0, 1.0);
-		
-		fc = vec4(t2c.rgb, fc.a);
-		// fc = vec4(lighter2(fc.rgb, t2c, 0.2), fc.a);
+		t2c = lighter(fc.rgb, t2c, 0.8);		
+		fc.rgb = t2c.rgb;
 	}
 
 	gl_FragColor = fc;
