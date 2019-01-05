@@ -184,8 +184,7 @@ Tarumae.ShaderUniform = class {
 					if (Array.isArray(val)) {
 						gl.uniform2fv(this.address, val);
 					} else {
-						this.arr[0] = val.x;
-						this.arr[1] = val.y;
+						this.arr[0] = val.x; this.arr[1] = val.y;
 						gl.uniform2fv(this.address, this.arr);
 					}
 				};
@@ -1149,7 +1148,7 @@ Tarumae.StandardShader = class extends Tarumae.Shader {
 			var lightUniform = {
 				type: this.findUniform(indexName + "type"),
 				pos: this.bindUniform(indexName + "pos", "vec3"),
-				color: this.bindUniform(indexName + "color", "vec3"),
+				color: this.bindUniform(indexName + "color", "color3"),
 			};
 			if (!lightUniform.pos.address) break;
 			this.lightUniforms.push(lightUniform);
@@ -1742,26 +1741,17 @@ Tarumae.ImageShader = class extends Tarumae.Shader {
 		this.resStrideUniform = this.bindUniform("resStride", "vec2");
 		this.filterTypeUniform = this.bindUniform("filterType", "int");
 		this.isVerticalUniform = this.bindUniform("isVertical", "bool");
-		this.resizeScaleUniform = this.bindUniform("resizeScale", "vec2");
 
 		this.samplingWeightUniform = this.bindUniform("samplingWeight", "float[]");
-		this.samplingWeightUniform.set([0.132572,0.125472,0.106373,0.08078,0.05495,0.033482,0.018275,0.008934,0.003912,0.001535]);
+		// this.samplingWeightUniform.set([0.132572, 0.125472, 0.106373, 0.08078, 0.05495, 0.033482, 0.018275, 0.008934, 0.003912, 0.001535]);
+		this.samplingWeightUniform.set([0.114357, 0.109813, 0.097238, 0.079397, 0.059781, 0.041506, 0.026573, 0.015687, 0.00854, 0.004287]);
 		// this.samplingWeightUniform.set([0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216]);
 		
 		this.enableAntialiasUniform = this.bindUniform("enableAntialias", "bool");
-		this.enableAntialias = true;
-
 		this.gammaFactorUniform = this.bindUniform("gammaFactor", "float");
-		this.gammaFactor = 1;
-
 		this.projectionMatrix = new Tarumae.Matrix4().ortho(-1, 1, -1, 1, -1, 1);
-		this.color = [1, 1, 1];
-		this.opacity = 1;
-		this.texture = undefined;
-		this.resolution = [0, 0];
-		this.isVertical = false;
-		this.resizeScale = [1, 1];
-		this.filterType = 0;
+
+		this.resetParameters();
 	}
 
 	beginMesh(mesh) {
@@ -1771,16 +1761,15 @@ Tarumae.ImageShader = class extends Tarumae.Shader {
 		this.colorUniform.set(this.color);
 		this.opacityUniform.set(this.opacity);
 
-		const resXInv = 1 / this.resolution[0];
-		const resYInv = 1 / this.resolution[1];
-		this.resStrideUniform.set([resXInv, resYInv]);
+		this.resStride[0] = 1 / this.resolution[0];
+		this.resStride[1] = 1 / this.resolution[1];
+		this.resStrideUniform.set(this.resStride);
 		this.resolutionUniform.set(this.resolution);
 
 		this.enableAntialiasUniform.set(this.enableAntialias);
 		this.gammaFactorUniform.set(this.gammaFactor);
 		this.isVerticalUniform.set(this.isVertical);
 		this.filterTypeUniform.set(this.filterType);
-		this.resizeScaleUniform.set(this.resizeScale);
  
 		if (this.texture) {
 			this.textureUniform.set(this.texture);
@@ -1801,14 +1790,7 @@ Tarumae.ImageShader = class extends Tarumae.Shader {
 	}
 
 	endMesh(mesh) {
-		this.color = [1, 1, 1];
-		this.gammaFactor = 1;
-		this.opacity = 1;
-		this.texture = undefined;
-		this.resolution = [0, 0];
-		this.isVertical = false;
-		this.enableAntialias = false;
-		this.filterType = 0;
+		this.resetParameters();
 
 		// const gl = this.renderer.gl;
 		// gl.disable(gl.BLEND);
@@ -1822,6 +1804,17 @@ Tarumae.ImageShader = class extends Tarumae.Shader {
 		super.endMesh(mesh);
 	}
 
+	resetParameters() {
+		this.enableAntialias = false;
+		this.gammaFactor = 1;
+		this.color = [1, 1, 1];
+		this.opacity = 1;
+		this.texture = undefined;
+		this.resolution = [0, 0];
+		this.isVertical = false;
+		this.resStride = [.001, .001];
+		this.filterType = 0;
+	}
 };
 
 ////////////////// ScreenShader ///////////////////////
@@ -1845,8 +1838,11 @@ Tarumae.ScreenShader = class extends Tarumae.Shader {
 		this.resolutionUniform = this.bindUniform("resolution", "vec2");
 		this.resStrideUniform = this.bindUniform("resStride", "vec2");
 		
+		this.samplingWeightUniform = this.bindUniform("samplingWeight", "float[]");
+		this.samplingWeightUniform.set([0.114357, 0.109813, 0.097238, 0.079397, 0.059781, 0.041506, 0.026573, 0.015687, 0.00854, 0.004287]);
+
 		this.enableAntialiasUniform = this.bindUniform("enableAntialias", "bool");
-		this.enableAntialias = true;
+		this.enableAntialias = false;
 
 		this.gammaFactorUniform = this.bindUniform("gammaFactor", "float");
 		this.gammaFactor = 1;
@@ -1856,6 +1852,7 @@ Tarumae.ScreenShader = class extends Tarumae.Shader {
 		this.opacity = 1;
 		this.texture = undefined;
 		this.resolution = [0, 0];
+		this.resStride = [.001, .001];
 	}
 
 	beginMesh(mesh) {
@@ -1865,9 +1862,9 @@ Tarumae.ScreenShader = class extends Tarumae.Shader {
 		this.colorUniform.set(this.color);
 		this.opacityUniform.set(this.opacity);
 
-		const resXInv = 1 / this.resolution[0];
-		const resYInv = 1 / this.resolution[1];
-		this.resStrideUniform.set([resXInv, resYInv]);
+		this.resStride[0] = 1 / this.resolution[0];
+		this.resStride[1] = 1 / this.resolution[1];
+		this.resStrideUniform.set(this.resStride);
 		this.resolutionUniform.set(this.resolution);
 
 		this.enableAntialiasUniform.set(this.enableAntialias);

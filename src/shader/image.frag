@@ -14,7 +14,6 @@ uniform bool enableAntialias;
 uniform float gammaFactor;
 uniform int filterType;
 uniform bool isVertical;
-uniform vec2 resizeScale;
 
 #define BLUR_SAMPLINGS 10
 uniform float samplingWeight[BLUR_SAMPLINGS];
@@ -196,7 +195,7 @@ void main(void) {
     fc = blur5(texture);
   }
 
-	fc = gamma(fc, gammaFactor);
+  fc.rgb = gamma(fc.rgb, gammaFactor);
 
 	// vec3 t2c = vec3(0);
 	

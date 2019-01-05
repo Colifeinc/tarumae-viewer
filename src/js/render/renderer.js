@@ -41,6 +41,7 @@ Tarumae.Renderer = class {
 			debugMode: false,
 			backColor: new Color4(0.93, 0.93, 0.93, 1.0),
 			enable3D: true,
+			enableAntialias: false,
 		};
 	}
 
@@ -365,10 +366,10 @@ Tarumae.Renderer = class {
 		}
 		
 		if (this.options.postprocess) {
-			const width = this.canvas.width * 1,
-				height = this.canvas.height * 1,
-				sw = width * 0.05,
-				sh = height * 0.05;
+			const width = this.canvas.width,
+				height = this.canvas.height,
+				sw = width * 0.1,
+				sh = height * 0.1;
 
 			const sceneImageRenderer = new Tarumae.PipelineNodes.SceneToImageRenderer(this, {
 				imageSize: { width, height },
@@ -381,11 +382,18 @@ Tarumae.Renderer = class {
 			imgRenderer128.input = sceneImageRenderer;
 			imgRenderer128.gammaFactor = 2.0;
 
+			// const imgRenderer128 = new Tarumae.PipelineNodes.MemoryImageRenderer(this, {
+			// 	width: width,
+			// 	height: height,
+			// });
+			// imgRenderer128.input = sceneImageRenderer;
+			// imgRenderer128.gammaFactor = 2.0;
+
 			const imgRenderer = new Tarumae.PipelineNodes.ImageToScreenRenderer(this);
 			imgRenderer.input = sceneImageRenderer;
 			imgRenderer.gammaFactor = 1.4;
 			imgRenderer.tex2Input = imgRenderer128;
-			imgRenderer.enableAntialias = true;
+			imgRenderer.enableAntialias = this.options.enableAntialias;
 	
 			this.pipelineNodes.push(imgRenderer);
 		} else {
@@ -444,6 +452,9 @@ Tarumae.Renderer = class {
 
 		if (this.debugger) {
 			this.debugger.numberOfSceneRendered++;
+			if (this.debugger.numberOfSceneRendered > 1) {
+				console.warn("duplicate scene renderering");
+			}
 		}
 	
 		if (scene.mainCamera) {
@@ -649,6 +660,10 @@ Tarumae.Renderer = class {
 				return;
 			}
 		}
+
+		if (this.debugger) {
+			this.debugger.beforeObjectRender(obj);
+		}
 	
 		let shaderPushed = false;
 	
@@ -735,7 +750,7 @@ Tarumae.Renderer = class {
 		}
 		
 		if (this.debugger) {
-			this.debugger.totalNumberOfObjectDrawed++;
+			this.debugger.afterObjectRender(obj);
 		}
 		// if (this.debugMode) {
 		// 	this.debugger.drawBoundingBox(obj, this.transformStack);

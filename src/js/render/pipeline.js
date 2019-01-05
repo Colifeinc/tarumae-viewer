@@ -175,9 +175,12 @@ Tarumae.PipelineNodes.ImageToScreenRenderer = class extends Tarumae.PipelineNode
 
       imageShader.texture = this._input.output;
 
-      if (typeof enableAntialias !== "undefined") {
+      if (typeof this.enableAntialias !== "undefined") {
         imageShader.enableAntialias = this.enableAntialias;
+      } else {
+        imageShader.enableAntialias = false;
       }
+
       if (typeof this.gammaFactor !== "undefined") {
         imageShader.gammaFactor = this.gammaFactor;
       }
@@ -261,7 +264,10 @@ Tarumae.PipelineNodes.MemoryImageRenderer = class extends Tarumae.PipelineNode {
 
       if (typeof this.enableAntialias !== "undefined") {
         imageShader.enableAntialias = this.enableAntialias;
+      } else {
+        imageShader.enableAntialias = false;
       }
+
       if (typeof this.gammaFactor !== "undefined") {
         imageShader.gammaFactor = this.gammaFactor;
       }
