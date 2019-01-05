@@ -10,9 +10,10 @@ window.addEventListener("load", function() {
 	const renderer = new Tarumae.Renderer({
 		postprocess: true,
 		enableLighting: false,
-		renderPixelRatio: window.devicePixelRatio,
-		// renderPixelRatio: window.devicePixelRatio * 0.75,
+		// renderPixelRatio: window.devicePixelRatio,
+		renderPixelRatio: Math.max(window.devicePixelRatio * 0.75, 1),
 		// renderPixelRatio: 1,
+		enableAntialias: true,
 	});
 	const scene = renderer.createScene();
 
@@ -22,7 +23,7 @@ window.addEventListener("load", function() {
 	cube.scale.set(100, 5, 100);
 	cube.location.set(0, 1, 0);
 	cube.meshes[0].flipSurfaces();
-	cube.mat = { color: [0.93, 0.97, 1] };
+	cube.mat = { color: [0.98, 0.99, 1] };
 	cube.receiveLight = false;
 	scene.add(cube);
 
