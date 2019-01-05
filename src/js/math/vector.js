@@ -544,85 +544,110 @@ Vec4.prototype.toArrayDigits = function(digits) {
 
 /////////////////// Color3 ////////////////////
 
-export function Color3(r, g, b) {
-	switch (arguments.length) {
-		case 0:
-			this.r = 0; this.g = 0; this.b = 0;
-			break;
+export class Color3 {
+	constructor(r, g, b) {
+		this.elements = new Array(3);
+
+		switch (arguments.length) {
+			case 0:
+				this.elements[0] = 0; this.elements[1] = 0; this.elements[2] = 0;
+				break;
 			
-		case 1:
-			if (typeof r === "number") {
-				this.r = r; this.g = r; this.b = r;
-			} else if (typeof r === "object") {
-				this.r = r.r; this.g = r.g; this.b = r.b;
-			}
-			break;
+			case 1:
+				if (typeof r === "number") {
+					this.elements[0] = r; this.elements[1] = r; this.elements[2] = r;
+				} else if (typeof r === "object") {
+					this.elements[0] = r.r; this.elements[1] = r.g; this.elements[3] = r.b;
+				}
+				break;
 
-		case 3:
-			this.r = r; this.g = g; this.b = b;
-			break;
+			case 3:
+				this.elements[0] = r; this.elements[1] = g; this.elements[2] = b;
+				break;
+		}
 	}
-}
 
-Color3.prototype.clone = function() {
-	return new Color3(this.r, this.g, this.b);
-};
+	clone() {
+		const c = new Color3();
+		c.copyFrom(this);
+		return c;
+	}
 
-Color3.prototype.copyFrom = function(c) {
-	this.r = c.r;
-	this.g = c.g;
-	this.b = c.b;
-	return this;
-};
+	copyFrom(c) {
+		this.elements = c.elements.slice();
+		return this;
+	}
 
-Color3.prototype.add = function(c) {
-	return new Color3(this.r + c.r, this.g + c.g, this.b + c.b);
-};
+	get r() { return this.elements[0]; }
+	set r(val) { this.elements[0] = val };
 
-Color3.prototype.sub = function(c) {
-	return new Color3(this.r - c.r, this.g - c.g, this.b - c.b);
-};
+	get g() { return this.elements[1]; }
+	set g(val) { this.elements[1] = val };
 
-Color3.prototype.mul = function(s) {
-	return new Color3(this.r * s, this.g * s, this.b * s);
-};
+	get b() { return this.elements[2]; }
+	set b(val) { this.elements[2] = val };
 
-Color3.prototype.length = function() {
-	return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
-};
-
-Color3.prototype.normalize = function () {
-	var scalar = 1 / this.length();
+	add(c) {
+		return new Color3(this.r + c.r, this.g + c.g, this.b + c.b);
+	}
 	
-	if (isFinite(scalar)) {
-		return new Color3(this.x * scalar, this.y * scalar, this.z * scalar);
-	} else {
-		return new Color3();
+	sub(c) {
+		return new Color3(this.r - c.r, this.g - c.g, this.b - c.b);
 	}
-};
+	
+	mul(s) {
+		return new Color3(this.r * s, this.g * s, this.b * s);
+	}
+	
+	length() {
+		return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+	}
+	
+	normalize() {
+		const scalar = 1 / this.length();
+		
+		if (isFinite(scalar)) {
+			return new Color3(this.x * scalar, this.y * scalar, this.z * scalar);
+		} else {
+			return new Color3();
+		}
+	};
+	
+	lerp(v2, t) {
+		return this.add((v2.sub(this)).mul(t));
+	}
+	
+	static lerp(v1, v2, t) {
+		return v1.lerp(v2, t);
+	}
+	
+	toArray() {
+		return this.elements;
+	}
+	
+	toFloat32Array() {
+		return new Float32Array(this.elements);
+	}
+	
+	toString() {
+		var toStringDigits = Tarumae.Utility.NumberExtension.toStringWithDigits;
+	
+		return "[" + toStringDigits(this.r) + ", " + toStringDigits(this.g) + ", "
+			+ toStringDigits(this.b) + "]";
+	}
 
-Color3.prototype.lerp = function(v2, t) {
-	return this.add((v2.sub(this)).mul(t));
-};
-
-Color3.lerp = function(v1, v2, t) {
-	return v1.lerp(v2, t);
-};
-
-Color3.prototype.toArray = function() {
-	return [this.r, this.g, this.b];
-};
-
-Color3.prototype.toFloat32Array = function() {
-	return new Float32Array(this.toArray());
-};
-
-Color3.prototype.toString = function() {
-	var toStringDigits = Tarumae.Utility.NumberExtension.toStringWithDigits;
-
-	return "[" + toStringDigits(this.r) + ", " + toStringDigits(this.g) + ", "
-		+ toStringDigits(this.b) + "]";
-};
+	static randomly() {
+		return new Color3(Math.random(), Math.random(), Math.random());
+	};
+	
+	static randomlyLight() {
+		return new Color3(0.3 + Math.random() * 0.7, 0.3 + Math.random() * 0.7, 0.3 + Math.random() * 0.7);
+	};
+	
+	static randomlyDark() {
+		return new Color3(Math.random() * 0.5, Math.random() * 0.5, Math.random() * 0.5);
+	};
+}
 
 Color3.white = new Color3(1.0, 1.0, 1.0);
 Color3.silver = new Color3(0.7, 0.7, 0.7);
@@ -633,17 +658,6 @@ Color3.red = new Color3(1.0, 0.0, 0.0);
 Color3.green = new Color3(0.0, 1.0, 0.0);
 Color3.blue = new Color3(0.0, 0.0, 1.0);
 
-Color3.randomly = function() {
-	return new Color3(Math.random(), Math.random(), Math.random());
-};
-
-Color3.randomlyLight = function() {
-	return new Color3(0.3 + Math.random() * 0.7, 0.3 + Math.random() * 0.7, 0.3 + Math.random() * 0.7);
-};
-
-Color3.randomlyDark = function() {
-	return new Color3(Math.random() * 0.5, Math.random() * 0.5, Math.random() * 0.5);
-};
 /////////////////// Color4 ////////////////////
 
 export function Color4(r, g, b, a) {
