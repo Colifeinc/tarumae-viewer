@@ -179,35 +179,66 @@ Tarumae.ShaderUniform = class {
 
 			case "vec2":
 				this.address = this.register(shader, name);
+				this.arr = new Array(2);
 				this.set = val => {
 					if (Array.isArray(val)) {
 						gl.uniform2fv(this.address, val);
 					} else {
-						gl.uniform2fv(this.address, val.toArray());
+						this.arr[0] = val.x;
+						this.arr[1] = val.y;
+						gl.uniform2fv(this.address, this.arr);
 					}
 				};
 				break;
 
 			case "color3":
-			case "vec3":
 				this.address = this.register(shader, name);
+				this.arr = new Array(3);
 				this.set = val => {
 					if (Array.isArray(val)) {
 						gl.uniform3fv(this.address, val);
 					} else {
-						gl.uniform3fv(this.address, val.toArray());
+						this.arr[0] = val.r; this.arr[1] = val.g; this.arr[2] = val.b;
+						gl.uniform3fv(this.address, this.arr);
+					}
+				};
+				break;
+
+			case "vec3":
+				this.address = this.register(shader, name);
+				this.arr = new Array(3);
+				this.set = val => {
+					if (Array.isArray(val)) {
+						gl.uniform3fv(this.address, val);
+					} else {
+						this.arr[0] = val.x; this.arr[1] = val.y; this.arr[2] = val.z;
+						gl.uniform3fv(this.address, this.arr);
 					}
 				};
 				break;
 
 			case "color4":
-			case "vec4":
 				this.address = this.register(shader, name);
+				this.arr = new Array(4);
 				this.set = val => {
 					if (Array.isArray(val)) {
 						gl.uniform4fv(this.address, val);
 					} else {
-						gl.uniform4fv(this.address, val.toArray());
+						this.arr[0] = val.r; this.arr[1] = val.g; this.arr[2] = val.b; this.arr[3] = val.a;
+						gl.uniform4fv(this.address, this.arr);
+					}
+				};
+				break;
+			
+			case "vec4":
+				this.address = this.register(shader, name);
+				this.arr = new Array(4);
+				this.set = val => {
+					if (Array.isArray(val)) {
+						gl.uniform4fv(this.address, val);
+					} else {
+						this.arr[0] = val.x; this.arr[1] = val.y; this.arr[2] = val.z; this.arr[3] = val.w;
+						gl.uniform4fv(this.address, this.arr);
 					}
 				};
 				break;
@@ -1715,7 +1746,6 @@ Tarumae.ImageShader = class extends Tarumae.Shader {
 
 		this.samplingWeightUniform = this.bindUniform("samplingWeight", "float[]");
 		this.samplingWeightUniform.set([0.132572,0.125472,0.106373,0.08078,0.05495,0.033482,0.018275,0.008934,0.003912,0.001535]);
-		this.samplingWeightUniform.set([0.13298,0.125858,0.106701,0.081029,0.055119,0.033585,0.018331,0.008962,0.003924]);
 		// this.samplingWeightUniform.set([0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216]);
 		
 		this.enableAntialiasUniform = this.bindUniform("enableAntialias", "bool");
