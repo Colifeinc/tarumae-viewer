@@ -11,6 +11,8 @@ window.addEventListener("load", function() {
 		postprocess: true,
 		enableLighting: false,
 		renderPixelRatio: window.devicePixelRatio,
+		// renderPixelRatio: window.devicePixelRatio * 0.75,
+		// renderPixelRatio: 1,
 	});
 	const scene = renderer.createScene();
 

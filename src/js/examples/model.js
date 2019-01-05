@@ -11,6 +11,7 @@ window.addEventListener("load", function() {
 
 	const renderer = new Tarumae.Renderer({
 		renderPixelRatio: window.devicePixelRatio,
+		// renderPixelRatio: 1,
 		backColor: new Color4(0.74, .87, .85, 1),
 		backgroundImage: "../static/textures/bg-gray-gradient.jpg",
 		showDebugPanel: true,
@@ -27,7 +28,7 @@ window.addEventListener("load", function() {
 		{ name: "chair_adv_01.toba" },
 		// { name: "chair_compact_01.toba" },
 		{ name: "chair_jati.toba" },
-		// { name: "char_stand_01.toba", scale: [.05, .05, .05], color: [.7, .7, .7] },
+		{ name: "char_stand_01.toba", scale: [1, 1, 1], color: [.7, .7, .7] },
 		{ name: "desk_study_1p.toba", color: [.7, .7, .7] },
 		// { name: "fan_vintage_ceiling.toba", scale: [3, 3, 3] },
 		// { name: "print_mfp_w1500.toba", color: [.7, .7, .7] },
