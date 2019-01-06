@@ -5,7 +5,7 @@ attribute vec2 vertexTexcoord;
 
 uniform mat4 projectViewMatrix, modelMatrix, normalMatrix;
 uniform mat4 projectViewModelMatrix;
-//uniform mat4 projectLightMatrix;
+//uniform mat4 projectionMatrix;
 //uniform vec3 directionalLightDir;
 //uniform vec3 color;
 
@@ -20,7 +20,7 @@ void main(void) {
 	gl_Position = projectViewMatrix * vertexPos;
 
 //	position = vertexPos.xyz;
-//	vec4 pos = projectLightMatrix * vertexPos;
+//	vec4 pos = projectionMatrix * vertexPos;
 //	shadowPosition = vec3(0.5, 0.5, 0.5) + (pos.xyz / pos.w) * 0.5;
 
 //	vec3 normal = vec3(normalMatrix * vec4(vertexNormal, 0.0));

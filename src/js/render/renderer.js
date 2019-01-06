@@ -366,14 +366,20 @@ Tarumae.Renderer = class {
 		}
 		
 		if (this.options.postprocess) {
-			const width = this.canvas.width,
-				height = this.canvas.height,
-				sw = width * 0.1,
-				sh = height * 0.1;
+			const width = this.canvas.width, height = this.canvas.height,
+				sw = width * 0.1, sh = height * 0.1;
 
+			// const shadowMapRenderer = new Tarumae.PipelineNodes.ShadowMapRenderer(this, {
+			// 	resolution: {
+			// 		width: width * 2,
+			// 		height: height * 2,
+			// 	}
+			// });
+	
 			const sceneImageRenderer = new Tarumae.PipelineNodes.SceneToImageRenderer(this, {
 				resolution: { width, height },
 			});
+			// sceneImageRenderer.shadowMap2DInput = shadowMapRenderer;
 			
 			const imgRenderer128 = new Tarumae.PipelineNodes.BlurRenderer(this, {
 				resolution: {
@@ -382,14 +388,7 @@ Tarumae.Renderer = class {
 				}
 			});
 			imgRenderer128.input = sceneImageRenderer;
-			imgRenderer128.gammaFactor = 2.0;
-
-			// const imgRenderer128 = new Tarumae.PipelineNodes.MemoryImageRenderer(this, {
-			// 	width: width,
-			// 	height: height,
-			// });
-			// imgRenderer128.input = sceneImageRenderer;
-			// imgRenderer128.gammaFactor = 2.0;
+			// imgRenderer128.gammaFactor = 1.0;
 
 			const imgRenderer = new Tarumae.PipelineNodes.ImageToScreenRenderer(this);
 			imgRenderer.input = sceneImageRenderer;
@@ -398,6 +397,15 @@ Tarumae.Renderer = class {
 			imgRenderer.enableAntialias = this.options.enableAntialias;
 	
 			this.pipelineNodes.push(imgRenderer);
+
+			// const previewRenderer = new Tarumae.PipelineNodes.MultipleImagePreviewRenderer(this);
+			// previewRenderer.addPreview(imgRenderer128);
+			// previewRenderer.addPreview(sceneImageRenderer);
+			// previewRenderer.addPreview(shadowMapRenderer);
+			// previewRenderer.enableAntialias = true;
+			
+			// this.pipelineNodes.push(previewRenderer);
+
 		} else {
 			this.pipelineNodes.push(new Tarumae.PipelineNodes.DefaultRenderer(this));
 		}
@@ -408,9 +416,6 @@ Tarumae.Renderer = class {
 			this._bgImageRenderer.clear();
 			this._bgImageRenderer.process();
 		}
-		// else {
-			// this.clearViewport();
-		// }
 
 		for (const node of this.pipelineNodes) {
 			node.clear();
@@ -1168,6 +1173,8 @@ import blurVert from '../../shader/blur.vert';
 import blurFrag from '../../shader/blur.frag';
 import screenVert from '../../shader/screen.vert';
 import screenFrag from '../../shader/screen.frag';
+import shadowmapVert from '../../shader/shadowmap.vert';
+import shadowmapFrag from '../../shader/shadowmap.frag';
 
 Tarumae.Renderer.Shaders = {
 	// viewer: {
@@ -1186,6 +1193,7 @@ Tarumae.Renderer.Shaders = {
 	image: { vert: imageVert, frag: imageFrag, class: "ImageShader" },
 	blur: { vert: blurVert, frag: blurFrag, class: "ImageShader" },
 	screen: { vert: screenVert, frag: screenFrag, class: "ScreenShader" },
+	shadowmap: { vert: shadowmapVert, frag: shadowmapFrag, class: "ShadowMapShader" },
 };
 
 
