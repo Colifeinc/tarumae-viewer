@@ -86,6 +86,12 @@ Tarumae.FrameBuffer = class extends Tarumae.CommonBuffer {
 		gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.glFrameBuffer);
 
 		gl.viewport(0, 0, this.width, this.height);
+
+		if (!this.renderer.options.backgroundImage) {
+			const backColor = this.renderer.options.backColor;
+			gl.clearColor(backColor.r, backColor.g, backColor.b, 1.0);
+    }
+
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	}
 
