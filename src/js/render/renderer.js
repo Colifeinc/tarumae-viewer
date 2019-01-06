@@ -228,7 +228,7 @@ Tarumae.Renderer = class {
 	loadShader(shaderDefine, vertSource, fragSource) {
 		var renderer = this;
 	
-		var shader = new Tarumae[shaderDefine.class](renderer, vertSource, fragSource);
+		let shader = new Tarumae.Shaders[shaderDefine.class](renderer, vertSource, fragSource);
 		shaderDefine.instance = shader;
 		Tarumae.Utility.invokeIfExist(shaderDefine, "oncreate");
 	}

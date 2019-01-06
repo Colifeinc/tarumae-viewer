@@ -478,7 +478,7 @@ Tarumae.Mesh = class {
 			}
 		}
 
-		if (renderer.currentShader instanceof Tarumae.WireframeShader && meta.edgeCount > 0) {
+		if (renderer.currentShader instanceof Tarumae.Shaders.WireframeShader && meta.edgeCount > 0) {
 			gl.vertexAttribPointer(sp.vertexPositionAttribute, 3, gl.FLOAT, false, meta.stride, meta.edgeDataOffset);
 			gl.drawArrays(gl.LINES, 0, meta.edgeCount * 2);
 		}
