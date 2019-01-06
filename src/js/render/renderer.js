@@ -28,7 +28,7 @@ Tarumae.Renderer = class {
 			perspective: {
 				method: Tarumae.ProjectionMethods.Persp,
 				angle: 50.0,
-				near: 0.01,
+				near: 0.1,
 				far: 100.0,
 			},
 			enableDrawMesh: true,
@@ -112,7 +112,7 @@ Tarumae.Renderer = class {
 		this.respool = new Tarumae.ResourcePool();
 
 		// matrices
-		this.projectMatrix = new Tarumae.Matrix4();
+		this.projectionMatrix = new Tarumae.Matrix4();
 		this.viewMatrix = new Tarumae.Matrix4();
 		this.cameraMatrix = new Tarumae.Matrix4();
 		this.modelMatrix = new Tarumae.Matrix4();
@@ -422,8 +422,19 @@ Tarumae.Renderer = class {
 	}
 
 	renderFrame() {
-
 		const scene = this.currentScene;
+		if (scene) {
+			this.prepareRenderMatrices();
+			this.drawSceneFrame(scene);
+		}
+	}
+
+	prepareRenderMatrices() {
+		const scene = this.currentScene;
+		if (!scene) return;
+
+		this.cameraMatrix.loadIdentity();
+		this.viewMatrix.loadIdentity();
 
 		const projectionMethod = ((scene && scene.mainCamera)
 			? (this.currentScene.mainCamera.projectionMethod)
@@ -433,21 +444,27 @@ Tarumae.Renderer = class {
 			default:
 			case Tarumae.ProjectionMethods.Persp:
 			case "persp":
-				this.perspectiveProject(this.projectMatrix);
+				this.perspectiveProject(this.projectionMatrix);
 				break;
 
 			case Tarumae.ProjectionMethods.Ortho:
 			case "ortho":
-				this.orthographicProject(this.projectMatrix);
+				this.orthographicProject(this.projectionMatrix);
 				break;
 		}
 
-		this.drawSceneFrame(scene);
+		if (scene.mainCamera) {
+			this.makeCameraMatrix(scene.mainCamera, this.cameraMatrix);
+		}
+	
+		this.makeViewMatrix(this.viewMatrix);
+	
+		this.projectionViewMatrix = this.viewMatrix.mul(this.cameraMatrix).mul(this.projectionMatrix);
+		this.projectionViewMatrixArray = this.projectionViewMatrix.toArray();
 	}
 	
 	drawSceneFrame(scene) {		
-		this.cameraMatrix.loadIdentity();
-		this.viewMatrix.loadIdentity();
+
 		this.transparencyList._s3_clear();
 	
 		if (!scene) return;
@@ -458,15 +475,6 @@ Tarumae.Renderer = class {
 				console.warn("duplicate scene renderering");
 			}
 		}
-	
-		if (scene.mainCamera) {
-			this.makeCameraMatrix(scene.mainCamera, this.cameraMatrix);
-		}
-	
-		this.makeViewMatrix(this.viewMatrix);
-	
-		this.projectionViewMatrix = this.viewMatrix.mul(this.cameraMatrix).mul(this.projectMatrix);
-		this.projectionViewMatrixArray = this.projectionViewMatrix.toArray();
 
 		if (this.wireframe) {
 			this.useShader("wireframe");
@@ -1108,13 +1116,13 @@ Tarumae.Renderer = class {
 };
 
 Tarumae.Renderer.prototype.toWorldPosition = (function() {
-	var projectMatrix = new Tarumae.Matrix4();
+	var projectionMatrix = new Tarumae.Matrix4();
 	
 	return function(pos, viewMatrix, projectMethod) {
 	
-		this.makeProjectMatrix(projectMethod, projectMatrix);
+		this.makeProjectMatrix(projectMethod, projectionMatrix);
 	
-		var m = (viewMatrix || this.viewMatrix).mul(this.cameraMatrix).mul(projectMatrix);
+		var m = (viewMatrix || this.viewMatrix).mul(this.cameraMatrix).mul(projectionMatrix);
 	
 		if (Array.isArray(pos)) {
 			for (var i = 0; i < pos.length; i++) {

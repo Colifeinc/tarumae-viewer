@@ -84,9 +84,6 @@ Tarumae.FrameBuffer = class extends Tarumae.CommonBuffer {
 		const gl = this.gl;
 
 		gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.glFrameBuffer);
-		
-		// gl.activeTexture(gl.TEXTURE0);
-		// this.texture.bind(this.renderer);
 
 		gl.viewport(0, 0, this.width, this.height);
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);

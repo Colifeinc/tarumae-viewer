@@ -275,7 +275,7 @@ Scene.prototype.destroy = function() {
 
 Scene.prototype.drawSky = function() {
 	var x = this.renderer.canvas.width / this.renderer.canvas.height;
-	this.projectMatrix.ortho(-x, x, -1, 1, -1, 1);
+	this.projectionMatrix.ortho(-x, x, -1, 1, -1, 1);
 };
 
 Scene.prototype.drawFrame = function(renderer) {
