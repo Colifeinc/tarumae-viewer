@@ -158,21 +158,17 @@ vec3 gamma(vec3 c, float factor) {
 
 vec3 lighter(vec3 a, vec3 b, float factor) {
 	vec3 d = clamp(b - a, 0.0, 1.0);
+	return a + d * factor;
+}
+
+vec3 lighter2(vec3 a, vec3 b, float factor) {
+	vec3 d = clamp(b - a, 0.0, 1.0);
 	// vec3 d = smoothstep(0.0, 0.8, b - a);
 	// vec3 d = smoothstep(0.5, 1.0, b - a);
   // d = gamma(d * factor, 1.5);
   float n = dot(b, vec3(0.299, 0.587, 0.114));
   n = smoothstep(0.5, 1.0, n);
-	return a + d * n;
-}
-
-vec3 lighter2(vec3 a, vec3 b, float factor) {
-	vec3 diff = b - a;
-	float l = length(diff);
-	if (l > 0.0) {
-		return a + vec3(0.0, l, 0.0);
-	}
-	return a;
+	return a + d * n * factor;
 }
 
 void main(void) {
@@ -189,7 +185,7 @@ void main(void) {
 	
 	if (hasTex2) {
 		t2c = sample(tex2).rgb;
-		t2c = lighter(fc.rgb, t2c, 1.0);
+		t2c = lighter2(fc.rgb, t2c, 1.0);
 		fc.rgb = t2c.rgb;
 	}
 
