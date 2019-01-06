@@ -50,6 +50,11 @@ Tarumae.PipelineNodes.DefaultRenderer = class extends Tarumae.PipelineNode {
 
   render() {
     this.renderer.setGLViewport();
+
+    if (!this.renderer.options.backgroundImage) {
+      this.renderer.clearViewport();
+    }
+
     this.renderer.renderFrame();
   }
 };
@@ -155,14 +160,30 @@ Tarumae.PipelineNodes.ImageToScreenRenderer = class extends Tarumae.PipelineNode
     }
 
     if (options && options.resolution) {
-      this.width = options.resolution.width;
-      this.height = options.resolution.height;
+      this._width = options.resolution.width;
+      this._height = options.resolution.height;
+      this.autoSize = false;
     } else {
-      this.width = this.renderer.canvas.width;
-      this.height = this.renderer.canvas.height;
+      this.autoSize = true;
     }
 
     this.shader = Tarumae.Renderer.Shaders.screen.instance;
+  }
+
+  get width() {
+    if (this.autoSize) {
+      return this.renderer.canvas.width;
+    } else {
+      return this._width;
+    }
+  }
+
+  get height() {
+    if (this.autoSize) {
+      return this.renderer.canvas.height;
+    } else {
+      return this._height;
+    }
   }
   
   set input(node) {
