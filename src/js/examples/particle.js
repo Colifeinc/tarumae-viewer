@@ -11,7 +11,8 @@ import "../utility/res";
 window.addEventListener("load", function() {
 
 	const renderer = new Tarumae.Renderer({
-		backColor: new Color4(0.9),
+		backColor: new Color4(0.2),
+		postprocess: true,
 	});
 
 	const scene = renderer.createScene();
