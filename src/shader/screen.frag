@@ -156,15 +156,14 @@ vec3 gamma(vec3 c, float factor) {
 	return pow(c, vec3(factor));
 }
 
-vec4 gamma(vec4 c, float factor) {
-	return vec4(pow(c.rgb, vec3(factor)), c.a);
-}
-
 vec3 lighter(vec3 a, vec3 b, float factor) {
 	vec3 d = clamp(b - a, 0.0, 1.0);
 	// vec3 d = smoothstep(0.0, 0.8, b - a);
 	// vec3 d = smoothstep(0.5, 1.0, b - a);
-	return a + d * factor;
+  // d = gamma(d * factor, 1.5);
+  float n = dot(b, vec3(0.299, 0.587, 0.114));
+  n = smoothstep(0.5, 1.0, n);
+	return a + d * n;
 }
 
 vec3 lighter2(vec3 a, vec3 b, float factor) {

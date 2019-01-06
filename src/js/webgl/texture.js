@@ -28,9 +28,9 @@ Tarumae.Texture = class {
 			
 		this.enableMipmapped = true;
 		this.enableRepeat = true;
+		this.linearInterpolation = false;
 		this.canMipmap = false;
 		this._mipmapped = false;
-		this.linearInterpolation = true;
 	}
 
 	setupParameters() {
