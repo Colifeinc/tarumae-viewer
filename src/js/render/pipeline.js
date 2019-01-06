@@ -49,6 +49,7 @@ Tarumae.PipelineNodes.DefaultRenderer = class extends Tarumae.PipelineNode {
   }
 
   render() {
+    this.renderer.setGLViewport();
     this.renderer.renderFrame();
   }
 };
@@ -58,11 +59,10 @@ Tarumae.PipelineNodes.SceneToImageRenderer = class extends Tarumae.PipelineNode 
     super(renderer);
     this.nodes = [];
 
-    if (options && options.resolution
-      && options.resolution.width && options.resolution.height) {
+    if (options && options.resolution) {
+      this.autoSize = false;
       this._width = options.resolution.width;
       this._height = options.resolution.height;
-      this.autoSize = false;
     } else {
       this.autoSize = true;
     }
@@ -91,9 +91,8 @@ Tarumae.PipelineNodes.SceneToImageRenderer = class extends Tarumae.PipelineNode 
   }
 
   render() {    
-    if (this.autoSize && (this.buffer.width != this.renderer.canvas.width
-      || this.buffer.height != this.renderer.canvas.height)) {
-        this.buffer.destroy();
+    if (this.buffer.width != this.width || this.buffer.height != this.height) {
+      this.buffer.destroy();
       this.createBuffer();
     }
 
@@ -219,12 +218,10 @@ Tarumae.PipelineNodes.ImageToScreenRenderer = class extends Tarumae.PipelineNode
 };
 
 Tarumae.ScreenMesh = class extends Tarumae.Mesh {
-	constructor() {
+  constructor(x = -1, y = -1, w = 2, h = 2) {
 		super();
 
-    const w = 1, h = 1;
-
-		this.vertices = [-w, h, 0, -w, -h, 0, w, h, 0, w, -h, 0];
+		this.vertices = [x, y + h, 0, x, y, 0, x + w, y + h, 0, x + w, y, 0];
 		this.texcoords = [0, 0, 0, 1, 1, 0, 1, 1];
 
 		this.meta = {
@@ -259,7 +256,7 @@ Tarumae.PipelineNodes.MemoryImageRenderer = class extends Tarumae.PipelineNode {
       this.screenPlaneMesh.flipTexcoordY();
     }
 
-    this.shader = Tarumae.Renderer.Shaders["image"].instance;
+    this.shader = Tarumae.Renderer.Shaders.image.instance;
     
     this.buffer = new Tarumae.FrameBuffer(this.renderer, this.width, this.height, {
       depthBuffer: false

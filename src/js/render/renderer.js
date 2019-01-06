@@ -146,7 +146,7 @@ Tarumae.Renderer = class {
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 			gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA,
 				gl.ONE_MINUS_DST_ALPHA, gl.ONE);
-		
+			
 			window.addEventListener("resize", _ => this.resetViewport(), false);
 
 			this.resetViewport();
@@ -182,8 +182,13 @@ Tarumae.Renderer = class {
 	}
 
 	setGLViewport() {
-		const size = this.renderSize;
-		this.gl.viewport(0, 0, size.width * this.options.renderPixelRatio, size.height * this.options.renderPixelRatio);
+		this.glViewport(
+			this.renderSize.width * this.options.renderPixelRatio,
+			this.renderSize.height * this.options.renderPixelRatio);
+	}
+
+	glViewport(width, height) {
+		this.gl.viewport(0, 0, width, height);
 	}
 
 	resetViewport() {
@@ -288,20 +293,18 @@ Tarumae.Renderer = class {
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	}
 	
-	perspectiveProject(m) {
-		var afov = this.getAfov();
-	
-		m.perspective(afov, this.aspectRate,
+	perspectiveProject(m) {	
+		m.perspective(this.getAfov(), this.aspectRate,
 			this.options.perspective.near, this.options.perspective.far);
 	}
 	
 	orthographicProject(m) {
-		var scale = ((this.viewer.originDistance - 0.5) * 10);
+		const scale = ((this.viewer.originDistance - 0.5) * 10);
 		m.ortho(-this.aspectRate * scale, this.aspectRate * scale, -scale, scale, -this.options.perspective.far, this.options.perspective.far);
 	}
 	
 	getAfov() {
-		var scene = this.currentScene;
+		const scene = this.currentScene;
 	
 		if (scene && scene.mainCamera && typeof scene.mainCamera.fieldOfView !== "undefined") {
 			return scene.mainCamera.fieldOfView;
@@ -490,7 +493,7 @@ Tarumae.Renderer = class {
 		}
 	
 		for (var i = 0; i < scene.objects.length; i++) {
-			this.drawObject(scene.objects[i], false);
+			this.drawObject(scene.objects[i]);
 		}
 
 		if (this.wireframe) {
@@ -592,7 +595,7 @@ Tarumae.Renderer = class {
 	}
 	
 	makeViewMatrix(m) {
-		var viewer = this.viewer;
+		const viewer = this.viewer;
 	
 		if (viewer) {
 			m.translateZ(-(viewer.originDistance) * 10);
@@ -654,7 +657,7 @@ Tarumae.Renderer = class {
 		}
 	}
 	
-	drawObject(obj, transparencyRendering) {
+	drawObject(obj, transparencyRendering = false) {
 
 		if (!obj || obj.visible === false) {
 			return;
@@ -669,7 +672,7 @@ Tarumae.Renderer = class {
 	
 				for (let i = 0; i < obj.objects.length; i++) {
 					let child = obj.objects[i];
-					this.drawObject(child, false);
+					this.drawObject(child);
 				}
 	
 				return;
@@ -727,7 +730,7 @@ Tarumae.Renderer = class {
 					if (!transparencyRendering) {
 						for (let i = 0; i < obj.objects.length; i++) {
 							let child = obj.objects[i];
-							this.drawObject(child, false);
+							this.drawObject(child);
 						}
 					}
 				}
