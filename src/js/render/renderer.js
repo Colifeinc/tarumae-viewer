@@ -372,17 +372,17 @@ Tarumae.Renderer = class {
 			const width = this.canvas.width, height = this.canvas.height,
 				sw = width * 0.1, sh = height * 0.1;
 
-			// const shadowMapRenderer = new Tarumae.PipelineNodes.ShadowMapRenderer(this, {
-			// 	resolution: {
-			// 		width: width * 2,
-			// 		height: height * 2,
-			// 	}
-			// });
+			const shadowMapRenderer = new Tarumae.PipelineNodes.ShadowMapRenderer(this, {
+				resolution: {
+					width: 4096,
+					height: 4096,
+				}
+			});
 	
 			const sceneImageRenderer = new Tarumae.PipelineNodes.SceneToImageRenderer(this, {
 				resolution: { width, height },
 			});
-			// sceneImageRenderer.shadowMap2DInput = shadowMapRenderer;
+			sceneImageRenderer.shadowMap2DInput = shadowMapRenderer;
 			
 			const imgRenderer128 = new Tarumae.PipelineNodes.BlurRenderer(this, {
 				resolution: {
@@ -395,11 +395,10 @@ Tarumae.Renderer = class {
 
 			const imgRenderer = new Tarumae.PipelineNodes.ImageToScreenRenderer(this);
 			imgRenderer.input = sceneImageRenderer;
-			imgRenderer.gammaFactor = 1.4;
+			imgRenderer.gammaFactor = 1.2;
 			imgRenderer.tex2Input = imgRenderer128;
 			imgRenderer.enableAntialias = this.options.enableAntialias;
 	
-			this.pipelineNodes.push(imgRenderer);
 
 			// const previewRenderer = new Tarumae.PipelineNodes.MultipleImagePreviewRenderer(this);
 			// previewRenderer.addPreview(imgRenderer128);
@@ -407,6 +406,7 @@ Tarumae.Renderer = class {
 			// previewRenderer.addPreview(shadowMapRenderer);
 			// previewRenderer.enableAntialias = true;
 			
+			this.pipelineNodes.push(imgRenderer);
 			// this.pipelineNodes.push(previewRenderer);
 
 		} else {

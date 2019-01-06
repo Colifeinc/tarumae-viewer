@@ -404,14 +404,14 @@ Tarumae.Shaders.ShadowMapShader = class extends Tarumae.Shader {
 		// shadow
 		// this.projectionMatrixUniform = this.findUniform('projectionMatrix');
 		// this.directionalLightDirUniform = this.findUniform('directionalLightDir');
-		this.lightPosition = new Vec3(2, 5, 2);
+		this.lightPosition = new Vec3(2, 10, 5);
 		this.lightMatrix = new Tarumae.Matrix4().lookAt(this.lightPosition, Vec3.zero, Vec3.up);		
 		this.projectionMatrix = new Tarumae.Matrix4();
 		
 		const aspectRate = this.renderer.aspectRate;
 		const scale = 20;
 		this.projectionMatrix.ortho(-aspectRate * scale, aspectRate * scale,
-			-scale, scale, -scale, scale);
+			-scale, scale, -5, 5);
 	}
 
 	beginObject(obj) {

@@ -460,8 +460,8 @@ Tarumae.PipelineNodes.MultipleImagePreviewRenderer = class extends Tarumae.Pipel
       this.height = this.renderer.canvas.height;
     }
 
-    this.rows = this.options.rows || 3;
-    this.columns = this.options.columns || 3;
+    this.rows = this.options.rows || 2;
+    this.columns = this.options.columns || 2;
     this.previewWidth = 2 / this.columns;
     this.previewHeight = 2 / this.rows;
     this.shader = Tarumae.Renderer.Shaders.screen.instance;
@@ -471,8 +471,8 @@ Tarumae.PipelineNodes.MultipleImagePreviewRenderer = class extends Tarumae.Pipel
   }
 
   addPreview(piplelineRenderer) {
-    const x = -1.5 + Math.floor(this.nodes.length % this.columns),
-      y = Math.floor(this.nodes.length / this.rows);
+    const x = -1.0 + Math.floor(this.nodes.length % this.columns),
+      y = -0.5 + Math.floor(this.nodes.length / this.rows);
     const mesh = new Tarumae.ScreenMesh(x * this.previewWidth, y * this.previewHeight,
       this.previewWidth, this.previewHeight);
 

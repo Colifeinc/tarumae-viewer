@@ -16,7 +16,7 @@ window.addEventListener("load", function() {
 		// backgroundImage: "../static/textures/bg-gray-gradient.jpg",
 		showDebugPanel: true,
 		// enableLighting: false,
-		// postprocess: true,
+		postprocess: true,
 		enableAntialias: true,
 	});
 

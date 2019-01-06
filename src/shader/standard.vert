@@ -41,5 +41,5 @@ void main(void) {
 	}
 
 	vec4 shadowPos = shadowmapProjectionMatrix * pos;
-	shadowPosition = vec3(0.5, 0.5, 0.5) + (shadowPos.xyz / shadowPos.w) * 0.5;
+	shadowPosition = vec3(0.5) + (shadowPos.xyz / shadowPos.w) * 0.5;
 }

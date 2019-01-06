@@ -76,6 +76,10 @@ vec3 correctBoundingBoxIntersect(BoundingBox bbox, vec3 dir) {
 	return intersectPosition - bbox.origin;
 }
 
+float decodeFloatRGBA(vec4 rgba) {
+  return dot(rgba, vec4(1.0, 1.0/255.0, 1.0/65025.0, 1.0/16581375.0));
+}
+
 vec3 traceLight(vec3 color, vec3 vertexNormal, vec3 cameraNormal) {
 
 	vec3 diff = vec3(0.0);
@@ -199,23 +203,28 @@ void main(void) {
 	//////////////// ShadowMap ////////////////
 
 	if (shadowMapType == 1) {
-		float shadowDir = dot(vertexNormal, normalize(vec3(3.0, 5.0, 3.0)));
+		float shadowDir = dot(vertexNormal, normalize(vec3(2.0, 10.0, 5.0)));
 		if (shadowDir > 0.0) {
 
 			float shadowMapDepth;
-			shadowMapDepth  = texture2D(shadowMap2D, shadowPosition.xy + vec2(0.0, 0.0)).r;
-			// shadowMapDepth += texture2D(shadowMap2D, shadowPosition.xy + vec2(0.0, 0.001)).r;
-			// shadowMapDepth += texture2D(shadowMap2D, shadowPosition.xy + vec2(0.001, 0.0)).r;
-			// shadowMapDepth += texture2D(shadowMap2D, shadowPosition.xy + vec2(0.001, 0.001)).r;
-			// shadowMapDepth /= 4.0;
+			float stride = 0.00024;
+			shadowMapDepth  = 0.25 * decodeFloatRGBA(texture2D(shadowMap2D, shadowPosition.xy + vec2(stride * 0.4, stride * 0.6)));
+			shadowMapDepth += 0.25 * decodeFloatRGBA(texture2D(shadowMap2D, shadowPosition.xy + vec2(stride * 0.6, stride * 0.4)));
+			shadowMapDepth += 0.25 * decodeFloatRGBA(texture2D(shadowMap2D, shadowPosition.xy - vec2(stride * 0.4, stride * 0.6)));
+			shadowMapDepth += 0.25 * decodeFloatRGBA(texture2D(shadowMap2D, shadowPosition.xy - vec2(stride * 0.6, stride * 0.4)));
+			// shadowMapDepth  = 0.25 * (texture2D(shadowMap2D, shadowPosition.xy + vec2(stride * 0.4, stride * 0.6)));
+			// shadowMapDepth += 0.25 * (texture2D(shadowMap2D, shadowPosition.xy + vec2(stride * 0.6, stride * 0.4)));
+			// shadowMapDepth += 0.25 * (texture2D(shadowMap2D, shadowPosition.xy - vec2(stride * 0.4, stride * 0.6)));
+			// shadowMapDepth += 0.25 * (texture2D(shadowMap2D, shadowPosition.xy - vec2(stride * 0.6, stride * 0.4)));
 
-			// float shadowBlock = 1.0 - (shadowPosition.z - shadowMapDepth);
+			// float shadowBlock = 1.0 - (shadowZ - shadowMapDepth);
 			// float shadowBlock = 1.0 - clamp((shadowPosition.z - shadowMapDepth) * 0.5, 0.0, 0.1);
-			float shadowBlock = 1.0 - smoothstep(0.005, 0.1, (shadowPosition.z - shadowMapDepth));
-			finalColor *= shadowBlock;
+			float shadowBlock = 1.0 - smoothstep(0.00001, 0.05, (shadowPosition.z - shadowMapDepth)) / 0.5;
+			// float shadowBlock = 1.0 - smoothstep(0.02, 0.3, (shadowZ - shadowMapDepth)) / 0.5;
+			finalColor = finalColor * 0.85 + finalColor * shadowBlock * 0.15;
 
 			// float block = (shadowPosition.z - shadowMapDepth);
-			// if (block > 0.006) {
+			// if (block > 0.02) {
 			// 	finalColor *= 0.5;
 			// }
 		}
