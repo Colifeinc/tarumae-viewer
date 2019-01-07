@@ -163,9 +163,6 @@ vec3 lighter(vec3 a, vec3 b, float factor) {
 
 vec3 lighter2(vec3 a, vec3 b, float factor) {
 	vec3 d = clamp(b - a, 0.0, 1.0);
-	// vec3 d = smoothstep(0.0, 0.8, b - a);
-	// vec3 d = smoothstep(0.5, 1.0, b - a);
-  // d = gamma(d * factor, 1.5);
   float n = dot(b, vec3(0.299, 0.587, 0.114));
   n = smoothstep(0.5, 1.0, n);
 	return a + d * n * factor;

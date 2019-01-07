@@ -336,6 +336,10 @@ Tarumae.Mesh = class {
 				case Tarumae.Mesh.ComposeModes.TriangleFan:
 					this._polygonCount = this.meta.vertexCount - 2;
 					break;
+				
+				case Tarumae.Mesh.ComposeModes.Points:
+					this._polygonCount = this.meta.vertexCount;
+					break;
 			}
 
 			renderer.debugger.totalNumberOfPolygonBound += this._polygonCount;
@@ -1162,7 +1166,7 @@ Tarumae.DynamicMesh = class extends Tarumae.Mesh {
 			}
 		}
 
-		super.draw.apply(this, arguments);
+		super.draw(renderer);
 	}
 };
 

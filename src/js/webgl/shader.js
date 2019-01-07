@@ -409,9 +409,10 @@ Tarumae.Shaders.ShadowMapShader = class extends Tarumae.Shader {
 		this.projectionMatrix = new Tarumae.Matrix4();
 		
 		const aspectRate = this.renderer.aspectRate;
-		const scale = 20;
+		const scale = renderer.options.shadowQuality.scale || 5;
+		const viewDepth = renderer.options.shadowQuality.viewDepth || 5;
 		this.projectionMatrix.ortho(-aspectRate * scale, aspectRate * scale,
-			-scale, scale, -5, 5);
+			-scale, scale, -viewDepth, viewDepth);
 	}
 
 	beginObject(obj) {

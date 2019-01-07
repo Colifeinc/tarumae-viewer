@@ -16,7 +16,14 @@ window.addEventListener("load", function() {
 		renderPixelRatio: Math.max(window.devicePixelRatio * 0.75, 1),
 		// renderPixelRatio: 1,
 		enableAntialias: true,
+		// enableShadow: true,
+		shadowQuality: {
+			scale: 15,
+			viewDepth: 5,
+			resolution: 4096,
+		},
 	});
+	
 	const scene = renderer.createScene();
 
 	window._scene = scene;

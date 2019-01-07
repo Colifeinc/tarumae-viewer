@@ -23,14 +23,14 @@ Tarumae.Renderer = class {
 			containerId: "canvas-container",
 			renderPixelRatio: 1,
 			enable3D: true,
-			enableShadow: false,
-			enableEnvmap: true,
 			perspective: {
 				method: Tarumae.ProjectionMethods.Persp,
 				angle: 50.0,
 				near: 0.1,
 				far: 100.0,
 			},
+			backColor: new Color4(0.93, 0.93, 0.93, 1.0),
+			backgroundImage: undefined,
 			enableDrawMesh: true,
 			enableCustomDraw: true,
 			enableLighting: true,
@@ -38,8 +38,14 @@ Tarumae.Renderer = class {
 			enableNormalMap: true,
 			enableEnvmap: true,
 			enableHighlightSelectedChildren: true,
+			enableShadow: false,
+			shadowQuality: {
+				scale: 1,
+				viewDepth: 2,
+				resolution: 1024,
+			},
 			debugMode: false,
-			backColor: new Color4(0.93, 0.93, 0.93, 1.0),
+			showDebugPanel: false,
 			enable3D: true,
 			enableAntialias: false,
 		};
@@ -372,12 +378,16 @@ Tarumae.Renderer = class {
 			const width = this.canvas.width, height = this.canvas.height,
 				sw = width * 0.1, sh = height * 0.1;
 
-			const shadowMapRenderer = new Tarumae.PipelineNodes.ShadowMapRenderer(this, {
-				resolution: {
-					width: 4096,
-					height: 4096,
-				}
-			});
+			let shadowMapRenderer = undefined;
+
+			if (this.options.enableShadow) {
+				shadowMapRenderer = new Tarumae.PipelineNodes.ShadowMapRenderer(this, {
+					resolution: {
+						width: this.options.shadowQuality.resolution || 2048,
+						height: this.options.shadowQuality.resolution || 2048,
+					}
+				});
+			}
 	
 			const sceneImageRenderer = new Tarumae.PipelineNodes.SceneToImageRenderer(this, {
 				resolution: { width, height },
