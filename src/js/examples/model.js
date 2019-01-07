@@ -5,6 +5,7 @@ import "../scene/animation"
 import "../scene/viewer";
 import "../utility/archive";
 import "../utility/res";
+import "../view/objectcontroller"
 import { Color3, Color4 } from "../math/vector";
 
 window.addEventListener("load", function() {
@@ -31,7 +32,7 @@ window.addEventListener("load", function() {
 		{ name: "chair_adv_01.toba" },
 		// { name: "chair_compact_01.toba" },
 		{ name: "chair_jati.toba" },
-		{ name: "char_stand_01.toba", scale: [1, 1, 1], color: [.7, .7, .7] },
+		// { name: "char_stand_01.toba", scale: [1, 1, 1], color: [.7, .7, .7] },
 		{ name: "desk_study_1p.toba", color: [.7, .7, .7] },
 		// { name: "fan_vintage_ceiling.toba", scale: [3, 3, 3] },
 		// { name: "print_mfp_w1500.toba", color: [.7, .7, .7] },
@@ -43,8 +44,12 @@ window.addEventListener("load", function() {
 	const ground = {
 		mesh: new Tarumae.Shapes.PlaneMesh(2, 2),
 		// mat: { tex: "../static/textures/empty.png" }
+		angle: [0, 30, 0],
 	};
 	scene.load(ground);
+
+	const holder = new Tarumae.SceneObject();
+	scene.add(holder);
 
 	scene.onkeydown = function(key) {
 		if (key >= Tarumae.Viewer.Keys.D1
@@ -62,7 +67,7 @@ window.addEventListener("load", function() {
 			mod.obj = obj;
 			obj.location.x = 5;
 			obj.visible = false;
-			scene.add(obj);
+			ground.add(obj);
 
 			if (firstObject) {
 				switchTo(i);
@@ -109,12 +114,23 @@ window.addEventListener("load", function() {
 	scene.mainCamera.location.set(0, 1, 2);
 	scene.mainCamera.angle.set(-15, 0, 0);
 	
-	const light = new Tarumae.PointLight();
-	light.location.set(1, 2, -2);
-	scene.add(light);
-	
+	const lights = new Tarumae.SceneObject();
+
+	const light1 = new Tarumae.PointLight();
+	light1.location.set(2, 8, 7);
+	lights.add(light1);
+		
+	const light2 = new Tarumae.PointLight();
+	light2.location.set(-3, 6, 3);
+	lights.add(light2);
+
+	scene.add(lights);
+
 	// new Tarumae.TouchController(scene);
-	new Tarumae.ModelViewer(scene);
+	const objController = new Tarumae.ObjectController(scene, {
+		enableVerticalRotation: true
+	});
+	objController.object = ground;
 
 	scene.show();
 });

@@ -50,24 +50,21 @@ Tarumae.PipelineNodes.DefaultRenderer = class extends Tarumae.PipelineNode {
 
   render() {
     this.renderer.setGLViewport();
-
-    if (!this.renderer.options.backgroundImage) {
-      this.renderer.clearViewport();
-    }
-
+    this.renderer.renderBackground();
     this.renderer.renderFrame();
   }
 };
 
 Tarumae.PipelineNodes.SceneToImageRenderer = class extends Tarumae.PipelineNode {
-  constructor(renderer, options) {
+  constructor(renderer, { resolution }) {
     super(renderer);
+
     this.nodes = [];
 
-    if (options && options.resolution) {
+    if (resolution) {
       this.autoSize = false;
-      this._width = options.resolution.width;
-      this._height = options.resolution.height;
+      this._width = resolution.width;
+      this._height = resolution.height;
     } else {
       this.autoSize = true;
     }
@@ -115,6 +112,7 @@ Tarumae.PipelineNodes.SceneToImageRenderer = class extends Tarumae.PipelineNode 
       node.process();
     }
 
+    this.renderer.renderBackground();
     this.renderer.renderFrame();
     
     this.buffer.disuse();
@@ -472,7 +470,7 @@ Tarumae.PipelineNodes.MultipleImagePreviewRenderer = class extends Tarumae.Pipel
 
   addPreview(piplelineRenderer) {
     const x = -1.0 + Math.floor(this.nodes.length % this.columns),
-      y = -0.5 + Math.floor(this.nodes.length / this.rows);
+      y = -1.0 + Math.floor(this.nodes.length / this.rows);
     const mesh = new Tarumae.ScreenMesh(x * this.previewWidth, y * this.previewHeight,
       this.previewWidth, this.previewHeight);
 

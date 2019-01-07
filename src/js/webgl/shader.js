@@ -404,7 +404,7 @@ Tarumae.Shaders.ShadowMapShader = class extends Tarumae.Shader {
 		// shadow
 		// this.projectionMatrixUniform = this.findUniform('projectionMatrix');
 		// this.directionalLightDirUniform = this.findUniform('directionalLightDir');
-		this.lightPosition = new Vec3(2, 10, 5);
+		this.lightPosition = new Vec3(2, 8, 7);
 		this.lightMatrix = new Tarumae.Matrix4().lookAt(this.lightPosition, Vec3.zero, Vec3.up);		
 		this.projectionMatrix = new Tarumae.Matrix4();
 		

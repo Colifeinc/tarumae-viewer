@@ -242,30 +242,28 @@ Object.defineProperties(Tarumae.Utility, {
 	},
 
 	getImageDataURLFromTexture: {
-		value: function(renderer, tex, imgformat, imgQuality) {
-			if (!renderer || !tex) return null;
-			imgformat = imgformat || "image/png";
-			imgQuality = imgQuality || 0.85;
+		value: function(renderer, tex, imgformat = "image/png", imgQuality = 0.85) {
+			if (!renderer || !tex) return;
 
-			var width = tex.width, height = tex.height;
-			var data = new Uint8Array(width * height * 4);
+			const width = tex.width, height = tex.height;
+			const data = new Uint8Array(width * height * 4);
 
 			tex.use();
 			renderer.gl.readPixels(0, 0, width, height, renderer.gl.RGBA, renderer.gl.UNSIGNED_BYTE, data);
 			tex.disuse();
 
-			var canvas = document.createElement("canvas");
+			const canvas = document.createElement("canvas");
 			canvas.width = width;
 			canvas.height = height;
 
-			var ctx = canvas.getContext("2d");
+			const ctx = canvas.getContext("2d");
 
 			if (ctx) {
-				var imgData = ctx.createImageData(width, height);
+				const imgData = ctx.createImageData(width, height);
 
-				for (var y = 0; y < height; y++) {
-					for (var x = 0; x < width; x++) {
-						var index1 = y * width * 4 + x * 4, index2 = (height - y) * width * 4 + x * 4;
+				for (let y = 0; y < height; y++) {
+					for (let x = 0; x < width; x++) {
+						const index1 = y * width * 4 + x * 4, index2 = (height - y) * width * 4 + x * 4;
 
 						imgData.data[index2 + 0] = data[index1 + 0];
 						imgData.data[index2 + 1] = data[index1 + 1];
@@ -281,7 +279,7 @@ Object.defineProperties(Tarumae.Utility, {
 		}
 	},
 
-	perforMovementAccelerationAnimation: {
+	performMovementAccelerationAnimation: {
 		value: function(scene, intensity, attenuation, onframe, onfinish) {
 
 			if (typeof onframe !== "function" || !scene) return;

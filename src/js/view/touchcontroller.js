@@ -95,7 +95,7 @@ Tarumae.TouchController = class {
 
 		scene.on("enddrag", _ => {
 			if ((Date.now() - startDragTime) < 300) {
-				Tarumae.Utility.perforMovementAccelerationAnimation(scene,
+				Tarumae.Utility.performMovementAccelerationAnimation(scene,
           this.options.dragAccelerationIntensity, this.options.dragAccelerationAttenuation,
           (xdiff, ydiff) => {
 						scene.mainCamera.angle.y += xdiff;

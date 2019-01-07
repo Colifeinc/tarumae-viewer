@@ -105,7 +105,7 @@ vec3 traceLight(vec3 color, vec3 vertexNormal, vec3 cameraNormal) {
 				float refd = dot(reflection, cameraNormal);
 
 				if (refd > 0.0) {
-					specular += lights[i].color * (pow(refd, 400.0 * glossy)) * 0.2;
+					specular += lights[i].color * (pow(refd, 100.0 * glossy));
 				}
 		}
 	}
@@ -160,9 +160,10 @@ void main(void) {
 	//////////////// LightMap ////////////////
 	vec2 uv2 = hasUV2 ? texcoord2 : texcoord1;
 
-	vec3 lightmapColor = texture2D(lightMap, uv2).rgb;
+	vec3 lightmapColor = vec3(0.0);
 
 	if (hasLightMap) {
+		lightmapColor = texture2D(lightMap, uv2).rgb;
 		finalColor = finalColor * pow(lightmapColor, vec3(0.5)) + pow(lightmapColor, vec3(10.0)) * 0.1;
 	}
 
@@ -177,11 +178,9 @@ void main(void) {
 			refmapLookup = reflect(cameraNormal, vertexNormal);
 			refmapLookup = normalize(correctBoundingBoxIntersect(refMapBox, refmapLookup));
 		}
-	}
 
-	vec3 refColor = textureCube(refMap, refmapLookup, (roughness - 0.5) * 5.0).rgb;
-	
-	if (glossy > 0.0) {
+		vec3 refColor = textureCube(refMap, refmapLookup, (roughness - 0.5) * 5.0).rgb;
+
 		if (refMapType == 1) {
 			finalColor += pow(refColor, vec3(10.0)) * glossy;
 		} else if (refMapType == 2) {
@@ -207,6 +206,7 @@ void main(void) {
 		if (shadowDir > 0.0) {
 
 			float shadowMapDepth;
+			// shadowMapDepth = texture2D(shadowMap2D, shadowPosition.xy).r;
 			float stride = 0.00024;
 			shadowMapDepth  = 0.25 * decodeFloatRGBA(texture2D(shadowMap2D, shadowPosition.xy + vec2(stride * 0.4, stride * 0.6)));
 			shadowMapDepth += 0.25 * decodeFloatRGBA(texture2D(shadowMap2D, shadowPosition.xy + vec2(stride * 0.6, stride * 0.4)));

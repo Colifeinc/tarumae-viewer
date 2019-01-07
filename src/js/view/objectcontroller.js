@@ -1,10 +1,13 @@
 import Tarumae from "../entry";
 
-Tarumae.ModelViewer = class {
-  constructor(scene) {
+Tarumae.ObjectController = class {
+  constructor(scene, {
+    enableVerticalRotation = false
+  } = {}) {
     this.scene = scene;
     this.renderer = scene.renderer;
     this.viewer = scene.renderer.viewer;
+    this.object = null;
   
     this.minRotateX = -90;
     this.maxRotateX = 90;
@@ -16,6 +19,9 @@ Tarumae.ModelViewer = class {
     this.sceneDragHandlerListener = undefined;
     this.sceneMouseWheelHandlerListener = undefined;
     this.sceneMouseDragAccelerationHandler = undefined;
+
+    this.enableHorizontalRotation = true;
+    this.enableVerticalRotation = enableVerticalRotation;
     
     this.scene.on("begindrag", _ => {
       this.startDragTime = Date.now();
@@ -59,7 +65,7 @@ Tarumae.ModelViewer = class {
     } else if (this.viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Control)) {
       this.zoomViewByMouseButton();
     } else {
-      this.dragToRotateScene();
+      this.dragToRotateObject();
     }
   }
 
@@ -93,11 +99,15 @@ Tarumae.ModelViewer = class {
     if (this.viewer.angle.y > 360) this.viewer.angle.y -= 360;
   }
 
-  dragToRotateScene() {
+  dragToRotateObject() {
     const movement = this.viewer.mouse.movement;
 
-    this.viewer.angle.y += movement.x;
-    this.viewer.angle.x += movement.y;
+    if (this.enableHorizontalRotation) {
+      this.object.angle.y += movement.x;
+    }
+    if (this.enableVerticalRotation) {
+      this.object.angle.x += movement.y;
+    }
 
     this.limitViewAngleScope();
     this.scene.requireUpdateFrame();
@@ -111,8 +121,14 @@ Tarumae.ModelViewer = class {
     if ((Date.now() - this.startDragTime) < 300) {
       Tarumae.Utility.performMovementAccelerationAnimation(scene,
         this.dragAccelerationIntensity, this.dragAccelerationAttenuation, (xdiff, ydiff) => {
-          viewer.angle.y += xdiff;
-          viewer.angle.x += ydiff;
+
+          if (this.enableHorizontalRotation) {
+            this.object.angle.y += xdiff;
+          }
+
+          if (this.enableVerticalRotation) {
+            this.object.angle.x += ydiff;
+          }
 
           this.limitViewAngleScope();
         });

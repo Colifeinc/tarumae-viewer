@@ -662,7 +662,7 @@ Tarumae.Mesh = class {
 		if (!this.cachedTransformedVertices) {
 			this.cachedTransformedVertices = [];
 
-			var vertices, vertexElementCount = 0;
+			let vertices, vertexElementCount = 0;
 		
 			if (this.vertexBuffer && this.meta) {
 				vertices = this.vertexBuffer;

@@ -21,11 +21,10 @@ Tarumae.VertexBuffer = class {
 /////////////////////// CommonBuffer /////////////////////////
 
 Tarumae.CommonBuffer = class {
-	constructor(renderer, width, height, options) {
+	constructor(renderer, width, height) {
 		this.renderer = renderer;
 		this.width = width;
 		this.height = height;
-		this.options = options;
 		this.gl = renderer.gl;
 		this.glFrameBuffer = null;
 
@@ -39,9 +38,6 @@ Tarumae.CommonBuffer = class {
 		this.gl.bindTexture(this.gl.TEXTURE_2D, null);
 		this.gl.bindRenderbuffer(this.gl.RENDERBUFFER, null);
 		this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
-
-		//this.renderer.resetViewport();
-		// this.renderer.clear();
 	}
 
 	destroy() {
@@ -55,9 +51,16 @@ Tarumae.CommonBuffer = class {
 /////////////////////// FrameBuffer /////////////////////////
 
 Tarumae.FrameBuffer = class extends Tarumae.CommonBuffer {
-	constructor(renderer, width, height, options) {
-		super(renderer, width, height, options);
+	constructor(renderer,
+		width = renderer.canvas.width,
+		height = renderer.canvas.height, {
+			depthBuffer = true,
+			clearBackground = true,
+		} = {}) {
+		super(renderer, width, height);
 
+		this.clearBackground = clearBackground;
+	
 		const gl = this.gl;
 
 		this.texture = Tarumae.Texture.create(this.width, this.height);
@@ -69,7 +72,7 @@ Tarumae.FrameBuffer = class extends Tarumae.CommonBuffer {
 
 		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.texture.glTexture, 0);
 
-		if (!options || options.depthBuffer) {
+		if (depthBuffer) {
 			this.renderbuffer = gl.createRenderbuffer();
 			gl.bindRenderbuffer(gl.RENDERBUFFER, this.renderbuffer);
 			gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, this.width, this.height);
@@ -84,13 +87,14 @@ Tarumae.FrameBuffer = class extends Tarumae.CommonBuffer {
 		const gl = this.gl;
 
 		gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.glFrameBuffer);
-
 		gl.viewport(0, 0, this.width, this.height);
 
-		if (!this.renderer.options.backgroundImage) {
-			const backColor = this.renderer.options.backColor;
-			gl.clearColor(backColor.r, backColor.g, backColor.b, 1.0);
-    }
+		if (this.clearBackground) {
+			if (!this.renderer.options.backgroundImage) {
+				const backColor = this.renderer.options.backColor;
+				gl.clearColor(backColor.r, backColor.g, backColor.b, 1.0);
+			}
+		}
 
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	}
