@@ -1692,7 +1692,6 @@ Tarumae.Shaders.ImageShader = class extends Tarumae.Shader {
 		this.resolutionUniform = this.bindUniform("resolution", "vec2");
 		this.resStrideUniform = this.bindUniform("resStride", "vec2");
 		this.filterTypeUniform = this.bindUniform("filterType", "int");
-		this.isVerticalUniform = this.bindUniform("isVertical", "bool");
 
 		this.samplingWeightUniform = this.bindUniform("samplingWeight", "float[]");
 		// this.samplingWeightUniform.set([0.132572, 0.125472, 0.106373, 0.08078, 0.05495, 0.033482, 0.018275, 0.008934, 0.003912, 0.001535]);
@@ -1720,7 +1719,6 @@ Tarumae.Shaders.ImageShader = class extends Tarumae.Shader {
 
 		this.enableAntialiasUniform.set(this.enableAntialias);
 		this.gammaFactorUniform.set(this.gammaFactor);
-		this.isVerticalUniform.set(this.isVertical);
 		this.filterTypeUniform.set(this.filterType);
  
 		if (this.texture) {
@@ -1763,7 +1761,6 @@ Tarumae.Shaders.ImageShader = class extends Tarumae.Shader {
 		this.opacity = 1;
 		this.texture = undefined;
 		this.resolution = [0, 0];
-		this.isVertical = false;
 		this.resStride = [.001, .001];
 		this.filterType = 0;
 	}

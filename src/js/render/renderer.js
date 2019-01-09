@@ -384,7 +384,7 @@ Tarumae.Renderer = class {
 		if (this.options.postprocess) {
 			const width = this.canvas.width, height = this.canvas.height,
 				sw = width * 0.1, sh = height * 0.1;
-
+			
 			let shadowMapRenderer = undefined;
 
 			if (this.options.enableShadow) {
@@ -400,27 +400,38 @@ Tarumae.Renderer = class {
 				resolution: { width, height },
 			});
 			sceneImageRenderer.shadowMap2DInput = shadowMapRenderer;
+
+			const imgRendererSmall = new Tarumae.PipelineNodes.ImageFilterRenderer(this, {
+				resolution: {
+					width: sw,
+					height: sh,
+				},
+				flipTexcoordY: true,
+				filter: 'light-pass',
+			});
+			imgRendererSmall.input = sceneImageRenderer;
 			
-			const imgRendererGlow = new Tarumae.PipelineNodes.BlurRenderer(this, {
+			const imgRendererBlur = new Tarumae.PipelineNodes.BlurRenderer(this, {
 				resolution: {
 					width: sw,
 					height: sh,
 				}
 			});
-			imgRendererGlow.input = sceneImageRenderer;
-			// imgRenderer128.gammaFactor = 1.0;
+			imgRendererBlur.input = imgRendererSmall;
+			// imgRendererBlur.gammaFactor = 1.0;
 
 			const imgRenderer = new Tarumae.PipelineNodes.ImageToScreenRenderer(this);
 			imgRenderer.input = sceneImageRenderer;
 			imgRenderer.gammaFactor = 1.2;
-			imgRenderer.tex2Input = imgRendererGlow;
+			imgRenderer.tex2Input = imgRendererBlur;
 			imgRenderer.enableAntialias = this.options.enableAntialias;
 
-			// const previewRenderer = new Tarumae.PipelineNodes.MultipleImagePreviewRenderer(this);
-			// previewRenderer.addPreview(imgRenderer128);
-			// previewRenderer.addPreview(sceneImageRenderer);
-			// previewRenderer.addPreview(shadowMapRenderer);
-			// previewRenderer.enableAntialias = true;
+			const previewRenderer = new Tarumae.PipelineNodes.MultipleImagePreviewRenderer(this);
+			previewRenderer.addPreview(sceneImageRenderer);
+			previewRenderer.addPreview(imgRendererSmall);
+			previewRenderer.addPreview(imgRendererBlur);
+			previewRenderer.addPreview(shadowMapRenderer);
+			previewRenderer.enableAntialias = true;
 			
 			this.pipelineNodes.push(imgRenderer);
 			// this.pipelineNodes.push(previewRenderer);

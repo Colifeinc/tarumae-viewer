@@ -255,23 +255,26 @@ Tarumae.ScreenMesh = class extends Tarumae.Mesh {
 	}
 };
 
-Tarumae.PipelineNodes.MemoryImageRenderer = class extends Tarumae.PipelineNode {
-  constructor(renderer, options) {
+Tarumae.PipelineNodes.ImageFilterRenderer = class extends Tarumae.PipelineNode {
+  constructor(renderer, {
+      resolution,
+      filter,
+      flipTexcoordY,
+    } = { }) {
     super(renderer);
 
-    this.options = options || {};
-
-    if (options.resolution) {
-      this.width = options.resolution.width;
-      this.height = options.resolution.height;
-    } else {
+    if (resolution === undefined) {
       this.width = this.renderer.canvas.width;
       this.height = this.renderer.canvas.height;
+    } else {
+      this.width = resolution.width;
+      this.height = resolution.height;
     }
+    this.filter = filter;
 
     this.screenPlaneMesh = new Tarumae.ScreenMesh();
     
-    if (this.options.flipTexcoordY) {
+    if (flipTexcoordY) {
       this.screenPlaneMesh.flipTexcoordY();
     }
 
@@ -309,15 +312,20 @@ Tarumae.PipelineNodes.MemoryImageRenderer = class extends Tarumae.PipelineNode {
       if (typeof this.gammaFactor !== "undefined") {
         imageShader.gammaFactor = this.gammaFactor;
       }
-      if (typeof this.options.resizeScale !== "undefined") {
-        imageShader.resizeScale[0] = this.options.resizeScale[0];
-        imageShader.resizeScale[1] = this.options.resizeScale[1];
-      }
 
       this.renderer.useShader(imageShader);
-      
+
+      switch (this.filter) {
+        default:
+        case "none": imageShader.filterType = 0; break;
+        case "linear-interp": imageShader.filterType = 1; break;
+        case "blur-hor": imageShader.filterType = 2; break;
+        case "blur-ver": imageShader.filterType = 3; break;
+        case "light-pass": imageShader.filterType = 4; break;
+      }
+
       this.buffer.use();
-     
+
       imageShader.resolution[0] = this.buffer.width;
       imageShader.resolution[1] = this.buffer.height;
       imageShader.beginMesh(this.screenPlaneMesh);
@@ -334,8 +342,10 @@ Tarumae.PipelineNodes.BlurRenderer = class extends Tarumae.PipelineNode {
   constructor(renderer, options) {
     super(renderer);
 
-    this.blurHorRenderer = new Tarumae.PipelineNodes.MemoryImageRenderer(renderer, options); 
-    this.blurVerRenderer = new Tarumae.PipelineNodes.MemoryImageRenderer(renderer, options);
+    this.blurHorRenderer = new Tarumae.PipelineNodes.ImageFilterRenderer(renderer, options); 
+    this.blurVerRenderer = new Tarumae.PipelineNodes.ImageFilterRenderer(renderer, options);
+    this.blurHorRenderer.filter = 'blur-hor';
+    this.blurVerRenderer.filter = 'blur-ver';
   }
 
   get output() {
@@ -355,13 +365,10 @@ Tarumae.PipelineNodes.BlurRenderer = class extends Tarumae.PipelineNode {
     }
 
     this.blurHorRenderer.input = this._input;
-    this.blurHorRenderer.shader.isVertical = false;
-    this.blurHorRenderer.shader.filterType = 2;
     this.blurHorRenderer.process();
 
     this.blurVerRenderer.input = this.blurHorRenderer;
     this.blurVerRenderer.shader.isVertical = true;
-    this.blurVerRenderer.shader.filterType = 2;
     this.blurVerRenderer.process();
   }
 };

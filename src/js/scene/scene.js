@@ -458,7 +458,7 @@ Scene.prototype.prepareObjectMesh = function(obj, name, value, loadingSession, b
 				if (mesh) {
 					if (archive && mesh._lightmapTrunkId) {
 						if (mesh._lightmapType === 1) {
-							var lightmapData = archive.getChunkData(mesh._lightmapTrunkId, 0x70616d6c);
+							var lightmapData = archive.getChunkData(mesh._lightmapTrunkId);
 							var img;
 
 							if (typeof Blob === "function" && typeof URL === "function") {

@@ -182,7 +182,7 @@ void main(void) {
 	
 	if (hasTex2) {
 		t2c = sample(tex2).rgb;
-		t2c = lighter2(fc.rgb, t2c, 1.0);
+		t2c = lighter(fc.rgb, t2c, 1.0);
 		fc.rgb = t2c.rgb;
 	}
 

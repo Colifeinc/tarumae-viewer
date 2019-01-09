@@ -30,13 +30,13 @@ window.addEventListener("load", function() {
 	// scene.add(new Tarumae.GridLine());
 	this.models = [
 		{ name: "chair_adv_01.toba" },
-		// { name: "chair_compact_01.toba" },
+		{ name: "chair_compact_01.toba" },
 		{ name: "chair_jati.toba" },
-		// { name: "char_stand_01.toba", scale: [1, 1, 1], color: [.7, .7, .7] },
-		{ name: "desk_study_1p.toba", color: [.7, .7, .7] },
-		// { name: "fan_vintage_ceiling.toba", scale: [3, 3, 3] },
+		// { name: "char_stand_01-baked.toba", scale: [.1, .1, .1], color: [.7, .7, .7] },
+		// { name: "desk_study_1p.toba", color: [.7, .7, .7] },
+		{ name: "fan_vintage_ceiling.toba", scale: [3, 3, 3] },
 		// { name: "print_mfp_w1500.toba", color: [.7, .7, .7] },
-		{ name: "rice_cooker_01.toba", z: 1, color: [.7, .7, .7] },
+		// { name: "rice_cooker_01.toba", z: 1, color: [.7, .7, .7] },
 		// { name: "sofa_leather_3s.toba" },
 		// { name: "ceo.toba", color: [.5, .5, .5] },
 	];
@@ -102,6 +102,7 @@ window.addEventListener("load", function() {
 			if (mod.scale) {
 				nextObj.scale.set(mod.scale[0], mod.scale[1], mod.scale[2]);
 			}
+			window.obj = nextObj;
 			nextObj.visible = true;
 			scene.animate({ effect: "fadein", duration: 0.5 }, t => {
 				nextObj.location.x = 3 * (1 - t);
