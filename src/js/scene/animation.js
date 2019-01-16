@@ -7,82 +7,57 @@
 
 import Tarumae from "../entry";
 
-Tarumae.Animation = function(scene, options, onframe, onfinish) {
-	"use strict";
-	options = options || {};
+Tarumae.Animation = class {
+	
+	constructor(scene, options, onframe, onfinish) {
+		this.scene = scene;
 
-	this.scene = scene;
+		this.startTime = undefined;
+		this.endTime = undefined;
 
-	this.startTime = undefined;
-	this.endTime = undefined;
-	this.timer = undefined;
+		const _options = { ...Tarumae.Animation.DefaultOptions, ...options };
+		this.duration = _options.duration || 1;
+		this.delay = _options.delay || 0;
+		this.repeat = _options.repeat || 0;
 
-	this.effect = options.effect || Tarumae.Animation.Effects.Smooth;
-	this.duration = options.duration || 1;
-	this.delay = options.delay || 0;
-	this.repeat = options.repeat || 0;
-
-	this.isPaused = false;
-	this.elapsedTime = 0;
-	this.repeatCount = 0;
-	this.initialized = false;
+		this.isPaused = false;
+		this.elapsedTime = 0;
+		this.repeatCount = 0;
+		this.initialized = false;
   
-	if (typeof options.name === "string" && options.name.length > 0) {
-		this.name = options.name;
-	} else {
-		this.name = Tarumae.Animation.getAvailableDefaultName();
-	}
+		if (typeof options.name === "string" && options.name.length > 0) {
+			this.name = options.name;
+		} else {
+			this.name = Tarumae.Animation.getAvailableDefaultName();
+		}
   
-	if (typeof onframe === "function") {
-		this.onframe = onframe;
+		if (typeof onframe === "function") {
+			this.onframe = onframe;
+		}
+
+		if (typeof onfinish === "function") {
+			this.on("finish", onfinish);
+		}
 	}
 
-	if (typeof onfinish === "function") {
-		this.on("finish", onfinish);
+	get progressRate() {
+		if (this._inDelay) return 0;
+		return this.elapsedTime / this._msDuration;
 	}
-};
 
-Object.assign(Tarumae.Animation, {
-	Interval: 10,  // ms
+	get isPlaying() {
+		return this.elapsedTime < this.duration * 1000;
+	}
 
-	Effects: {
-		Normal: 0,
-		Smooth: 1,
-		Sharp: 2,
-		FadeIn: 3,
-		FadeOut: 4,
-	},
+	get isDuringDelay() {
+		return this._inDelay;
+	}
 
-	RunningAnimations: {},
+	get isFinished () {
+		return this.elapsedTime >= this._msDuration;
+	}
 
-	isAnyAnimationPlaying: function() {
-		return !Tarumae.Animation.RunningAnimations._s3_isEmpty();
-	},
-
-	isAnimationPlaying: function(name) {
-		return Tarumae.Animation.RunningAnimations.hasOwnProperty(name);
-	},
-
-	cancelAnimationByName: function(name) {
-		var previousInstance = Tarumae.Animation.RunningAnimations[name];
-		if (previousInstance) {
-			if (previousInstance.timer) clearInterval(previousInstance.timer);
-			delete Tarumae.Animation.RunningAnimations[name];
-		}
-	},
-
-	getAvailableDefaultName: function() {
-		var name;
-		while (name === undefined || Tarumae.Animation.RunningAnimations.hasOwnProperty(name)) {
-			name = "__unnamed" + Date.now() + Math.floor(Math.random());
-		}
-		return name;
-	},
-});
-
-Tarumae.Animation.prototype = {
-
-	initialize: function() {
+	initialize() {
 		this._msDuration = this.duration * 1000;
 		this._lastCheckedTime = undefined;
 
@@ -92,10 +67,16 @@ Tarumae.Animation.prototype = {
 		this.endTime = this.startTime + this.duration * 1000;
     
 		this.initialized = true;
-	},
+	}
 
-	play: function() {
-		"use strict";
+	play() {
+		if (this.delay) {
+			setTimeout(_ => {
+				this.play();
+			}, this.delay * 1000);
+			this.delay = 0;
+			return;
+		}
 
 		if (typeof this.onframe !== "function") {
 			throw Error("must specify the onframe function to start animation.");
@@ -114,14 +95,13 @@ Tarumae.Animation.prototype = {
 		this.isPaused = false;
 		this._lastCheckedTime = Date.now();
 
-		this.createAnimationTimer();
-	},
+		// this.createAnimationTimer();
+		requestAnimationFrame(_ => this.tick());
+	}
 
-	animationTimerTick: function() {
-		"use strict";
-
-		var now = Date.now();
-		var diff = now - this._lastCheckedTime;
+	tick() {
+		const now = Date.now();
+		const diff = now - this._lastCheckedTime;
 		this._lastCheckedTime = now;
 
 		if (this.isPaused) return;
@@ -138,33 +118,31 @@ Tarumae.Animation.prototype = {
 		}
     
 		if (this.elapsedTime < this._msDuration) {
-			var t = this.elapsedTime / this._msDuration;
+			let t = this.elapsedTime / this._msDuration;
     
 			switch (this.effect) {
 			default:
-			case Tarumae.Animation.Effects.Normal:
-				break;
-
-			case Tarumae.Animation.Effects.Smooth:
+			case "smooth":
 				t = Tarumae.MathFunctions.smoothstep(0, 1, t);
 				break;
 
-			case Tarumae.Animation.Effects.Sharp:
+			case "sharp":
 				t = Tarumae.MathFunctions.smoothstep(0.2, 0.8, t);
 				break;
 
-			case Tarumae.Animation.Effects.FadeIn:
+			case "fadein":
 				t = 1 - Math.cos(Math.PI / 2 * t);
 				break;
 
-			case Tarumae.Animation.Effects.FadeOut:
+			case "fadeout":
 				t = Math.sin(Math.PI / 2 * t);
 				break;
 			}
 
 			this.onframe(t);
 			if (this.scene) this.scene.requireUpdateFrame();
-      
+			
+			requestAnimationFrame(_ => this.tick());
 			return;
 		}
 
@@ -185,22 +163,20 @@ Tarumae.Animation.prototype = {
 
 		this.removeAnimationTimer();
 		this.onfinish();
-	},
+	}
 
-	createAnimationTimer: function() {
-		if (!this.timer) {
-			var _this = this;
-			this.timer = setInterval(function() { _this.animationTimerTick() }, Tarumae.Animation.Interval);
-		}
-	},
+	// createAnimationTimer() {
+	// 	if (!this.timer) {
+	// 		var _this = this;
+	// 		this.timer = setInterval(function() { _this.tick() }, Tarumae.Animation.Interval);
+	// 	}
+	// }
 
-	removeAnimationTimer: function() {
-		"use strict";
-
-		if (this.timer) {
-			clearInterval(this.timer);
-			this.timer = undefined;
-		}
+	removeAnimationTimer() {
+		// if (this.timer) {
+		// 	clearInterval(this.timer);
+		// 	this.timer = undefined;
+		// }
 
 		if (typeof this.name === "string" && this.name.length > 0) {
 			var previousInstance = Tarumae.Animation.RunningAnimations[this.name];
@@ -208,53 +184,71 @@ Tarumae.Animation.prototype = {
 				delete Tarumae.Animation.RunningAnimations[this.name];
 			}
 		}
-	},
+	}
 
-	stop: function() {
+	stop() {
 		this.removeAnimationTimer();
 		this.onstop();
-	},
+	}
 
-	pause: function() {
-		if (this.timer) {
-			clearInterval(this.timer);
-			this.timer = undefined;
-		}
+	pause() {
+		// if (this.timer) {
+		// 	clearInterval(this.timer);
+		// 	this.timer = undefined;
+		// }
 		this.isPaused = true;
 
 		this.onpause();
-	},
+	}
 
-	reset: function() {
+	reset() {
 		this.elapsedTime = 0;
-	},
-};
+	}
+	
+	static isAnyAnimationPlaying() {
+		return !Tarumae.Animation.RunningAnimations._s3_isEmpty();
+	}
 
-Object.defineProperties(Tarumae.Animation.prototype, {
-	progressRate: {
-		get: function() {
-			if (this._inDelay) return 0;
-			return this.elapsedTime / this._msDuration;
-		},
-	},
+	static isAnimationPlaying(name) {
+		return Tarumae.Animation.RunningAnimations.hasOwnProperty(name);
+	}
 
-	isPlaying: {
-		get: function() {
-			return this.elapsedTime < this.duration * 1000;
-		},
-	},
-
-	isDuringDelay: {
-		get: function() {
-			return this._inDelay;
+	static cancelAnimationByName(name) {
+		var previousInstance = Tarumae.Animation.RunningAnimations[name];
+		if (previousInstance) {
+			// if (previousInstance.timer) clearInterval(previousInstance.timer);
+			delete Tarumae.Animation.RunningAnimations[name];
 		}
+	}
+
+	static getAvailableDefaultName() {
+		var name;
+		while (name === undefined || Tarumae.Animation.RunningAnimations.hasOwnProperty(name)) {
+			name = "__unnamed" + Date.now() + Math.floor(Math.random());
+		}
+		return name;
+	}
+}
+
+Object.assign(Tarumae.Animation, {
+	DefaultOptions: {
+		effect: "smooth",
+		duration: 1,
+		delay: 0,
+		repeat: 0,
 	},
 
-	isFinished: {
-		get: function() {
-			return this.elapsedTime >= this._msDuration;
-		}
+	Interval: 10,  // ms
+
+	Effects: {
+		Normal: 0,
+		Smooth: 1,
+		Sharp: 2,
+		FadeIn: 3,
+		FadeOut: 4,
 	},
+
+	RunningAnimations: {},
 });
 
 new Tarumae.EventDispatcher(Tarumae.Animation).registerEvents(

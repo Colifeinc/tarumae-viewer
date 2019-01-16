@@ -134,7 +134,8 @@ Tarumae.Shader = class {
 };
 
 Object.defineProperties(Tarumae.Shader, {
-	defaultSunColor: { value: new Vec3(0.21, 0.18, 0.16) },
+	defaultSunColor: { value: new Color3(0.21, 0.18, 0.16) },
+	// defaultSunColor: { value: new Color3(1.0, 0.97, 0.94) },
 	emptyTexture: { value: Tarumae.Texture.createEmpty() },
 });
 
@@ -404,8 +405,7 @@ Tarumae.Shaders.ShadowMapShader = class extends Tarumae.Shader {
 		// shadow
 		// this.projectionMatrixUniform = this.findUniform('projectionMatrix');
 		// this.directionalLightDirUniform = this.findUniform('directionalLightDir');
-		this.lightPosition = new Vec3(2, 8, 7);
-		this.lightMatrix = new Tarumae.Matrix4().lookAt(this.lightPosition, Vec3.zero, Vec3.up);		
+		this.lightMatrix = new Tarumae.Matrix4();
 		this.projectionMatrix = new Tarumae.Matrix4();
 		
 		const aspectRate = this.renderer.aspectRate;
@@ -415,16 +415,21 @@ Tarumae.Shaders.ShadowMapShader = class extends Tarumae.Shader {
 			-scale, scale, -viewDepth, viewDepth);
 	}
 
+	beginScene(scene) {
+		this.lightPosition = scene.sun.location;
+		this.lightMatrix.lookAt(this.lightPosition, Vec3.zero, Vec3.up);
+	}
+
 	beginObject(obj) {
 		super.beginObject(obj);
 
-		const gl = this.renderer.gl;
-		gl.cullFace(gl.FRONT);
+		// const gl = this.renderer.gl;
+		// gl.cullFace(gl.FRONT);
 
 		const m = obj._transform.mul(this.lightMatrix).mul(this.projectionMatrix);
 		this.projectionMatrixUniform.set(m);
 
-		gl.cullFace(gl.BACK);
+		// gl.cullFace(gl.BACK);
 	}
 };
 
@@ -628,6 +633,9 @@ Tarumae.Shaders.SimpleShader = class extends Tarumae.Shader {
 			this.sundirUniform.set(sundir);
 		
 			const mat = scene.sun.mat || null;
+			if (mat && Array.isArray(mat.color)) {
+				mat.color = Color3.fromArray(mat.color);
+			}
 			const suncolor = (mat && mat.color) || Tarumae.Shader.defaultSunColor;
 
 			this.sunlightUniform.set(suncolor.mul(Vec3.dot(sundir, Vec3.up)).toArray());
@@ -1036,9 +1044,10 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		this.shadowMapProjectionMatrixUniform = this.bindUniform("shadowmapProjectionMatrix", "mat4");
 
 		this.sundirUniform = this.bindUniform("sundir", "vec3");
-		this.sunlightUniform = this.bindUniform("sunlight", "vec3");
+		this.sunlightUniform = this.bindUniform("sunlight", "color3");
 	
 		this.receiveLightUniform = this.bindUniform("receiveLight", "bool");
+		this.receiveShadowUniform = this.bindUniform("receiveShadow", "bool");
 		this.opacityUniform = this.bindUniform("opacity", "float");
 		this.colorUniform = this.bindUniform("color", "vec3");
 		this.texTilingUniform = this.bindUniform("texTiling", "vec2");
@@ -1062,9 +1071,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		this.hasNormalMapUniform = this.bindUniform("hasNormalMap", "bool");
 		this.hasUV2Uniform = this.bindUniform("hasUV2", "bool");
 
-		this.cameraUniform = {
-			loc: this.bindUniform("camera.loc", "vec3"),
-		};
+		this.cameraLocUniform = this.bindUniform("cameraLoc", "vec3");
 
 		// light source
 		this.lightSources = [];
@@ -1159,16 +1166,16 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		this.projectViewMatrixUniform.set(this.renderer.projectionViewMatrixArray);
 
 		// camera
-		var camera = scene.mainCamera;
-		var cameraLocation;
+		const camera = scene.mainCamera;
+		let cameraLocation;
 
 		if (camera) {
 			cameraLocation = camera.getWorldLocation();
 		} else {
-			cameraLocation = new Vec3(0, 0, 0);
+			cameraLocation = Vec3.zero;
 		}
 
-		this.cameraUniform.loc.set(cameraLocation.toArray());
+		this.cameraLocUniform.set(cameraLocation);
 
 		// lights
 		this.lightSources._s3_clear();
@@ -1220,15 +1227,19 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		this.lightCountUniform.set(lightCount);
 
 		// sun
-		if (typeof scene.sun === "object" && scene.sun != null) {
-			const sunloc = scene.sun.getWorldLocation();
-			const sundir = Vec3.normalize(sunloc);
+		if (scene.sun !== undefined) {
+			const sun = scene.sun;
+
+			const sundir = Vec3.normalize(sun.getWorldLocation());
 			this.sundirUniform.set(sundir);
 		
-			const mat = scene.sun.mat || null;
-			const suncolor = (mat && mat.color) || Tarumae.Shader.defaultSunColor;
+			let sunlight = Tarumae.Shader.defaultSunColor;
 
-			this.sunlightUniform.set(suncolor.mul(Vec3.dot(sundir, Vec3.up)).toArray());
+			if (sun.mat && sun.mat.color) {
+				sunlight = sun.mat.color;
+			}
+
+			this.sunlightUniform.set(sunlight);
 		}
 	
 		// shadow
@@ -1280,17 +1291,13 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 
 		var gl = this.gl;
 
-		var modelMatrix = obj._transform;
+		const modelMatrix = obj._transform;
 
-		this.modelMatrixUniform.set(modelMatrix);
-
-		this.normalMatrix.copyFrom(modelMatrix);
-		this.normalMatrix.inverse();
-		this.normalMatrix.transpose();
-
-		this.normalMatrixUniform.set(this.normalMatrix);
+		this.modelMatrixUniform.set(obj._transform);
+		this.normalMatrixUniform.set(obj._normalTransform);
 	
 		this.receiveLightUniform.set((typeof obj.receiveLight === "boolean") ? obj.receiveLight : true);
+		this.receiveShadowUniform.set((typeof obj.receiveShadow === "boolean") ? obj.receiveShadow : true);
 
 		// material
 		var mat = obj.mat;

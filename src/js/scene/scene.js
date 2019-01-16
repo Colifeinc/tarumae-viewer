@@ -10,6 +10,7 @@ import "../utility/event";
 import { Vec2, Vec3, Vec4, Color3, Color4 } from "../math/vector";
 import "../math/matrix";
 import "../render/renderer";
+import "../scene/animation";
 import "../scene/shapes";
 import "../scene/camera";
 import "../webgl/texture";
@@ -48,6 +49,7 @@ Tarumae.Scene = class {
 		if (typeof Tarumae.Sun === "function") {
 			this.sun = new Tarumae.Sun();
 			this.sun.location = new Vec3(10, 20, 5);
+			this.sun.mat = {};
 		}
 
 		this.shadowMap = null;
@@ -1167,35 +1169,10 @@ Scene.prototype.keyup = function(key) {
 
 Scene.prototype.animate = function(options, onframe, onfinish) {
 	if (typeof Tarumae.Animation !== "function") {
-		return;
+		return "requires animation feature but library is not included";
 	}
 
-	if (typeof options.effect === "string") {
-		switch (options.effect) {
-			default:
-			case "normal":
-				options.effect = Tarumae.Animation.Effects.Normal;
-				break;
-
-			case "smooth":
-				options.effect = Tarumae.Animation.Effects.Smooth;
-				break;
-
-			case "sharp":
-				options.effect = Tarumae.Animation.Effects.Sharp;
-				break;
-
-			case "fadein":
-				options.effect = Tarumae.Animation.Effects.FadeIn;
-				break;
-
-			case "fadeout":
-				options.effect = Tarumae.Animation.Effects.FadeOut;
-				break;
-		}
-	}
-
-	var animation = new Tarumae.Animation(this, options, onframe, onfinish);
+	const animation = new Tarumae.Animation(this, options, onframe, onfinish);
 	animation.play();
 	return animation;
 };

@@ -13,14 +13,13 @@ uniform mat4 normalMatrix;
 uniform mat4 shadowmapProjectionMatrix;
 
 uniform bool hasNormalMap;
-uniform bool hasVColor;
 
 varying vec3 vertex;
 varying vec3 normal;
 varying vec2 texcoord1;
 varying vec2 texcoord2;
 varying vec3 vcolor;
-varying vec3 shadowPosition;
+varying highp vec3 shadowPosition;
 varying mat3 TBN;
 
 void main(void) {

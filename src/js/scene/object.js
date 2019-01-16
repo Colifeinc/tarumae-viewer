@@ -27,6 +27,7 @@ Tarumae.SceneObject = class {
 		this._parent = undefined;
 		this._scene = undefined;
 		this._transform = new Tarumae.Matrix4().loadIdentity();
+		this._normalTransform = new Tarumae.Matrix4().loadIdentity();
 
 		// this._location = new Vec3(0, 0, 0);
 		// this._angle = new Vec3(0, 0, 0);
@@ -101,7 +102,7 @@ Tarumae.SceneObject = class {
 	updateTransform() {
 		if (this._suspendTransformUpdate) return;
 
-		var t = this._transform;
+		const t = this._transform;
 
 		if (this._parent) {
 			t.copyFrom(this._parent._transform);
@@ -113,15 +114,18 @@ Tarumae.SceneObject = class {
 			|| !this._angle.equals(0, 0, 0)
 			|| !this._scale.equals(1, 1, 1)) {
 
+			// TODO: merge transform calc
 			t.translate(this._location._x, this._location._y, this._location._z);
 			t.rotate(this._angle._x, this._angle._y, this._angle._z);
 			t.scale(this._scale._x, this._scale._y, this._scale._z);
 		}
 
-		for (var i = 0; i < this.objects.length; i++) {
+		this._normalTransform.copyFrom(t);
+		this._normalTransform.inverse().transpose();
+
+		for (let i = 0; i < this.objects.length; i++) {
 			this.objects[i].updateTransform();
 		}
-
 	}
 
 	clone() {
@@ -357,7 +361,10 @@ Object.assign(Tarumae.SceneObject.prototype, {
 	},
 
 	moveOffset: function(x, y, z) {
-		return this._changeLocation(this.location.x + x, this.location.y + y, this.location.z + z);
+		this.location.set(this.location.x + x, this.location.y + y, this.location.z + z);
+		if (this.scene) {
+			this.scene.requireUpdateFrame();
+		}
 	},
 
 	forward: (function() {
@@ -491,12 +498,11 @@ Object.assign(Tarumae.SceneObject.prototype, {
 	eachChild: function(iterator) {
 		if (typeof iterator !== "function") return;
 	
-		for (var i = 0; i < this.objects.length; i++) {
-			var obj = this.objects[i];
-			iterator(obj);
+		for (let i = 0; i < this.objects.length; i++) {
+			iterator(this.objects[i]);
 		}
 
-		for (i = 0; i < this.objects.length; i++) {
+		for (let i = 0; i < this.objects.length; i++) {
 			this.objects[i].eachChild(iterator);
 		}
 	},
@@ -835,5 +841,161 @@ Tarumae.Sun = class extends Tarumae.SceneObject {
 Tarumae.ParticleObject = class extends Tarumae.SceneObject {
 	constructor() {
 		super();
+	}
+};
+
+
+////////////////////////// GridLine //////////////////////////
+
+Tarumae.GridLine = class extends Tarumae.SceneObject {
+	constructor(gridSize, stride) {
+		super();
+
+		this.mat = { color: new Color3(0.7, 0.7, 0.7) };
+		this.receiveLight = false;
+
+		if (typeof gridSize === "undefined") {
+			this.gridSize = 10.0;
+		} else {
+			this.gridSize = gridSize;
+		}
+
+		if (typeof stride === "undefined") {
+			this.stride = 1.0;
+		} else {
+			this.stride = stride;
+		}
+
+		this.conflictWithRay = false;
+		this.receiveLight = false;
+
+		this.addMesh(Tarumae.GridLine.generateGridLineMesh(this.gridSize, this.stride));
+	}
+}
+
+Tarumae.GridLine.generateGridLineMesh = function(gridSize, stride) {
+	var width = gridSize, height = gridSize;
+
+	var mesh = new Tarumae.Mesh();
+	mesh.vertices = [];
+	mesh.composeMode = Tarumae.Mesh.ComposeModes.Lines;
+
+	for (var y = -height; y <= height; y += stride) {
+		mesh.vertices.push(-width, 0, y);
+		mesh.vertices.push(width, 0, y);
+	}
+
+	for (var x = -width; x <= width; x += stride) {
+		mesh.vertices.push(x, 0, -height);
+		mesh.vertices.push(x, 0, height);
+	}
+
+	return mesh;
+};
+
+////////////////////////// Billboard //////////////////////////
+
+Tarumae.Billboard = class extends Tarumae.SceneObject {
+	constructor(image) {
+		super();
+	
+		if (Tarumae.BillboardMesh.instance == null) {
+			Tarumae.BillboardMesh.instance = new Tarumae.BillboardMesh();
+		}
+
+		this.addMesh(Tarumae.BillboardMesh.instance);
+
+		this.mat = { tex: null };
+	
+		if (typeof image === "string" && image.length > 0) {
+			Tarumae.ResourceManager.download(image, Tarumae.ResourceTypes.Image, img => {
+				this.mat.tex = new Tarumae.Texture(img);
+				if (this.scene) {
+					this.scene.requireUpdateFrame();
+				}
+			});
+		} else if (image instanceof Image) {
+			this.mat.tex = image;
+		}
+	
+		this.targetCamera = null;
+		this.cameraMoveListener = null;
+		this.attachedScene = null;
+		this.cameraChangeListener = null;
+
+		this.on("sceneChange", scene => {
+			if (scene) {
+				this.targetCamera = scene.mainCamera;
+				this.cameraMoveListener = this.targetCamera.on("move", function() {
+					Tarumae.Billboard.faceToCamera(this, this.targetCamera);
+				});
+
+				this.attachedScene = scene;
+				this.cameraChangeListener = scene.on("mainCameraChange", function() {
+					Tarumae.Billboard.faceToCamera(this, this.targetCamera);
+				});
+			} else {
+				if (this.targetCamera && this.cameraMoveListener) {
+					this.targetCamera.removeEventListener("move", this.cameraMoveListener);
+				}
+				if (this.attachedScene && this.cameraChangeListener) {
+					this.attachedScene.removeEventListener("mainCameraChange", this.cameraChangeListener);
+				}
+
+				this.targetCamera = null;
+				this.cameraMoveListener = null;
+				this.attachedScene = null;
+				this.cameraChangeListener = null;
+			}
+		});
+
+		this.shader = {
+			name: "billboard",
+		};
+	}
+};	
+
+Tarumae.Billboard.faceToCamera = function(billboard, camera) {
+	var cameraLoc = camera.getWorldLocation();
+	var worldLoc = billboard.getWorldLocation();
+
+	var diff = cameraLoc.sub(worldLoc);
+
+	billboard.angle.y = Tarumae.MathFunctions.degreeToAngle(Math.atan2(diff.x, diff.z));
+};
+
+Tarumae.BillboardMesh = class extends Tarumae.Mesh {
+	constructor() {
+		super();
+
+		this.meta = {
+			vertexCount: 4,
+			normalCount: 0,
+			texcoordCount: 4
+		};
+
+		this.vertexBuffer = Tarumae.BillboardMesh.VertexBuffer;
+		this.composeMode = Tarumae.Mesh.ComposeModes.TriangleStrip;
+	}
+};
+
+Tarumae.BillboardMesh.instance = null;
+
+Tarumae.BillboardMesh.VertexBuffer = new Float32Array([
+	-1, 1, 0, -1, -1, 0, 1, 1, 0, 1, -1, 0, 0, 0, 0, 1, 1, 0, 1, 1
+]);
+
+////////////////////////// Light //////////////////////////
+
+Tarumae.PointLight = class extends Tarumae.SceneObject {
+	constructor() {
+		super();
+
+		this.mat = {
+			emission: 1.0,
+			color: new Color3(1.0, 0.95, 0.9),
+		};
+
+		this.type = Tarumae.ObjectTypes.PointLight;
 	}
 };

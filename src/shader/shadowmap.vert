@@ -1,10 +1,8 @@
 
 attribute vec3 vertexPosition;
-attribute vec3 normalPosition;
-
 uniform mat4 projectionMatrix;
 
-varying float depth;
+varying highp float depth;
 
 void main(void) {
     vec4 position = projectionMatrix * vec4(vertexPosition, 1.0);

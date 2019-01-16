@@ -44,6 +44,14 @@ Tarumae.Renderer = class {
 				viewDepth: 2,
 				resolution: 1024,
 			},
+			enablePostprocess: true,
+			postprocess: {
+				gamma: 1.2,
+			},
+			bloomEffect: {
+				enabled: true,
+				gamma: 1.5,
+			},
 			debugMode: false,
 			showDebugPanel: false,
 			enable3D: true,
@@ -381,7 +389,7 @@ Tarumae.Renderer = class {
 			});
 		}
 		
-		if (this.options.postprocess) {
+		if (this.options.enablePostprocess || this.options.enableShadow) {
 			const width = this.canvas.width, height = this.canvas.height,
 				sw = width * 0.1, sh = height * 0.1;
 			
@@ -396,33 +404,37 @@ Tarumae.Renderer = class {
 				});
 			}
 	
-			const sceneImageRenderer = new Tarumae.PipelineNodes.SceneToImageRenderer(this, {
-				resolution: { width, height },
-			});
+			const sceneImageRenderer = new Tarumae.PipelineNodes.SceneToImageRenderer(this);
 			sceneImageRenderer.shadowMap2DInput = shadowMapRenderer;
 
-			const imgRendererSmall = new Tarumae.PipelineNodes.ImageFilterRenderer(this, {
-				resolution: {
-					width: sw,
-					height: sh,
-				},
-				flipTexcoordY: true,
-				filter: 'light-pass',
-			});
-			imgRendererSmall.input = sceneImageRenderer;
+			let imgRendererBlur = undefined, imgRendererSmall = undefined;
+
+			if (!this.options.bloomEffect
+				|| this.options.bloomEffect.eanbled === undefined
+				|| (this.options.bloomEffect && this.options.bloomEffect.enabled)) {
+				imgRendererSmall = new Tarumae.PipelineNodes.ImageFilterRenderer(this, {
+					resolution: {
+						width: sw,
+						height: sh,
+					},
+					flipTexcoordY: true,
+				});
+				imgRendererSmall.gammaFactor = this.options.bloomEffect.gamma || 1.4;
+				imgRendererSmall.input = sceneImageRenderer;
 			
-			const imgRendererBlur = new Tarumae.PipelineNodes.BlurRenderer(this, {
-				resolution: {
-					width: sw,
-					height: sh,
-				}
-			});
-			imgRendererBlur.input = imgRendererSmall;
-			// imgRendererBlur.gammaFactor = 1.0;
+				imgRendererBlur = new Tarumae.PipelineNodes.BlurRenderer(this, {
+					resolution: {
+						width: sw,
+						height: sh,
+					}
+				});
+				imgRendererBlur.input = imgRendererSmall;
+				// imgRendererBlur.gammaFactor = 1.0;
+			}
 
 			const imgRenderer = new Tarumae.PipelineNodes.ImageToScreenRenderer(this);
 			imgRenderer.input = sceneImageRenderer;
-			imgRenderer.gammaFactor = 1.2;
+			imgRenderer.gammaFactor = this.options.postprocess.gamma;
 			imgRenderer.tex2Input = imgRendererBlur;
 			imgRenderer.enableAntialias = this.options.enableAntialias;
 

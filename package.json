@@ -1,7 +1,7 @@
 {
 	"name": "tarumae",
-	"version": "1.2.0",
-	"description": "",
+	"version": "1.3.0",
+	"description": "Optimized WebGL engine for showcase application",
 	"main": "src/js/tarumae.js",
 	"scripts": {
 		"start": "npm run dev",

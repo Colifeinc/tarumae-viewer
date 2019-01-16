@@ -1,5 +1,5 @@
 precision mediump float;
-//precision highp float;
+precision highp float;
 
 struct BoundingBox {
 	vec3 min;
@@ -12,27 +12,24 @@ struct Light {
 	vec3 color;
 };
 
-struct Object
-{
-	vec3 loc;
-};
-
+uniform vec3 cameraLoc;
 uniform vec3 sundir;
 uniform vec3 sunlight;
-
-uniform BoundingBox refMapBox;
-uniform BoundingBox shadowMapBox;
-
 uniform vec3 color;
 uniform vec2 texTiling;
 uniform float opacity;
-uniform bool receiveLight;
 
 uniform float glossy;
 uniform float roughness;
 uniform float emission;
 uniform float normalMipmap;
-//uniform float normalIntensity;
+uniform float normalIntensity;
+
+uniform bool receiveLight;
+uniform bool hasNormalMap;
+uniform bool receiveShadow;
+uniform int refMapType;
+uniform int shadowMapType;
 
 uniform sampler2D texture;
 uniform sampler2D normalMap;
@@ -41,30 +38,24 @@ uniform sampler2D shadowMap2D;
 uniform samplerCube refMap;
 uniform samplerCube shadowMap;
 
-uniform bool hasTexture;
-uniform bool hasLightMap;
-uniform bool hasNormalMap;
-uniform bool hasUV2;
-uniform int refMapType;
-uniform int shadowMapType;
-
 varying vec3 vertex;
 varying vec3 normal;
 varying vec2 texcoord1;
 varying vec2 texcoord2;
 varying vec3 vcolor;
-varying vec3 shadowPosition;
+varying highp vec3 shadowPosition;
 varying mat3 TBN;
 
-uniform Light lights[15];
 uniform int lightCount;
-
-uniform Object camera;
+uniform Light lights[15];
 
 struct LightReturn {
 	vec3 diff;
 	vec3 spec;
 };
+
+uniform BoundingBox refMapBox;
+uniform BoundingBox shadowMapBox;
 
 vec3 correctBoundingBoxIntersect(BoundingBox bbox, vec3 dir) {
 	vec3 invdir = vec3(1.0, 1.0, 1.0) / dir;
@@ -80,7 +71,7 @@ float decodeFloatRGBA(vec4 rgba) {
   return dot(rgba, vec4(1.0, 1.0/255.0, 1.0/65025.0, 1.0/16581375.0));
 }
 
-vec3 traceLight(vec3 color, vec3 vertexNormal, vec3 cameraNormal) {
+vec3 traceLight(vec3 vertexNormal, vec3 cameraNormal) {
 
 	vec3 diff = vec3(0.0);
 	vec3 specular = vec3(0.0);
@@ -94,23 +85,22 @@ vec3 traceLight(vec3 color, vec3 vertexNormal, vec3 cameraNormal) {
 		float ln = dot(lightNormal, vertexNormal);
 
 		if (ln > 0.0) {
-			if (!hasLightMap) {
-				float ld = pow(length(lightRay), -2.0);
-				diff += lights[i].color * clamp(ln * ld * (0.5 + roughness * 0.5), 0.0, 1.0);
-			}
+			float ld = pow(length(lightRay), -2.0);
+			diff += lights[i].color * clamp(ln * ld, 0.0, 1.0);
 		}
 
 		if (glossy > 0.0) {
-				vec3 reflection = reflect(lightNormal, vertexNormal);
-				float refd = dot(reflection, cameraNormal);
+			vec3 reflection = reflect(lightNormal, vertexNormal);
+			float refd = dot(reflection, cameraNormal);
 
-				if (refd > 0.0) {
-					specular += lights[i].color * (pow(refd, 100.0 * glossy));
-				}
+			if (refd > 0.0) {
+				specular += lights[i].color * pow(refd, 10.0 * (1.0 - glossy)) * glossy;
+				// specular += pow(lights[i].color, vec3(refd)) *  glossy;
+			}
 		}
 	}
 
-	return color + color * diff + specular;
+	return diff + specular;
 }
 
 void main(void) {
@@ -130,14 +120,14 @@ void main(void) {
 	vec3 vertexNormal = normal, normalmapValue = texture2D(normalMap, uv1, normalMipmap).rgb;
 
 	if (hasNormalMap) {
-		//vertexNormal = normalize(TBN * (normalmapValue * 2.0 - 1.0) * vec3(normalIntensity, normalIntensity, 1.0));
-		vertexNormal = normalize(TBN * (normalmapValue * 2.0 - 1.0));
+		vertexNormal = normalize(TBN * (normalmapValue * 2.0 - 1.0) * vec3(normalIntensity, normalIntensity, 1.0));
+		// vertexNormal = normalize(TBN * (normalmapValue * 2.0 - 1.0));
 	}
 
 	vec3 cameraRay, cameraNormal;
 
 	if (lightCount > 0 || refMapType > 0) {
-		cameraRay = vertex - camera.loc;
+		cameraRay = vertex - cameraLoc;
 		cameraNormal = normalize(cameraRay);
 	}
 
@@ -145,96 +135,95 @@ void main(void) {
 	
 	vec3 finalColor = color;
 
-	if (receiveLight) {	
-		if (lightCount > 0 && (!hasLightMap || glossy > 0.0)) {
-			finalColor = traceLight(color, vertexNormal, cameraNormal);
+	if (receiveLight) {
+		if (lightCount > 0 || glossy > 0.0) {
+			finalColor += traceLight(vertexNormal, cameraNormal);
 		}
 
-		finalColor = finalColor + dot(vertexNormal, sundir) * sunlight;
+		finalColor = finalColor + sunlight * max(dot(vertexNormal, sundir), 0.0);
 	}
 
-	if (hasTexture) {
-		finalColor = finalColor * textureColor.rgb;
-	}
+	finalColor = finalColor * textureColor.rgb;
 
 	//////////////// LightMap ////////////////
-	vec2 uv2 = hasUV2 ? texcoord2 : texcoord1;
 
 	vec3 lightmapColor = vec3(0.0);
 
-	if (hasLightMap) {
-		lightmapColor = texture2D(lightMap, uv2).rgb;
-		finalColor = finalColor * pow(lightmapColor, vec3(0.5)) + pow(lightmapColor, vec3(10.0)) * 0.1;
-	}
+	lightmapColor = texture2D(lightMap, texcoord2).rgb;
+	// finalColor = finalColor * pow(lightmapColor, vec3(0.5)) + pow(lightmapColor, vec3(10.0)) * 0.1;
+	finalColor = finalColor * lightmapColor;
 
-	//////////////// RefMap ////////////////
 
-	vec3 refmapLookup = vec3(0.0);
+		//////////////// RefMap ////////////////
 
-	if (glossy > 0.0) {
-		if (refMapType == 1) {
-			refmapLookup = reflect(cameraNormal, vertexNormal);
-		} else if (refMapType == 2) {
-			refmapLookup = reflect(cameraNormal, vertexNormal);
-			refmapLookup = normalize(correctBoundingBoxIntersect(refMapBox, refmapLookup));
-		}
+		vec3 refmapLookup = vec3(0.0);
 
-		vec3 refColor = textureCube(refMap, refmapLookup, (roughness - 0.5) * 5.0).rgb;
-
-		if (refMapType == 1) {
-			finalColor += pow(refColor, vec3(10.0)) * glossy;
-		} else if (refMapType == 2) {
-			if (dot(normal, vec3(0.0, 1.0, 0.0)) > 0.98) {
-				refColor *= clamp(1.0 - dot(refmapLookup, normal), 0.0, 1.0);
+		if (glossy > 0.0) {
+			if (refMapType == 1) {
+				refmapLookup = reflect(cameraNormal, vertexNormal);
+			} else if (refMapType == 2) {
+				refmapLookup = reflect(cameraNormal, vertexNormal);
+				refmapLookup = normalize(correctBoundingBoxIntersect(refMapBox, refmapLookup));
 			}
-			finalColor = finalColor + pow(refColor, vec3(7.5)) * (glossy * 0.7);
-		}
-	
-		// if (alpha < 1.0) {
-			// alpha = max(finalColor.r, max(finalColor.g, finalColor.b)) * 0.5;
-		// }
-	}
 
-	if (alpha < 0.05) {
-		discard;
-	}
+			vec3 refColor = textureCube(refMap, refmapLookup, (roughness - 0.5) * 5.0).rgb;
 
-	//////////////// ShadowMap ////////////////
-
-	if (shadowMapType == 1) {
-		float shadowDir = dot(vertexNormal, normalize(vec3(2.0, 10.0, 5.0)));
-		if (shadowDir > 0.0) {
-
-			float shadowMapDepth;
-			// shadowMapDepth = texture2D(shadowMap2D, shadowPosition.xy).r;
-			float stride = 0.00024;
-			shadowMapDepth  = 0.25 * decodeFloatRGBA(texture2D(shadowMap2D, shadowPosition.xy + vec2(stride * 0.4, stride * 0.6)));
-			shadowMapDepth += 0.25 * decodeFloatRGBA(texture2D(shadowMap2D, shadowPosition.xy + vec2(stride * 0.6, stride * 0.4)));
-			shadowMapDepth += 0.25 * decodeFloatRGBA(texture2D(shadowMap2D, shadowPosition.xy - vec2(stride * 0.4, stride * 0.6)));
-			shadowMapDepth += 0.25 * decodeFloatRGBA(texture2D(shadowMap2D, shadowPosition.xy - vec2(stride * 0.6, stride * 0.4)));
-			// shadowMapDepth  = 0.25 * (texture2D(shadowMap2D, shadowPosition.xy + vec2(stride * 0.4, stride * 0.6)));
-			// shadowMapDepth += 0.25 * (texture2D(shadowMap2D, shadowPosition.xy + vec2(stride * 0.6, stride * 0.4)));
-			// shadowMapDepth += 0.25 * (texture2D(shadowMap2D, shadowPosition.xy - vec2(stride * 0.4, stride * 0.6)));
-			// shadowMapDepth += 0.25 * (texture2D(shadowMap2D, shadowPosition.xy - vec2(stride * 0.6, stride * 0.4)));
-
-			// float shadowBlock = 1.0 - (shadowZ - shadowMapDepth);
-			// float shadowBlock = 1.0 - clamp((shadowPosition.z - shadowMapDepth) * 0.5, 0.0, 0.1);
-			float shadowBlock = 1.0 - smoothstep(0.00001, 0.05, (shadowPosition.z - shadowMapDepth)) / 0.5;
-			// float shadowBlock = 1.0 - smoothstep(0.02, 0.3, (shadowZ - shadowMapDepth)) / 0.5;
-			finalColor = finalColor * 0.85 + finalColor * shadowBlock * 0.15;
-
-			// float block = (shadowPosition.z - shadowMapDepth);
-			// if (block > 0.02) {
-			// 	finalColor *= 0.5;
+			if (refMapType == 1) {
+				finalColor += pow(refColor, vec3(10.0)) * glossy;
+			} else if (refMapType == 2) {
+				if (dot(normal, vec3(0.0, 1.0, 0.0)) > 0.98) {
+					refColor *= clamp(1.0 - dot(refmapLookup, normal), 0.0, 1.0);
+				}
+				finalColor = finalColor + pow(refColor, vec3(7.5)) * (glossy * 0.7);
+			}
+		
+			// if (alpha < 1.0) {
+				// alpha = max(finalColor.r, max(finalColor.g, finalColor.b)) * 0.5;
 			// }
 		}
-	} else if (shadowMapType == 2) {
-		vec3 correctedVertexToSun = vec3(0.0);
-		correctedVertexToSun = correctBoundingBoxIntersect(shadowMapBox, sundir);
 
-		float shadowBlock = textureCube(shadowMap, correctedVertexToSun).r;
-		shadowBlock *= max(dot(normal, sundir), 0.0);
-		finalColor += vec3(1.0, 1.0, 0.9) * shadowBlock;
+		if (alpha < 0.05) {
+			discard;
+		}
+
+		//////////////// ShadowMap ////////////////
+
+	if (receiveShadow) {
+		if (shadowMapType == 1) {
+			float shadowDir = dot(vertexNormal, normalize(vec3(2.0, 10.0, 5.0)));
+			if (shadowDir > 0.0) {
+
+				float shadowMapDepth;
+				shadowMapDepth = decodeFloatRGBA(texture2D(shadowMap2D, shadowPosition.xy));
+				// float stride = 0.00024;
+				// shadowMapDepth  = 0.25 * decodeFloatRGBA(texture2D(shadowMap2D, shadowPosition.xy + vec2(stride * 0.4, stride * 0.6)));
+				// shadowMapDepth += 0.25 * decodeFloatRGBA(texture2D(shadowMap2D, shadowPosition.xy + vec2(stride * 0.6, stride * 0.4)));
+				// shadowMapDepth += 0.25 * decodeFloatRGBA(texture2D(shadowMap2D, shadowPosition.xy - vec2(stride * 0.4, stride * 0.6)));
+				// shadowMapDepth += 0.25 * decodeFloatRGBA(texture2D(shadowMap2D, shadowPosition.xy - vec2(stride * 0.6, stride * 0.4)));
+				// shadowMapDepth  = 0.25 * (texture2D(shadowMap2D, shadowPosition.xy + vec2(stride * 0.4, stride * 0.6))).r;
+				// shadowMapDepth += 0.25 * (texture2D(shadowMap2D, shadowPosition.xy + vec2(stride * 0.6, stride * 0.4))).r;
+				// shadowMapDepth += 0.25 * (texture2D(shadowMap2D, shadowPosition.xy - vec2(stride * 0.4, stride * 0.6))).r;
+				// shadowMapDepth += 0.25 * (texture2D(shadowMap2D, shadowPosition.xy - vec2(stride * 0.6, stride * 0.4))).r;
+
+				// float shadowBlock = (shadowPosition.z - shadowMapDepth);
+				// float shadowBlock = 1.0 - clamp((shadowPosition.z - shadowMapDepth) * 0.5, 0.0, 0.1);
+				float shadowBlock = 1.0 - smoothstep(0.00001, 0.05, (shadowPosition.z - shadowMapDepth)) / 0.5;
+				// float shadowBlock = 1.0 - smoothstep(0.0002, 0.3, (shadowPosition.z - shadowMapDepth)) / 0.5;
+				finalColor = finalColor * 0.75 + finalColor * shadowBlock * 0.25;
+
+				// float block = (shadowPosition.z - shadowMapDepth);
+				// if (block > 0.02) {
+				// 	finalColor *= 0.5;
+				// }
+			}
+		} else if (shadowMapType == 2) {
+			vec3 correctedVertexToSun = vec3(0.0);
+			correctedVertexToSun = correctBoundingBoxIntersect(shadowMapBox, sundir);
+
+			float shadowBlock = textureCube(shadowMap, correctedVertexToSun).r;
+			shadowBlock *= max(dot(normal, sundir), 0.0);
+			finalColor += vec3(1.0, 1.0, 0.9) * shadowBlock;
+		}
 	}
 
 	gl_FragColor = vec4(finalColor, alpha);

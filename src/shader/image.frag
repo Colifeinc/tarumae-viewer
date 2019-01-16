@@ -65,12 +65,12 @@ vec4 blur5_v(sampler2D tex) {
 
 vec3 light_pass(vec3 color) {
   float b = dot(color, vec3(0.3, 0.7152, 0.0722));
-  return (b < 0.6) ? color : vec3(0.0);
+  return (b > 0.7) ? color : vec3(0.0);
 }
 
 vec4 light_pass(vec4 color) {
   float b = dot(color.rgb, vec3(0.2126, 0.7152, 0.0722));
-  return (b > 0.6) ? color : vec4(0.0, 0.0, 0.0, 1.0);
+  return (b > 0.7) ? color : vec4(0.0, 0.0, 0.0, 1.0);
 }
 
 // 0.0625   0.125   0.0625   
@@ -201,6 +201,10 @@ void main(void) {
   } else if (filterType == 4) /* light-pass */ {
     fc = light_pass(sample(texture));
     // fc = sample(texture);
+  } else if (filterType == 5) /* guass_blur3 */ {
+    fc = guassBlur3(texture);
+  } else if (filterType == 6) /* guass_blur5 */ {
+    fc = guassBlur5(texture);
   }
 
   fc.rgb = gamma(fc.rgb, gammaFactor);

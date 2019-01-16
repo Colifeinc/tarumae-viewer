@@ -56,7 +56,7 @@ Tarumae.PipelineNodes.DefaultRenderer = class extends Tarumae.PipelineNode {
 };
 
 Tarumae.PipelineNodes.SceneToImageRenderer = class extends Tarumae.PipelineNode {
-  constructor(renderer, { resolution }) {
+  constructor(renderer, { resolution } = {}) {
     super(renderer);
 
     this.nodes = [];
@@ -322,6 +322,8 @@ Tarumae.PipelineNodes.ImageFilterRenderer = class extends Tarumae.PipelineNode {
         case "blur-hor": imageShader.filterType = 2; break;
         case "blur-ver": imageShader.filterType = 3; break;
         case "light-pass": imageShader.filterType = 4; break;
+        case "guass_blur3": imageShader.filterType = 5; break;
+        case "guass_blur5": imageShader.filterType = 6; break;
       }
 
       this.buffer.use();
@@ -403,12 +405,17 @@ Tarumae.PipelineNodes.ShadowMapRenderer = class extends Tarumae.PipelineNode {
 
     this.renderer.prepareRenderMatrices();
 
+    
     // this.renderer.projectionViewMatrix = this.renderer.viewMatrix.mul(this.renderer.cameraMatrix).mul(this.renderer.projectionMatrix);
 		// this.renderer.projectionViewMatrixArray = this.renderer.projectionViewMatrix.toArray();
 
     // this.shader.lightMatrix = toArray();
     // this.shader.projectionMatrix = this.renderer.projectionViewMatrix;
-    
+
+    // const gl = this.renderer.gl;
+    // gl.cullFace(gl.FRONT);
+    // gl.disable(gl.CULL_FACE);
+
     this.renderer.useShader(this.shader);
     this.shader.beginScene(scene);
 
@@ -418,6 +425,10 @@ Tarumae.PipelineNodes.ShadowMapRenderer = class extends Tarumae.PipelineNode {
 
     this.renderer.disuseCurrentShader();
     this.buffer.disuse();
+
+    // gl.enable(gl.CULL_FACE);
+    // gl.cullFace(gl.BACK);
+
   }
 
   drawObject(obj) {
@@ -476,6 +487,8 @@ Tarumae.PipelineNodes.MultipleImagePreviewRenderer = class extends Tarumae.Pipel
   }
 
   addPreview(piplelineRenderer) {
+    if (!piplelineRenderer) return;
+
     const x = -1.0 + Math.floor(this.nodes.length % this.columns),
       y = -1.0 + Math.floor(this.nodes.length / this.rows);
     const mesh = new Tarumae.ScreenMesh(x * this.previewWidth, y * this.previewHeight,

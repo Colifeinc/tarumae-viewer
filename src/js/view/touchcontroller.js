@@ -14,11 +14,13 @@ Tarumae.TouchController = class {
 
 	constructor(scene, options) {
 		this.scene = scene;
-		this.renderer = scene.renderer;
+	this.renderer = scene.renderer;
 		this.options = { ...Tarumae.TouchController.defaultOptions(), ...options };
+		this._enabled = true;
 
 		const viewer = this.renderer.viewer;
 		const Viewer = Tarumae.Viewer;
+		const controller = this;
   
 		var m = new Tarumae.Matrix4(), dir = new Vec3();
   
@@ -80,20 +82,26 @@ Tarumae.TouchController = class {
 			}
 		};
 		
-		function frameDetect() {
-			requestAnimationFrame(frameDetect);
+		this.frameDetect = () => {
+			if (!this._enabled) return;
+
 			detectFirstPersonMove();
+			requestAnimationFrame(this.frameDetect);
 		}
 	
-		requestAnimationFrame(frameDetect);
+		requestAnimationFrame(this.frameDetect);
 
 		var startDragTime;
 
 		scene.on("begindrag", function() {
+			if (!controller._enabled) return;
+
 			startDragTime = Date.now();
 		});
 
 		scene.on("enddrag", _ => {
+			if (!controller._enabled) return;
+
 			if ((Date.now() - startDragTime) < 300) {
 				Tarumae.Utility.performMovementAccelerationAnimation(scene,
           this.options.dragAccelerationIntensity, this.options.dragAccelerationAttenuation,
@@ -106,6 +114,8 @@ Tarumae.TouchController = class {
 
 		if (this.options.clickToMove) {
 			this.scene.on("mouseup", () => {
+				if (!controller._enabled) return;
+
 				var camera = scene.mainCamera;
 				if (camera) {
 					if (viewer.pressedKeys._t_contains(Viewer.Keys.Shift)
@@ -122,6 +132,8 @@ Tarumae.TouchController = class {
 			var m = new Tarumae.Matrix4();
   
 			return function() {
+				if (!controller._enabled) return;
+
 				var viewer = this.renderer.viewer;
 				var camera = this.mainCamera;
   
@@ -153,5 +165,16 @@ Tarumae.TouchController = class {
 				}
 			};
 		})());
+	}
+
+	get enabled() {
+		return this._enabled;
+	}
+
+	set enabled(v) {
+		if (v && !this._enabled) {
+			requestAnimationFrame(this.frameDetect);
+		}
+		this._enabled = v;
 	}
 };

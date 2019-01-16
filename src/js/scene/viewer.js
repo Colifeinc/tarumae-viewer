@@ -10,6 +10,7 @@ import { Vec3, Vec4 } from "../math/vector";
 import "../math/matrix";
 import "../view/modelviewer";
 import "../view/touchcontroller";
+import "../view/objectcontroller";
 import "../view/fpscontroller";
 
 Tarumae.Viewer = class {

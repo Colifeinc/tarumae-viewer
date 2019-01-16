@@ -1,67 +1,38 @@
 import Tarumae from "../entry";
 
-Tarumae.ObjectController = class {
-  constructor(scene, {
-    enableVerticalRotation = false
-  } = {}) {
+Tarumae.ObjectViewController = class {
+  constructor(scene, options) {
     this.scene = scene;
     this.renderer = scene.renderer;
     this.viewer = scene.renderer.viewer;
+    this._enabled = true;
     this.object = null;
-  
-    this.minRotateX = -90;
-    this.maxRotateX = 90;
-    this.startDragTime = 0;
-    this.enableDragAcceleration = true;
-    this.dragAccelerationAttenuation = 0.03;
-    this.dragAccelerationIntensity = 5;
-
-    this.sceneDragHandlerListener = undefined;
-    this.sceneMouseWheelHandlerListener = undefined;
-    this.sceneMouseDragAccelerationHandler = undefined;
-
-    this.enableHorizontalRotation = true;
-    this.enableVerticalRotation = enableVerticalRotation;
     
+    this.options = { ...Tarumae.ObjectViewController.DefaultOptions, ...options };
+
+    this.sceneDragHandlerListener = scene.on("drag", _ => this.sceneDragHandler());
+    this.sceneMouseWheelHandlerListener = scene.on("mousewheel", _ => this.sceneMouseWheelHandler());
+    this.sceneMouseDragAccelerationHandler = scene.on("enddrag", _ => this.dragAcceleration());
+
+    this.startDragTime = 0;
     this.scene.on("begindrag", _ => {
       this.startDragTime = Date.now();
     });
-
-    this.attach();
   }
 
-  attach() {
-    const scene = this.scene;
-
-    if (scene) {
-      this.sceneDragHandlerListener = scene.on("drag", _ => this.sceneDragHandler());
-      this.sceneMouseWheelHandlerListener = scene.on("mousewheel", _ => this.sceneMouseWheelHandler());
-      this.sceneMouseDragAccelerationHandler = scene.on("enddrag", _ => this.dragAcceleration());
-    }
+  get enabled() {
+    return _enabled;
   }
-  
-  detach() {
-    var scene = this.scene;
-
-    if (this.sceneDragHandlerListener) {
-      scene.removeEventListener("drag", this.sceneDragHandlerListener);
-      this.sceneMouseWheelHandlerListener = undefined;
-    }
-    
-    if (this.sceneMouseWheelHandlerListener) {
-      scene.removeEventListener("mousewheel", this.sceneMouseWheelHandlerListener);
-      this.sceneMouseWheelHandlerListener = undefined;
-    }
-        
-    if (this.sceneMouseDragAccelerationHandler) {
-      scene.removeEventListener("enddrag", this.sceneMouseWheelHandlerListener);
-      this.sceneMouseDragAccelerationHandler = undefined;
-    }
+  set enabled(v) {
+    this._enabled = v;
   }
 
   sceneDragHandler() {
+    if (!this._enabled) return;
+
+    
     if (this.viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Shift)) {
-      this.panViewByMouseMove();
+      this.panObjectByMouseMove();
     } else if (this.viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Control)) {
       this.zoomViewByMouseButton();
     } else {
@@ -70,10 +41,14 @@ Tarumae.ObjectController = class {
   }
 
   sceneMouseWheelHandler() {
+    if (!this._enabled) return;
+
     this.zoomViewByMouseWheel();
   }
 
   zoomViewByMouseWheel() {
+    if (!this._enabled) return;
+
     let s = this.viewer.originDistance - this.viewer.mouse.wheeldelta / 3000;
     if (s > 50) s = 50; else if (s < 0) s = 0;
     this.viewer.originDistance = s;
@@ -81,31 +56,39 @@ Tarumae.ObjectController = class {
   }
 
   zoomViewByMouseButton() {
+    if (!this._enabled) return;
+
     let s = this.viewer.originDistance - (this.viewer.mouse.movement.x + this.viewer.mouse.movement.y) / -100;
     if (s > 50) s = 50; else if (s < 0) s = 0;
     this.viewer.originDistance = s;
     this.scene.requireUpdateFrame();
   }
 
-  panViewByMouseMove() {
-    this.viewer.moveOffset(this.viewer.mouse.movement.x / 50, -this.viewer.mouse.movement.y / 50, 0);
+  panObjectByMouseMove() {
+    if (!this._enabled || !this.object) return;
+
+    this.object.moveOffset(this.viewer.mouse.movement.x / 50, -this.viewer.mouse.movement.y / 50, 0);
   }
 
   limitViewAngleScope() {
-    if (this.viewer.angle.x < this.minRotateX) this.viewer.angle.x = this.minRotateX;
-    if (this.viewer.angle.x > this.maxRotateX) this.viewer.angle.x = this.maxRotateX;
+    if (!this.object) return;
 
-    if (this.viewer.angle.y < 0) this.viewer.angle.y += 360;
-    if (this.viewer.angle.y > 360) this.viewer.angle.y -= 360;
+    if (this.object.angle.x < this.minVerticalRotateAngle) this.object.angle.x = this.minVerticalRotateAngle;
+    if (this.object.angle.x > this.maxVerticalRotateAngle) this.object.angle.x = this.maxVerticalRotateAngle;
+
+    if (this.object.angle.y < 0) this.object.angle.y += 360;
+    if (this.object.angle.y > 360) this.object.angle.y -= 360;
   }
 
   dragToRotateObject() {
+    if (!this._enabled || !this.object) return;
+
     const movement = this.viewer.mouse.movement;
 
-    if (this.enableHorizontalRotation) {
+    if (this.options.enableHorizontalRotation) {
       this.object.angle.y += movement.x;
     }
-    if (this.enableVerticalRotation) {
+    if (this.options.enableVerticalRotation) {
       this.object.angle.x += movement.y;
     }
 
@@ -114,6 +97,7 @@ Tarumae.ObjectController = class {
   }
 
   dragAcceleration() {
+    if (!this._enabled || !this.object) return;
     if (!this.enableDragAcceleration) return;
 
     const scene = this.scene, viewer = this.viewer;
@@ -134,4 +118,17 @@ Tarumae.ObjectController = class {
         });
     }
   }
+};
+
+Tarumae.ObjectViewController.DefaultOptions = {
+  enableHorizontalRotation: true,
+  enableVerticalRotation: false,
+  enableScrollToScaleObject: false,
+
+  minVerticalRotateAngle: -90,
+  maxVerticalRotateAngle: 90,
+
+  enableDragAcceleration: true,
+  dragAccelerationAttenuation: 0.03,
+  dragAccelerationIntensity: 5,
 };

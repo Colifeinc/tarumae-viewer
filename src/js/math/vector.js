@@ -546,23 +546,21 @@ Vec4.prototype.toArrayDigits = function(digits) {
 
 export class Color3 {
 	constructor(r, g, b) {
-		this.elements = new Array(3);
-
 		switch (arguments.length) {
 			case 0:
-				this.elements[0] = 0; this.elements[1] = 0; this.elements[2] = 0;
+				this.r = 0; this.g = 0; this.b = 0;
 				break;
 			
 			case 1:
 				if (typeof r === "number") {
-					this.elements[0] = r; this.elements[1] = r; this.elements[2] = r;
+					this.r = r; this.g = r; this.b = r;
 				} else if (typeof r === "object") {
-					this.elements[0] = r.r; this.elements[1] = r.g; this.elements[3] = r.b;
+					this.r = r.r; this.g = r.g; this.b = r.b;
 				}
 				break;
 
 			case 3:
-				this.elements[0] = r; this.elements[1] = g; this.elements[2] = b;
+				this.r = r; this.g = g; this.b = b;
 				break;
 		}
 	}
@@ -574,18 +572,9 @@ export class Color3 {
 	}
 
 	copyFrom(c) {
-		this.elements = c.elements.slice();
+		this.r = c.r; this.g = c.g; this.b = c.b;
 		return this;
 	}
-
-	get r() { return this.elements[0]; }
-	set r(val) { this.elements[0] = val };
-
-	get g() { return this.elements[1]; }
-	set g(val) { this.elements[1] = val };
-
-	get b() { return this.elements[2]; }
-	set b(val) { this.elements[2] = val };
 
 	add(c) {
 		return new Color3(this.r + c.r, this.g + c.g, this.b + c.b);
@@ -622,11 +611,11 @@ export class Color3 {
 	}
 	
 	toArray() {
-		return this.elements;
+		return [this.r, this.g, this.b];
 	}
 	
 	toFloat32Array() {
-		return new Float32Array(this.elements);
+		return new Float32Array(this.toArray());
 	}
 	
 	toString() {
@@ -634,6 +623,10 @@ export class Color3 {
 	
 		return "[" + toStringDigits(this.r) + ", " + toStringDigits(this.g) + ", "
 			+ toStringDigits(this.b) + "]";
+	}
+
+	static fromArray(arr) {
+		return new Color3(arr[0], arr[1], arr[2]);
 	}
 
 	static randomly() {
