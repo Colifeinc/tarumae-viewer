@@ -10,7 +10,7 @@ Object.assign(TarumaeEditor.prototype, {
 	addModels: function(modlib) {
 		var _this = this;
 
-		modlib._s3_foreach(function(id, modelDefine) {
+		modlib._t_foreach(function(id, modelDefine) {
 			modelDefine.id = String(id);
 			modelDefine.loaded = false;
 			
@@ -101,7 +101,7 @@ Object.assign(TarumaeEditor.prototype, {
 		"use strict";
 		var editor = this;
 
-		objPrototype._s3_foreach(function(name, value) {
+		objPrototype._t_foreach(function(name, value) {
 			switch (name) {
 			case "conflictWithRay":
 				obj.conflictWithRay = objPrototype.conflictWithRay;
@@ -195,7 +195,7 @@ Object.assign(TarumaeEditor.prototype, {
 		"use strict";
 		var editor = this;
 		
-		obj._s3_foreach(function(name, value) {
+		obj._t_foreach(function(name, value) {
 			switch (name) {
 
 			case "location":

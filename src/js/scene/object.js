@@ -59,12 +59,17 @@ Tarumae.SceneObject = class {
 
 	set scene(val) {
 		if (this._scene != val) {
+			if (this._scene) {
+				this._scene.onobjectRemove(this);
+			}
+
 			this._scene = val;
+			this._scene.whenObjectAdd(this);
 			this.onsceneChange(this._scene);
 		}
 
 		for (let i = 0; i < this.objects.length; i++) {
-			var child = this.objects[i];
+			const child = this.objects[i];
 			if (child._scene != this._scene) {
 				child.scene = this._scene;
 			}
@@ -412,25 +417,24 @@ Object.assign(Tarumae.SceneObject.prototype, {
 		return this.forward(-distance, options);
 	},
 
-	add: function(child) {
-		if (child.parent) {
-			child.parent.remove(child);
+	add: function(obj) {
+		if (obj.parent) {
+			obj.parent.remove(obj);
 		}
 
-		this.objects.push(child);
-		child.parent = this;
-		child.updateTransform();
+		this.objects.push(obj);
+		obj.parent = this;
+		obj.updateTransform();
 
-		var scene = this.scene;
+		const scene = this.scene;
 	
-		if (scene && child._scene != scene) {
-			child.scene = scene;
-			scene.onobjectAdd(child);
+		if (scene && obj._scene != scene) {
+			obj.scene = scene;
 		}
 	},
 
 	remove: function(child) {
-		this.objects._s3_remove(child);
+		this.objects._t_remove(child);
 		child.parent = null;
 
 		var scene = this.scene;
@@ -441,13 +445,13 @@ Object.assign(Tarumae.SceneObject.prototype, {
 
 	addMesh: function(mesh) {
 		if (mesh) {
-			this.meshes._s3_pushIfNotExist(mesh);
+			this.meshes._t_pushIfNotExist(mesh);
 			this.onmeshAdd(mesh);
 		}
 	},
 
 	removeMesh: function(mesh) {
-		this.meshes._s3_remove(mesh);
+		this.meshes._t_remove(mesh);
 		this.onmeshRemove(mesh);
 	},
 

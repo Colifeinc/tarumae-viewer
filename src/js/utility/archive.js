@@ -7,6 +7,7 @@ Tarumae.Utility.Archive = class {
 		this.dataLength = 0;
 		this.loadingLength = 0;
 		this.chunkListeners = {};
+		this.cachedChunks = {};
 	}
 
 	onChunkReady(uid, callback) {
@@ -29,21 +30,21 @@ Tarumae.Utility.Archive = class {
 	loadFromStream(data) {
 		if (!data) return;
 
-		var headerBuffer = new Uint32Array(data.slice(0, 32));
+		const headerBuffer = new Uint32Array(data.slice(0, 32));
 		
 		if (headerBuffer[0] != 0x61626f73
 			&& headerBuffer[0] != 0x61626f74) return null;
 		
-		var verflags = headerBuffer[1];
-		var ver = verflags & 0xffff;
+		let verflags = headerBuffer[1];
+		const ver = verflags & 0xffff;
 		if (ver !== 0x0100) return null;
 	
-		var pos = headerBuffer[2];
-		var chunkStartPos = pos;
+		let pos = headerBuffer[2];
+		const chunkStartPos = pos;
 		
 		pos += headerBuffer[4];
 		verflags = headerBuffer[5];
-		var chunkCount = headerBuffer[6];
+		const chunkCount = headerBuffer[6];
 	
 		if (chunkCount > 0x1FFFE) {
 			// invalid chunk count
@@ -53,8 +54,8 @@ Tarumae.Utility.Archive = class {
 		var archive = this;
 		archive.chunks = {};
 	
-		var readChunks = function() {
-			var _blockLen = 24;
+		const readChunks = function() {
+			const _blockLen = 24;
 			var chunkBuffer = data.slice(pos, pos + _blockLen);
 			var chunkHeaderBuffer = new Uint32Array(chunkBuffer);
 			var uid = chunkHeaderBuffer[0];
@@ -76,7 +77,7 @@ Tarumae.Utility.Archive = class {
 			readChunks();
 		}
 
-		this.chunks._s3_foreach(function(uid, chunk) {
+		this.chunks._t_foreach(function(uid, chunk) {
 			archive.callChunkReady(parseInt(uid), chunk.data);
 		});
 	}

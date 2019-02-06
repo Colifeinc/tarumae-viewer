@@ -50,6 +50,7 @@ Tarumae.Renderer = class {
 			},
 			bloomEffect: {
 				enabled: true,
+				threshold: 0.1,
 				gamma: 1.5,
 			},
 			debugMode: false,
@@ -382,7 +383,9 @@ Tarumae.Renderer = class {
 		if (this.options.backgroundImage) {
 			this.createTextureFromURL(this.options.backgroundImage, tex => {
 				const bgImageSource = new Tarumae.PipelineNodes.ImageSource(this, tex);
-				this._bgImageRenderer = new Tarumae.PipelineNodes.ImageToScreenRenderer(this);
+				this._bgImageRenderer = new Tarumae.PipelineNodes.ImageToScreenRenderer(this, {
+					flipTexcoordY: true
+				});
 				this._bgImageRenderer.enableAntialias = false;
 				this._bgImageRenderer.input = bgImageSource;
 				if (this.currentScene) this.currentScene.requireUpdateFrame();
@@ -391,7 +394,8 @@ Tarumae.Renderer = class {
 		
 		if (this.options.enablePostprocess || this.options.enableShadow) {
 			const width = this.canvas.width, height = this.canvas.height,
-				sw = width * 0.1, sh = height * 0.1;
+				sw = width * (this.options.bloomEffect.threshold || 0.1),
+				sh = height * (this.options.bloomEffect.threshold || 0.1);
 			
 			let shadowMapRenderer = undefined;
 
@@ -418,6 +422,7 @@ Tarumae.Renderer = class {
 						height: sh,
 					},
 					flipTexcoordY: true,
+					filter: "linear-interp",
 				});
 				imgRendererSmall.gammaFactor = this.options.bloomEffect.gamma || 1.4;
 				imgRendererSmall.input = sceneImageRenderer;
@@ -518,7 +523,7 @@ Tarumae.Renderer = class {
 	
 	drawSceneFrame(scene) {
 
-		this.transparencyList._s3_clear();
+		this.transparencyList._t_clear();
 	
 		if (!scene) return;
 

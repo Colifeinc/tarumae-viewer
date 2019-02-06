@@ -75,9 +75,9 @@ Tarumae.Viewer = class {
 				mouse.dragstart.y = mouse.position.y;
 
 				switch (e.button) {
-					case 0: mouse.pressedButtons._s3_pushIfNotExist(Tarumae.Viewer.MouseButtons.Left); break;
-					case 1: mouse.pressedButtons._s3_pushIfNotExist(Tarumae.Viewer.MouseButtons.Middle); break;
-					case 2: mouse.pressedButtons._s3_pushIfNotExist(Tarumae.Viewer.MouseButtons.Right); break;
+					case 0: mouse.pressedButtons._t_pushIfNotExist(Tarumae.Viewer.MouseButtons.Left); break;
+					case 1: mouse.pressedButtons._t_pushIfNotExist(Tarumae.Viewer.MouseButtons.Middle); break;
+					case 2: mouse.pressedButtons._t_pushIfNotExist(Tarumae.Viewer.MouseButtons.Right); break;
 				}
 
 				viewer.operationMode = Tarumae.Viewer.OperationModes.DragReady;
@@ -147,7 +147,7 @@ Tarumae.Viewer = class {
 			}, { passive: false });
 
 			surface.addEventListener('keydown', function(e) {
-				viewer.pressedKeys._s3_pushIfNotExist(e.keyCode);
+				viewer.pressedKeys._t_pushIfNotExist(e.keyCode);
       
 				var isProcessed = false;
 
@@ -224,17 +224,17 @@ Tarumae.Viewer = class {
 			});
 
 			surface.addEventListener("blur", function(e) {
-				viewer.pressedKeys._s3_clear();
-				viewer.mouse.pressedButtons._s3_clear();
+				viewer.pressedKeys._t_clear();
+				viewer.mouse.pressedButtons._t_clear();
 			});
 
 			window.addEventListener("blur", function(e) {
-				viewer.pressedKeys._s3_clear();
-				viewer.mouse.pressedButtons._s3_clear();
+				viewer.pressedKeys._t_clear();
+				viewer.mouse.pressedButtons._t_clear();
 			});
 
 			window.addEventListener('keyup', function(e) {
-				viewer.pressedKeys._s3_remove(e.keyCode);
+				viewer.pressedKeys._t_remove(e.keyCode);
 
 				var scene = viewer.renderer.currentScene;
 
@@ -307,9 +307,9 @@ Tarumae.Viewer = class {
 			viewer.performSceneMouseUp();
 
 			switch (e.button) {
-				case 0: mouse.pressedButtons._s3_remove(Tarumae.Viewer.MouseButtons.Left); break;
-				case 1: mouse.pressedButtons._s3_remove(Tarumae.Viewer.MouseButtons.Middle); break;
-				case 2: mouse.pressedButtons._s3_remove(Tarumae.Viewer.MouseButtons.Right); break;
+				case 0: mouse.pressedButtons._t_remove(Tarumae.Viewer.MouseButtons.Left); break;
+				case 1: mouse.pressedButtons._t_remove(Tarumae.Viewer.MouseButtons.Middle); break;
+				case 2: mouse.pressedButtons._t_remove(Tarumae.Viewer.MouseButtons.Right); break;
 			}
 
 			viewer.operationMode = Viewer.OperationModes.None;

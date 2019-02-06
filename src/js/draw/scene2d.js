@@ -38,7 +38,7 @@ Draw2D.Scene2D = class {
         }
       }
       else {
-        this.objects._s3_pushIfNotExist(arg);
+        this.objects._t_pushIfNotExist(arg);
       }
     }
     this.requireUpdateFrame();
@@ -272,17 +272,17 @@ Draw2D.Object = class {
         }
       }
       else {
-        this.objects._s3_pushIfNotExist(arg);
+        this.objects._t_pushIfNotExist(arg);
       }
     }
   }
 
   remove(obj) {
-    this.objects._s3_remove(obj);
+    this.objects._t_remove(obj);
   }
 
   clear() {
-    this.objects._s3_clear();
+    this.objects._t_clear();
   }
 
   eachChild(handler) {

@@ -35,6 +35,7 @@ Tarumae.Mesh = class {
 		this._lightmap = undefined;
 		this._lightmapTrunkId = undefined;
 		this._lightmapType = undefined;
+		this._refmapTrunkId = undefined;
 	}
 
 	loadFromStream(stream) {
@@ -86,8 +87,9 @@ Tarumae.Mesh = class {
 				}
 
 				if (ver >= 0x0103) {
+					const chunkIdBuffer = new Uint32Array(stream, 80, 4);
 					if ((flags & Tarumae.Mesh.HeaderFlags.HasLightmap) === Tarumae.Mesh.HeaderFlags.HasLightmap) {
-						this._lightmapTrunkId = new Uint32Array(stream, 80, 4)[0];
+						this._lightmapTrunkId = chunkIdBuffer[0];
 						this._lightmapType = header[21];
 					}
 
@@ -105,6 +107,12 @@ Tarumae.Mesh = class {
 		
 						if ((flags & Tarumae.Mesh.HeaderFlags.HasWireframe) === Tarumae.Mesh.HeaderFlags.HasWireframe) {
 							this.meta.edgeCount = header[6];
+						}
+
+						if (ver >= 0x0105) {
+							if ((flags & Tarumae.Mesh.HeaderFlags.HasRefmap) === Tarumae.Mesh.HeaderFlags.HasRefmap) {
+								this._refmapTrunkId = chunkIdBuffer[2];
+							}
 						}
 					}
 				}
@@ -1046,6 +1054,7 @@ Object.assign(Tarumae.Mesh, {
 		HasLightmap: 0x40,
 		HasGrabBoundary: 0x80,
 		HasWireframe: 0x100,
+		HasRefmap: 0x200,
 	},
 
 	StructureTypes: {

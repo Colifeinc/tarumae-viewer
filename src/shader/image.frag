@@ -201,9 +201,9 @@ void main(void) {
   } else if (filterType == 4) /* light-pass */ {
     fc = light_pass(sample(texture));
     // fc = sample(texture);
-  } else if (filterType == 5) /* guass_blur3 */ {
+  } else if (filterType == 5) /* guass-blur3 */ {
     fc = guassBlur3(texture);
-  } else if (filterType == 6) /* guass_blur5 */ {
+  } else if (filterType == 6) /* guass-blur5 */ {
     fc = guassBlur5(texture);
   }
 

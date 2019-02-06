@@ -497,7 +497,7 @@ Tarumae.DrawingContext2D = class {
 
 	resetTransform() {
 		this.currentTransform.loadIdentity();
-		this.transformStack._s3_clear();
+		this.transformStack._t_clear();
 	}
 
 	resetDrawingStyle() {

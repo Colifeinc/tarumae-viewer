@@ -46,8 +46,8 @@ Object.assign(TarumaeEditor.prototype, {
       
       editor.currentSceneSnapshotJSON = this.sceneSnapshostJSONHistory[snapshotIndex];
       
-      editor.rootObject.objects._s3_clear();
-      editor.scene.selectedObjects._s3_clear();
+      editor.rootObject.objects._t_clear();
+      editor.scene.selectedObjects._t_clear();
       editor.cursor.hide();
       editor.setFocus(null);
       
@@ -55,7 +55,7 @@ Object.assign(TarumaeEditor.prototype, {
       
       editor.suspendBackupScene = true;
 
-      json._s3_foreach(function(name, obj) {
+      json._t_foreach(function(name, obj) {
         editor.loadObject(name, obj);
         editor.rootObject.add(obj);
       });

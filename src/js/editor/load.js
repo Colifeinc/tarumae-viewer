@@ -51,7 +51,7 @@ Object.assign(TarumaeEditor.prototype, {
       Object.assign(obj.mat, mergedMat);
     }
     
-    obj._s3_foreach(function(name, prop) {
+    obj._t_foreach(function(name, prop) {
       switch (name) {
 
         case "location":
@@ -104,10 +104,10 @@ Object.assign(TarumaeEditor.prototype, {
 
 		var _materials = objs._materials;
 		if (_materials) {
-			_materials._s3_foreach(iterateMaterials);
+			_materials._t_foreach(iterateMaterials);
 		}
     
-    objs._s3_foreach(function(name, obj) {
+    objs._t_foreach(function(name, obj) {
       if (name != "_materials") {
         name = editor.getAvailableNewObjectName(name);
 

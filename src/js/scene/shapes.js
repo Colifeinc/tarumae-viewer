@@ -225,7 +225,7 @@ Tarumae.Shapes.Sphere.prototype.generateMesh = function(segments, rings, compose
 		this.meshes[i].destroy();
 	}
 
-	this.meshes._s3_clear();
+	this.meshes._t_clear();
 
 	segments = segments || 12;
 	rings = rings || 24;

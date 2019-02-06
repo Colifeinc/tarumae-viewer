@@ -11,8 +11,8 @@ import { Color3, Color4 } from "../math/vector";
 window.addEventListener("load", function() {
 
 	const renderer = new Tarumae.Renderer({
-		renderPixelRatio: window.devicePixelRatio,
-		// renderPixelRatio: Math.max(window.devicePixelRatio * 0.75, 1),
+		// renderPixelRatio: window.devicePixelRatio,
+		renderPixelRatio: Math.max(window.devicePixelRatio * 0.75, 1),
 		// renderPixelRatio: 1,
 		backColor: new Color4(0.74, .87, .85, 1),
 		backgroundImage: "../static/textures/bg-gray-gradient.jpg",
@@ -21,6 +21,10 @@ window.addEventListener("load", function() {
 		enableShadow: true,
 		postprocess: false,
 		enableAntialias: true,
+		bloomEffect: {
+			threshold: 0.2,
+			gamma: 1.4,
+		}
 	});
 
 	const scene = renderer.createScene();
@@ -29,11 +33,12 @@ window.addEventListener("load", function() {
  
 	// scene.add(new Tarumae.GridLine());
 	this.models = [
+		// { name: "test.toba" },
 		{ name: "chair_adv_01.toba" },
 		// { name: "chair_compact_01.toba" },
 		// { name: "chair_jati.toba" },
-		// // { name: "char_stand_01-baked.toba", scale: [.1, .1, .1], color: [.7, .7, .7] },
-		// { name: "desk_study_1p.toba", color: [.7, .7, .7] },
+		// { name: "char_stand_01-baked.toba", scale: [.1, .1, .1], color: [.7, .7, .7] },
+		// { name: "desk_study_1p-baked.toba", color: [.7, .7, .7] },
 		// { name: "fan_vintage_ceiling.toba", scale: [3, 3, 3] },
 		// { name: "print_mfp_w1500.toba", color: [.7, .7, .7] },
 		// { name: "rice_cooker_01.toba", z: 1, color: [.8, .8, .8] },
@@ -92,7 +97,7 @@ window.addEventListener("load", function() {
 		currentIndex = idx;
 
 		const mod = models[currentIndex];
-		if (mod) {
+		if (mod && mod.obj) {
 			const nextObj = mod.obj;
 			if (mod.color) {
 				if (!nextObj.mat) nextObj.mat = {}
@@ -120,11 +125,15 @@ window.addEventListener("load", function() {
 
 	const light1 = new Tarumae.PointLight();
 	light1.location.set(2, 8, 7);
+	light1.mat.emission = 2.0;
 	lights.add(light1);
 		
 	const light2 = new Tarumae.PointLight();
 	light2.location.set(-3, 6, 3);
+	light2.mat.emission = 1.0;
 	lights.add(light2);
+
+	scene.sun.mat.color = [1, 1, 1];
 
 	scene.add(lights);
 

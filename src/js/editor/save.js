@@ -144,7 +144,7 @@ Object.assign(TarumaeEditor.prototype, {
     
     var jsobj = {};
     
-    mat._s3_foreach(function(name, item) {
+    mat._t_foreach(function(name, item) {
 
       var converted = false;
 

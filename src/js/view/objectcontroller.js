@@ -1,14 +1,34 @@
 import Tarumae from "../entry";
 
 Tarumae.ObjectViewController = class {
-  constructor(scene, options) {
+  constructor(scene, {
+    enableHorizontalRotation = true,
+    enableVerticalRotation = true,
+    enableScrollToScaleObject = true,
+  
+    minVerticalRotateAngle = -90,
+    maxVerticalRotateAngle = 90,
+  
+    enableDragAcceleration = true,
+    dragAccelerationAttenuation = 0.03,
+    dragAccelerationIntensity = 5,
+
+    object,
+  } = {}) {
     this.scene = scene;
     this.renderer = scene.renderer;
     this.viewer = scene.renderer.viewer;
     this._enabled = true;
-    this.object = null;
+    this.object = object;
     
-    this.options = { ...Tarumae.ObjectViewController.DefaultOptions, ...options };
+    this.enableHorizontalRotation = enableHorizontalRotation;
+    this.enableVerticalRotation = enableVerticalRotation;
+    this.enableScrollToScaleObject = enableScrollToScaleObject;
+    this.minVerticalRotateAngle = minVerticalRotateAngle;
+    this.maxVerticalRotateAngle = maxVerticalRotateAngle;
+    this.enableDragAcceleration = enableDragAcceleration;
+    this.dragAccelerationAttenuation = dragAccelerationAttenuation;
+    this.dragAccelerationIntensity = dragAccelerationIntensity;
 
     this.sceneDragHandlerListener = scene.on("drag", _ => this.sceneDragHandler());
     this.sceneMouseWheelHandlerListener = scene.on("mousewheel", _ => this.sceneMouseWheelHandler());
@@ -85,10 +105,10 @@ Tarumae.ObjectViewController = class {
 
     const movement = this.viewer.mouse.movement;
 
-    if (this.options.enableHorizontalRotation) {
+    if (this.enableHorizontalRotation) {
       this.object.angle.y += movement.x;
     }
-    if (this.options.enableVerticalRotation) {
+    if (this.enableVerticalRotation) {
       this.object.angle.x += movement.y;
     }
 
@@ -118,17 +138,4 @@ Tarumae.ObjectViewController = class {
         });
     }
   }
-};
-
-Tarumae.ObjectViewController.DefaultOptions = {
-  enableHorizontalRotation: true,
-  enableVerticalRotation: false,
-  enableScrollToScaleObject: false,
-
-  minVerticalRotateAngle: -90,
-  maxVerticalRotateAngle: 90,
-
-  enableDragAcceleration: true,
-  dragAccelerationAttenuation: 0.03,
-  dragAccelerationIntensity: 5,
 };

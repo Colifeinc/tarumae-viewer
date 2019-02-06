@@ -232,19 +232,20 @@ class ShowroomController {
 window.addEventListener("load", function() {
 
 	const renderer = new Tarumae.Renderer({
-		enableLighting: false,
+		enableLighting: true,
 		backColor: new Color4(0.96, .98, 1, 1),
+		backgroundImage: "/static/textures/52642.jpg",
 
-		// renderPixelRatio: window.devicePixelRatio,
-		renderPixelRatio: Math.max(window.devicePixelRatio * 0.75, 1),
+		renderPixelRatio: window.devicePixelRatio,
+		// renderPixelRatio: Math.max(window.devicePixelRatio * 0.75, 1),
 		// renderPixelRatio: 1,
 	
 		enablePostprocess: true,
 		postprocess: {
-			gamma: 1.2,
+			gamma: 1.0,
 		},
 		enableAntialias: true,
-		enableShadow: true,
+		enableShadow: false,
 		shadowQuality: {
 			scale: 10,
 			viewDepth: 14,
@@ -263,17 +264,23 @@ window.addEventListener("load", function() {
 	scene.sun.mat.color = [.1, .09, .08];
 	scene.mainCamera.fieldOfView = 75;
 
-	const controller = new ShowroomController(scene);
+	// const controller = new ShowroomController(scene);
+	new Tarumae.TouchController(scene);
+
+	_scene.sun.mat.color = [.8, .8, .8];
 	
-	scene.createObjectFromURL("/static/floor.toba", obj => {
+	scene.createObjectFromURL("/static/models/room_01a-baked.toba", obj => {
 		window.obj = obj;
 
 		scene.add(obj);
-		obj.visible = false;
-		obj.eachChild(o => o.receiveShadow = o.name === "floor");
+		// obj.visible = false;
+		obj.eachChild(o => {
+			o.receiveShadow = o.name === "floor"
+			// o.visible = o.name !== "wall_corner_glass"
+		});
 
-		controller.targetObject = obj;
-		controller.fadeIn();
+		// controller.targetObject = obj;
+		// controller.fadeIn();
 	});
 
 	scene.show();

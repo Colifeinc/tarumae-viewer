@@ -1,5 +1,5 @@
 import Tarumae from "../entry"
-import { Vec3, Vec4 } from "../math/vector"
+import { Vec3, Vec4, Vec2 } from "../math/vector"
 
 Tarumae.BoundingBox = class {
 	constructor(min, max) {
@@ -23,6 +23,11 @@ Tarumae.BoundingBox = class {
 			case 2:
 				this._min = min;
 				this._max = max;
+				break;
+			
+			case 6:
+				this._min = new Vec3(arguments[0], arguments[1], arguments[2]);
+				this._max = new Vec3(arguments[3], arguments[4], arguments[5]);
 				break;
 		}
 

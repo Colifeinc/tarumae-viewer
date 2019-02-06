@@ -23,7 +23,7 @@ Object.assign(TarumaeEditor.prototype, {
       var aps = editor.focusObject.activePoints;
       
       if (typeof aps === "object" && aps !== null) {
-        aps._s3_foreach(function(name, ap) {
+        aps._t_foreach(function(name, ap) {
           editor.updateActivePoint(ap);
         });
       }
@@ -324,7 +324,7 @@ Object.assign(TarumaeEditor.prototype, {
 
     if (offset !== undefined) {
       var newArray = {};
-      planeVertices._s3_foreach(function(name, v) {
+      planeVertices._t_foreach(function(name, v) {
         newArray[name] = v.add(offset);
       });
       planeVertices = newArray;

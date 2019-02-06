@@ -46,8 +46,9 @@ varying vec3 vcolor;
 varying highp vec3 shadowPosition;
 varying mat3 TBN;
 
+#define MAX_LIGHT_COUNT 5
 uniform int lightCount;
-uniform Light lights[15];
+uniform Light lights[MAX_LIGHT_COUNT];
 
 struct LightReturn {
 	vec3 diff;
@@ -76,7 +77,7 @@ vec3 traceLight(vec3 vertexNormal, vec3 cameraNormal) {
 	vec3 diff = vec3(0.0);
 	vec3 specular = vec3(0.0);
 
-	for (int i = 0; i < 50; i++) {
+	for (int i = 0; i < MAX_LIGHT_COUNT; i++) {
 		if (i >= lightCount) break;
 
 		vec3 lightRay = lights[i].pos - vertex;
@@ -85,8 +86,8 @@ vec3 traceLight(vec3 vertexNormal, vec3 cameraNormal) {
 		float ln = dot(lightNormal, vertexNormal);
 
 		if (ln > 0.0) {
-			float ld = pow(length(lightRay), -2.0);
-			diff += lights[i].color * clamp(ln * ld, 0.0, 1.0);
+			float ld = pow(length(lightRay), 0.2);
+			diff += lights[i].color * clamp(ln * ld, 0.0, 1.0) * 0.1;
 		}
 
 		if (glossy > 0.0) {
@@ -94,8 +95,7 @@ vec3 traceLight(vec3 vertexNormal, vec3 cameraNormal) {
 			float refd = dot(reflection, cameraNormal);
 
 			if (refd > 0.0) {
-				specular += lights[i].color * pow(refd, 10.0 * (1.0 - glossy)) * glossy;
-				// specular += pow(lights[i].color, vec3(refd)) *  glossy;
+				specular += lights[i].color * pow(refd, 7.0) * pow(glossy, 10.0);
 			}
 		}
 	}
@@ -140,7 +140,7 @@ void main(void) {
 			finalColor += traceLight(vertexNormal, cameraNormal);
 		}
 
-		finalColor = finalColor + sunlight * max(dot(vertexNormal, sundir), 0.0);
+		finalColor = finalColor * 0.5 + finalColor * sunlight * max(dot(vertexNormal, sundir), 0.0) * 0.5;
 	}
 
 	finalColor = finalColor * textureColor.rgb;
@@ -151,7 +151,8 @@ void main(void) {
 
 	lightmapColor = texture2D(lightMap, texcoord2).rgb;
 	// finalColor = finalColor * pow(lightmapColor, vec3(0.5)) + pow(lightmapColor, vec3(10.0)) * 0.1;
-	finalColor = finalColor * lightmapColor;
+	finalColor = finalColor * 0.3 + finalColor * lightmapColor * 0.7;
+	// finalColor = finalColor * lightmapColor;
 
 
 		//////////////// RefMap ////////////////
@@ -166,7 +167,7 @@ void main(void) {
 				refmapLookup = normalize(correctBoundingBoxIntersect(refMapBox, refmapLookup));
 			}
 
-			vec3 refColor = textureCube(refMap, refmapLookup, (roughness - 0.5) * 5.0).rgb;
+			vec3 refColor = textureCube(refMap, refmapLookup, (roughness - 0.5) * 7.0).rgb;
 
 			if (refMapType == 1) {
 				finalColor += pow(refColor, vec3(10.0)) * glossy;
@@ -174,11 +175,11 @@ void main(void) {
 				if (dot(normal, vec3(0.0, 1.0, 0.0)) > 0.98) {
 					refColor *= clamp(1.0 - dot(refmapLookup, normal), 0.0, 1.0);
 				}
-				finalColor = finalColor + pow(refColor, vec3(7.5)) * (glossy * 0.7);
+				finalColor = finalColor + pow(refColor, vec3(1.0 / glossy)) * pow(glossy, 10.0);
 			}
 		
 			// if (alpha < 1.0) {
-				// alpha = max(finalColor.r, max(finalColor.g, finalColor.b)) * 0.5;
+			// 	alpha = max(finalColor.r, max(finalColor.g, finalColor.b)) * 0.5;
 			// }
 		}
 

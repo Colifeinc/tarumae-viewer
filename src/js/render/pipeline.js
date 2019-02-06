@@ -322,8 +322,8 @@ Tarumae.PipelineNodes.ImageFilterRenderer = class extends Tarumae.PipelineNode {
         case "blur-hor": imageShader.filterType = 2; break;
         case "blur-ver": imageShader.filterType = 3; break;
         case "light-pass": imageShader.filterType = 4; break;
-        case "guass_blur3": imageShader.filterType = 5; break;
-        case "guass_blur5": imageShader.filterType = 6; break;
+        case "guass-blur3": imageShader.filterType = 5; break;
+        case "guass-blur5": imageShader.filterType = 6; break;
       }
 
       this.buffer.use();

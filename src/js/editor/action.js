@@ -56,17 +56,17 @@ Object.assign(TarumaeEditor.prototype, {
 
 		while (scene.selectedObjects.length > 0) {
 			scene.remove(scene.selectedObjects[0]);
-			scene.selectedObjects._s3_removeAt(0);
+			scene.selectedObjects._t_removeAt(0);
 		}
     
-		scene.selectedObjects._s3_clear();
+		scene.selectedObjects._t_clear();
 		scene.requireUpdateFrame();
 		this.backupCurrentEditorScene();
 	},
 
 	deleteAllObjects: function() {
-		this.rootObject.objects._s3_clear();
-		this.scene.selectedObjects._s3_clear();
+		this.rootObject.objects._t_clear();
+		this.scene.selectedObjects._t_clear();
 
 		this.scene.requireUpdateFrame();
 		this.backupCurrentEditorScene();
@@ -165,7 +165,7 @@ Object.assign(TarumaeEditor.prototype, {
 						editor.focusActivePoint.set(viewer.mouse.movement);
           
 						var aps = editor.focusObject.activePoints;
-						aps._s3_foreach(function(name, ap) {
+						aps._t_foreach(function(name, ap) {
 							editor.updateActivePoint(ap);
 						});
           
@@ -260,7 +260,7 @@ Object.assign(TarumaeEditor.prototype, {
 							// var aps = editor.focusObject.activePoints;
 
 							// if (typeof aps !== "undefined" && aps != null) {
-							//   aps._s3_foreach(function (name, ap) {
+							//   aps._t_foreach(function (name, ap) {
 							//     if (Tarumae.MathFunctions.triangleContainsPoint3D(viewer.mouse.position,
 							//       renderer.transformPoints(ap.arrowPoints))) {
 

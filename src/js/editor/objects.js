@@ -162,7 +162,7 @@ Tarumae.EditorWall.prototype.updateMesh = function() {
     mesh.destroy();
   }
 
-  this.meshes._s3_clear();
+  this.meshes._t_clear();
 
   this.generateMeshes();
 };

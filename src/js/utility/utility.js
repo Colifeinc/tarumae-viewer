@@ -46,7 +46,7 @@ Object.defineProperties(Tarumae.Utility.StringExtension, {
 	
 Object.defineProperties(Object.prototype, {
 
-	_s3_foreach: {
+	_t_foreach: {
 		value: function(iterator) {
 			if (typeof iterator !== "function") return;
 
@@ -85,7 +85,7 @@ Object.defineProperties(Object.prototype, {
 });
 
 Object.defineProperties(Array.prototype, {
-	_s3_foreach: {
+	_t_foreach: {
 		value: function(iterator) {
 			if (typeof iterator !== "function") return;
 
@@ -119,7 +119,7 @@ Object.defineProperties(Array.prototype, {
 		enumerable: false
 	},
 
-	_s3_remove: {
+	_t_remove: {
 		value: function(element) {
 			var index = this._t_arrayIndexOf(element);
 			if (index > -1) this.splice(index, 1);
@@ -127,20 +127,20 @@ Object.defineProperties(Array.prototype, {
 		enumerable: false
 	},
 
-	_s3_removeAt: {
+	_t_removeAt: {
 		value: function(index) {
 			this.splice(index, 1);
 		}
 	},
 
-	_s3_clear: {
+	_t_clear: {
 		value: function() {
 			this.length = 0;
 		},
 		enumerable: false
 	},
 
-	_s3_pushIfNotExist: {
+	_t_pushIfNotExist: {
 		value: function(element) {
 			if (!this._t_contains(element)) {
 				this.push(element);
