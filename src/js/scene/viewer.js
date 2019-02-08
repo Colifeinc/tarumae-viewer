@@ -439,7 +439,7 @@ Tarumae.Viewer = class {
 				size = Math.max(bbox.size.x, bbox.size.y, bbox.size.z);
 				target = bbox.origin;
 			} else {
-				target = target.getWorldLocation();
+				target = target.worldLocation;
 			}
         
 			targetLocation = target.neg();

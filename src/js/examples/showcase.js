@@ -263,11 +263,14 @@ window.addEventListener("load", function() {
 	scene.sun.location.set(0.01, 2, 0.01);
 	scene.sun.mat.color = [.1, .09, .08];
 	scene.mainCamera.fieldOfView = 75;
+	scene.mainCamera.location.set(-2.55, 1.5, 2.12);
+	scene.mainCamera.angle.set(-3, 310, 0);
 
 	// const controller = new ShowroomController(scene);
 	new Tarumae.TouchController(scene);
 
-	_scene.sun.mat.color = [.8, .8, .8];
+	// _scene.sun.mat.color = [.8, .8, .8];
+	_scene.sun.mat.color = [.1, .1, .1];
 	
 	scene.createObjectFromURL("/static/models/room_01a-baked.toba", obj => {
 		window.obj = obj;

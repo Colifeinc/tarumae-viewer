@@ -175,7 +175,7 @@ Object.assign(Tarumae.EditorShader.prototype, {
 
     // sun
     if (typeof scene.sun === "object" && scene.sun != null) {
-      var sunloc = scene.sun.getWorldLocation();
+      var sunloc = scene.sun.worldLocation;
       var sundir = Vec3.normalize(sunloc);
       this.sundirUniform.set(sundir);
 		

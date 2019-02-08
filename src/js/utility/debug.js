@@ -260,7 +260,7 @@ Tarumae.Debugger = class {
 			var html = (obj.name ? this.getShorterUrl(obj.name) : "&lt;unnamed&gt;") + "<br/><br/>";
       
 			html += "local: " + obj.location.toString() + "<br/>"
-        + "world: " + obj.getWorldLocation().toString() + "<br/>"
+        + "world: " + obj.worldLocation.toString() + "<br/>"
         + "angle: " + obj.angle.toString() + "<br/>"
         + "scale: " + obj.scale.toString() + "<br/>"
         + "polys: " + obj.polygonCount + "<br/><br/>";

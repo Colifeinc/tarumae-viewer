@@ -11,8 +11,8 @@ import { Color3, Color4 } from "../math/vector";
 window.addEventListener("load", function() {
 
 	const renderer = new Tarumae.Renderer({
-		// renderPixelRatio: window.devicePixelRatio,
-		renderPixelRatio: Math.max(window.devicePixelRatio * 0.75, 1),
+		renderPixelRatio: window.devicePixelRatio,
+		// renderPixelRatio: Math.max(window.devicePixelRatio * 0.75, 1),
 		// renderPixelRatio: 1,
 		backColor: new Color4(0.74, .87, .85, 1),
 		backgroundImage: "../static/textures/bg-gray-gradient.jpg",
@@ -113,7 +113,9 @@ window.addEventListener("load", function() {
 				nextObj.opacity = t;
 			});
 			scene.animate({ effect: "fadeout" }, t => {
+				console.log(nextObj._angle.obj === nextObj);
 				nextObj.angle.y = -(1 - t) * 500 + 25;
+				debugger;
 			});
 		}
 	}
@@ -125,15 +127,15 @@ window.addEventListener("load", function() {
 
 	const light1 = new Tarumae.PointLight();
 	light1.location.set(2, 8, 7);
-	light1.mat.emission = 2.0;
+	light1.mat.emission = 100.0;
 	lights.add(light1);
 		
 	const light2 = new Tarumae.PointLight();
 	light2.location.set(-3, 6, 3);
-	light2.mat.emission = 1.0;
+	light2.mat.emission = 50.0;
 	lights.add(light2);
 
-	scene.sun.mat.color = [1, 1, 1];
+	scene.sun.mat.color = [2, 2, 2];
 
 	scene.add(lights);
 

@@ -86,8 +86,8 @@ vec3 traceLight(vec3 vertexNormal, vec3 cameraNormal) {
 		float ln = dot(lightNormal, vertexNormal);
 
 		if (ln > 0.0) {
-			float ld = pow(length(lightRay), 0.2);
-			diff += lights[i].color * clamp(ln * ld, 0.0, 1.0) * 0.1;
+			float ld = pow(length(lightRay), -5.0);
+			diff += lights[i].color * clamp(ln * ld, 0.0, 1.0) * ((roughness * roughness) + 0.1);
 		}
 
 		if (glossy > 0.0) {
@@ -175,7 +175,7 @@ void main(void) {
 				if (dot(normal, vec3(0.0, 1.0, 0.0)) > 0.98) {
 					refColor *= clamp(1.0 - dot(refmapLookup, normal), 0.0, 1.0);
 				}
-				finalColor = finalColor + pow(refColor, vec3(1.0 / glossy)) * pow(glossy, 10.0);
+				finalColor = finalColor + pow(refColor, vec3(1.0 / glossy)) * pow(glossy, 4.0);
 			}
 		
 			// if (alpha < 1.0) {
@@ -183,9 +183,9 @@ void main(void) {
 			// }
 		}
 
-		if (alpha < 0.05) {
-			discard;
-		}
+		// if (alpha < 0.05) {
+		// 	discard;
+		// }
 
 		//////////////// ShadowMap ////////////////
 

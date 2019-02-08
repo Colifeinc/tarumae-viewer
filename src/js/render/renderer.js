@@ -336,6 +336,8 @@ Tarumae.Renderer = class {
 	}
 	
 	render() {
+		requestAnimationFrame(_ => this.render());
+
 		if (this.initialized) {
 	
 			if (this.options.enable3D) {
@@ -372,9 +374,7 @@ Tarumae.Renderer = class {
 				this.current2DScene.render(this.drawingContext2D);
 				this.current2DScene.requestedUpdateFrame = false;
 			}
-		}
-	
-		requestAnimationFrame(_ => this.render());
+		}	
 	}
 
 	createPipeline() {
@@ -534,6 +534,8 @@ Tarumae.Renderer = class {
 			}
 		}
 
+		scene.beforeDrawFrame(this);
+
 		if (this.wireframe) {
 			this.useShader("wireframe");
 		}
@@ -576,7 +578,7 @@ Tarumae.Renderer = class {
 			// }
 		}
 	
-		scene.drawFrame(this);
+		scene.afterDrawFrame(this);
 	
 		if (this.currentShader) {
 			this.currentShader.endScene(scene);

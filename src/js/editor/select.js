@@ -31,7 +31,7 @@ Object.assign(TarumaeEditor.prototype, {
       }
       scene.selectedObjects._t_pushIfNotExist(object);
       
-      this.cursor.position = object.getWorldLocation();
+      this.cursor.position = object.worldLocation;
       this.cursor.show();
     } else {
       this.cursor.hide();

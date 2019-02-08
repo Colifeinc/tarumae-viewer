@@ -592,7 +592,7 @@ Tarumae.Shaders.SimpleShader = class extends Tarumae.Shader {
 
 		// sun
 		if (typeof scene.sun === "object" && scene.sun != null) {
-			const sunloc = scene.sun.getWorldLocation();
+			const sunloc = scene.sun.worldLocation;
 			const sundir = Vec3.normalize(sunloc);
 			this.sundirUniform.set(sundir);
 		
@@ -876,7 +876,7 @@ Tarumae.Shaders.PanoramaShader = class extends Tarumae.Shader {
 
 	// 	// // sun
 	// 	// if (typeof scene.sun === "object" && scene.sun != null) {
-	// 	// 	var sunloc = scene.sun.getWorldLocation();
+	// 	// 	var sunloc = scene.sun.worldLocation;
 	// 	// 	var sundir = Vec3.normalize(sunloc);
 	// 	// 	this.sundirUniform.set(sundir);
 		
@@ -1053,58 +1053,6 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		this.emptyBoundingBox = new Tarumae.BoundingBox(Vec3.zero, Vec3.zero);
 	}
 
-	checkSceneLightSources(scene, cameraLocation) {
-		for (const object of scene._lightSources) {
-			if (object.visible === true) {
-				if (typeof object.mat === "object" && object.mat !== null) {
-					if (typeof object.mat.emission !== "undefined" && object.mat.emission > 0) {
-						
-						var lightWorldPos;
-					
-						if (Array.isArray(object.meshes) && object.meshes.length > 0) {
-							var bounds = object.getBounds();
-							lightWorldPos = Vec3.add(bounds.min, Vec3.mul(Vec3.sub(bounds.max, bounds.min), 0.5));
-						} else {
-							lightWorldPos = new Vec4(0, 0, 0, 1).mulMat(object._transform).xyz();
-						}
-
-						var distance = Vec3.sub(lightWorldPos, cameraLocation).length();
-						if (distance > Tarumae.Shaders.StandardShader.LightLimitation.Distance) return;
-
-						var index = -1;
-
-						for (var i = 0; i < Tarumae.Shaders.StandardShader.LightLimitation.Count
-							&& i < this.lightSources.length; i++) {
-							var existLight = this.lightSources[i];
-							if (distance < existLight.distance) {
-								index = i;
-								break;
-							}
-						}
-
-						if (index === -1) {
-							this.lightSources.push({
-								object: object,
-								worldloc: lightWorldPos,
-								distance: distance
-							});
-						} else if (index >= 0) {
-							this.lightSources.splice(index, 0, {
-								object: object,
-								worldloc: lightWorldPos,
-								distance: distance
-							});
-						}
-					}
-				}
-			}
-		}
-
-		if (this.lightSources.length > Tarumae.Shaders.StandardShader.LightLimitation.Count) {
-			this.lightSources = this.lightSources.slice(0, Tarumae.Shaders.StandardShader.LightLimitation.Count);
-		}
-	}
-
 	beginScene(scene) {
 		super.beginScene(scene);
 	
@@ -1115,7 +1063,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		let cameraLocation;
 
 		if (camera) {
-			cameraLocation = camera.getWorldLocation();
+			cameraLocation = camera.worldLocation;
 		} else {
 			cameraLocation = Vec3.zero;
 		}
@@ -1123,18 +1071,11 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		this.cameraLocUniform.set(cameraLocation);
 
 		// lights
-		this.lightSources._t_clear();
 		let lightCount = 0;
 
 		if (scene.renderer.options.enableLighting) {
-		
-			if (this.renderer.debugger) {
-				this.renderer.debugger.beforeSelectLightSource();
-			}
 
-			this.checkSceneLightSources(scene, cameraLocation);
-		
-			lightCount = this.lightSources.length;
+			lightCount = scene._activedLightSources.length;
 		
 			if (this.renderer.debugMode) {
 				this.renderer.debugger.currentLightCount = lightCount;
@@ -1142,7 +1083,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 
 			for (var i = 0; i < lightCount; i++) {
 				const lightUniform = this.lightUniforms[i];
-				var lightWrap = this.lightSources[i];
+				var lightWrap = scene._activedLightSources[i];
 				var light = lightWrap.object;
 
 				lightUniform.pos.set(lightWrap.worldloc);
@@ -1163,9 +1104,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 				}
 			}
 
-			if (this.renderer.debugger) {
-				this.renderer.debugger.afterSelectLightSource();
-			}
+
 		}
 	
 		this.lightCountUniform.set(lightCount);
@@ -1174,7 +1113,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		if (scene.sun !== undefined) {
 			const sun = scene.sun;
 
-			const sundir = Vec3.normalize(sun.getWorldLocation());
+			const sundir = Vec3.normalize(sun.worldLocation);
 			this.sundirUniform.set(sundir);
 		
 			let sunlight = Tarumae.Shader.defaultSunColor;
@@ -1233,7 +1172,6 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		var normalIntensity = 1.0;
 
 		this.usingLightmap = null;
-		this.useRefmap = null;
 		this.useNormalmap = null;
 	
 		if (typeof mat === "object" && mat != null) {
@@ -1328,8 +1266,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		// refmap
 		if (this.renderer.options.enableEnvmap
 			&& typeof obj.refmap && (obj.refmap instanceof Tarumae.CubeMap) && obj.refmap.loaded) {
-			this.useRefmap = obj.refmap;
-			this.refMapUniform.set(this.useRefmap);
+			this.refMapUniform.set(obj.refmap);
 		
 			if (!obj.refmap.bbox) {
 				this.refmapBoxUniform.set(this.emptyBoundingBox);
@@ -1386,8 +1323,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		// refmap
 		if (this.renderer.options.enableEnvmap
 			&& typeof mesh._refmap === "object" && mesh._refmap instanceof Tarumae.CubeMap && mesh._refmap.loaded) {
-			this.useRefmap = mesh._refmap;
-			this.refMapUniform.set(this.useRefmap);
+			this.refMapUniform.set(mesh._refmap);
 		
 			if (!mesh._refmap.bbox) {
 				this.refmapBoxUniform.set(this.emptyBoundingBox);
@@ -1411,12 +1347,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 
 		this.textureUniform.unset();
 		this.lightMapUniform.unset();
-	
-		// refmap
-		if (this.useRefmap !== null) {
-			gl.activeTexture(gl.TEXTURE2);
-			this.useRefmap.disuse();
-		}
+		this.refMapUniform.unset();
 
 		// normal-map	
 		if (this.useNormalmap !== null) {

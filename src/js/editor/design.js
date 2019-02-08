@@ -252,7 +252,7 @@ Object.assign(TarumaeEditor.prototype, {
     var renderer = this.renderer;
 
     var obj = ap.object;
-    var worldLocation = obj.getWorldLocation();
+    var worldLocation = obj.worldLocation;
     var worldRotation = obj.getWorldRotation();
     var pos = ap.get();
     

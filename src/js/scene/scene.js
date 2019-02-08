@@ -32,6 +32,7 @@ Tarumae.Scene = class {
 		this._refmaps = {};
 		this._bundles = {};
 		this._lightSources = [];
+		this._activedLightSources = [];
 
 		this.resourceManager = new Tarumae.ResourceManager();
 		this.animation = false;
@@ -262,7 +263,11 @@ Tarumae.Scene = class {
 		// 			 downloaded and created from this scene
 	}
 
-	drawFrame(renderer) {
+	beforeDrawFrame(renderer) {
+		this.updateLightSources();
+	}
+
+	afterDrawFrame(renderer) {
 		this.onframe(renderer);
 		this.requestedUpdateFrame = false;
 	}
@@ -371,10 +376,84 @@ Tarumae.Scene = class {
 	removeAllSelectedObjects() {
 		for (var i = 0; i < this.selectedObjects.length; i++) {
 			this.remove(this.selectedObjects[i]);
-		}
+	}
 
 		this.selectedObjects._t_clear();
 		this.requireUpdateFrame();
+	}
+	
+	updateLightSources() {
+		this._activedLightSources._t_clear();
+
+		if (!this.renderer.options.enableLighting) {
+			return;
+		}
+		
+		if (this.renderer.debugger) {
+			this.renderer.debugger.beforeSelectLightSource();
+		}
+
+		let cameraLocation;
+
+		if (this.mainCamera) {
+			cameraLocation = this.mainCamera.worldLocation;
+		} else {
+			cameraLocation = Vec3.zero;
+		}
+
+		for (const object of this._lightSources) {
+			if (object.visible === true) {
+				if (typeof object.mat === "object" && object.mat !== null) {
+					if (typeof object.mat.emission !== "undefined" && object.mat.emission > 0) {
+							
+						var lightWorldPos;
+						
+						if (Array.isArray(object.meshes) && object.meshes.length > 0) {
+							var bounds = object.getBounds();
+							lightWorldPos = Vec3.add(bounds.min, Vec3.mul(Vec3.sub(bounds.max, bounds.min), 0.5));
+						} else {
+							lightWorldPos = new Vec4(0, 0, 0, 1).mulMat(object._transform).xyz();
+						}
+	
+						var distance = Vec3.sub(lightWorldPos, cameraLocation).length();
+						if (distance > Tarumae.Shaders.StandardShader.LightLimitation.Distance) return;
+	
+						var index = -1;
+	
+						for (var i = 0; i < Tarumae.Shaders.StandardShader.LightLimitation.Count
+							&& i < this._activedLightSources.length; i++) {
+							var existLight = this._activedLightSources[i];
+							if (distance < existLight.distance) {
+								index = i;
+								break;
+							}
+						}
+	
+						if (index === -1) {
+							this._activedLightSources.push({
+								object: object,
+								worldloc: lightWorldPos,
+								distance: distance
+							});
+						} else if (index >= 0) {
+							this._activedLightSources.splice(index, 0, {
+								object: object,
+								worldloc: lightWorldPos,
+								distance: distance
+							});
+						}
+					}
+				}
+			}
+		}
+	
+		if (this._activedLightSources.length > Tarumae.Shaders.StandardShader.LightLimitation.Count) {
+			this._activedLightSources = this._activedLightSources.slice(0, Tarumae.Shaders.StandardShader.LightLimitation.Count);
+		}
+
+		if (this.renderer.debugger) {
+			this.renderer.debugger.afterSelectLightSource();
+		}
 	}
 
 	createMeshFromURL(url, handler, rm) {
@@ -417,13 +496,14 @@ Tarumae.Scene = class {
 	}
 
 	prepareObjectMesh(obj, name, value, loadingSession, bundle) {
-		var scene = this;
+		const scene = this;
+		const renderer = this.renderer;
 
-		var rm = loadingSession ? loadingSession.rm : this.resourceManager;
+		const rm = loadingSession ? loadingSession.rm : this.resourceManager;
 			
 		if (typeof value === "string" && value.length > 0) {
-			if (scene.renderer.cachedMeshes.hasOwnProperty(value)) {
-				var mesh = scene.renderer.cachedMeshes[value];
+			if (renderer.cachedMeshes.hasOwnProperty(value)) {
+				var mesh = renderer.cachedMeshes[value];
 				obj.addMesh(mesh);
 				if (typeof name === "string") {
 					obj[name] = mesh;
@@ -652,11 +732,14 @@ Tarumae.Scene = class {
 		const rm = loadingSession ? loadingSession.rm : this.resourceManager;
 
 		if (!(obj instanceof Tarumae.SceneObject)) {
+			let newProto;
 			if (obj.type === Tarumae.ObjectTypes.Camera) {
-				Object.setPrototypeOf(obj, new Tarumae.Camera());
+				newProto = new Tarumae.Camera();
 			} else {
-				Object.setPrototypeOf(obj, new Tarumae.SceneObject());
+				newProto = new Tarumae.SceneObject();
 			}
+			Object.setPrototypeOf(obj, newProto);
+			// obj._changePrototype(newProto);
 		}
 	
 		const prepareObjectProperties = function(obj, loadingSession, bundle) {
@@ -747,14 +830,15 @@ Tarumae.Scene = class {
 						}
 						break;
 
-					case "location":
 					case "angle":
+						
+					case "location":
 					case "scale":
 						if (typeof value === "object" && Array.isArray(value)) {
 							switch (value.length) {
 								default: break;
 								case 3: case 4:
-									delete obj[name];
+									delete obj[name]; // delete property from define
 									obj[name].set(value[0], value[1], value[2]);
 									break;
 							}
