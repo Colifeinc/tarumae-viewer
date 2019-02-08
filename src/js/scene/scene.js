@@ -732,14 +732,16 @@ Tarumae.Scene = class {
 		const rm = loadingSession ? loadingSession.rm : this.resourceManager;
 
 		if (!(obj instanceof Tarumae.SceneObject)) {
-			let newProto;
+			let typeConstructor;
+
 			if (obj.type === Tarumae.ObjectTypes.Camera) {
-				newProto = new Tarumae.Camera();
+				typeConstructor = Tarumae.Camera;
 			} else {
-				newProto = new Tarumae.SceneObject();
+				typeConstructor = Tarumae.SceneObject;
 			}
-			Object.setPrototypeOf(obj, newProto);
-			// obj._changePrototype(newProto);
+
+			obj.__proto__ = typeConstructor.prototype;
+			typeConstructor.call(obj);
 		}
 	
 		const prepareObjectProperties = function(obj, loadingSession, bundle) {
@@ -829,10 +831,9 @@ Tarumae.Scene = class {
 							scene.prepareMaterialObject(value, rm, loadingSession, bundle);
 						}
 						break;
-
-					case "angle":
-						
+					
 					case "location":
+					case "angle":
 					case "scale":
 						if (typeof value === "object" && Array.isArray(value)) {
 							switch (value.length) {

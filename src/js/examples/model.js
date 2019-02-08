@@ -113,9 +113,7 @@ window.addEventListener("load", function() {
 				nextObj.opacity = t;
 			});
 			scene.animate({ effect: "fadeout" }, t => {
-				console.log(nextObj._angle.obj === nextObj);
 				nextObj.angle.y = -(1 - t) * 500 + 25;
-				debugger;
 			});
 		}
 	}
