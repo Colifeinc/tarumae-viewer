@@ -9,8 +9,9 @@ module.exports = {
     particleDemo: "./src/js/examples/particle.js",
     modelDemo: "./src/js/examples/model.js",
     showcaseDemo: "./src/js/examples/showcase.js",
-    shibauraDemo: "./src/js/examples/house_shibaura.js",
+    // shibauraDemo: "./src/js/examples/house_shibaura.js",
     designer: "./src/js/designer/main.js",
+    edge: "./src/js/edge.js",
   },
   module: {
     rules: [
@@ -74,17 +75,23 @@ module.exports = {
       template: './src/examples/showcase.html',
       filename: 'showcase.html'
     }),
-    new HtmlWebpackPlugin({
-      inject: false,
-      hash: true,
-      template: './src/examples/house_shibaura.html',
-      filename: 'house_shibaura.html'
-    }),
+    // new HtmlWebpackPlugin({
+    //   inject: false,
+    //   hash: true,
+    //   template: './src/examples/house_shibaura.html',
+    //   filename: 'house_shibaura.html'
+    // }),
     new HtmlWebpackPlugin({
       inject: false,
       hash: true,
       template: './src/designer.html',
       filename: 'designer.html'
+    }),
+    new HtmlWebpackPlugin({
+      inject: false,
+      hash: true,
+      template: './src/edge.html',
+      filename: 'edge.html'
     }),
     new CopyWebpackPlugin([
       {from: 'src/css', to: 'css', force: true}
