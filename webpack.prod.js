@@ -2,7 +2,7 @@ const path = require("path");
 
 module.exports = {
   entry: {
-    tarumae: "./src/js/tarumae-viewer.js",
+    "tarumae-viewer": "./src/js/tarumae-viewer.js",
   },
   module: {
     rules: [
