@@ -44,7 +44,7 @@ Tarumae.CubeMap.prototype = {
     return Tarumae.CubeMap.LoadingFaces;
   },
 
-  createEmpty: function(width, height) {
+  create: function(width, height, defaultData) {
     if (!this.renderer) {
       throw "renderer must be specified before create empty cubemap";
     }
@@ -62,10 +62,15 @@ Tarumae.CubeMap.prototype = {
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
     
     for (var i = 0; i < faces.length; i++) {
-      gl.texImage2D(faces[i], 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+      gl.texImage2D(faces[i], 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, defaultData);
     }
 
     this.disuse();
+  },
+
+  createEmpty: function() {
+    this.create(1, 1, new Uint8Array([255, 255, 255, 255]));
+    // this.create(1, 1, new Uint8Array([0, 0, 0, 0]));
   },
 
   setParameters: function() {
@@ -294,6 +299,9 @@ Tarumae.ImageCubeBox = class {
         rm.get(imageUrls[4]),
         rm.get(imageUrls[5]),
       ]);
+  
+      console.log("cubemap loaded");
+      this.onload();
     });
 
     this.onload();

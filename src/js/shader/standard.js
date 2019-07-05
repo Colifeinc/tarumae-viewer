@@ -87,7 +87,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		// empty cubemap
 		this.emptyCubemap = new Tarumae.CubeMap(renderer);
 		this.emptyCubemap.enableMipmap = false;
-		this.emptyCubemap.createEmpty(2, 2);
+		this.emptyCubemap.createEmpty();
 
 		this.emptyBoundingBox = new Tarumae.BoundingBox(Vec3.zero, Vec3.zero);
 	}

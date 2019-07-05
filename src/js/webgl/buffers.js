@@ -118,7 +118,7 @@ Tarumae.CubeMapFrameBuffer = class extends Tarumae.CommonBuffer {
 		const gl = this.gl;
 		
 		const cubemap = new Tarumae.CubeMap(this.renderer);
-		cubemap.createEmpty(this.width, this.height);
+		cubemap.create(this.width, this.height);
 		this.texture = cubemap;
 
 		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_CUBE_MAP_POSITIVE_X, this.texture.glTexture, 0);
