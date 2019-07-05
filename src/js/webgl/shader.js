@@ -134,8 +134,9 @@ Tarumae.Shader = class {
 };
 
 Object.defineProperties(Tarumae.Shader, {
-	defaultSunColor: { value: new Color3(0.21, 0.18, 0.16) },
-	// defaultSunColor: { value: new Color3(1.0, 0.97, 0.94) },
+	// defaultSunColor: { value: new Color3(0.21, 0.18, 0.16) },
+	// defaultSunColor: { value: new Color3(0.5, 0.48, 0.46) },
+	defaultSunColor: { value: new Color3(1.0, 0.97, 0.94) },
 	emptyTexture: { value: Tarumae.Texture.createEmpty() },
 });
 
