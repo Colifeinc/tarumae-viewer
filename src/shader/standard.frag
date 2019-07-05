@@ -91,20 +91,14 @@ vec3 traceLight(vec3 vertexNormal, vec3 cameraNormal) {
 		vec3 lightNormal = normalize(lightRay);
 
 		float ln = dot(lightNormal, vertexNormal);
+		float ld = pow(length(lightRay), -2.0);
 
-		if (ln > 0.0) {
-			float ld = pow(length(lightRay), -5.0);
-			diff += lights[i].color * clamp(ln * ld, 0.0, 1.0) * ((roughness * roughness) + 0.1);
-		}
+		diff += lights[i].color * smoothstep(0.0, 1.0, ln * ld);
 
-		if (glossy > 0.0) {
-			vec3 reflection = reflect(lightNormal, vertexNormal);
-			float refd = dot(reflection, cameraNormal);
+		vec3 lightReflection = reflect(lightNormal, vertexNormal);
+		float refd = dot(lightReflection, cameraNormal);
 
-			if (refd > 0.0) {
-				specular += lights[i].color * pow(refd, 7.0) * pow(glossy, 10.0);
-			}
-		}
+		specular += lights[i].color * smoothstep(0.0, 1.0, pow(refd, glossy) * glossy);
 	}
 
 	return diff + specular;
@@ -128,15 +122,10 @@ void main(void) {
 
 	if (hasNormalMap) {
 		vertexNormal = normalize(TBN * (normalmapValue * 2.0 - 1.0) * vec3(normalIntensity, normalIntensity, 1.0));
-		// vertexNormal = normalize(TBN * (normalmapValue * 2.0 - 1.0));
 	}
 
-	vec3 cameraRay, cameraNormal;
-
-	if (lightCount > 0 || refMapType > 0) {
-		cameraRay = vertex - cameraLoc;
-		cameraNormal = normalize(cameraRay);
-	}
+	vec3 cameraRay = vertex - cameraLoc;
+	vec3 cameraNormal = normalize(cameraRay);
 
 	//////////////// Lights ////////////////
 	
@@ -147,7 +136,7 @@ void main(void) {
 			finalColor += traceLight(vertexNormal, cameraNormal);
 		}
 
-		finalColor = finalColor * 0.5 + finalColor * sunlight * max(dot(vertexNormal, sundir), 0.0) * 0.5;
+		finalColor = finalColor * sunlight + max(dot(vertexNormal, sundir), 0.0);
 	}
 
 	finalColor = finalColor * textureColor.rgb;
@@ -157,44 +146,23 @@ void main(void) {
 	vec3 lightmapColor = vec3(0.0);
 
 	lightmapColor = texture2D(lightMap, texcoord2).rgb;
-	// finalColor = finalColor * pow(lightmapColor, vec3(0.5)) + pow(lightmapColor, vec3(10.0)) * 0.1;
 	finalColor = finalColor * 0.3 + finalColor * lightmapColor * 0.7;
-	// finalColor = finalColor * lightmapColor;
 
+	//////////////// RefMap ////////////////
 
-		//////////////// RefMap ////////////////
+	vec3 refmapLookup = reflect(cameraNormal, vertexNormal);
 
-		vec3 refmapLookup = vec3(0.0);
+	if (refMapType == 2) {
+		refmapLookup = normalize(correctBoundingBoxIntersect(refMapBox, refmapLookup));
+	}
 
-		if (glossy > 0.0) {
-			if (refMapType == 1) {
-				refmapLookup = reflect(cameraNormal, vertexNormal);
-			} else if (refMapType == 2) {
-				refmapLookup = reflect(cameraNormal, vertexNormal);
-				refmapLookup = normalize(correctBoundingBoxIntersect(refMapBox, refmapLookup));
-			}
+	vec3 refColor = textureCube(refMap, refmapLookup, roughness).rgb;
+	
+	float gg = clamp(pow(glossy, 3.0), 0.0, 1.0);
+	// finalColor = finalColor * (1.0 - gg) + (finalColor * 0.5 + finalColor * 0.5 * refColor) * gg;
+	finalColor = finalColor * (1.0 - gg) + (finalColor * refColor * gg);
 
-			vec3 refColor = textureCube(refMap, refmapLookup, (roughness - 0.5) * 7.0).rgb;
-
-			if (refMapType == 1) {
-				finalColor += pow(refColor, vec3(10.0)) * glossy;
-			} else if (refMapType == 2) {
-				if (dot(normal, vec3(0.0, 1.0, 0.0)) > 0.98) {
-					refColor *= clamp(1.0 - dot(refmapLookup, normal), 0.0, 1.0);
-				}
-				finalColor = finalColor + pow(refColor, vec3(1.0 / glossy)) * pow(glossy, 4.0);
-			}
-		
-			// if (alpha < 1.0) {
-			// 	alpha = max(finalColor.r, max(finalColor.g, finalColor.b)) * 0.5;
-			// }
-		}
-
-		// if (alpha < 0.05) {
-		// 	discard;
-		// }
-
-		//////////////// ShadowMap ////////////////
+	//////////////// ShadowMap ////////////////
 
 	if (receiveShadow) {
 		if (shadowMapType == 1) {
@@ -203,26 +171,9 @@ void main(void) {
 
 				float shadowMapDepth;
 				shadowMapDepth = decodeFloatRGBA(texture2D(shadowMap2D, shadowPosition.xy));
-				// float stride = 0.00024;
-				// shadowMapDepth  = 0.25 * decodeFloatRGBA(texture2D(shadowMap2D, shadowPosition.xy + vec2(stride * 0.4, stride * 0.6)));
-				// shadowMapDepth += 0.25 * decodeFloatRGBA(texture2D(shadowMap2D, shadowPosition.xy + vec2(stride * 0.6, stride * 0.4)));
-				// shadowMapDepth += 0.25 * decodeFloatRGBA(texture2D(shadowMap2D, shadowPosition.xy - vec2(stride * 0.4, stride * 0.6)));
-				// shadowMapDepth += 0.25 * decodeFloatRGBA(texture2D(shadowMap2D, shadowPosition.xy - vec2(stride * 0.6, stride * 0.4)));
-				// shadowMapDepth  = 0.25 * (texture2D(shadowMap2D, shadowPosition.xy + vec2(stride * 0.4, stride * 0.6))).r;
-				// shadowMapDepth += 0.25 * (texture2D(shadowMap2D, shadowPosition.xy + vec2(stride * 0.6, stride * 0.4))).r;
-				// shadowMapDepth += 0.25 * (texture2D(shadowMap2D, shadowPosition.xy - vec2(stride * 0.4, stride * 0.6))).r;
-				// shadowMapDepth += 0.25 * (texture2D(shadowMap2D, shadowPosition.xy - vec2(stride * 0.6, stride * 0.4))).r;
 
-				// float shadowBlock = (shadowPosition.z - shadowMapDepth);
-				// float shadowBlock = 1.0 - clamp((shadowPosition.z - shadowMapDepth) * 0.5, 0.0, 0.1);
 				float shadowBlock = 1.0 - smoothstep(0.00001, 0.05, (shadowPosition.z - shadowMapDepth)) / 0.5;
-				// float shadowBlock = 1.0 - smoothstep(0.0002, 0.3, (shadowPosition.z - shadowMapDepth)) / 0.5;
-				finalColor = finalColor * 0.75 + finalColor * shadowBlock * 0.25;
-
-				// float block = (shadowPosition.z - shadowMapDepth);
-				// if (block > 0.02) {
-				// 	finalColor *= 0.5;
-				// }
+				finalColor = finalColor + finalColor * shadowBlock * 0.15;
 			}
 		} else if (shadowMapType == 2) {
 			vec3 correctedVertexToSun = vec3(0.0);
