@@ -78,7 +78,7 @@ Tarumae.Camera = class extends Tarumae.SceneObject {
 			target = bbox.origin;
 			size = Math.max(bbox.size.x, bbox.size.y, bbox.size.z) * 2.0;
 		} else {
-			target = obj.getWorldLocation();
+			target = obj.worldLocation;
 			size = 1;
 		}
 	
@@ -97,7 +97,7 @@ Tarumae.Camera = class extends Tarumae.SceneObject {
 		var out = {};
 		var distance = this.calcVisibleDistanceToObject(obj, options.padding, out);
 	
-		var worldpos = this.getWorldLocation();
+		var worldpos = this.worldLocation;
 		var dir = Vec3.sub(worldpos, out.targetLocation).normalize();
 	
 		var targetpos = out.targetLocation.add(dir.mul(distance));

@@ -11,14 +11,20 @@ import "../utility/res";
 window.addEventListener("load", function() {
 
 	const renderer = new Tarumae.Renderer({
-		backColor: new Color4(0.9),
+		backColor: new Color4(0.2),
+		postprocess: true,
+		enableLighting: false,
+		bloomEffect: {
+			threshold: 0.8,
+			gamma: 1.0,
+		},
 	});
 
 	const scene = renderer.createScene();
 
 	window._scene = scene;
  
-	const count = 20000;
+	const count = 30000;
 	const pm = new Tarumae.ParticleMesh(count);
 
 	var particles = new Array(count);
@@ -50,7 +56,7 @@ window.addEventListener("load", function() {
 
 	function setAll(iterator) {
 		for (var i = 0; i < count; i++) {
-			iterator(particles[i]);
+			iterator(particles[i], i);
 		}
 	}
 
@@ -59,7 +65,6 @@ window.addEventListener("load", function() {
 	pobj.addMesh(pm);
   
 	scene.add(pobj);
-	// scene.add(new Tarumae.Cube());
 
 	function updateFrame() {
 		for (var i = 0; i < count; i++) {
@@ -77,14 +82,6 @@ window.addEventListener("load", function() {
 		scene.requireUpdateFrame();
 		requestAnimationFrame(updateFrame);
 	}
-
-	scene.onmousedown = () => {
-		setAll(p => {
-			p.ox = Math.random() * 20 - 10;
-			p.oy = Math.random() * 20 - 10;
-			p.oz = Math.random() * 20 - 10;
-		});
-	};
 
 	var mountainVertices;
 
@@ -106,9 +103,6 @@ window.addEventListener("load", function() {
 		}
 	};
 
-	scene.onmouseup = collapse;
-	scene.onenddrag = collapse;
-
 	requestAnimationFrame(updateFrame);
 
 	scene.animation = true;
@@ -129,19 +123,34 @@ window.addEventListener("load", function() {
 		
 	});
 
-	// scene.load({
-	// 	"bundle": "models/mountain2.mod"
-	// });
-
-
-	scene.mainCamera.location.set(0, 0, 10);
-	scene.mainCamera.angle.set(0, 0, 0);
+	const camera = scene.mainCamera;
+	camera.location.set(0, 0, 10);
+	camera.angle.set(0, 0, 0);
+	camera.fieldOfView = 20;
   
-	//new Tarumae.TouchViewer(scene);
+	new Tarumae.ObjectViewController(scene, {
+		object: pobj
+	});
 
-	scene.ondrag = () => {
-		pobj.angle.y += renderer.viewer.mouse.movement.x;
-	};
+	// setInterval(() => {
+	// 	setAll((p, i) => {
+	// 		// p.ox = Math.sin(i / Math.PI);
+	// 		// p.oy = Math.sin(i / Math.PI);
+	// 		p.oz = Math.sin(i / count * Math.PI);
+	// 	});
+	// }, 2000);
+	// scene.onmousedown = () => {
+	// 	setAll(p => {
+	// 		p.ox = Math.random() * 20 - 10;
+	// 		p.oy = Math.random() * 20 - 10;
+	// 		p.oz = Math.random() * 20 - 10;
+	// 	});
+	// };
+	// scene.onmouseup = collapse;
+	// scene.onenddrag = collapse;
+	// scene.ondrag = () => {
+	// 	pobj.angle.y += renderer.viewer.mouse.movement.x;
+	// };
 
 	scene.show();
 });

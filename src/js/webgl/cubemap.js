@@ -6,6 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "../entry"
+import { Vec2 } from "../math/vector";
 
 Tarumae.CubeMap = function(renderer, images) {
   this.glTexture = null;
@@ -194,7 +195,11 @@ Tarumae.CubeMap.prototype = {
 
     var headerLen = header[1];
     var res = header[3];
-    var resX = res >> 16, resY = res & 0xffff;
+    const resX = res >> 16, resY = res & 0xffff;
+
+    const bboxBuffer = new Float32Array(stream, 16, 24);
+    this.bbox = new Tarumae.BoundingBox(bboxBuffer[0], bboxBuffer[1], bboxBuffer[2],
+      bboxBuffer[3], bboxBuffer[4], bboxBuffer[5]);
 
     var faceDataLen = resX * resY * 3;
 

@@ -162,7 +162,7 @@ Object.assign(PlanDesigner.prototype, {
       var obj = this.selectedObjects[i];
       if (obj !== exceptObj) {
         this.removeActivePointsBelongToObject(obj);
-        this.selectedObjects._s3_remove(obj);
+        this.selectedObjects._t_remove(obj);
       }
     }
   },
@@ -276,7 +276,7 @@ Object.assign(PlanDesigner.prototype, {
     }
 
     for (var k = 0; k < removeList.length; k++) {
-      this.activePointsHolder._s3_remove(removeList[k]);
+      this.activePointsHolder._t_remove(removeList[k]);
     }
   },
 

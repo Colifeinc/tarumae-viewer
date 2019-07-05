@@ -21,7 +21,7 @@ Tarumae.KDNode = class {
   reset() {
     this.left = undefined;
     this.right = undefined;
-    this.items._s3_clear();
+    this.items._t_clear();
   }
   
   build(itemGetter, itemCount, depth = 0) {

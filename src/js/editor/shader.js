@@ -22,7 +22,7 @@ Tarumae.EditorShader = function(renderer, vertShaderSrc, fragShaderSrc) {
 	this.receiveLightUniform = this.bindUniform("receiveLight", "bool");
 	this.opacityUniform = this.bindUniform("opacity", "float");
 	this.colorUniform = this.bindUniform("color", "vec3");
-	this.texTilingUniform = this.findUniform("texTiling");
+	this.texTilingUniform = this.bindUniform("texTiling", "vec2");
 	this.glossyUniform = this.findUniform("glossy");
 	this.roughnessUniform = this.bindUniform("roughness", "float");
 	this.emissionUniform = this.findUniform("emission");
@@ -175,7 +175,7 @@ Object.assign(Tarumae.EditorShader.prototype, {
 
     // sun
     if (typeof scene.sun === "object" && scene.sun != null) {
-      var sunloc = scene.sun.getWorldLocation();
+      var sunloc = scene.sun.worldLocation;
       var sundir = Vec3.normalize(sunloc);
       this.sundirUniform.set(sundir);
 		
@@ -324,9 +324,9 @@ Object.assign(Tarumae.EditorShader.prototype, {
 
     // texture tiling
     if (texTiling != null) {
-      gl.uniform2fv(this.texTilingUniform, texTiling);
+      this.texTilingUniform.set();
     } else {
-      gl.uniform2fv(this.texTilingUniform, this.defaultTexTiling);
+      this.texTilingUniform.set(this.defaultTexTiling);
     }
 	
     // glossy

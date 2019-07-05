@@ -10,23 +10,24 @@ uniform mat4 projectViewMatrix;
 uniform mat4 modelMatrix;
 uniform mat3 modelMatrix3x3;
 uniform mat4 normalMatrix;
+uniform mat4 shadowmapProjectionMatrix;
+varying mat3 TBN;
 
 uniform bool hasNormalMap;
-uniform bool hasVColor;
 
 varying vec3 vertex;
 varying vec3 normal;
 varying vec2 texcoord1;
 varying vec2 texcoord2;
 varying vec3 vcolor;
-varying mat3 TBN;
+varying highp vec3 shadowPosition;
 
 void main(void) {
 	vec4 pos = vec4(vertexPosition, 1.0);
 	vec4 transformPos = modelMatrix * pos;
 
 	gl_Position = projectViewMatrix * transformPos;
-	
+
 	vertex = transformPos.xyz;
 	normal = normalize((normalMatrix * vec4(vertexNormal, 0.0)).xyz);
 	vcolor = vertexColor;
@@ -37,4 +38,7 @@ void main(void) {
 	if (hasNormalMap) {
 		TBN = modelMatrix3x3 * mat3(vertexTangent, vertexBitangent, vertexNormal);
 	}
+
+	vec4 shadowPos = shadowmapProjectionMatrix * pos;
+	shadowPosition = vec3(0.5) + (shadowPos.xyz / shadowPos.w) * 0.5;
 }

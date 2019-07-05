@@ -1,13 +1,13 @@
 {
 	"name": "tarumae",
-	"version": "1.2.0",
-	"description": "",
+	"version": "1.3.0",
+	"description": "Optimized WebGL engine for showcase application",
 	"main": "src/js/tarumae.js",
 	"scripts": {
 		"start": "npm run dev",
 		"build": "webpack --config webpack.prod.js --mode production",
 		"test": ":",
-		"dev": "webpack-dev-server --config webpack.dev.js --mode development",
+		"serve": "webpack-dev-server --config webpack.dev.js --mode development",
 		"pub": "npx babel src -d dist"
 	},
 	"keywords": [],

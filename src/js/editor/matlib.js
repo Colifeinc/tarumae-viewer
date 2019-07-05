@@ -2,7 +2,7 @@
 Object.assign(TarumaeEditor.prototype, {
   
   addMaterials: function(mats) {
-    mats._s3_foreach(function(name, mat) {
+    mats._t_foreach(function(name, mat) {
       mat.name = name;
       mat.loaded = false;
     });

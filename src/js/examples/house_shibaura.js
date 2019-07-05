@@ -8,7 +8,9 @@ import "../utility/res";
 
 window.addEventListener("load", function() {
 
-	const renderer = new Tarumae.Renderer();
+	const renderer = new Tarumae.Renderer({
+		postprocess: true
+	});
 
 	const scene = renderer.createScene();
 
@@ -23,7 +25,7 @@ window.addEventListener("load", function() {
 			location: [0, 3, 0],
 			scale: [20, 20, 20],
 			receiveLight: false,
-			mat: { tex: "textures/sky.jpg", color: [0.7, 0.9, 0.99] },
+			mat: { tex: "textures/sky.jpg", color: [0.7, 0.9, 1.0] },
 			// mat: { tex: "textures/sky.jpg", color: [1.0,1.1,1.15] },
 		};
     

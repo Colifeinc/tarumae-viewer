@@ -23,6 +23,10 @@ Tarumae.Debugger = class {
 		this.totalMeshMemoryUsed = 0;
 		this.totalNumberOfTexturesUsed = 0;
 		this.totalNumberOfPolygonBound = 0;
+		this.numberOfRenderPassesPerFrame = 0;
+		this.numberOfSceneRendered = 0;
+		this.numberOfPolygonRenderedPerSecond = 0;
+		this._numberOfPolygonRenderedPerSecond = 0;
 
 		this._maxPathLength = 30;
 
@@ -53,11 +57,11 @@ Tarumae.Debugger = class {
 		debugPanel.style.top = "0px";
 		debugPanel.style.left = "0px";
 		debugPanel.style.minWidth = "500px";
-		debugPanel.style.backgroundColor = "rgba(0, 0, 0, 0.2)";
+		debugPanel.style.backgroundColor = "rgba(0, 0, 0, 0.6)";
 		debugPanel.style.position = "absolute";
 		debugPanel.style.fontFamily = "monospace";
-		debugPanel.style.color = "black";
-		debugPanel.style["text-shadow"] = "0px 0px 1px #ffffff";
+		debugPanel.style.color = "white";
+		// debugPanel.style["text-shadow"] = "0px 0px 1px #ffffff";
 		debugPanel.style.display = "none";
 		renderer.container.appendChild(debugPanel);
 
@@ -93,6 +97,10 @@ Tarumae.Debugger = class {
   
 	beforeDrawFrame() {
 		this.elapsedTime.drawFrameBegin = Date.now();
+		this.numberOfRenderPassesPerFrame = 0;
+		this.totalNumberOfObjectRendered = 0;
+		this.totalNumberOfPolygonRendered = 0;
+		this.numberOfSceneRendered = 0;
 	}
 
 	afterDrawFrame() {
@@ -105,6 +113,22 @@ Tarumae.Debugger = class {
 
 		this.renderDebugPanel();
 		this.drawFPSRecord();
+	}
+
+	beforeObjectRender(obj) {
+
+	}
+
+	afterObjectRender(obj) {
+		this.totalNumberOfObjectRendered++;
+	}
+
+	beforeMeshRender(mesh) {
+	}
+
+	afterMeshRender(mesh) {
+		this.totalNumberOfPolygonRendered += mesh.polygonCount;
+		this._numberOfPolygonRenderedPerSecond += mesh.polygonCount;
 	}
 
 	beforeRaycast() {
@@ -157,6 +181,8 @@ Tarumae.Debugger = class {
 
 			this.averageFrameRenderingTime = fm.currentFPS <= 0 ? 0 : (this.totalFrameRenderingTime / fm.currentFPS);
 			this.totalFrameRenderingTime = 0;
+			this.numberOfPolygonRenderedPerSecond = this._numberOfPolygonRenderedPerSecond;
+			this._numberOfPolygonRenderedPerSecond = 0;
 		}
 	}
 
@@ -211,15 +237,17 @@ Tarumae.Debugger = class {
 		var toStringDigits = Tarumae.Utility.NumberExtension.toStringWithDigits;
     
 		return "<b>Tarumae (" + tarumaeversion + ")</b>" + newline + newline
-      + "FPS: " + toStringDigits(fm.currentFPS, 2) + " (" + toStringDigits(fm.minFPS, 2) + " ~ " + toStringDigits(fm.maxFPS, 2) + ")" + newline
-      + "average frame rendering time: " + toStringDigits(this.averageFrameRenderingTime, 2) + " ms." + newline
+			+ "fps: " + toStringDigits(fm.currentFPS, 2) + " (" + toStringDigits(fm.minFPS, 2) + " ~ " + toStringDigits(fm.maxFPS, 2) + ") / " 
+			+ "pts: " + toStringDigits(this.numberOfPolygonRenderedPerSecond / 1000, 1) + "k" + newline
+			+ "frame time: " + toStringDigits(this.averageFrameRenderingTime, 2) + " ms. / "
+			+ "passes: " + (this.numberOfRenderPassesPerFrame) + newline
       + "last raycast operation time: " + toStringDigits(this.lastRaycastElapsedTime, 2) + " ms." + newline
       + "current enabled lights: " + this.currentLightCount + newline
       + "light source filter time: " + this.lightSourceFilterElapsedTime + " ms." + newline
       + "navmesh movement check time: " + this.navmeshCheckElapsedTime + " ms." + newline
       + "total number of polygons bound: " + this.totalNumberOfPolygonBound + newline
-      + "total number of polygons drawed: " + this.totalNumberOfPolygonDrawed + newline
-      + "total number of objects drawed: " + this.totalNumberOfObjectDrawed + newline
+      + "total number of polygons rendered: " + this.totalNumberOfPolygonRendered + newline
+      + "total number of objects rendered: " + this.totalNumberOfObjectRendered + newline
       + "total mesh memory used: " + this.totalMeshMemoryUsed + " bytes" + newline
       + "total number of textures used: " + this.totalNumberOfTexturesUsed + newline
       + "";
@@ -232,7 +260,7 @@ Tarumae.Debugger = class {
 			var html = (obj.name ? this.getShorterUrl(obj.name) : "&lt;unnamed&gt;") + "<br/><br/>";
       
 			html += "local: " + obj.location.toString() + "<br/>"
-        + "world: " + obj.getWorldLocation().toString() + "<br/>"
+        + "world: " + obj.worldLocation.toString() + "<br/>"
         + "angle: " + obj.angle.toString() + "<br/>"
         + "scale: " + obj.scale.toString() + "<br/>"
         + "polys: " + obj.polygonCount + "<br/><br/>";

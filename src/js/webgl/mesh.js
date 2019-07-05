@@ -35,6 +35,7 @@ Tarumae.Mesh = class {
 		this._lightmap = undefined;
 		this._lightmapTrunkId = undefined;
 		this._lightmapType = undefined;
+		this._refmapTrunkId = undefined;
 	}
 
 	loadFromStream(stream) {
@@ -86,8 +87,9 @@ Tarumae.Mesh = class {
 				}
 
 				if (ver >= 0x0103) {
+					const chunkIdBuffer = new Uint32Array(stream, 80, 4);
 					if ((flags & Tarumae.Mesh.HeaderFlags.HasLightmap) === Tarumae.Mesh.HeaderFlags.HasLightmap) {
-						this._lightmapTrunkId = new Uint32Array(stream, 80, 4)[0];
+						this._lightmapTrunkId = chunkIdBuffer[0];
 						this._lightmapType = header[21];
 					}
 
@@ -105,6 +107,12 @@ Tarumae.Mesh = class {
 		
 						if ((flags & Tarumae.Mesh.HeaderFlags.HasWireframe) === Tarumae.Mesh.HeaderFlags.HasWireframe) {
 							this.meta.edgeCount = header[6];
+						}
+
+						if (ver >= 0x0105) {
+							if ((flags & Tarumae.Mesh.HeaderFlags.HasRefmap) === Tarumae.Mesh.HeaderFlags.HasRefmap) {
+								this._refmapTrunkId = chunkIdBuffer[2];
+							}
 						}
 					}
 				}
@@ -336,6 +344,10 @@ Tarumae.Mesh = class {
 				case Tarumae.Mesh.ComposeModes.TriangleFan:
 					this._polygonCount = this.meta.vertexCount - 2;
 					break;
+				
+				case Tarumae.Mesh.ComposeModes.Points:
+					this._polygonCount = this.meta.vertexCount;
+					break;
 			}
 
 			renderer.debugger.totalNumberOfPolygonBound += this._polygonCount;
@@ -401,6 +413,10 @@ Tarumae.Mesh = class {
 
 		const sp = renderer.currentShader;
 		if (!sp) return;
+
+		if (renderer.debugger) {
+			renderer.debugger.beforeMeshRender(this);
+		}
 
 		const meta = this.meta;
 		const gl = renderer.gl;
@@ -474,7 +490,7 @@ Tarumae.Mesh = class {
 			}
 		}
 
-		if (renderer.currentShader instanceof Tarumae.WireframeShader && meta.edgeCount > 0) {
+		if (renderer.currentShader instanceof Tarumae.Shaders.WireframeShader && meta.edgeCount > 0) {
 			gl.vertexAttribPointer(sp.vertexPositionAttribute, 3, gl.FLOAT, false, meta.stride, meta.edgeDataOffset);
 			gl.drawArrays(gl.LINES, 0, meta.edgeCount * 2);
 		}
@@ -507,7 +523,7 @@ Tarumae.Mesh = class {
 		}
 
 		if (renderer.debugger) {
-			renderer.debugger.totalNumberOfPolygonDrawed += meta.vertexCount / 3;
+			renderer.debugger.afterMeshRender(this);
 		}
 	}
 
@@ -589,6 +605,23 @@ Tarumae.Mesh = class {
 		}
 	}
 
+	flipSurfaces() {
+		const length = (this.meta.vertexCount +
+			(this.meta.HasNormal ? this.meta.vertexCount : 0)) * 3;
+		
+		for (let i = 0; i < length; i += 9) {
+			const tmp1 = this.vertexBuffer[i + 3];
+			const tmp2 = this.vertexBuffer[i + 4];
+			const tmp3 = this.vertexBuffer[i + 5];
+			this.vertexBuffer[i + 3] = this.vertexBuffer[i + 6];
+			this.vertexBuffer[i + 4] = this.vertexBuffer[i + 7];
+			this.vertexBuffer[i + 5] = this.vertexBuffer[i + 8];
+			this.vertexBuffer[i + 6] = tmp1;
+			this.vertexBuffer[i + 7] = tmp2;
+			this.vertexBuffer[i + 8] = tmp3;
+		}
+	}
+
 	scaleTexcoords(scaleX, scaleY) {
 		if (Array.isArray(this.texcoords)) {
 			for (var i = 0; i < this.texcoords.length;) {
@@ -637,7 +670,7 @@ Tarumae.Mesh = class {
 		if (!this.cachedTransformedVertices) {
 			this.cachedTransformedVertices = [];
 
-			var vertices, vertexElementCount = 0;
+			let vertices, vertexElementCount = 0;
 		
 			if (this.vertexBuffer && this.meta) {
 				vertices = this.vertexBuffer;
@@ -1021,6 +1054,7 @@ Object.assign(Tarumae.Mesh, {
 		HasLightmap: 0x40,
 		HasGrabBoundary: 0x80,
 		HasWireframe: 0x100,
+		HasRefmap: 0x200,
 	},
 
 	StructureTypes: {
@@ -1141,7 +1175,7 @@ Tarumae.DynamicMesh = class extends Tarumae.Mesh {
 			}
 		}
 
-		super.draw.apply(this, arguments);
+		super.draw(renderer);
 	}
 };
 

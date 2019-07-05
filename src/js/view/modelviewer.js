@@ -1,10 +1,13 @@
 import Tarumae from "../entry";
 
 Tarumae.ModelViewer = class {
-  constructor(scene) {
+  constructor(scene, {
+    dragBehavior,
+  } = {}) {
     this.scene = scene;
     this.renderer = scene.renderer;
     this.viewer = scene.renderer.viewer;
+    this.enabled = true;
   
     this.minRotateX = -90;
     this.maxRotateX = 90;
@@ -12,6 +15,9 @@ Tarumae.ModelViewer = class {
     this.enableDragAcceleration = true;
     this.dragAccelerationAttenuation = 0.03;
     this.dragAccelerationIntensity = 5;
+    this.maximalZoomDistance = 10;
+    this.minimalZoomDistance = 0.5;
+    this.dragBehavior = dragBehavior;
 
     this.sceneDragHandlerListener = undefined;
     this.sceneMouseWheelHandlerListener = undefined;
@@ -54,38 +60,58 @@ Tarumae.ModelViewer = class {
   }
 
   sceneDragHandler() {
-    if (this.viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Shift)) {
-      this.panViewByMouseMove();
-    } else if (this.viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Control)) {
-      this.zoomViewByMouseButton();
+    if (!this.enabled) return;
+
+    if (this.dragBehavior === "pan") {
+      if (this.viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Shift)) {
+        this.dragToRotateScene();
+      } else {
+        this.panViewByMouseMove();
+      }
     } else {
-      this.dragToRotateScene();
+      if (this.viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Shift)) {
+        this.panViewByMouseMove();
+      } else if (this.viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Control)) {
+        this.zoomViewByMouseButton();
+      } else {
+        this.dragToRotateScene();
+      }
     }
   }
 
   sceneMouseWheelHandler() {
+    if (!this.enabled) return;
+
     this.zoomViewByMouseWheel();
   }
 
   zoomViewByMouseWheel() {
+    if (!this.enabled) return;
+
     let s = this.viewer.originDistance - this.viewer.mouse.wheeldelta / 3000;
-    if (s > 50) s = 50; else if (s < 0) s = 0;
+    if (s > this.maximalZoomDistance) s = this.maximalZoomDistance; else if (s < this.minimalZoomDistance) s = this.minimalZoomDistance;
     this.viewer.originDistance = s;
     this.scene.requireUpdateFrame();
   }
 
   zoomViewByMouseButton() {
+    if (!this.enabled) return;
+
     let s = this.viewer.originDistance - (this.viewer.mouse.movement.x + this.viewer.mouse.movement.y) / -100;
-    if (s > 50) s = 50; else if (s < 0) s = 0;
+    if (s > this.maximalZoomDistance) s = this.maximalZoomDistance; else if (s < this.minimalZoomDistance) s = this.minimalZoomDistance;
     this.viewer.originDistance = s;
     this.scene.requireUpdateFrame();
   }
 
   panViewByMouseMove() {
+    if (!this.enabled) return;
+
     this.viewer.moveOffset(this.viewer.mouse.movement.x / 50, -this.viewer.mouse.movement.y / 50, 0);
   }
 
   limitViewAngleScope() {
+    if (!this.enabled) return;
+
     if (this.viewer.angle.x < this.minRotateX) this.viewer.angle.x = this.minRotateX;
     if (this.viewer.angle.x > this.maxRotateX) this.viewer.angle.x = this.maxRotateX;
 
@@ -94,6 +120,8 @@ Tarumae.ModelViewer = class {
   }
 
   dragToRotateScene() {
+    if (!this.enabled) return;
+
     const movement = this.viewer.mouse.movement;
 
     this.viewer.angle.y += movement.x;
@@ -104,12 +132,14 @@ Tarumae.ModelViewer = class {
   }
 
   dragAcceleration() {
+    if (!this.enabled) return;
+    if (this.dragBehavior === "pan") return;
     if (!this.enableDragAcceleration) return;
 
     const scene = this.scene, viewer = this.viewer;
 
     if ((Date.now() - this.startDragTime) < 300) {
-      Tarumae.Utility.perforMovementAccelerationAnimation(scene,
+      Tarumae.Utility.performMovementAccelerationAnimation(scene,
         this.dragAccelerationIntensity, this.dragAccelerationAttenuation, (xdiff, ydiff) => {
           viewer.angle.y += xdiff;
           viewer.angle.x += ydiff;

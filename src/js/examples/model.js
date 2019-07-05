@@ -5,18 +5,26 @@ import "../scene/animation"
 import "../scene/viewer";
 import "../utility/archive";
 import "../utility/res";
+import "../view/objectcontroller"
 import { Color3, Color4 } from "../math/vector";
 
 window.addEventListener("load", function() {
 
 	const renderer = new Tarumae.Renderer({
-		// renderPixelRatio: window.devicePixelRatio,
-		renderPixelRatio: 1,
+		renderPixelRatio: window.devicePixelRatio,
+		// renderPixelRatio: Math.max(window.devicePixelRatio * 0.75, 1),
+		// renderPixelRatio: 1,
 		backColor: new Color4(0.74, .87, .85, 1),
 		backgroundImage: "../static/textures/bg-gray-gradient.jpg",
-		// showDebugPanel: true,
-		enableLighting: false,
-		postprocess: true,
+		showDebugPanel: true,
+		// enableLighting: false,
+		enableShadow: true,
+		postprocess: false,
+		enableAntialias: true,
+		bloomEffect: {
+			threshold: 0.2,
+			gamma: 1.4,
+		}
 	});
 
 	const scene = renderer.createScene();
@@ -25,18 +33,27 @@ window.addEventListener("load", function() {
  
 	// scene.add(new Tarumae.GridLine());
 	this.models = [
+		// { name: "test.toba" },
 		{ name: "chair_adv_01.toba" },
 		// { name: "chair_compact_01.toba" },
-		{ name: "chair_jati.toba" },
-		{ name: "desk_study_1p.toba", color: [.7, .7, .7] },
+		// { name: "chair_jati.toba" },
+		// { name: "char_stand_01-baked.toba", scale: [.1, .1, .1], color: [.7, .7, .7] },
+		// { name: "desk_study_1p-baked.toba", color: [.7, .7, .7] },
 		// { name: "fan_vintage_ceiling.toba", scale: [3, 3, 3] },
 		// { name: "print_mfp_w1500.toba", color: [.7, .7, .7] },
-		{ name: "rice_cooker_01.toba", z: 1, color: [.7, .7, .7] },
+		// { name: "rice_cooker_01.toba", z: 1, color: [.8, .8, .8] },
 		// { name: "sofa_leather_3s.toba" },
-		// { name: "ceo.toba", color: [.5, .5, .5] },
 	];
 
-	scene.add(new Tarumae.Shapes.Plane(2, 2));
+	const ground = {
+		mesh: new Tarumae.Shapes.PlaneMesh(2, 2),
+		mat: { color: [1.3, 1.3, 1.3], tex: "../static/textures/bg-gray-gradient.jpg" },
+		angle: [0, 30, 0],
+	};
+	scene.load(ground);
+
+	const holder = new Tarumae.SceneObject();
+	scene.add(holder);
 
 	scene.onkeydown = function(key) {
 		if (key >= Tarumae.Viewer.Keys.D1
@@ -54,7 +71,7 @@ window.addEventListener("load", function() {
 			mod.obj = obj;
 			obj.location.x = 5;
 			obj.visible = false;
-			scene.add(obj);
+			ground.add(obj);
 
 			if (firstObject) {
 				switchTo(i);
@@ -80,29 +97,51 @@ window.addEventListener("load", function() {
 		currentIndex = idx;
 
 		const mod = models[currentIndex];
-		if (mod) {
+		if (mod && mod.obj) {
 			const nextObj = mod.obj;
 			if (mod.color) {
 				if (!nextObj.mat) nextObj.mat = {}
 				nextObj.mat.color = mod.color;
 			}
 			if (mod.scale) {
-				obj.scale = mod.scale.clone();
+				nextObj.scale.set(mod.scale[0], mod.scale[1], mod.scale[2]);
 			}
+			window.obj = nextObj;
 			nextObj.visible = true;
 			scene.animate({ effect: "fadein", duration: 0.5 }, t => {
 				nextObj.location.x = 3 * (1 - t);
 				nextObj.opacity = t;
 			});
-			scene.animate({ effect: "fadeout" }, t => nextObj.angle.y = -(1 - t) * 500 + 25);
+			scene.animate({ effect: "fadeout" }, t => {
+				nextObj.angle.y = -(1 - t) * 500 + 25;
+			});
 		}
 	}
 
 	scene.mainCamera.location.set(0, 1, 2);
 	scene.mainCamera.angle.set(-15, 0, 0);
 	
+	const lights = new Tarumae.SceneObject();
+
+	const light1 = new Tarumae.PointLight();
+	light1.location.set(2, 8, 7);
+	light1.mat.emission = 100.0;
+	lights.add(light1);
+		
+	const light2 = new Tarumae.PointLight();
+	light2.location.set(-3, 6, 3);
+	light2.mat.emission = 50.0;
+	lights.add(light2);
+
+	scene.sun.mat.color = [2, 2, 2];
+
+	scene.add(lights);
+
 	// new Tarumae.TouchController(scene);
-	new Tarumae.ModelViewer(scene);
+	const objController = new Tarumae.ObjectViewController(scene, {
+		enableVerticalRotation: true
+	});
+	objController.object = ground;
 
 	scene.show();
 });

@@ -23,14 +23,14 @@ Tarumae.Renderer = class {
 			containerId: "canvas-container",
 			renderPixelRatio: 1,
 			enable3D: true,
-			enableShadow: false,
-			enableEnvmap: true,
 			perspective: {
 				method: Tarumae.ProjectionMethods.Persp,
 				angle: 50.0,
-				near: 0.01,
+				near: 0.1,
 				far: 100.0,
 			},
+			backColor: new Color4(0.93, 0.93, 0.93, 1.0),
+			backgroundImage: undefined,
 			enableDrawMesh: true,
 			enableCustomDraw: true,
 			enableLighting: true,
@@ -38,9 +38,25 @@ Tarumae.Renderer = class {
 			enableNormalMap: true,
 			enableEnvmap: true,
 			enableHighlightSelectedChildren: true,
+			enableShadow: false,
+			shadowQuality: {
+				scale: 1,
+				viewDepth: 2,
+				resolution: 1024,
+			},
+			enablePostprocess: true,
+			postprocess: {
+				gamma: 1.2,
+			},
+			bloomEffect: {
+				enabled: true,
+				threshold: 0.1,
+				gamma: 1.5,
+			},
 			debugMode: false,
-			backColor: new Color4(0.93, 0.93, 0.93, 1.0),
+			showDebugPanel: false,
 			enable3D: true,
+			enableAntialias: false,
 		};
 	}
 
@@ -62,7 +78,7 @@ Tarumae.Renderer = class {
 			console.debug("tarumae (development version)");
 		}
 
-		this.options = {...Tarumae.Renderer.defaultOptions(), ...options};
+		this.options = { ...Tarumae.Renderer.defaultOptions(), ...options };
 
 		initDOM(this);
 	
@@ -111,7 +127,7 @@ Tarumae.Renderer = class {
 		this.respool = new Tarumae.ResourcePool();
 
 		// matrices
-		this.projectMatrix = new Tarumae.Matrix4();
+		this.projectionMatrix = new Tarumae.Matrix4();
 		this.viewMatrix = new Tarumae.Matrix4();
 		this.cameraMatrix = new Tarumae.Matrix4();
 		this.modelMatrix = new Tarumae.Matrix4();
@@ -145,7 +161,7 @@ Tarumae.Renderer = class {
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 			gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA,
 				gl.ONE_MINUS_DST_ALPHA, gl.ONE);
-		
+			
 			window.addEventListener("resize", _ => this.resetViewport(), false);
 
 			this.resetViewport();
@@ -181,12 +197,17 @@ Tarumae.Renderer = class {
 	}
 
 	setGLViewport() {
-		const size = this.renderSize;
-		this.gl.viewport(0, 0, size.width * this.options.renderPixelRatio, size.height * this.options.renderPixelRatio);
+		this.glViewport(
+			this.renderSize.width * this.options.renderPixelRatio,
+			this.renderSize.height * this.options.renderPixelRatio);
+	}
+
+	glViewport(width, height) {
+		this.gl.viewport(0, 0, width, height);
 	}
 
 	resetViewport() {
-		var size = this.renderSize;
+		const size = this.renderSize;
 	
 		size.width = this.container.clientWidth;
 		size.height = this.container.clientHeight;
@@ -204,9 +225,16 @@ Tarumae.Renderer = class {
 			this.currentScene.requireUpdateFrame();
 		}
 	}
+
+	getCanvasResolution() {
+		return {
+			width: this.canvas.width,
+			height: this.canvas.height,
+		};
+	}
 	
 	init() {
-		var renderer = this;
+		const renderer = this;
 	
 		renderer.initialized = true;
 	
@@ -227,7 +255,7 @@ Tarumae.Renderer = class {
 	loadShader(shaderDefine, vertSource, fragSource) {
 		var renderer = this;
 	
-		var shader = new Tarumae[shaderDefine.class](renderer, vertSource, fragSource);
+		let shader = new Tarumae.Shaders[shaderDefine.class](renderer, vertSource, fragSource);
 		shaderDefine.instance = shader;
 		Tarumae.Utility.invokeIfExist(shaderDefine, "oncreate");
 	}
@@ -259,7 +287,7 @@ Tarumae.Renderer = class {
 
 		this.currentShader = shaderInstance;
 
-		return shaderInstance;	
+		return shaderInstance;
 	}
 	
 	getCurrentShader() {
@@ -288,19 +316,17 @@ Tarumae.Renderer = class {
 	}
 	
 	perspectiveProject(m) {
-		var afov = this.getAfov();
-	
-		m.perspective(afov, this.aspectRate,
+		m.perspective(this.getAfov(), this.aspectRate,
 			this.options.perspective.near, this.options.perspective.far);
 	}
 	
 	orthographicProject(m) {
-		var scale = ((this.viewer.originDistance - 0.5) * 10);
+		const scale = ((this.viewer.originDistance - 0.5) * 10);
 		m.ortho(-this.aspectRate * scale, this.aspectRate * scale, -scale, scale, -this.options.perspective.far, this.options.perspective.far);
 	}
 	
 	getAfov() {
-		var scene = this.currentScene;
+		const scene = this.currentScene;
 	
 		if (scene && scene.mainCamera && typeof scene.mainCamera.fieldOfView !== "undefined") {
 			return scene.mainCamera.fieldOfView;
@@ -310,6 +336,8 @@ Tarumae.Renderer = class {
 	}
 	
 	render() {
+		requestAnimationFrame(_ => this.render());
+
 		if (this.initialized) {
 	
 			if (this.options.enable3D) {
@@ -346,9 +374,7 @@ Tarumae.Renderer = class {
 				this.current2DScene.render(this.drawingContext2D);
 				this.current2DScene.requestedUpdateFrame = false;
 			}
-		}
-	
-		requestAnimationFrame(_ => this.render());
+		}	
 	}
 
 	createPipeline() {
@@ -357,68 +383,116 @@ Tarumae.Renderer = class {
 		if (this.options.backgroundImage) {
 			this.createTextureFromURL(this.options.backgroundImage, tex => {
 				const bgImageSource = new Tarumae.PipelineNodes.ImageSource(this, tex);
-				this._bgImageRenderer = new Tarumae.PipelineNodes.ImageRenderer(this);
+				this._bgImageRenderer = new Tarumae.PipelineNodes.ImageToScreenRenderer(this, {
+					flipTexcoordY: true
+				});
 				this._bgImageRenderer.enableAntialias = false;
 				this._bgImageRenderer.input = bgImageSource;
 				if (this.currentScene) this.currentScene.requireUpdateFrame();
 			});
 		}
 		
-		if (this.options.postprocess) {
-			const width = this.canvas.width, height = this.canvas.height;
-
-			const sceneImageRenderer = new Tarumae.PipelineNodes.SceneToImageRenderer(this, {
-				imageSize: {
-					width: width,
-					height: height,
-				}
-			});
+		if (this.options.enablePostprocess || this.options.enableShadow) {
+			const width = this.canvas.width, height = this.canvas.height,
+				sw = width * (this.options.bloomEffect.threshold || 0.1),
+				sh = height * (this.options.bloomEffect.threshold || 0.1);
 			
-			const imgRenderer128 = new Tarumae.PipelineNodes.MemoryImageRenderer(this, {
-				flipTexcoordY: true,
-				width: width * 0.1,
-				height: height * 0.1,
-			});
-			imgRenderer128.input = sceneImageRenderer;
-			// imgRenderer128.enableAntialias = false;
-			imgRenderer128.gammaFactor = 0.2;
+			let shadowMapRenderer = undefined;
 
-			const imgRenderer = new Tarumae.PipelineNodes.ImageRenderer(this, {
-				flipTexcoordY: true
-			});
-			imgRenderer.input = sceneImageRenderer;
-			imgRenderer.gammaFactor = 1.4;
-			imgRenderer.tex2Input = imgRenderer128;
-			// imgRenderer.enableAntialias = false;
+			if (this.options.enableShadow) {
+				shadowMapRenderer = new Tarumae.PipelineNodes.ShadowMapRenderer(this, {
+					resolution: {
+						width: this.options.shadowQuality.resolution || 2048,
+						height: this.options.shadowQuality.resolution || 2048,
+					}
+				});
+			}
 	
+			const sceneImageRenderer = new Tarumae.PipelineNodes.SceneToImageRenderer(this);
+			sceneImageRenderer.shadowMap2DInput = shadowMapRenderer;
+
+			let imgRendererBlur = undefined, imgRendererSmall = undefined;
+
+			if (!this.options.bloomEffect
+				|| this.options.bloomEffect.eanbled === undefined
+				|| (this.options.bloomEffect && this.options.bloomEffect.enabled)) {
+				imgRendererSmall = new Tarumae.PipelineNodes.ImageFilterRenderer(this, {
+					resolution: {
+						width: sw,
+						height: sh,
+					},
+					flipTexcoordY: true,
+					filter: "linear-interp",
+				});
+				imgRendererSmall.gammaFactor = this.options.bloomEffect.gamma || 1.4;
+				imgRendererSmall.input = sceneImageRenderer;
+			
+				imgRendererBlur = new Tarumae.PipelineNodes.BlurRenderer(this, {
+					resolution: {
+						width: sw,
+						height: sh,
+					}
+				});
+				imgRendererBlur.input = imgRendererSmall;
+				// imgRendererBlur.gammaFactor = 1.0;
+			}
+
+			const imgRenderer = new Tarumae.PipelineNodes.ImageToScreenRenderer(this);
+			imgRenderer.input = sceneImageRenderer;
+			imgRenderer.gammaFactor = this.options.postprocess.gamma;
+			imgRenderer.tex2Input = imgRendererBlur;
+			imgRenderer.enableAntialias = this.options.enableAntialias;
+
+			const previewRenderer = new Tarumae.PipelineNodes.MultipleImagePreviewRenderer(this);
+			previewRenderer.addPreview(sceneImageRenderer);
+			previewRenderer.addPreview(imgRendererSmall);
+			previewRenderer.addPreview(imgRendererBlur);
+			previewRenderer.addPreview(shadowMapRenderer);
+			previewRenderer.enableAntialias = true;
+			
 			this.pipelineNodes.push(imgRenderer);
+			// this.pipelineNodes.push(previewRenderer);
+
 		} else {
 			this.pipelineNodes.push(new Tarumae.PipelineNodes.DefaultRenderer(this));
 		}
-
-		console.log(this.pipelineNodes.length);
 	}
 	
 	renderPipeline() {
-		if (this._bgImageRenderer) {
-			this._bgImageRenderer.clear();
-			this._bgImageRenderer._render();
-		} else {
-			// this.clearViewport();
-		}
-
 		for (const node of this.pipelineNodes) {
 			node.clear();
 		}
 
 		for (const node of this.pipelineNodes) {
-			node._render();
+			node.process();
 		}
 	}
 
-	renderFrame() {
+	renderBackground() {
+		if (this.options.backgroundImage) {
+			if (this._bgImageRenderer) {
+				this._bgImageRenderer.clear();
+				this._bgImageRenderer.process();
+			}
+		} else {
+			this.clearViewport();
+		}
+	}
 
+	renderFrame() {		
 		const scene = this.currentScene;
+		if (scene) {
+			this.prepareRenderMatrices();
+			this.drawSceneFrame(scene);
+		}
+	}
+
+	prepareRenderMatrices() {
+		const scene = this.currentScene;
+		if (!scene) return;
+
+		this.cameraMatrix.loadIdentity();
+		this.viewMatrix.loadIdentity();
 
 		const projectionMethod = ((scene && scene.mainCamera)
 			? (this.currentScene.mainCamera.projectionMethod)
@@ -428,34 +502,39 @@ Tarumae.Renderer = class {
 			default:
 			case Tarumae.ProjectionMethods.Persp:
 			case "persp":
-				this.perspectiveProject(this.projectMatrix);
+				this.perspectiveProject(this.projectionMatrix);
 				break;
 
 			case Tarumae.ProjectionMethods.Ortho:
 			case "ortho":
-				this.orthographicProject(this.projectMatrix);
+				this.orthographicProject(this.projectionMatrix);
 				break;
 		}
 
-		this.drawSceneFrame(scene);
-	}
-	
-	drawSceneFrame(scene) {
-		
-		this.cameraMatrix.loadIdentity();
-		this.viewMatrix.loadIdentity();
-		this.transparencyList._s3_clear();
-	
-		if (!scene) return;
-	
 		if (scene.mainCamera) {
 			this.makeCameraMatrix(scene.mainCamera, this.cameraMatrix);
 		}
 	
 		this.makeViewMatrix(this.viewMatrix);
 	
-		this.projectionViewMatrix = this.viewMatrix.mul(this.cameraMatrix).mul(this.projectMatrix);
+		this.projectionViewMatrix = this.viewMatrix.mul(this.cameraMatrix).mul(this.projectionMatrix);
 		this.projectionViewMatrixArray = this.projectionViewMatrix.toArray();
+	}
+	
+	drawSceneFrame(scene) {
+
+		this.transparencyList._t_clear();
+	
+		if (!scene) return;
+
+		if (this.debugger) {
+			this.debugger.numberOfSceneRendered++;
+			if (this.debugger.numberOfSceneRendered > 1) {
+				console.warn("duplicate scene renderering");
+			}
+		}
+
+		scene.beforeDrawFrame(this);
 
 		if (this.wireframe) {
 			this.useShader("wireframe");
@@ -465,13 +544,8 @@ Tarumae.Renderer = class {
 			this.currentShader.beginScene(scene);
 		}
 	
-		if (this.debugger) {
-			this.debugger.totalNumberOfObjectDrawed = 0;
-			this.debugger.totalNumberOfPolygonDrawed = 0;
-		}
-
 		for (var i = 0; i < scene.objects.length; i++) {
-			this.drawObject(scene.objects[i], false);
+			this.drawObject(scene.objects[i]);
 		}
 
 		if (this.wireframe) {
@@ -504,7 +578,7 @@ Tarumae.Renderer = class {
 			// }
 		}
 	
-		scene.drawFrame(this);
+		scene.afterDrawFrame(this);
 	
 		if (this.currentShader) {
 			this.currentShader.endScene(scene);
@@ -573,18 +647,18 @@ Tarumae.Renderer = class {
 	}
 	
 	makeViewMatrix(m) {
-		var viewer = this.viewer;
+		const viewer = this.viewer;
 	
 		if (viewer) {
 			m.translateZ(-(viewer.originDistance) * 10);
 	
 			if ((!viewer.location.equals(0, 0, 0) || !viewer.angle.equals(0, 0, 0)
-			// || !viewer.scale.equals(1, 1, 1)
+				// || !viewer.scale.equals(1, 1, 1)
 			)) {
 				m.rotate(viewer.angle)
 					.translate(viewer.location.x, viewer.location.y, viewer.location.z)
 					//.scale(viewer.scale.z, viewer.scale.z, viewer.scale.z)
-				;
+					;
 			}
 		}
 	}
@@ -635,7 +709,7 @@ Tarumae.Renderer = class {
 		}
 	}
 	
-	drawObject(obj, transparencyRendering) {
+	drawObject(obj, transparencyRendering = false) {
 
 		if (!obj || obj.visible === false) {
 			return;
@@ -650,11 +724,15 @@ Tarumae.Renderer = class {
 	
 				for (let i = 0; i < obj.objects.length; i++) {
 					let child = obj.objects[i];
-					this.drawObject(child, false);
+					this.drawObject(child);
 				}
 	
 				return;
 			}
+		}
+
+		if (this.debugger) {
+			this.debugger.beforeObjectRender(obj);
 		}
 	
 		let shaderPushed = false;
@@ -704,7 +782,7 @@ Tarumae.Renderer = class {
 					if (!transparencyRendering) {
 						for (let i = 0; i < obj.objects.length; i++) {
 							let child = obj.objects[i];
-							this.drawObject(child, false);
+							this.drawObject(child);
 						}
 					}
 				}
@@ -742,7 +820,7 @@ Tarumae.Renderer = class {
 		}
 		
 		if (this.debugger) {
-			this.debugger.totalNumberOfObjectDrawed++;
+			this.debugger.afterObjectRender(obj);
 		}
 		// if (this.debugMode) {
 		// 	this.debugger.drawBoundingBox(obj, this.transformStack);
@@ -788,7 +866,7 @@ Tarumae.Renderer = class {
 		}
 	}
 	
-	createTextureFromURL(url, handler) {	
+	createTextureFromURL(url, handler) {
 		const cachedTexture = this.cachedTextures[url];
 		if (cachedTexture && typeof handler === "function") {
 			handler(cachedTexture);
@@ -871,9 +949,9 @@ Tarumae.Renderer = class {
 	
 	toScreenPosition(pos) {
 		var projectMethod = projectMethod
-				|| ((this.currentScene && this.currentScene.mainCamera)
-					? (this.currentScene.mainCamera.projectionMethod)
-					: (this.options.perspective.method));
+			|| ((this.currentScene && this.currentScene.mainCamera)
+				? (this.currentScene.mainCamera.projectionMethod)
+				: (this.options.perspective.method));
 		
 		var renderHalfWidth = this.renderSize.width / 2;
 		var renderHalfHeight = this.renderSize.height / 2;
@@ -887,9 +965,9 @@ Tarumae.Renderer = class {
 		
 	toScreenPositionEx(pos) {
 		var projectMethod = projectMethod
-				|| ((this.currentScene && this.currentScene.mainCamera)
-					? (this.currentScene.mainCamera.projectionMethod)
-					: (this.options.perspective.method));
+			|| ((this.currentScene && this.currentScene.mainCamera)
+				? (this.currentScene.mainCamera.projectionMethod)
+				: (this.options.perspective.method));
 		
 		var renderHalfWidth = this.renderSize.width / 2;
 		var renderHalfHeight = this.renderSize.height / 2;
@@ -1031,7 +1109,7 @@ Tarumae.Renderer = class {
 		var points = this.transformPoints([from, to]);
 		this.drawingContext2D.drawArrow(points[0], points[1], width, color);
 	};
-  fillArrow(from, to, size, color) {
+	fillArrow(from, to, size, color) {
 		var points = this.transformPoints([from, to]);
 		this.drawingContext2D.fillArrow(points[0], points[1], size, color);
 	}
@@ -1056,14 +1134,14 @@ Tarumae.Renderer = class {
 		this.drawingContext2D.drawEllipse(this.transformPoint(v), size, strokeWidth, strokeColor, fillColor);
 	};
 
-	drawImage(location, image) {		
+	drawImage(location, image) {
 		var p = this.transformPoint(location);
 				
 		var x = p.x - image.width / 2;
 		var y = p.y - image.height / 2;
 				
 		if (x >= 0 && y >= 0
-				&& x < this.renderSize.width && y < this.renderSize.height) {
+			&& x < this.renderSize.width && y < this.renderSize.height) {
 			return this.drawingContext2D.drawImage({ x: x, y: y }, image);
 		}
 	};
@@ -1074,37 +1152,53 @@ Tarumae.Renderer = class {
 
 	// 2D Drawing by 3D coordinates - End
 
-	createSnapshotOfRenderingImage(imgformat, imgQuality) {
-		if (!Tarumae.FrameBuffer) return null;
+	createSnapshotOfRenderingImage({
+		imgformat = "image/png",
+		imgQuality = 0.85, /* only for jpeg */
+		resolution = this.getCanvasResolution(),
+		renderBackground = false,
+	} = {
+		resolution: this.getCanvasResolution()
+	}) {
 		
-		const width = this.renderSize.width, height = this.renderSize.height;
-		
-		const renderbuffer = new Tarumae.FrameBuffer(this, width, height);
+		const renderbuffer = new Tarumae.FrameBuffer(this,
+			resolution.width, resolution.height, {
+				clearBackground: renderBackground
+			}
+		);
+
 		renderbuffer.use();
 		
+		if (renderBackground) {
+			this.renderBackground();
+		} else {
+			this.gl.clearColor(0, 0, 0, 0);
+			this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+		}
+		
 		this.renderFrame();
-		
-		var img = null;
-		
+
 		try {
-			img = Tarumae.Utility.getImageDataURLFromTexture(this, renderbuffer.texture, imgformat, imgQuality);
-		} catch (e) { /* ignore exception */ }
-		
+			const img = Tarumae.Utility.getImageDataURLFromTexture(this,
+				renderbuffer.texture, imgformat, imgQuality);
+			return img;
+		} catch (e) {
+			console.warn(e);
+		}
+
 		renderbuffer.disuse();
 		renderbuffer.destroy();
-		
-		return img;
 	};
 };
 
 Tarumae.Renderer.prototype.toWorldPosition = (function() {
-	var projectMatrix = new Tarumae.Matrix4();
+	var projectionMatrix = new Tarumae.Matrix4();
 	
 	return function(pos, viewMatrix, projectMethod) {
 	
-		this.makeProjectMatrix(projectMethod, projectMatrix);
+		this.makeProjectMatrix(projectMethod, projectionMatrix);
 	
-		var m = (viewMatrix || this.viewMatrix).mul(this.cameraMatrix).mul(projectMatrix);
+		var m = (viewMatrix || this.viewMatrix).mul(this.cameraMatrix).mul(projectionMatrix);
 	
 		if (Array.isArray(pos)) {
 			for (var i = 0; i < pos.length; i++) {
@@ -1146,22 +1240,31 @@ import pointVert from '../../shader/points.vert';
 import pointFrag from '../../shader/points.frag';
 import imageVert from '../../shader/image.vert';
 import imageFrag from '../../shader/image.frag';
+import blurVert from '../../shader/blur.vert';
+import blurFrag from '../../shader/blur.frag';
+import screenVert from '../../shader/screen.vert';
+import screenFrag from '../../shader/screen.frag';
+import shadowmapVert from '../../shader/shadowmap.vert';
+import shadowmapFrag from '../../shader/shadowmap.frag';
 
 Tarumae.Renderer.Shaders = {
 	// viewer: {
 	// 	vert: fs.readFileSync(__dirname + "../../../shader/viewer.vert", "utf8"),
 	// 	frag: fs.readFileSync(__dirname + "../../../shader/viewer.frag", "utf8"), class: "ViewerShader"
 	// },
-	solidcolor: { vert: solidcolorVert, frag: solidcolorFrag, class: "SolidColorShader" },
-	billboard: { vert: billboardVert, frag: billboardFrag, class: "BillboardShader" },
-	simple: { vert: simpleVert, frag: simpleFrag, class: "SimpleShader" },
+	// solidcolor: { vert: solidcolorVert, frag: solidcolorFrag, class: "SolidColorShader" },
+	// billboard: { vert: billboardVert, frag: billboardFrag, class: "BillboardShader" },
+	// simple: { vert: simpleVert, frag: simpleFrag, class: "SimpleShader" },
 	// grayscale: { vert: grayscaleVert, frag: grayscaleFrag, class: "GrayscaleShader" },
 	point: { vert: pointVert, frag: pointFrag, class: "PointShader" },
 	panorama: { vert: panoramaVert, frag: panoramaFrag, class: "PanoramaShader" },
 	standard: { vert: standardVert, frag: standardFrag, class: "StandardShader" },
 	wireframe: { vert: wireframeVert, frag: wireframeFrag, class: "WireframeShader" },
 	point: { vert: pointVert, frag: pointFrag, class: "PointShader" },
-	screen: { vert: imageVert, frag: imageFrag, class: "ImageShader" },
+	image: { vert: imageVert, frag: imageFrag, class: "ImageShader" },
+	blur: { vert: blurVert, frag: blurFrag, class: "ImageShader" },
+	screen: { vert: screenVert, frag: screenFrag, class: "ScreenShader" },
+	shadowmap: { vert: shadowmapVert, frag: shadowmapFrag, class: "ShadowMapShader" },
 };
 
 

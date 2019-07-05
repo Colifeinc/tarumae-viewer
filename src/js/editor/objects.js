@@ -162,7 +162,7 @@ Tarumae.EditorWall.prototype.updateMesh = function() {
     mesh.destroy();
   }
 
-  this.meshes._s3_clear();
+  this.meshes._t_clear();
 
   this.generateMeshes();
 };
@@ -641,7 +641,7 @@ _s3_Class("EditorImageObject", Tarumae.EditorObject, function() {
 Tarumae.EditorImageObject.prototype.draw = function(renderer) {
   if (this.model && this.model.gizmoImage instanceof Image
   && (this.editor.displayMode & TarumaeEditor.DisplayModes.Image) === TarumaeEditor.DisplayModes.Image) {
-    renderer.drawImage(this.getWorldLocation(), this.model.gizmoImage);
+    renderer.drawImage(this.worldLocation, this.model.gizmoImage);
   }
 };
 
@@ -703,7 +703,7 @@ Tarumae.EditorEmptyObject.prototype.draw = function(renderer) {
     return;
   }
   
-  var loc = this.getWorldLocation();
+  var loc = this.worldLocation;
 
   var halfSize = this.size * 0.5;
   
@@ -741,7 +741,7 @@ Tarumae.EditorRefRange.prototype.draw = function(renderer) {
     return;
   }
 
-  var loc = this.getWorldLocation();
+  var loc = this.worldLocation;
   var halfSize = this.scale.mul(0.5);
   
   renderer.drawFocusBBox({
@@ -768,7 +768,7 @@ _s3_Class("EditorResizeGuideBoundingBox", Tarumae.EditorEmptyObject, function() 
 });
 
 Tarumae.EditorResizeGuideBoundingBox.prototype.draw = function(renderer) {
-  var loc = this.getWorldLocation();
+  var loc = this.worldLocation;
   var halfSize = this.scale.mul(0.5);
   
   renderer.drawFocusBBox({

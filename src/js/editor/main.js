@@ -276,7 +276,7 @@ Object.assign(TarumaeEditor.prototype, {
     //   var aps = editor.focusObject.activePoints;
       
     //   if (typeof aps !== "undefined" && aps != null) {
-    //     aps._s3_foreach(function(name, ap) {
+    //     aps._t_foreach(function(name, ap) {
     //       var pos = ap.get();
           
     //       switch (ap.axies) {

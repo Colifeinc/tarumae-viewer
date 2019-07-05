@@ -79,7 +79,7 @@ Tarumae.EventDispatcher = class {
           }
         }
 
-        this._eventListeners[eventName]._s3_remove(listener);
+        this._eventListeners[eventName]._t_remove(listener);
       };
     }
     
@@ -160,6 +160,6 @@ Tarumae.EventDispatcher = class {
       obj._eventListeners[eventName] = [];
     }
 
-    obj._eventListeners[eventName]._s3_pushIfNotExist(listener);
+    obj._eventListeners[eventName]._t_pushIfNotExist(listener);
   }
 }

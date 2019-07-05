@@ -19,7 +19,7 @@ Object.assign(TarumaeEditor.prototype, {
         }
       }
 
-      scene.selectedObjects._s3_clear();
+      scene.selectedObjects._t_clear();
     }
     
     this.setFocus(object);
@@ -29,9 +29,9 @@ Object.assign(TarumaeEditor.prototype, {
         object.isSelected = true;
         this.onobjectSelect(object);
       }
-      scene.selectedObjects._s3_pushIfNotExist(object);
+      scene.selectedObjects._t_pushIfNotExist(object);
       
-      this.cursor.position = object.getWorldLocation();
+      this.cursor.position = object.worldLocation;
       this.cursor.show();
     } else {
       this.cursor.hide();
@@ -120,7 +120,7 @@ Object.assign(TarumaeEditor.prototype, {
     }
 
     for (i = 0; i < removeList.length; i++) {
-      scene.selectedObjects._s3_remove(removeList[i]);
+      scene.selectedObjects._t_remove(removeList[i]);
     }
 
     for (i = 0; i < appendList.length; i++) {
