@@ -1,6 +1,11 @@
 .cache
-build
-node_modules
-resources
+
+bin
 src
+resources
+static
+
+webpack.prod.js
+webpack.dev.js
+yarn.lock
 wercker.yml

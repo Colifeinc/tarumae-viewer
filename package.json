@@ -2,7 +2,10 @@
   "name": "@bulbcorp/tarumae-viewer",
   "version": "1.4.0",
   "description": "Optimized WebGL engine for showcase application",
-  "main": "src/js/tarumae-viewer.js",
+  "main": "build/tarumae-viewer.js",
+  "files": [
+    "/dist"
+  ],
   "scripts": {
     "build": "webpack --config webpack.prod.js --mode production",
     "test": ":",
