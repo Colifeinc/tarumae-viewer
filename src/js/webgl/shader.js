@@ -1221,7 +1221,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 			}
 			
 			// roughness
-			if (mat.roughness !== undefined) {
+			if (mat.roughness) {
 				this.roughnessUniform.set(mat.roughness);
 			} else {
 				this.roughnessUniform.set(0.5);
@@ -1267,10 +1267,10 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		if (this.renderer.options.enableEnvmap
 			&& typeof obj.refmap && (obj.refmap instanceof Tarumae.CubeMap) && obj.refmap.loaded) {
 			this.refMapUniform.set(obj.refmap);
+			this.refMapTypeUniform.set(1);
 		
 			if (!obj.refmap.bbox) {
 				this.refmapBoxUniform.set(this.emptyBoundingBox);
-				this.refMapTypeUniform.set(1);
 			} else {
 				this.refmapBoxUniform.set(obj.refmap.bbox);
 				this.refMapTypeUniform.set(2);
@@ -1324,10 +1324,10 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		if (this.renderer.options.enableEnvmap
 			&& typeof mesh._refmap === "object" && mesh._refmap instanceof Tarumae.CubeMap && mesh._refmap.loaded) {
 			this.refMapUniform.set(mesh._refmap);
+			this.refMapTypeUniform.set(1);
 		
 			if (!mesh._refmap.bbox) {
 				this.refmapBoxUniform.set(this.emptyBoundingBox);
-				this.refMapTypeUniform.set(1);
 			} else {
 				this.refmapBoxUniform.set(mesh._refmap.bbox);
 				this.refMapTypeUniform.set(2);

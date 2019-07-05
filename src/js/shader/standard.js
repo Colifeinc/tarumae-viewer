@@ -290,6 +290,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		if (this.renderer.options.enableEnvmap
 			&& typeof obj.refmap && (obj.refmap instanceof Tarumae.CubeMap) && obj.refmap.loaded) {
 			this.refMapUniform.set(obj.refmap);
+			this.refMapTypeUniform.set(1);
 		
 			if (!obj.refmap.bbox) {
 				this.refmapBoxUniform.set(this.emptyBoundingBox);

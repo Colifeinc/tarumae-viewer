@@ -303,8 +303,6 @@ Tarumae.ImageCubeBox = class {
       console.log("cubemap loaded");
       this.onload();
     });
-
-    this.onload();
   }
 };
 
