@@ -18,18 +18,16 @@ window.addEventListener("load", function() {
 
 	const renderer = new Tarumae.Renderer({
 		renderPixelRatio: window.devicePixelRatio,
-		// renderPixelRatio: Math.max(window.devicePixelRatio * 0.75, 1),
-		// renderPixelRatio: 1,
-		backColor: new Color4(0.74, .87, .85, 1),
-		backgroundImage: "../static/textures/bg-gray-gradient.jpg",
-		showDebugPanel: true,
+		// backColor: new Color4(0.74, .87, .85, 1),
+		// backgroundImage: "../static/textures/bg-gray-gradient.jpg",
+		showDebugPanel: false,
 		// enableLighting: false,
 		enableShadow: true,
 		postprocess: false,
 		enableAntialias: true,
 		bloomEffect: {
-			threshold: 0.2,
-			gamma: 1.4,
+			threshold: 0.3,
+			gamma: 2.4,
 		}
 	});
 
@@ -40,7 +38,8 @@ window.addEventListener("load", function() {
 	// scene.add(new Tarumae.GridLine());
 	this.models = [
 		// { name: "test.toba" },
-		{ name: "chair_adv_01.toba" },
+		// { name: "chair_adv_01.toba" },
+		{ name: "KG-367JB-ZW.toba" },
 		// { name: "chair_compact_01.toba" },
 		// { name: "chair_jati.toba" },
 		// { name: "char_stand_01-baked.toba", scale: [.1, .1, .1], color: [.7, .7, .7] },
@@ -53,7 +52,7 @@ window.addEventListener("load", function() {
 
 	const ground = {
 		mesh: new Tarumae.Shapes.PlaneMesh(2, 2),
-		mat: { color: [1.3, 1.3, 1.3], tex: "../static/textures/bg-gray-gradient.jpg" },
+		mat: { color: [2, 2, 2], tex: "../static/textures/bg-gray-gradient.jpg" },
 		angle: [0, 30, 0],
 	};
 	scene.load(ground);
@@ -113,6 +112,8 @@ window.addEventListener("load", function() {
 				nextObj.scale.set(mod.scale[0], mod.scale[1], mod.scale[2]);
 			}
 			window.obj = nextObj;
+			if (window.refmap) window.setObjectRefmap(window.obj);
+				
 			nextObj.visible = true;
 			scene.animate({ effect: "fadein", duration: 0.5 }, t => {
 				nextObj.location.x = 3 * (1 - t);
@@ -127,27 +128,53 @@ window.addEventListener("load", function() {
 	scene.mainCamera.location.set(0, 1, 2);
 	scene.mainCamera.angle.set(-15, 0, 0);
 	
+	// light sources
+
 	const lights = new Tarumae.SceneObject();
 
 	const light1 = new Tarumae.PointLight();
-	light1.location.set(2, 8, 7);
-	light1.mat.emission = 100.0;
+	light1.location.set(-2, 5, 4);
+	light1.mat.emission = 1.0;
 	lights.add(light1);
 		
 	const light2 = new Tarumae.PointLight();
-	light2.location.set(-3, 6, 3);
-	light2.mat.emission = 50.0;
+	light2.location.set(0, 4, 3);
+	light2.mat.emission = 0.3;
 	lights.add(light2);
-
-	scene.sun.mat.color = [2, 2, 2];
 
 	scene.add(lights);
 
+	scene.sun.mat.color = [0.5, 0.5, 0.5];
+
 	// new Tarumae.TouchController(scene);
 	const objController = new Tarumae.ObjectViewController(scene, {
-		enableVerticalRotation: true
+		enableVerticalRotation: true,
+		minVerticalRotateAngle: -10,
+		maxVerticalRotateAngle: 50,
+		
 	});
 	objController.object = ground;
+
+	const cubebox = new Tarumae.ImageCubeBox(renderer, [
+		"../static/textures/office-cubemap/px.jpg",
+		"../static/textures/office-cubemap/nx.jpg",
+		"../static/textures/office-cubemap/py.jpg",
+		"../static/textures/office-cubemap/ny.jpg",
+		"../static/textures/office-cubemap/pz.jpg",
+		"../static/textures/office-cubemap/nz.jpg",
+	]);
+		
+	window.setObjectRefmap = (obj) => {
+		obj.eachChild(c => c.meshes[0]._refmap = window.refmap);
+		this.console.log("set object refmap done");
+	};
+
+	cubebox.on('load', _ => {
+		window.refmap = cubebox.cubemap;
+		if (window.obj) {
+			window.setObjectRefmap(window.obj);
+		}
+	});
 
 	scene.show();
 });
