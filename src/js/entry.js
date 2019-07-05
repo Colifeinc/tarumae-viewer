@@ -2,7 +2,7 @@
 // tarumae engine
 // https://tarumae.tech
 //
-// Copyright(c) 2018 unvell, all rights reserved
+// Copyright(c) 2016-2019 BULB Corp., Jingwood, all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
 const Tarumae = {

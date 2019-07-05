@@ -2,7 +2,7 @@
 // Tarumae engine
 // https://tarumae.tech
 //
-// copyright(c) 2016 bulb inc. all rights reserved
+// Copyright(c) 2016-2019 BULB Corp., Jingwood, all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "../entry";

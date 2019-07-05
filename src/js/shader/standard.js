@@ -1,3 +1,10 @@
+////////////////////////////////////////////////////////////////////////////////
+// tarumae engine
+// https://tarumae.tech
+//
+// Copyright(c) 2016-2019 BULB Corp., Jingwood, all rights reserved
+////////////////////////////////////////////////////////////////////////////////
+
 import Tarumae from "../entry";
 import "../webgl/shader"
 import { Vec2, Vec3, Vec4, Color3, Color4 } from "../math/vector";

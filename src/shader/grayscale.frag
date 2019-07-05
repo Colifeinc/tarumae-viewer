@@ -2,7 +2,7 @@
 // tarumae engine
 // https://tarumae.tech
 //
-// copyright(c) 2018 bulb corp. all rights reserved
+// Copyright(c) 2016-2019 BULB Corp., Jingwood, all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
 precision mediump float;
