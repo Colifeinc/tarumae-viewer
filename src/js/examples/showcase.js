@@ -238,13 +238,10 @@ class ShowroomController {
 window.addEventListener("load", function() {
 
 	const renderer = new Tarumae.Renderer({
-		enableLighting: true,
+		enableLighting: false,
+
 		backColor: new Color4(0.96, .98, 1, 1),
 		backgroundImage: "/static/textures/52642.jpg",
-
-		renderPixelRatio: window.devicePixelRatio,
-		// renderPixelRatio: Math.max(window.devicePixelRatio * 0.75, 1),
-		// renderPixelRatio: 1,
 	
 		enablePostprocess: true,
 		postprocess: {
@@ -258,7 +255,8 @@ window.addEventListener("load", function() {
 			resolution: 4096,
 		},
 		bloomEffect: {
-			gamma: 2.0
+			threshold: 0.2,
+			gamma: 1.2,
 		},
 	});
 	
@@ -276,9 +274,13 @@ window.addEventListener("load", function() {
 	new Tarumae.TouchController(scene);
 
 	// _scene.sun.mat.color = [.8, .8, .8];
-	_scene.sun.mat.color = [.1, .1, .1];
-	
-	scene.createObjectFromURL("/static/models/room_01a-baked.toba", obj => {
+	// _scene.sun.mat.color = [.1, .1, .1];
+	_scene.sun.mat.color = [.5, .5, .5];
+
+	// const showcaseToba = "/static/floor.toba";
+	const showcaseToba = "/static/models/room_01a-baked.toba";
+
+	scene.createObjectFromURL(showcaseToba, obj => {
 		window.obj = obj;
 
 		scene.add(obj);

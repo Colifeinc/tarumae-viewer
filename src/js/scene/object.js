@@ -309,6 +309,23 @@ Tarumae.SceneObject = class {
 		return arr;
 	}
 
+	// /*
+	//  * Finds objects and children in this scene by given conditions. Returns null if nothing found.
+	//  */
+	// iterateObjects(handler) {
+	// 	for (let i = 0; i < this.objects.length; i++) {
+	// 		let obj = this.objects[i];
+	// 		if (handler(obj)) yield obj;
+	// 	}
+
+	// 	for (let k = 0; k < this.objects.length; k++) {
+	// 		let obj = this.objects[k];
+	// 		obj.iterateObjects(handler);
+	// 	}
+
+	// 	return null;
+	// }
+
 	/*
 	 * itearte over all children of this object,
 	 * pass the object to specified iterator function.

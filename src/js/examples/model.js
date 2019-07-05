@@ -23,11 +23,11 @@ window.addEventListener("load", function() {
 		showDebugPanel: false,
 		// enableLighting: false,
 		enableShadow: true,
-		postprocess: false,
+		postprocess: true,
 		enableAntialias: true,
 		bloomEffect: {
-			threshold: 0.3,
-			gamma: 2.4,
+			threshold: 0.25,
+			gamma: 1.8,
 		}
 	});
 
@@ -40,6 +40,7 @@ window.addEventListener("load", function() {
 		// { name: "test.toba" },
 		// { name: "chair_adv_01.toba" },
 		{ name: "KG-367JB-ZW.toba" },
+		{ name: "KLL-120C-TN.toba" },
 		// { name: "chair_compact_01.toba" },
 		// { name: "chair_jati.toba" },
 		// { name: "char_stand_01-baked.toba", scale: [.1, .1, .1], color: [.7, .7, .7] },
@@ -50,6 +51,9 @@ window.addEventListener("load", function() {
 		// { name: "sofa_leather_3s.toba" },
 	];
 
+
+	// const ground = new Tarumae.Shapes.Sphere();
+	
 	const ground = {
 		mesh: new Tarumae.Shapes.PlaneMesh(2, 2),
 		mat: { color: [2, 2, 2], tex: "../static/textures/bg-gray-gradient.jpg" },
@@ -134,17 +138,17 @@ window.addEventListener("load", function() {
 
 	const light1 = new Tarumae.PointLight();
 	light1.location.set(-2, 5, 4);
-	light1.mat.emission = 1.0;
+	light1.mat.emission = 0.5;
 	lights.add(light1);
 		
 	const light2 = new Tarumae.PointLight();
 	light2.location.set(0, 4, 3);
-	light2.mat.emission = 0.3;
+	light2.mat.emission = 0.1;
 	lights.add(light2);
 
 	scene.add(lights);
 
-	scene.sun.mat.color = [0.5, 0.5, 0.5];
+	scene.sun.mat.color = [0.55, 0.55, 0.55];
 
 	// new Tarumae.TouchController(scene);
 	const objController = new Tarumae.ObjectViewController(scene, {
@@ -166,13 +170,13 @@ window.addEventListener("load", function() {
 		
 	window.setObjectRefmap = (obj) => {
 		obj.eachChild(c => c.meshes[0]._refmap = window.refmap);
-		this.console.log("set object refmap done");
 	};
 
 	cubebox.on('load', _ => {
 		window.refmap = cubebox.cubemap;
 		if (window.obj) {
 			window.setObjectRefmap(window.obj);
+			ground.meshes[0]._refmap = window.refmap;
 		}
 	});
 

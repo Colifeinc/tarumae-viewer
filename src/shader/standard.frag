@@ -93,12 +93,12 @@ vec3 traceLight(vec3 vertexNormal, vec3 cameraNormal) {
 		float ln = dot(lightNormal, vertexNormal);
 		float ld = pow(length(lightRay), -2.0);
 
-		diff += lights[i].color * smoothstep(0.0, 1.0, ln * ld);
+		diff += lights[i].color * ln * ld;
 
 		vec3 lightReflection = reflect(lightNormal, vertexNormal);
 		float refd = dot(lightReflection, cameraNormal);
 
-		specular += lights[i].color * smoothstep(0.0, 1.0, pow(refd, glossy) * glossy);
+		specular += lights[i].color * (pow(refd, glossy) * glossy);
 	}
 
 	return diff + specular;
@@ -136,7 +136,7 @@ void main(void) {
 			finalColor += traceLight(vertexNormal, cameraNormal);
 		}
 
-		finalColor = finalColor * sunlight + max(dot(vertexNormal, sundir), 0.0);
+		finalColor = (finalColor + max(dot(vertexNormal, sundir), 0.0)) * sunlight;
 	}
 
 	finalColor = finalColor * textureColor.rgb;

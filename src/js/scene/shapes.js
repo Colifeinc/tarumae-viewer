@@ -185,27 +185,27 @@ Tarumae.Shapes.LineMesh = class extends Tarumae.SceneObject {
 
 		this.composeMode = Tarumae.Mesh.ComposeModes.TriangleStrip;
 	}
-};
 
-Tarumae.Shapes.LineMesh.prototype.update = function(start, end, width) {
-	this.destroy();
-	
-	start = start || Vec3.zero;
-	end = end || Vec3.zero;
-	width = width || 0.5;
-
-	var segs = 5;
-	var angles = Math.PI * 2 / segs;
-
-	this.vertices = [];
-
-	var m = new Tarumae.Matrix4().lookAt(start, end, Vec3.up);
-
-	for (var i = 0, a = 0; i <= segs; i++ , a += angles) {
-		var v = new Vec4(Math.sin(a) * width, Math.cos(a) * width, 0, 1).mulMat(m);
+	update(start, end, width) {
+		this.destroy();
 		
-		this.vertices.push(start.x + v.x, start.y + v.y, start.z + v.z);
-		this.vertices.push(end.x + v.x, end.y + v.y, end.z + v.z);
+		start = start || Vec3.zero;
+		end = end || Vec3.zero;
+		width = width || 0.5;
+	
+		var segs = 5;
+		var angles = Math.PI * 2 / segs;
+	
+		this.vertices = [];
+	
+		var m = new Tarumae.Matrix4().lookAt(start, end, Vec3.up);
+	
+		for (var i = 0, a = 0; i <= segs; i++ , a += angles) {
+			var v = new Vec4(Math.sin(a) * width, Math.cos(a) * width, 0, 1).mulMat(m);
+			
+			this.vertices.push(start.x + v.x, start.y + v.y, start.z + v.z);
+			this.vertices.push(end.x + v.x, end.y + v.y, end.z + v.z);
+		}
 	}
 };
 
@@ -215,108 +215,106 @@ Tarumae.Shapes.Sphere = class extends Tarumae.SceneObject {
 	
 		this.generateMesh(segments, rings);
 	}
-};
 
-// Tarumae.Shapes.Sphere.prototype = new Tarumae.SceneObject();
+	generateMesh(segments, rings, composeMode) {
 
-Tarumae.Shapes.Sphere.prototype.generateMesh = function(segments, rings, composeMode) {
-
-	for (var i = 0; i < this.meshes.length; i++) {
-		this.meshes[i].destroy();
-	}
-
-	this.meshes._t_clear();
-
-	segments = segments || 12;
-	rings = rings || 24;
-
-	var anglePerSeg = Math.PI / segments;
-	var anglePerRing = Math.PI * 2.0 / rings;
-	var halfPI = Math.PI / 2;
-	var vangle = Math.PI / 2 - anglePerSeg;
+		for (var i = 0; i < this.meshes.length; i++) {
+			this.meshes[i].destroy();
+		}
 	
-	if (composeMode == Tarumae.Mesh.ComposeModes.Points) {
-
-		var mesh = (function() {
-			var mesh = new Tarumae.Mesh();
-			mesh.composeMode = composeMode;
-			mesh.vertices = [];
-			mesh.normals = [];
+		this.meshes._t_clear();
+	
+		segments = segments || 12;
+		rings = rings || 24;
+	
+		var anglePerSeg = Math.PI / segments;
+		var anglePerRing = Math.PI * 2.0 / rings;
+		var halfPI = Math.PI / 2;
+		var vangle = Math.PI / 2 - anglePerSeg;
 		
-			for (var j = 0; j < segments; j++) {
+		if (composeMode === Tarumae.Mesh.ComposeModes.Points) {
+	
+			var mesh = (function() {
+				var mesh = new Tarumae.Mesh();
+				mesh.composeMode = composeMode;
+				mesh.vertices = [];
+				mesh.normals = [];
+			
+				for (var j = 0; j < segments; j++) {
+					var a1 = vangle, a2 = vangle - anglePerSeg;
+	
+					var y1 = Math.sin(a1), y2 = Math.sin(a2);
+					var l1 = Math.sin(a1 + halfPI), l2 = Math.sin(a2 + halfPI);
+	
+					for (var i = 0, hangle = 0; i <= rings; i++ , hangle += anglePerRing) {
+				
+						var s = Math.sin(hangle), c = Math.cos(hangle);
+						var x1 = s * l1, z1 = c * l1, x2 = s * l2, z2 = c * l2;
+				
+						mesh.vertices.push(x1, y1, z1);
+						mesh.normals.push(x1, y1, z1);
+					}
+	
+					vangle -= anglePerSeg;
+				}
+	
+				return mesh;
+			})();
+			
+			this.addMesh(mesh);
+	
+		} else {
+			var generateSphereFan = function(starty) {
+				var mesh = new Tarumae.Mesh();
+				mesh.composeMode = Tarumae.Mesh.ComposeModes.TriangleFan;
+				mesh.vertices = [];
+				mesh.normals = [];
+				mesh.vertices.push(0, starty, 0);
+				mesh.normals.push(0, starty, 0);
+	
+				for (var i = 0, hangle = 0; i <= rings; i++ , hangle += anglePerRing) {
+					var y = Math.sin(vangle), l = Math.sin(vangle + halfPI);
+					var x = Math.sin(hangle) * l, z = Math.cos(hangle) * l;
+					mesh.vertices.push(x, y, z);
+					mesh.normals.push(x, y, z);
+				}
+	
+				return mesh;
+			};
+	
+			var topMesh = generateSphereFan(1);
+		
+			var middleMesh = new Tarumae.Mesh();
+			middleMesh.composeMode = Tarumae.Mesh.ComposeModes.TriangleStrip;
+			middleMesh.vertices = [];
+			middleMesh.normals = [];
+		
+			for (var j = 1; j < segments - 1; j++) {
 				var a1 = vangle, a2 = vangle - anglePerSeg;
-
+	
 				var y1 = Math.sin(a1), y2 = Math.sin(a2);
 				var l1 = Math.sin(a1 + halfPI), l2 = Math.sin(a2 + halfPI);
-
+	
 				for (var i = 0, hangle = 0; i <= rings; i++ , hangle += anglePerRing) {
-			
+				
 					var s = Math.sin(hangle), c = Math.cos(hangle);
 					var x1 = s * l1, z1 = c * l1, x2 = s * l2, z2 = c * l2;
-			
-					mesh.vertices.push(x1, y1, z1);
-					mesh.normals.push(x1, y1, z1);
+				
+					middleMesh.vertices.push(x1, y1, z1);
+					middleMesh.vertices.push(x2, y2, z2);
+					middleMesh.normals.push(x1, y1, z1);
+					middleMesh.normals.push(x2, y2, z2);
 				}
-
+	
 				vangle -= anglePerSeg;
 			}
-
-			return mesh;
-		})();
+	
+			var bottomMesh = generateSphereFan(-1);
 		
-		this.addMesh(mesh);
-
-	} else {
-		var generateSphereFan = function(starty) {
-			var mesh = new Tarumae.Mesh();
-			mesh.composeMode = Tarumae.Mesh.ComposeModes.TriangleFan;
-			mesh.vertices = [];
-			mesh.normals = [];
-			mesh.vertices.push(0, starty, 0);
-			mesh.normals.push(0, starty, 0);
-
-			for (var i = 0, hangle = 0; i <= rings; i++ , hangle += anglePerRing) {
-				var y = Math.sin(vangle), l = Math.sin(vangle + halfPI);
-				var x = Math.sin(hangle) * l, z = Math.cos(hangle) * l;
-				mesh.vertices.push(x, y, z);
-				mesh.normals.push(x, y, z);
-			}
-
-			return mesh;
-		};
-
-		var topMesh = generateSphereFan(1);
-	
-		var middleMesh = new Tarumae.Mesh();
-		middleMesh.composeMode = Tarumae.Mesh.ComposeModes.TriangleStrip;
-		middleMesh.vertices = [];
-		middleMesh.normals = [];
-	
-		for (var j = 1; j < segments - 1; j++) {
-			var a1 = vangle, a2 = vangle - anglePerSeg;
-
-			var y1 = Math.sin(a1), y2 = Math.sin(a2);
-			var l1 = Math.sin(a1 + halfPI), l2 = Math.sin(a2 + halfPI);
-
-			for (var i = 0, hangle = 0; i <= rings; i++ , hangle += anglePerRing) {
-			
-				var s = Math.sin(hangle), c = Math.cos(hangle);
-				var x1 = s * l1, z1 = c * l1, x2 = s * l2, z2 = c * l2;
-			
-				middleMesh.vertices.push(x1, y1, z1);
-				middleMesh.vertices.push(x2, y2, z2);
-				middleMesh.normals.push(x1, y1, z1);
-				middleMesh.normals.push(x2, y2, z2);
-			}
-
-			vangle -= anglePerSeg;
+			this.addMesh(topMesh);
+			this.addMesh(middleMesh);
+			this.addMesh(bottomMesh);
 		}
-
-		var bottomMesh = generateSphereFan(-1);
-	
-		this.addMesh(topMesh);
-		this.addMesh(middleMesh);
-		this.addMesh(bottomMesh);
 	}
 };
 

@@ -193,7 +193,7 @@ Tarumae.PipelineNodes.ImageToScreenRenderer = class extends Tarumae.PipelineNode
   set input(node) {
     if (!node.output || (!(node.output instanceof Tarumae.Texture)
      && !(node.output instanceof WebGLTexture))) {
-      throw "image renderer requires a texture input pipleline";
+      throw "image renderer requires a texture input pipleline node";
     }
     super.input = node;
   }

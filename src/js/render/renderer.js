@@ -21,7 +21,7 @@ Tarumae.Renderer = class {
 	static defaultOptions() {
 		return {
 			containerId: "canvas-container",
-			renderPixelRatio: 1,
+			renderPixelRatio: window.devicePixelRatio,
 			enable3D: true,
 			perspective: {
 				method: Tarumae.ProjectionMethods.Persp,
