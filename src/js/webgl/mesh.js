@@ -207,12 +207,17 @@ Tarumae.Mesh = class {
 			vertexBuffer = vertexBuffer.concat(this.colors);
 		}
 
+		if (meta.hasSize) {
+			vertexBuffer = vertexBuffer.concat(this.sizes);
+		}
+
 		this.vertexBuffer = new Float32Array(vertexBuffer);
 		
 		return true;
 	}
 
-	bind(renderer) {
+	initMeta(renderer) {
+		
 		if (!this.meta) {
 			this.meta = {
 				vertexCount: 0,
@@ -276,7 +281,7 @@ Tarumae.Mesh = class {
 			var offset = meta.vertexCount * 12;
 
 			meta.normalOffset = offset;
-			offset += meta.normalCount * 12;
+			offset += (meta.normalCount || 0) * 12;
 
 			if (meta.texcoordCount > 0) {
 				meta.texcoordOffset = offset;
@@ -301,11 +306,20 @@ Tarumae.Mesh = class {
 				offset += meta.vertexCount * 12;
 			}
 
+			if (meta.hasSize) {
+				meta.vertexSizeOffset = offset;
+				offset += meta.vertexCount * 4;
+			}
+
 			if (meta.edgeCount > 0) {
 				meta.edgeDataOffset = offset;
 				offset += meta.edgeCount * 12 * 2;
 			}
 		}
+	}
+
+	bind(renderer) {
+		this.initMeta(renderer);
 
 		if (this.indexed && !this.indexBuffer) {
 			if (Array.isArray(this.indexes)) {
@@ -1132,6 +1146,8 @@ Tarumae.DynamicMesh = class extends Tarumae.Mesh {
 	}
 	
 	bind(renderer) {
+		this.initMeta(renderer);
+
 		if (!this.meta || this.meta.vertexBufferId) return;
 
 		this.meta.renderer = renderer;
@@ -1142,7 +1158,7 @@ Tarumae.DynamicMesh = class extends Tarumae.Mesh {
 		gl.bufferData(gl.ARRAY_BUFFER, this.vertexBuffer, gl.DYNAMIC_DRAW);
 	}
 
-	updateBuffer() {
+	updateGLBuffer() {
 		if (this.meta && this.meta.vertexBufferId) {
 			const gl = this.meta.renderer.gl;
 			if (gl) {
@@ -1168,7 +1184,7 @@ Tarumae.DynamicMesh = class extends Tarumae.Mesh {
 		}
 
 		if (this.bufferDirty) {
-			this.updateBuffer();
+			this.updateGLBuffer();
 
 			if (this.bufferDirty) {
 				return;
@@ -1190,8 +1206,8 @@ Tarumae.ParticleMesh = class extends Tarumae.DynamicMesh {
 			hasColor: true,
 			hasSize: true,
 			stride: 0,
-			vertexColorOffset: count * 12,
-			vertexSizeOffset: count * 24,
+			// vertexColorOffset: count * 12,
+			// vertexSizeOffset: count * 24,
 		};
 
 		this.composeMode = Tarumae.Mesh.ComposeModes.Points;

@@ -53,7 +53,7 @@ varying vec3 vcolor;
 varying highp vec3 shadowPosition;
 varying mat3 TBN;
 
-#define MAX_LIGHT_COUNT 5
+#define MAX_LIGHT_COUNT 10
 uniform int lightCount;
 uniform Light lights[MAX_LIGHT_COUNT];
 
@@ -91,14 +91,16 @@ vec3 traceLight(vec3 vertexNormal, vec3 cameraNormal) {
 		vec3 lightNormal = normalize(lightRay);
 
 		float ln = dot(lightNormal, vertexNormal);
-		float ld = pow(length(lightRay), -2.0);
+		float ld = length(lightRay);
+		ld = pow(2.718282, -ld);
 
-		diff += lights[i].color * ln * ld;
+		diff += lights[i].color * max(ln * ld, 0.0);
 
 		vec3 lightReflection = reflect(lightNormal, vertexNormal);
 		float refd = dot(lightReflection, cameraNormal);
 
-		specular += lights[i].color * (pow(refd, glossy) * glossy);
+		float sf = max(pow(2.718282, -ld / 5.0) * pow(refd, glossy * 10.0) * pow(glossy, 5.0), 0.0);
+		specular += lights[i].color * sf;
 	}
 
 	return diff + specular;
@@ -136,7 +138,7 @@ void main(void) {
 			finalColor += traceLight(vertexNormal, cameraNormal);
 		}
 
-		finalColor = (finalColor + max(dot(vertexNormal, sundir), 0.0)) * sunlight;
+		finalColor = (finalColor + finalColor * max(dot(vertexNormal, sundir), 0.0)) * sunlight;
 	}
 
 	finalColor = finalColor * textureColor.rgb;
@@ -158,8 +160,7 @@ void main(void) {
 
 	vec3 refColor = textureCube(refMap, refmapLookup, roughness).rgb;
 	
-	float gg = clamp(pow(glossy, 3.0), 0.0, 1.0);
-	// finalColor = finalColor * (1.0 - gg) + (finalColor * 0.5 + finalColor * 0.5 * refColor) * gg;
+	float gg = clamp(pow(glossy, 5.0), 0.0, 1.0) * (1.0 - roughness);
 	finalColor = finalColor * (1.0 - gg) + (finalColor * refColor * gg);
 
 	//////////////// ShadowMap ////////////////

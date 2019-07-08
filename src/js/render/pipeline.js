@@ -419,18 +419,22 @@ Tarumae.PipelineNodes.ShadowMapRenderer = class extends Tarumae.PipelineNode {
     // this.shader.projectionMatrix = this.renderer.projectionViewMatrix;
 
     // const gl = this.renderer.gl;
-    // gl.cullFace(gl.FRONT);
     // gl.disable(gl.CULL_FACE);
+    // gl.cullFace(gl.FRONT);
+
+    this.renderer.currentPipeline = this;
 
     this.renderer.useShader(this.shader);
     this.shader.beginScene(scene);
 
-		for (let i = 0; i < scene.objects.length; i++) {
+    for (let i = 0; i < scene.objects.length; i++) {
 			this.drawObject(scene.objects[i]);
     }
 
     this.renderer.disuseCurrentShader();
     this.buffer.disuse();
+
+    this.renderer.currentPipeline = null;
 
     // gl.enable(gl.CULL_FACE);
     // gl.cullFace(gl.BACK);
@@ -438,7 +442,7 @@ Tarumae.PipelineNodes.ShadowMapRenderer = class extends Tarumae.PipelineNode {
   }
 
   drawObject(obj) {
-    if (obj instanceof Tarumae.Camera) {
+    if (obj instanceof Tarumae.Camera || obj.castShadow === false) {
       return;
     }
 

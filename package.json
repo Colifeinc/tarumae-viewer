@@ -1,8 +1,8 @@
 {
-  "name": "@bulbcorp/tarumae-viewer",
-  "version": "1.4.0",
+  "name": "tarumae-viewer",
+  "version": "1.4.1",
   "description": "Optimized WebGL engine for showcase application",
-  "main": "build/tarumae-viewer.js",
+  "main": "dist/js/tarumae.js",
   "files": [
     "/dist"
   ],
@@ -13,7 +13,7 @@
     "pub": "npx babel src -d dist"
   },
   "keywords": [],
-  "author": "BULB CORP.",
+  "author": "BULB Corp.",
   "license": "MIT",
   "repository": {
     "type": "git",

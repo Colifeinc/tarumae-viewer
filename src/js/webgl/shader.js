@@ -1128,7 +1128,8 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 	
 		// shadow
 
-		if (this._shadowMap2D && this._shadowMap2D instanceof Tarumae.Texture) {
+		if (this.renderer.options.enableShadow
+			&& this._shadowMap2D && this._shadowMap2D instanceof Tarumae.Texture) {
 			this.shadowMapTypeUniform.set(1);
 			this.shadowMapUniform.tex2d.set(this._shadowMap2D);
 			this.shadowMapUniform.texcube.set(this.emptyCubemap);
@@ -1144,7 +1145,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 					this.shadowMapUniform.texcube.set(scene.shadowMap);
 				}
 	
-				this.shadowMapUniform.boundingBox.set(scene.shadowMap.bbox);	
+				this.shadowMapUniform.boundingBox.set(scene.shadowMap.bbox);
 			} else {
 				this.shadowMapUniform.texcube.set(this.emptyCubemap);
 				this.shadowMapTypeUniform.set(0);
@@ -1175,15 +1176,15 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		this.usingLightmap = null;
 		this.useNormalmap = null;
 	
-		if (typeof mat === "object" && mat != null) {
+		this.textureUniform.set(Tarumae.Shader.emptyTexture);
+		this.hasTextureUniform.set(false);
+
+		if (mat) {
 			// texture
 			if (mat.tex && typeof mat.tex === "object" && mat.tex instanceof Tarumae.Texture
 				&& !mat.tex.isLoading && mat.tex.image && mat.tex.image.complete) {
 				this.textureUniform.set(mat.tex);
 				this.hasTextureUniform.set(true);
-			} else {
-				this.textureUniform.set(Tarumae.Shader.emptyTexture);
-				this.hasTextureUniform.set(false);
 			}
 			
 			// normal-map
@@ -1290,7 +1291,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		}
 
 		// shadow
-		if (this._shadowMap2D) {
+		if (this.renderer.options.enableShadow && this._shadowMap2D) {
 			const shadowMapShader = Tarumae.Renderer.Shaders.shadowmap.instance;
 			if (shadowMapShader) {
 				const m = modelMatrix.mul(shadowMapShader.lightMatrix).mul(shadowMapShader.projectionMatrix);
@@ -1383,6 +1384,7 @@ Tarumae.Shaders.WireframeShader = class extends Tarumae.Shader {
 		this.use();
 
 		this.vertexPositionAttribute = this.findAttribute("vertexPosition");
+		// this.vertexSizeAttribute = this.findAttribute("vertexSize");
 		this.projectViewModelMatrixUniform = this.bindUniform("projectViewModelMatrix", "mat4");
 
 		// material

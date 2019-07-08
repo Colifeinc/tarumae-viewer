@@ -125,65 +125,96 @@ Tarumae.Shapes.Line = class extends Tarumae.SceneObject {
 		this._start = start || new Vec3();
 		this._end = end || new Vec3();
 		this._width = width || 0.1;
+		
+		this.shader = { name: "points" };
 
-		this.dirty = true;
-	
 		this.mesh = new Tarumae.Shapes.LineMesh(this._start, this._end, this._width);
 		this.addMesh(this.mesh);
+
+		this.dirty = false;
+	}
+	
+	get start() {
+		return this._start;
+	}
+
+	set start(val) {
+		this._start = val;
+		this.dirty = true;
+	}
+
+	get end() {
+		return this._end;
+	}
+		
+	set end(val) {
+		this._end = val;
+		this.dirty = true;
+	}
+
+	get width() {
+		return this._width;
+	}
+	
+	set width(val) {
+		this._width = val;
+		this.dirty = true;
+	}
+
+	draw() {
+		if (this.dirty) {
+			this.mesh.update(this._start, this._end, this._width);
+			this.dirty = false;
+		}
 	}
 };
 
-// Tarumae.Shapes.Line.prototype = new Tarumae.SceneObject();
+// Tarumae.Shapes.LineMesh = class extends Tarumae.Mesh {
+// 	constructor(start, end, width) {
+// 		super();
+// 		this.name = "LineMesh";
 
-Object.defineProperties(Tarumae.Shapes.Line.prototype, {
-	"start": {
-		get: function() {
-			return this._start;
-		},
-		set: function(val) {
-			this._start = val;
-			this.dirty = true;
-		},
-	},
+// 		this.update(start, end, width);
 
-	"end": {
-		get: function() {
-			return this._end;
-		},
-		set: function(val) {
-			this._end = val;
-			this.dirty = true;
-		},
-	},
+// 		this.composeMode = Tarumae.Mesh.ComposeModes.TriangleStrip;
+// 	}
 
-	"width": {
-		get: function() {
-			return this._width;
-		},
-		set: function(val) {
-			this._width = val;
-			this.dirty = true;
-		},
-	},
+// 	update(start, end, width) {
+// 		this.destroy();
+		
+// 		start = start || Vec3.zero;
+// 		end = end || Vec3.zero;
+// 		width = width || 0.5;
+	
+// 		var segs = 5;
+// 		var angles = Math.PI * 2 / segs;
+	
+// 		this.vertices = [];
+	
+// 		var m = new Tarumae.Matrix4().lookAt(start, end, Vec3.up);
+	
+// 		for (var i = 0, a = 0; i <= segs; i++, a += angles) {
+// 			var v = new Vec4(Math.sin(a) * width, Math.cos(a) * width, 0, 1).mulMat(m);
+			
+// 			this.vertices.push(start.x + v.x, start.y + v.y, start.z + v.z);
+// 			this.vertices.push(end.x + v.x, end.y + v.y, end.z + v.z);
+// 		}
+// 	}
+// };
 
-	"draw": {
-		value: function() {
-			if (this.dirty) {
-				this.mesh.update(this._start, this._end, this._width);
-				this.dirty = false;
-			}
-		},
-	},
-});
-
-Tarumae.Shapes.LineMesh = class extends Tarumae.SceneObject {
+Tarumae.Shapes.LineMesh = class extends Tarumae.Mesh {
 	constructor(start, end, width) {
 		super();
 		this.name = "LineMesh";
 
 		this.update(start, end, width);
 
-		this.composeMode = Tarumae.Mesh.ComposeModes.TriangleStrip;
+		this.composeMode = Tarumae.Mesh.ComposeModes.Lines;
+
+		this.meta = {
+			vertexCount: 2,
+			hasSize: true
+		};
 	}
 
 	update(start, end, width) {
@@ -191,21 +222,22 @@ Tarumae.Shapes.LineMesh = class extends Tarumae.SceneObject {
 		
 		start = start || Vec3.zero;
 		end = end || Vec3.zero;
-		width = width || 0.5;
+		width = width || 0.1;
 	
-		var segs = 5;
-		var angles = Math.PI * 2 / segs;
+		// var segs = 5;
+		// var angles = Math.PI * 2 / segs;
 	
-		this.vertices = [];
+		this.vertices = [start.x, start.y, start.z, end.x, end.y, end.z];
+		this.sizes = [5, 5];
 	
-		var m = new Tarumae.Matrix4().lookAt(start, end, Vec3.up);
+		// var m = new Tarumae.Matrix4().lookAt(start, end, Vec3.up);
 	
-		for (var i = 0, a = 0; i <= segs; i++ , a += angles) {
-			var v = new Vec4(Math.sin(a) * width, Math.cos(a) * width, 0, 1).mulMat(m);
+		// for (var i = 0, a = 0; i <= segs; i++, a += angles) {
+		// 	var v = new Vec4(Math.sin(a) * width, Math.cos(a) * width, 0, 1).mulMat(m);
 			
-			this.vertices.push(start.x + v.x, start.y + v.y, start.z + v.z);
-			this.vertices.push(end.x + v.x, end.y + v.y, end.z + v.z);
-		}
+		// 	this.vertices.push(start.x + v.x, start.y + v.y, start.z + v.z);
+		// 	this.vertices.push(end.x + v.x, end.y + v.y, end.z + v.z);
+		// }
 	}
 };
 

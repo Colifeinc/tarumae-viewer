@@ -12,23 +12,30 @@ import "../scene/viewer";
 import "../utility/archive";
 import "../utility/res";
 import "../view/objectcontroller"
-import { Color3, Color4 } from "../math/vector";
+import { Color3, Color4, Vec3 } from "../math/vector";
 
 window.addEventListener("load", function() {
 
 	const renderer = new Tarumae.Renderer({
-		renderPixelRatio: window.devicePixelRatio,
 		// backColor: new Color4(0.74, .87, .85, 1),
 		// backgroundImage: "../static/textures/bg-gray-gradient.jpg",
 		showDebugPanel: false,
 		// enableLighting: false,
 		enableShadow: true,
-		postprocess: true,
-		enableAntialias: true,
+		// enableAntialias: false,
+		// enablePostprocess: false,
+		shadowQuality: {
+			scale: 2,
+			viewDepth: 2,
+			resolution: 4096,
+		},
 		bloomEffect: {
 			threshold: 0.25,
-			gamma: 1.8,
-		}
+			gamma: 1.6,
+		},
+		postprocess: {
+			gamma: 1.0,
+		},
 	});
 
 	const scene = renderer.createScene();
@@ -39,8 +46,37 @@ window.addEventListener("load", function() {
 	this.models = [
 		// { name: "test.toba" },
 		// { name: "chair_adv_01.toba" },
-		{ name: "KG-367JB-ZW.toba" },
-		{ name: "KLL-120C-TN.toba" },
+
+		// { name: "itoki/CZR-187BAC.toba" },
+		// { name: "itoki/CZR-187CBC.toba" },
+		// { name: "itoki/HLL-1114S.toba" },
+		// { name: "itoki/JP-1407S.toba" },
+		// { name: "itoki/JP-1407WCA.toba" },
+		// { name: "itoki/JP-1414HWA.toba" },
+		// { name: "itoki/JP-2244TWA.toba" },
+		// { name: "itoki/JP-2414HWA.toba" },
+
+		// { name: "itoki/JVB-1207GL.toba" },
+		// { name: "itoki/JVB-1207GLWM.toba" },
+		// { name: "itoki/JVD-6677KW.toba" },
+		{ name: "itoki/JVT-1809HW.toba" },
+		// { name: "itoki/JVT-1809HWWM.toba" },
+		// { name: "itoki/JWL-241GES.toba" },
+		// { name: "itoki/JZD-1407HB-C.toba" },
+		// { name: "itoki/JZD-1414HB.toba" },
+		// { name: "itoki/JZD-6677KA.toba" },
+
+		// { name: "itoki/KF-577JB-ZT.toba" },
+		{ name: "itoki/KF-835GC-ZT.toba" },
+		// { name: "itoki/KG-177JB-W9.toba" },
+		// { name: "itoki/KG-367JB-ZW.toba" },
+		// { name: "itoki/KLL-110.toba" },
+		// { name: "itoki/KLL-120C-TN.toba" },
+		// { name: "itoki/KLL-130C-T1.toba" },
+		// { name: "itoki/KZ-337JB-W9.toba" },		
+		// { name: "itoki/LLL-07CLN.toba" },
+		// { name: "itoki/LLL-12SLN.toba" },
+
 		// { name: "chair_compact_01.toba" },
 		// { name: "chair_jati.toba" },
 		// { name: "char_stand_01-baked.toba", scale: [.1, .1, .1], color: [.7, .7, .7] },
@@ -55,8 +91,11 @@ window.addEventListener("load", function() {
 	// const ground = new Tarumae.Shapes.Sphere();
 	
 	const ground = {
-		mesh: new Tarumae.Shapes.PlaneMesh(2, 2),
-		mat: { color: [2, 2, 2], tex: "../static/textures/bg-gray-gradient.jpg" },
+		mesh: new Tarumae.Shapes.PlaneMesh(3, 3),
+		mat: {
+			color: [1, 1, 1],
+			//tex: "../static/textures/bg-gray-gradient.jpg"
+		},
 		angle: [0, 30, 0],
 	};
 	scene.load(ground);
@@ -124,7 +163,7 @@ window.addEventListener("load", function() {
 				nextObj.opacity = t;
 			});
 			scene.animate({ effect: "fadeout" }, t => {
-				nextObj.angle.y = -(1 - t) * 500 + 25;
+				// nextObj.angle.y = -(1 - t) * 500 + 25;
 			});
 		}
 	}
@@ -137,18 +176,32 @@ window.addEventListener("load", function() {
 	const lights = new Tarumae.SceneObject();
 
 	const light1 = new Tarumae.PointLight();
-	light1.location.set(-2, 5, 4);
-	light1.mat.emission = 0.5;
+	light1.location.set(-3, 4, 2);
+	light1.mat.emission = 3;
 	lights.add(light1);
 		
 	const light2 = new Tarumae.PointLight();
-	light2.location.set(0, 4, 3);
-	light2.mat.emission = 0.1;
+	light2.location.set(2, 3, 5);
+	light2.mat.emission = 3;
 	lights.add(light2);
+
+	const light3 = new Tarumae.PointLight();
+	light3.location.set(2, 4, -5);
+	light3.mat.emission = 2;
+	lights.add(light3);
+
+	const light4 = new Tarumae.PointLight();
+	light4.location.set(-3, 6, -4);
+	light4.mat.emission = 2;
+	lights.add(light4);
 
 	scene.add(lights);
 
-	scene.sun.mat.color = [0.55, 0.55, 0.55];
+
+	// scene.sun.mat.color = [0.55, 0.55, 0.55];
+	scene.sun.mat.color = [0.45, 0.45, 0.45];
+	// scene.sun.mat.color = [0.5, 0.5, 0.5];
+	// scene.sun.mat.color = [0.1, 0.1, 0.1];
 
 	// new Tarumae.TouchController(scene);
 	const objController = new Tarumae.ObjectViewController(scene, {

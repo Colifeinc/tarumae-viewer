@@ -152,8 +152,8 @@ Object.defineProperties(Array.prototype, {
 	_t_set: {
 		value: function(i) {
 			if (arguments.length > 1) {
-				for (var j = 0; j < arguments.length - 1; j++) {
-					this[i++] = arguments[j + 1];
+				for (var j = 1; j < arguments.length - 1; j++) {
+					this[i++] = arguments[j];
 				}
 			}
 		},

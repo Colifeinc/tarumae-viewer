@@ -35,7 +35,7 @@ const renderer = new Tarumae.Renderer();
 const scene = renderer.createScene();
 
 // create a cube object
-const cube = new Tarumae.Cube();
+const cube = new Tarumae.Shapes.Cube();
 
 // add cube into scene
 scene.add(cube);

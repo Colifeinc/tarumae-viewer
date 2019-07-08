@@ -17,11 +17,12 @@ import "../utility/res";
 window.addEventListener("load", function() {
 
 	const renderer = new Tarumae.Renderer({
+		renderPixelRatio: 1,
 		backColor: new Color4(0.2),
 		postprocess: true,
 		enableLighting: false,
 		bloomEffect: {
-			threshold: 0.8,
+			threshold: 0.5,
 			gamma: 1.0,
 		},
 	});
@@ -30,7 +31,7 @@ window.addEventListener("load", function() {
 
 	window._scene = scene;
  
-	const count = 30000;
+	const count = 20000;
 	const pm = new Tarumae.ParticleMesh(count);
 
 	var particles = new Array(count);
@@ -47,9 +48,9 @@ window.addEventListener("load", function() {
 			oy: Math.random() * 20 - 10,
 			oz: Math.random() * 20 - 10,
 			r: 1.0, //Math.random(),
-			g: Math.random() * 0.5,
-			b: Math.random(),
-			size: Math.random()*4,
+			g: 1, //Math.random() * 0.5,
+			b: 1,//Math.random(),
+			size: 1 + Math.random() * 2,
 		};
 	}
 
@@ -61,7 +62,7 @@ window.addEventListener("load", function() {
 	}
 
 	function setAll(iterator) {
-		for (var i = 0; i < count; i++) {
+		for (let i = 0; i < count; i++) {
 			iterator(particles[i], i);
 		}
 	}

@@ -145,13 +145,13 @@ Tarumae.Renderer = class {
 			this.aspectRate = 1;
 			this.renderSize = new Tarumae.Size();
 
-			if (this.options.enableShadow && typeof Tarumae.FrameBuffer === "function") {
+			// if (this.options.enableShadow && typeof Tarumae.FrameBuffer === "function") {
 				// this.shadowFrameBuffer = new Tarumae.FrameBuffer(this, 2048, 2048, Color4.white);
-			}
+			// }
 
-			if (typeof Tarumae.StencilBuffer === "function") {
+			// if (typeof Tarumae.StencilBuffer === "function") {
 				// this.stencilBuffer = new Tarumae.StencilBuffer(this);
-			}
+			// }
 
 			const gl = this.gl;
 			gl.enable(gl.DEPTH_TEST);
@@ -397,7 +397,7 @@ Tarumae.Renderer = class {
 				sw = width * (this.options.bloomEffect.threshold || 0.1),
 				sh = height * (this.options.bloomEffect.threshold || 0.1);
 			
-			let shadowMapRenderer = undefined;
+			let shadowMapRenderer;
 
 			if (this.options.enableShadow) {
 				shadowMapRenderer = new Tarumae.PipelineNodes.ShadowMapRenderer(this, {
@@ -411,11 +411,10 @@ Tarumae.Renderer = class {
 			const sceneImageRenderer = new Tarumae.PipelineNodes.SceneToImageRenderer(this);
 			sceneImageRenderer.shadowMap2DInput = shadowMapRenderer;
 
-			let imgRendererBlur = undefined, imgRendererSmall = undefined;
+			let imgRendererBlur, imgRendererSmall;
 
 			if (!this.options.bloomEffect
-				|| this.options.bloomEffect.eanbled === undefined
-				|| (this.options.bloomEffect && this.options.bloomEffect.enabled)) {
+				|| this.options.bloomEffect.enabled !== false) {
 				imgRendererSmall = new Tarumae.PipelineNodes.ImageFilterRenderer(this, {
 					resolution: {
 						width: sw,
@@ -753,7 +752,7 @@ Tarumae.Renderer = class {
 		}
 
 		if (!shaderPushed && obj instanceof Tarumae.ParticleObject) {
-			this.useShader("point");
+			this.useShader("points");
 			shaderPushed = true;
 		}
 	
@@ -768,7 +767,7 @@ Tarumae.Renderer = class {
 			case Tarumae.ObjectTypes.GenericObject:
 				{
 					for (let i = 0; i < obj.meshes.length; i++) {
-						var mesh = obj.meshes[i];
+						const mesh = obj.meshes[i];
 						if (mesh && this.options.enableDrawMesh) {
 							if (mesh.meta && mesh.meta.vertexCount == 0) {
 								console.warn('invaliad mesh from object ' + obj.name);
@@ -781,7 +780,7 @@ Tarumae.Renderer = class {
 	
 					if (!transparencyRendering) {
 						for (let i = 0; i < obj.objects.length; i++) {
-							let child = obj.objects[i];
+							const child = obj.objects[i];
 							this.drawObject(child);
 						}
 					}
@@ -1256,11 +1255,11 @@ Tarumae.Renderer.Shaders = {
 	// billboard: { vert: billboardVert, frag: billboardFrag, class: "BillboardShader" },
 	// simple: { vert: simpleVert, frag: simpleFrag, class: "SimpleShader" },
 	// grayscale: { vert: grayscaleVert, frag: grayscaleFrag, class: "GrayscaleShader" },
-	point: { vert: pointVert, frag: pointFrag, class: "PointShader" },
+	// point: { vert: pointVert, frag: pointFrag, class: "PointShader" },
 	panorama: { vert: panoramaVert, frag: panoramaFrag, class: "PanoramaShader" },
 	standard: { vert: standardVert, frag: standardFrag, class: "StandardShader" },
 	wireframe: { vert: wireframeVert, frag: wireframeFrag, class: "WireframeShader" },
-	point: { vert: pointVert, frag: pointFrag, class: "PointShader" },
+	points: { vert: pointVert, frag: pointFrag, class: "PointShader" },
 	image: { vert: imageVert, frag: imageFrag, class: "ImageShader" },
 	blur: { vert: blurVert, frag: blurFrag, class: "ImageShader" },
 	screen: { vert: screenVert, frag: screenFrag, class: "ScreenShader" },
