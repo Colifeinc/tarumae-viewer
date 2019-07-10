@@ -576,6 +576,26 @@ export class Color3 {
 		return this;
 	}
 
+	set(r, g, b) {
+		switch (arguments.length) {
+			case 0:
+				this.r = 0; this.g = 0; this.b = 0;
+				break;
+			
+			case 1:
+				if (typeof r === "number") {
+					this.r = r; this.g = r; this.b = r;
+				} else if (typeof r === "object") {
+					this.r = r.r; this.g = r.g; this.b = r.b;
+				}
+				break;
+
+			case 3:
+				this.r = r; this.g = g; this.b = b;
+				break;
+		}
+	}
+
 	add(c) {
 		return new Color3(this.r + c.r, this.g + c.g, this.b + c.b);
 	}

@@ -45,11 +45,11 @@ Tarumae.Renderer = class {
 				resolution: 1024,
 			},
 			enablePostprocess: true,
-			postprocess: {
+			renderingImage: {
 				gamma: 1.2,
 			},
 			bloomEffect: {
-				enabled: true,
+				enabled: false,
 				threshold: 0.1,
 				gamma: 1.5,
 			},
@@ -438,7 +438,7 @@ Tarumae.Renderer = class {
 
 			const imgRenderer = new Tarumae.PipelineNodes.ImageToScreenRenderer(this);
 			imgRenderer.input = sceneImageRenderer;
-			imgRenderer.gammaFactor = this.options.postprocess.gamma;
+			imgRenderer.gammaFactor = this.options.renderingImage.gamma;
 			imgRenderer.tex2Input = imgRendererBlur;
 			imgRenderer.enableAntialias = this.options.enableAntialias;
 

@@ -8,29 +8,29 @@
 import Tarumae from "../entry"
 import { Vec2 } from "../math/vector";
 
-Tarumae.CubeMap = function(renderer, images) {
-  this.glTexture = null;
-  this.enableMipmap = true;
-  this.mipmapped = false;
-  this.loaded = false;
+Tarumae.CubeMap = class {
+  constructor(renderer, images) {
+    this.glTexture = null;
+    this.enableMipmap = true;
+    this.mipmapped = false;
+    this.loaded = false;
 
-  if (renderer) {
-    this.renderer = renderer;
-    this.gl = renderer.gl;
-  }
+    if (renderer) {
+      this.renderer = renderer;
+      this.gl = renderer.gl;
+    }
 
-  if (Array.isArray(images)) {
-    this.images = images;
-  } else {
-    this.images = [];
-  }
-};
+    if (Array.isArray(images)) {
+      this.images = images;
+    } else {
+      this.images = [];
+    }
+  } 
+   
+  getLoadingFaces() {
+    const gl = this.gl;
 
-Tarumae.CubeMap.prototype = {
-  getLoadingFaces: function() {
-    var gl = this.gl;
-
-    if (Tarumae.CubeMap.LoadingFaces === null) {
+    if (!Tarumae.CubeMap.LoadingFaces) {
       Tarumae.CubeMap.LoadingFaces = [
         gl.TEXTURE_CUBE_MAP_POSITIVE_X,
         gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
@@ -42,9 +42,9 @@ Tarumae.CubeMap.prototype = {
     }
   
     return Tarumae.CubeMap.LoadingFaces;
-  },
+  }
 
-  create: function(width, height, defaultData) {
+  create(width, height, defaultData) {
     if (!this.renderer) {
       throw "renderer must be specified before create empty cubemap";
     }
@@ -54,27 +54,26 @@ Tarumae.CubeMap.prototype = {
 
     this.use();
     
-    var gl = this.gl;
-
-    var faces = this.getLoadingFaces();
+    const gl = this.gl;
+    const faces = this.getLoadingFaces();
 
     this.setParameters();
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
     
-    for (var i = 0; i < faces.length; i++) {
+    for (let i = 0; i < faces.length; i++) {
       gl.texImage2D(faces[i], 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, defaultData);
     }
 
     this.disuse();
-  },
+  }
 
-  createEmpty: function() {
+  createEmpty() {
     this.create(1, 1, new Uint8Array([255, 255, 255, 255]));
     // this.create(1, 1, new Uint8Array([0, 0, 0, 0]));
-  },
+  }
 
-  setParameters: function() {
-    var gl = this.gl;
+  setParameters() {
+    const gl = this.gl;
 
     gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
@@ -89,14 +88,13 @@ Tarumae.CubeMap.prototype = {
     //gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
 
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-  },
+  }
 
-  setFaceImage: function(face, image) {
+  setFaceImage(face, image) {
     this.use();
 
-    var gl = this.gl;
-
-    var faces = this.getLoadingFaces();
+    const gl = this.gl;
+    const faces = this.getLoadingFaces();
   
     gl.texImage2D(faces[face], 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
 
@@ -108,9 +106,9 @@ Tarumae.CubeMap.prototype = {
     this.setParameters();
   
     this.disuse();
-  },
+  }
 
-  setImages: function(images) {
+  setImages(images) {
     if (!Array.isArray(images)) {
       throw "missing arguments: images";
     }
@@ -118,9 +116,9 @@ Tarumae.CubeMap.prototype = {
     this.images = images;
 
     this.bindTextures();
-  },
+  }
 
-  bind: function(renderer) {
+  bind(renderer) {
     if (renderer) {
       this.renderer = renderer;
       this.gl = renderer.gl;
@@ -135,9 +133,9 @@ Tarumae.CubeMap.prototype = {
     if (this.images.length > 6) {
       this.bindTextures(this.images);
     }
-  },
+  }
 
-  unbind: function() {
+  unbind() {
     if (this.glTexture) {
       this.gl.deleteTexture(this.glTexture);
       this.glTexture = null;
@@ -146,9 +144,9 @@ Tarumae.CubeMap.prototype = {
         this.renderer.debugger.totalNumberOfTexturesUsed -= 6;
       }
     }
-  },
+  }
 
-  bindTextures: function() {
+  bindTextures() {
     this.use();
 
     if (!this.glTexture) {
@@ -156,7 +154,14 @@ Tarumae.CubeMap.prototype = {
     }
 
     const gl = this.gl;
-    const faces = this.getLoadingFaces();
+    const faces = [
+      gl.TEXTURE_CUBE_MAP_POSITIVE_X,
+      gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
+      gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
+      gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
+      gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
+      gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
+    ];
 
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
 
@@ -182,9 +187,9 @@ Tarumae.CubeMap.prototype = {
     this.disuse();
 
     this.loaded = true;
-  },
+  }
 
-  setRawData: function(stream) {
+  setRawData(stream) {
     this.use();
 
     if (!this.glTexture) {
@@ -230,19 +235,19 @@ Tarumae.CubeMap.prototype = {
     this.disuse();
 
     this.loaded = true;
-  },
+  }
  
-  use: function(renderer) {
+  use(renderer) {
     if (this.glTexture === null) {
       this.bind(renderer);
     }
     
     this.gl.bindTexture(this.gl.TEXTURE_CUBE_MAP, this.glTexture);
-  },
+  }
 
-  disuse: function() {
+  disuse() {
     this.gl.bindTexture(this.gl.TEXTURE_CUBE_MAP, null);
-  },
+  }
 };
  
 Tarumae.CubeMap.LoadingFaces = null;

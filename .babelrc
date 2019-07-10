@@ -1,4 +1,13 @@
 {
   "presets": ["env"],
-  "plugins": ["transform-es2015-modules-commonjs", "syntax-object-rest-spread"]
+  "plugins": [
+    "transform-runtime", 
+    // "transform-es2015-modules-commonjs",
+    "babel-plugin-transform-object-rest-spread",
+    ["babel-plugin-inline-import", {
+	  "extensions": [
+	    ".vert", ".frag", ".shader"
+      ]
+    }]
+  ]
 }
