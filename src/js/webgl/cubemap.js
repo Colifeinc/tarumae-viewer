@@ -154,14 +154,7 @@ Tarumae.CubeMap = class {
     }
 
     const gl = this.gl;
-    const faces = [
-      gl.TEXTURE_CUBE_MAP_POSITIVE_X,
-      gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
-      gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
-      gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
-      gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
-      gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
-    ];
+    const faces = this.getLoadingFaces();
 
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
 
