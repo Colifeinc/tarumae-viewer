@@ -197,7 +197,9 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		// material
 		const mat = obj.mat;
 		this.usingLightmap = null;
-	
+		
+		let color = Color3.silver;
+
 		if (typeof mat === "object" && mat != null) {
 			// texture
 			if (mat.tex && typeof mat.tex === "object" && mat.tex instanceof Tarumae.Texture
@@ -236,9 +238,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 
 			// color
 			if (mat.color) {
-				this.colorUniform.set(mat.color);
-			} else {
-				this.colorUniform.set(this.defaultColor);
+				color = mat.color;
 			}
 
       // texture tiling
@@ -274,6 +274,8 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 			// 	transparency = mat.transparency;
 			// }
 		}
+
+		this.colorUniform.set(mat.color);
 
 		// lightmap
 		if (this.renderer.options.enableLightmap

@@ -1179,6 +1179,8 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		this.textureUniform.set(Tarumae.Shader.emptyTexture);
 		this.hasTextureUniform.set(false);
 
+		let color = this.defaultColor;
+
 		if (mat) {
 			// texture
 			if (mat.tex && typeof mat.tex === "object" && mat.tex instanceof Tarumae.Texture
@@ -1201,11 +1203,8 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 				}
 			}
 
-			// color
 			if (mat.color) {
-				this.colorUniform.set(mat.color);
-			} else {
-				this.colorUniform.set(Color3.black);
+				color = mat.color;
 			}
 
 			// texture tiling
@@ -1241,6 +1240,8 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 			// 	transparency = mat.transparency;
 			// }
 		}
+
+		this.colorUniform.set(color);
 
 		// normal-map	
 		if (this.renderer.options.enableNormalMap && this.useNormalmap) {
@@ -1475,7 +1476,7 @@ Tarumae.Shaders.PointShader = class extends Tarumae.Shader {
 		this.projectViewModelMatrixUniform.set(obj._transform.mul(this.renderer.projectionViewMatrix));
 		
 		var mat = obj.mat;
-		var color = undefined;
+		var color = Color3.silver;
 		var opacity = obj.opacity;
 		
 		if (typeof mat === "object" && mat != null) {
