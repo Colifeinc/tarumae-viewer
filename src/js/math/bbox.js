@@ -10,6 +10,10 @@ import { Vec3, Vec4, Vec2 } from "../math/vector"
 
 Tarumae.BoundingBox = class {
 	constructor(min, max) {
+		this.set(min, max);
+	}
+
+	set(min, max) {
 		this._dirty = false;
 
 		switch (arguments.length) {

@@ -122,9 +122,10 @@ AutoFloor.LayoutDesigner = class {
     //   scale: 1,
     // };
 
-    this.createLayout(this.data);
+    this.obj_test();
 
-    this.autoLayout();
+    // this.createLayout(this.data);
+    // this.autoLayout();
 
     // this.generateInterior();
 
@@ -132,6 +133,15 @@ AutoFloor.LayoutDesigner = class {
 
   show() {
     this.scene.show();
+  }
+
+  obj_test() {
+    const chair1 = new Chair(15, 15);
+    // chair1.scale.set(3, 3);
+    chair1.origin.set(200, 200);
+    chair1.update();
+
+    this.scene.add(chair1);
   }
 
   createLayout() {
@@ -542,19 +552,15 @@ class LayoutObject extends Drawing2d.Object {
     p = new Vec2((p.x - 200) * 0.5, (p.y - 200) * 0.5);
     return super.pointToObject(p);
   }
-  
-  hitTestPoint(p) {
-    return this.bbox.contains(this.pointToObject(p));
-  }
 
   mouseenter(e) {
-    this.style.strokeWidth = 2;
+    this.style.strokeWidth = 4;
     this.style.strokeColor = "orangered";
     e.requireUpdateFrame();
   }
 
   mouseout(e) {
-    this.style.strokeWidth = 1;
+    this.style.strokeWidth = 3;
     this.style.strokeColor = "gray";
     e.requireUpdateFrame();
   }
@@ -562,8 +568,8 @@ class LayoutObject extends Drawing2d.Object {
   drag(e) {
     const p = e.movement;
 
-    let x = p.x * 0.5;
-    let y = p.y * 0.5;
+    let x = p.x;
+    let y = p.y;
 
     function snapToGrid(x) {
       const xb = x;
@@ -578,7 +584,7 @@ class LayoutObject extends Drawing2d.Object {
     this.origin.x = this.origin.x + x;
     this.origin.y = this.origin.y + y;
 
-    this.updateBoundingBox();
+    this.update();
     e.requireUpdateFrame();
   }
 }
@@ -723,37 +729,31 @@ class InteriorObject extends LayoutObject {
   constructor(width, height) {
     super(new Tarumae.Size(width, height));
     
+    this.style.strokeWidth = 3;
+
     this.update();
-  }
-
-  updateBoundingBox() {
-    const w = this.size.width, hw = w * 0.5,
-      h = this.size.height, hh = h * 0.5;
-
-    this.bbox.min.set(this.origin.x - hw, this.origin.y - hh);
-    this.bbox.max.set(this.origin.x + hw, this.origin.y + hh);
   }
 
   render(g) {
     super.render(g);
-    // g.drawRect(this.bbox.rect, 1, "red", "transparent");
+    g.drawRect(this.bbox.rect, 1, "blue", "transparent");
   }
 }
 
 class Chair extends InteriorObject {
   constructor() {
-    super(15, 15);
+    super(45, 45);
   }
 
   draw(g) {
     const w = this.size.width, hh = this.size.height / 2;
     const x = -hh, y = -hh;
 
-    g.drawRoundRect({ x, y, width: w, height: w }, w * 0.7);
-    g.drawRoundRect({ x, y: y - 2, width: w, height: 4 }, w * 0.2);
+    g.drawRoundRect({ x: x + 2, y, width: w - 4, height: w }, w * 0.5);
+    g.drawRoundRect({ x: x + 2, y: y - 2, width: w - 4, height: 8 }, w * 0.3);
 
-    g.drawRoundRect({ x: x - 2, y: y + hh - 4, width: 3, height: 8 }, w * 0.2);
-    g.drawRoundRect({ x: x + w - 1, y: y + hh - 4, width: 3, height: 8 }, w * 0.2);
+    g.drawRoundRect({ x: x - 3, y: y + hh - 9, width: 8, height: 22 }, w * 0.2);
+    g.drawRoundRect({ x: x + w - 5, y: y + hh - 9, width: 8, height: 22 }, w * 0.2);
   }
 }
 

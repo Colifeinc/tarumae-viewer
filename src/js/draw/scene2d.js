@@ -38,20 +38,28 @@ Draw2D.Scene2D = class {
 
   add() {
     for (var i = 0; i < arguments.length; i++) {
-      var arg = arguments[i];
+      const arg = arguments[i];
       if (Array.isArray(arg)) {
         for (var k = 0; k < arg.length; k++) {
-          this.add(arg[k]);
+          const obj = arg[k];
+          if (obj instanceof Draw2D.Object) {
+            arg.parent = null;
+            this.add(obj);
+          }
         }
       }
       else {
-        this.objects._t_pushIfNotExist(arg);
+        if (arg instanceof Draw2D.Object) {
+          arg.parent = null;
+          this.objects._t_pushIfNotExist(arg);
+        }
       }
     }
     this.requireUpdateFrame();
   }
 
   remove(obj) {
+    obj.parent = null;
     this.objects.remove(obj);
   }
 
@@ -82,8 +90,8 @@ Draw2D.Scene2D = class {
 
   eachObjectInv(handler) {
     for (let i = this.objects.length - 1; i >= 0; i--) {
-      var obj = this.objects[i];
-      if (!obj.eachChildInv(handler)) break;
+      const obj = this.objects[i];
+      if (obj.eachChildInv(handler) === false) break;
       if (handler(obj) === false) break;
     }
   }
@@ -101,10 +109,9 @@ Draw2D.Scene2D = class {
 
   findObjectByPosition(p) {
     let target = null;
-    const transformStack = [new Tarumae.Matrix3().loadIdentity()];
 
     this.eachObjectInv(obj => {
-      if (obj.visible && obj.hitTestPoint(p, transformStack)) {
+      if (obj.visible && obj.hitTestPoint(p)) {
         target = obj;
         return false;
       }
@@ -133,7 +140,7 @@ Draw2D.Scene2D = class {
 
   mousemove(pos) {
     var obj = this.findObjectByPosition(pos);
-    
+
     if (obj) {
       obj.mousemove(this.createEventArgument(obj));
     }
@@ -253,13 +260,17 @@ Draw2D.EventArgument = class {
 Draw2D.Object = class {
   constructor() {
     this.objects = [];
+    this._parent = null;
 
     this.visible = true;
     this.zIndex = 0;
     this.style = new Draw2D.Style();
 
-    this.bbox = new Tarumae.BBox2D();
     this.origin = new Tarumae.Point(0, 0);
+    this.size = new Tarumae.Size(30, 30);
+
+    this.bbox = new Tarumae.BBox2D();
+    this.wbbox = new Tarumae.BBox2D();
 
     this.angle = 0;
     this.scale = new Vec2(1, 1);
@@ -270,21 +281,34 @@ Draw2D.Object = class {
   //   this._origin.set(v);
   // }
 
+  set parent(v) {
+    this._parent = v;
+    this._onParentChanged();
+  }
+
   add() {
     for (var i = 0; i < arguments.length; i++) {
       var arg = arguments[i];
       if (Array.isArray(arg)) {
         for (var k = 0; k < arg.length; k++) {
-          this.add(arg[k]);
+          const obj = arg[k];
+          if (obj instanceof Draw2D.Object) {
+            obj.parent = this;
+            this.add(obj);
+          }
         }
       }
       else {
-        this.objects._t_pushIfNotExist(arg);
+        if (arg instanceof Draw2D.Object) {
+          arg.parent = this;
+          this.objects._t_pushIfNotExist(arg);
+        }
       }
     }
   }
 
   remove(obj) {
+    obj.parent = null;
     this.objects._t_remove(obj);
   }
 
@@ -388,18 +412,26 @@ Draw2D.Object = class {
       if (style.fillColor) g.fillColor = style.fillColor;
     }
 
-    let t = undefined;
-  
-    if (this.origin.x !== 0 || this.origin.y !== 0
-      || this.angle !== 0
-      || this.scale.x !== 1 || this.scale.y !== 1) {
-      t = this.transform.loadIdentity();
-      t.translate(this.origin.x, this.origin.y);
-      t.rotate(this.angle);
-      t.scale(this.scale.x, this.scale.y);
-      g.pushTransform(t);
-    }
-      
+    // let t = this.updateTransform();
+    
+    // if (t) {
+    //   g.pushTransform(t);
+    // }
+    
+    // this.draw(g);
+
+    // for (let k = 0; k < this.objects.length; k++) {
+    //   const child = this.objects[k];
+    //   if (child && child.visible) {
+    //     child.render(g);
+    //   }
+    // }
+
+    // if (t) {
+    //   g.popTransform();
+    // }
+    g.setTransform(this.transform);
+
     this.draw(g);
 
     for (let k = 0; k < this.objects.length; k++) {
@@ -409,22 +441,60 @@ Draw2D.Object = class {
       }
     }
 
-    if (t) {
-      g.popTransform();
-    }
-      
-    // g.resetDrawingStyle();
+    g.setTransform(Tarumae.Matrix3.identity);
+
+    // g.resetStyle();
   }
 
   draw(g) {
     this.ondraw(g);
   }
 
-  update() {
-    this.updateBoundingBox();
+  _onParentChanged() {
+    this.update();
   }
-  
+
+  update() {
+    this.updateTransform();
+    this.updateBoundingBox();
+    this.updateWorldBoundingBox();
+  }
+
+  updateTransform() {
+    const t = this.transform;
+    t.loadIdentity();
+
+    if (this.origin.x !== 0 || this.origin.y !== 0
+      || this.angle !== 0
+      || this.scale.x !== 1 || this.scale.y !== 1) {
+      t.translate(this.origin.x, this.origin.y);
+      t.rotate(this.angle);
+      t.scale(this.scale.x, this.scale.y);
+    }
+
+    if (this.parent) {
+      this.transform = parent.transform.mul(t);
+    }
+  }
+
   updateBoundingBox() {
+    const w = this.size.width * this.scale.x, hw = w * 0.5,
+      h = this.size.height * this.scale.y, hh = h * 0.5;
+
+    this.bbox.min.set(this.origin.x - hw, this.origin.y - hh);
+    this.bbox.max.set(this.origin.x + hw, this.origin.y + hh);
+  }
+
+  updateWorldBoundingBox() {
+    const mint = this.bbox.min.mulMat(this.transform);
+    const maxt = this.bbox.max.mulMat(this.transform);
+
+    const minx = Math.min(mint.x, maxt.x);
+    const miny = Math.min(mint.y, maxt.y);
+    const maxx = Math.max(mint.x, maxt.x);
+    const maxy = Math.max(mint.y, maxt.y);
+    
+    this.wbbox.set(minx, miny, maxx, maxy);
   }
 };
 
@@ -435,7 +505,7 @@ new Tarumae.EventDispatcher(Draw2D.Object).registerEvents(
   "begindrag", "drag", "enddrag",
   "getFocus", "lostFocus",
 	"keyup", "keydown",
-  "childAdd", "childRemove",
+  "parentChanged", "childAdd", "childRemove",
   "move", "rotate",
   "draw");
 

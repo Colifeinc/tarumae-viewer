@@ -77,39 +77,38 @@ Tarumae.Size = class {
 ////////// BBox2D //////////
 
 Tarumae.BBox2D = class {
-	constructor(a, b, c, d) {
+	constructor() {
+		this.set();
+	}
+
+	set() {
 		switch (arguments.length) {
 			case 0:
 				this.min = Vec2.zero.clone();
 				this.max = Vec2.zero.clone();
 				break;
 			
+			case 1:
+				const bbox2 = arguments[0];
+				if (bbox2 instanceof Tarumae.BBox2D) {
+					this.set(bbox2.min, bbox2.max);
+				}
+				break;
+			
 			case 2:
-				this.min = a;
-				this.max = b;
+				this.min = arguments[0].clone();
+				this.max = arguments[1].clone();
 				break;
 			
 			case 4:
-				this.min.x = a;
-				this.min.y = b;
-				this.max.x = c;
-				this.max.y = d;
+				this.min.x = arguments[0];
+				this.min.y = arguments[1];
+				this.max.x = arguments[2];
+				this.max.y = arguments[3];
 				break;
 			
 			default:
 				throw new Error("BBox2D: unsupported argument count");
-		}
-	}
-
-	set() {
-		switch (arguments.length) {
-			case 1:
-				const bbox2 = arguments[0];
-				if (bbox2 instanceof Tarumae.BBox2D) {
-					this.min = bbox2.min.clone();
-					this.max = bbox2.max.clone();
-				}
-				break;
 		}
 	}
 
@@ -505,6 +504,10 @@ Tarumae.DrawingContext2D = class {
 	resetTransform() {
 		this.currentTransform.loadIdentity();
 		this.transformStack._t_clear();
+	}
+
+	setTransform(t) {
+		this.ctx.setTransform(t.a1, t.b1, t.a2, t.b2, t.a3, t.b3);
 	}
 
 	resetDrawingStyle() {
