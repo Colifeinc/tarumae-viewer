@@ -7,7 +7,7 @@
 
 import Tarumae from "../entry"
 import "../utility/event"
-import { Vec2 } from "../math/vector";
+import { Vec2, Vec3 } from "../math/vector";
 
 var Draw2D = {};
 
@@ -131,7 +131,7 @@ Draw2D.Scene2D = class {
 
     if (!isProcessed) {
       this.onmousedown(this.createEventArgument());
-    }  
+    }
   }
 
   mouseup() {
@@ -271,6 +271,7 @@ Draw2D.Object = class {
 
     this.bbox = new Tarumae.BBox2D();
     this.wbbox = new Tarumae.BBox2D();
+    this.bounds = new Tarumae.Polygon();
 
     this.angle = 0;
     this.scale = new Vec2(1, 1);
@@ -284,6 +285,10 @@ Draw2D.Object = class {
   set parent(v) {
     this._parent = v;
     this._onParentChanged();
+  }
+
+  get parent() {
+    return this._parent;
   }
 
   add() {
@@ -333,7 +338,7 @@ Draw2D.Object = class {
   }
 
   hitTestPoint(p) {
-    return this.bbox.contains(p);
+    return this.bounds.containsPoint(p);
   }
 
   pointToObject(p) {
@@ -403,6 +408,13 @@ Draw2D.Object = class {
     }
   }
 
+  offset(p) {
+    const v = new Vec2(p.x, p.y).mulMat(Tarumae.Matrix3.makeRotation(-this.parent.angle));
+    this.origin.x += v.x;
+    this.origin.y += v.y;
+    this.update();
+  }
+
   render(g) {
     const style = this.style;
       
@@ -434,11 +446,8 @@ Draw2D.Object = class {
 
     this.draw(g);
 
-    for (let k = 0; k < this.objects.length; k++) {
-      const child = this.objects[k];
-      if (child && child.visible) {
-        child.render(g);
-      }
+    for (const child of this.objects) {
+      if (child.visible) child.render(g);
     }
 
     g.setTransform(Tarumae.Matrix3.identity);
@@ -456,8 +465,15 @@ Draw2D.Object = class {
 
   update() {
     this.updateTransform();
+    
+    for (const child of this.objects) {
+      child.updateBoundingBox();
+    }
+   
     this.updateBoundingBox();
     this.updateWorldBoundingBox();
+    
+    this.updateChildren();
   }
 
   updateTransform() {
@@ -472,29 +488,46 @@ Draw2D.Object = class {
       t.scale(this.scale.x, this.scale.y);
     }
 
-    if (this.parent) {
-      this.transform = parent.transform.mul(t);
+    if (this._parent) {
+      this.transform = t.mul(this._parent.transform);
     }
   }
 
   updateBoundingBox() {
-    const w = this.size.width * this.scale.x, hw = w * 0.5,
-      h = this.size.height * this.scale.y, hh = h * 0.5;
+    const hw = this.size.width * 0.5,
+      hh = this.size.height * 0.5;
 
-    this.bbox.min.set(this.origin.x - hw, this.origin.y - hh);
-    this.bbox.max.set(this.origin.x + hw, this.origin.y + hh);
+    this.bbox.min.set(-hw, -hh);
+    this.bbox.max.set(hw, hh);
   }
 
   updateWorldBoundingBox() {
-    const mint = this.bbox.min.mulMat(this.transform);
-    const maxt = this.bbox.max.mulMat(this.transform);
+    // const t = this.transform;
 
-    const minx = Math.min(mint.x, maxt.x);
-    const miny = Math.min(mint.y, maxt.y);
-    const maxx = Math.max(mint.x, maxt.x);
-    const maxy = Math.max(mint.y, maxt.y);
-    
-    this.wbbox.set(minx, miny, maxx, maxy);
+    // const mint = this.bbox.min.mulMat(t);
+    // const maxt = this.bbox.max.mulMat(t);
+
+    // const minx = Math.min(mint.x, maxt.x);
+    // const miny = Math.min(mint.y, maxt.y);
+    // const maxx = Math.max(mint.x, maxt.x);
+    // const maxy = Math.max(mint.y, maxt.y);
+
+    // this.wbbox.set(minx, miny, maxx, maxy);
+
+    const t = this.transform;
+    const p1 = new Vec2(this.bbox.min.x, this.bbox.min.y).mulMat(t);
+    const p2 = new Vec2(this.bbox.max.x, this.bbox.min.y).mulMat(t);
+    const p3 = new Vec2(this.bbox.max.x, this.bbox.max.y).mulMat(t);
+    const p4 = new Vec2(this.bbox.min.x, this.bbox.max.y).mulMat(t);
+
+    this.bounds.points = [[p1.x, p1.y], [p2.x, p2.y], [p3.x, p3.y], [p4.x, p4.y]];
+    this.wbbox = this.bounds.bbox;
+  }
+
+  updateChildren() {
+    for (const o of this.objects) {
+      o.update();
+    }
   }
 };
 

@@ -399,7 +399,7 @@ Tarumae.MathFunctions = {
       
       if (intersect) inside = !inside;
     }
-    
+
     return inside;
   },
 

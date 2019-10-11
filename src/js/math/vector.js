@@ -126,7 +126,7 @@ export class Vec3 {
 		}
 	}
 
-	xy() {
+	get xy() {
 		return new Vec2(this.x, this.y);
 	}
 	

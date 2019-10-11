@@ -122,7 +122,7 @@ AutoFloor.LayoutDesigner = class {
     //   scale: 1,
     // };
 
-    this.obj_test();
+    this._obj_test();
 
     // this.createLayout(this.data);
     // this.autoLayout();
@@ -135,10 +135,11 @@ AutoFloor.LayoutDesigner = class {
     this.scene.show();
   }
 
-  obj_test() {
-    const chair1 = new Chair(15, 15);
+  _obj_test() {
+    const chair1 = new TableChairSet(3, 1, true);
     // chair1.scale.set(3, 3);
-    chair1.origin.set(200, 200);
+    chair1.origin.set(300, 300);
+    // chair1.angle = 45;
     chair1.update();
 
     this.scene.add(chair1);
@@ -535,12 +536,12 @@ class Wall extends Drawing2d.Object {
 }
 
 class LayoutObject extends Drawing2d.Object {
-  constructor(size) {
+  constructor() {
     super();
-
-    this.size = size;
-
+    
     this.style.strokeColor = "gray";
+
+    this.draggable = true;
   }
 
   drawDimension(g, x, y) {
@@ -566,25 +567,10 @@ class LayoutObject extends Drawing2d.Object {
   }
 
   drag(e) {
-    const p = e.movement;
+    if (!this.draggable) return;
 
-    let x = p.x;
-    let y = p.y;
+    this.offset(e.movement);
 
-    function snapToGrid(x) {
-      const xb = x;
-      const snapSize = 10;
-      const m = (x % 10), hm = snapSize * 0.5;
-      if (m < hm) x -= m;
-      // if (m < hm) x -= m;
-      console.log(xb, " -> ", x);
-      return x;
-    }
-
-    this.origin.x = this.origin.x + x;
-    this.origin.y = this.origin.y + y;
-
-    this.update();
     e.requireUpdateFrame();
   }
 }
@@ -726,8 +712,8 @@ class Window extends WallChildObject {
 }
 
 class InteriorObject extends LayoutObject {
-  constructor(width, height) {
-    super(new Tarumae.Size(width, height));
+  constructor() {
+    super();
     
     this.style.strokeWidth = 3;
 
@@ -736,13 +722,19 @@ class InteriorObject extends LayoutObject {
 
   render(g) {
     super.render(g);
-    g.drawRect(this.bbox.rect, 1, "blue", "transparent");
+
+    // debug
+    if (this.bounds.points) {
+      g.drawLines(this.bounds.points, 1, "blue", "transparent");
+    }
   }
 }
 
 class Chair extends InteriorObject {
   constructor() {
-    super(45, 45);
+    super();
+
+    this.size.set(50, 50);
   }
 
   draw(g) {
@@ -759,7 +751,11 @@ class Chair extends InteriorObject {
 
 class Table extends InteriorObject {
   constructor(width, height) {
-    super(width || 40, height || 15);
+    super();
+    
+    this.width = width || 120;
+    this.height = height || 60;
+    this.size.set(this.width, this.height);
   }
 
   draw(g) {
@@ -772,53 +768,84 @@ class Table extends InteriorObject {
 }
 
 class TableChairSet extends InteriorObject {
-  constructor(horsets, versets, ftf) {
+  constructor(horsets, versets, opposite) {
     super();
 
-    horsets = horsets || 1;
-    versets = versets || 1;
+    this.horsets = horsets || 1;
+    this.versets = versets || 1;
+    this.opposite = opposite;
 
-    const width = 37, hw = width * 0.5;
-    const totalWidth = width * horsets, htw = totalWidth * 0.5;
+    this.tableWidth = 120;
+    this.tableHeight = 60;
+    this.chairToTable = 0.4;
 
-    for (let y = 0; y < versets; y++) {
-      for (let x = 0; x < horsets; x++) {
+    this.tables = [];
+    this.chairs = [];
 
-        const ox = x * width + hw - htw;
+    this.createChildren();
+    this.layout();
+  }
 
-        if (ftf) {
-          const chair1 = new Chair(15, 15);
-          const table1 = new Table(width, 15);
-          const chair2 = new Chair(15, 15);
-          const table2 = new Table(width, 15);
-          chair1.origin.set(ox, -15);
-          table1.origin.set(ox, -5);
-          table2.origin.set(ox, 10);
-          chair2.origin.set(ox, 20);
-          this.add(chair1, chair2, table1, table2);
+  createChildren() {
+    for (let y = 0; y < this.versets; y++) {
+      for (let x = 0; x < this.horsets; x++) {
+        if (this.opposite) {
+          const table1 = new Table();
+          const chair1 = new Chair();
+          const table2 = new Table();
+          const chair2 = new Chair();
+          table2.angle = 180;
+          chair2.angle = 180;
+          this.tables.push(table1, table2);
+          this.chairs.push(chair1, chair2);
         } else {
-          const chair = new Chair(15, 15);
-          const table = new Table(width, 15);
-          chair.origin.set(ox, 0);
-          table.origin.set(ox, 10);
-          this.add(chair, table);
+          const table = new Table();
+          const chair = new Chair();
+          this.tables.push(table);
+          this.chairs.push(chair);
         }
       }
     }
 
-    this.angle = 0;
-    this.update();
+    this.chairs.forEach(o => this.add(o));
+    this.tables.forEach(o => this.add(o));
   }
 
-  update() {
-    this.updateChildren();
-    super.update();
-  }
+  layout() {
+    const hw = this.tableWidth * 0.5, hh = this.tableHeight * 0.5;
+    const totalWidth = this.tableWidth * this.horsets, htw = totalWidth * 0.5;
+    const ctt = this.chairToTable;
 
-  updateChildren() {
-    for (const o of this.objects) {
-      o.update();
+    let j = 0;
+    for (let y = 0; y < this.versets; y++) {
+      let i = 0;
+
+      for (let x = 0; x < this.horsets; x++) {
+
+        const ox = x * this.tableWidth + hw - htw;
+
+        if (this.opposite) {
+          const table1 = this.tables[i];
+          const chair1 = this.chairs[i];
+          const table2 = this.tables[i+1];
+          const chair2 = this.chairs[i+1];
+          table1.origin.set(ox, -hh);
+          chair1.origin.set(ox, -table1.height - hh * ctt);
+          table2.origin.set(ox, hh);
+          chair2.origin.set(ox, table2.height + hh * ctt);
+        } else {
+          const table = new Table();
+          const chair = new Chair();
+          table.origin.set(ox, -table.height * ctt);
+          chair.origin.set(ox, table.height * ctt);
+        }
+
+        i+=2;
+      }
+      j++;
     }
+
+    this.update();
   }
 
   updateBoundingBox() {
@@ -828,11 +855,20 @@ class TableChairSet extends InteriorObject {
       for (let i = 1; i < this.objects.length; i++) {
         this.bbox.expendToBBox(this.objects[i].bbox);
       }
-
-      this.size = this.bbox.size;
     }
 
-    super.updateBoundingBox();
+    // super.updateBoundingBox();
+    this.size = this.bbox.size;
+  }
+
+  updateWorldBoundingBox() {
+    if (this.objects.length > 0) {
+      this.wbbox.set(this.objects[0].wbbox);
+
+      for (let i = 1; i < this.objects.length; i++) {
+        this.wbbox.expendToBBox(this.objects[i].wbbox);
+      }
+    }
   }
 
   render(g) {

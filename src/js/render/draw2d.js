@@ -39,7 +39,11 @@ Tarumae.Point = Vec2;
 ////////// Size //////////
 
 Tarumae.Size = class {
-	constructor(w, h) {
+	constructor() {
+		this.set.apply(this, arguments);
+	}
+
+	set() {
 		switch (arguments.length) {
 			case 0:
 				this.width = 0;
@@ -55,12 +59,10 @@ Tarumae.Size = class {
 				break;
 		
 			case 2:
-				this.width = w;
-				this.height = h;
+				this.width = arguments[0];
+				this.height = arguments[1];
 				break;
 		}
-
-		this._arr = [this.width, this.height];
 	}
 	
 	clone() {
@@ -68,9 +70,7 @@ Tarumae.Size = class {
 	}
 
 	toArray() {
-		this._arr[0] = this.width;
-		this._arr[1] = this.height;
-		return this._arr;
+		return [this.width, this.height];
 	}
 };
 
@@ -78,7 +78,7 @@ Tarumae.Size = class {
 
 Tarumae.BBox2D = class {
 	constructor() {
-		this.set();
+		this.set.apply(this, arguments);
 	}
 
 	set() {
@@ -188,7 +188,12 @@ Tarumae.BBox2D = class {
 		}
 	}
 
+	// @deprecate
 	contains(p) {
+		return this.containsPoint(p);
+	}
+
+	containsPoint(p) {
 		return p.x >= this.min.x && p.x <= this.max.x
 			&& p.y >= this.min.y && p.y <= this.max.y;
 	}
@@ -445,21 +450,54 @@ Tarumae.LineSegment2D = class {
 
 Tarumae.Polygon = class {
 	constructor(points) {
-		this.points = points;
 		this.bbox = new Tarumae.BBox2D();
+		this.points = points;
+	}
+
+	set points(points) {
+		this._points = points;
 		this.updateBoundingBox();
 	}
 
+	get points() {
+		return this._points;
+	}
+
 	updateBoundingBox() {
-		for (let i = 0; i < this.points.length; i++) {
-			const x = this.points[i][0], y = this.points[i][1];
-			
-			const min = this.bbox.min, max = this.bbox.max;
+		if (!this._points || !Array.isArray(this._points) || this._points.length <= 0) {
+			return;
+		}
+
+		const min = this.bbox.min, max = this.bbox.max;
+		min.x = this._points[0][0];
+		min.y = this._points[0][1];
+
+		for (let i = 0; i < this._points.length; i++) {
+			const point = this._points[i];
+			const x = point[0], y = point[1];
+
 			if (min.x > x) min.x = x;
 			if (min.y > y) min.y = y;
 			if (max.x < x) max.x = x;
 			if (max.y < y) max.y = y;
 		}
+	}
+
+	containsPoint(p) {
+		if (!this._points)
+			return false;
+		else if (!this.bbox.containsPoint(p))
+			return false;
+		else
+			return Tarumae.MathFunctions.polygonContainsPoint(this._points, p);
+		
+	}
+
+	distanceToPoint(p) {
+		if (!this._points)
+			return Number.MAX_VALUE;
+		else
+			return Tarumae.MathFunctions.distancePointToPolygon(p, this._points);
 	}
 };
 
