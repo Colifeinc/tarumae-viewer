@@ -1124,10 +1124,10 @@ Tarumae.Renderer = class {
 		this.drawingContext2D.drawRect(new Tarumae.Rect(left, top, right - left, bottom - top), strokeWidth, strokeColor, fillColor);
 	};
 
-	drawPolygon(points, strokeWidth, strokeColor, fillColor) {
-		if (points.length < 2) return;
-		this.drawingContext2D.drawPolygon(this.transformPoints(points), strokeWidth, strokeColor, fillColor);
-	};
+	// drawPolygon(points, strokeWidth, strokeColor, fillColor) {
+	// 	if (points.length < 2) return;
+	// 	this.drawingContext2D.drawPolygon(this.transformPoints(points), strokeWidth, strokeColor, fillColor);
+	// };
 
 	drawEllipse(v, size, strokeWidth, strokeColor, fillColor) {
 		this.drawingContext2D.drawEllipse(this.transformPoint(v), size, strokeWidth, strokeColor, fillColor);

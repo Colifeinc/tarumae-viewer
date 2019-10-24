@@ -5,6 +5,7 @@ import "../utility/archive";
 import "../utility/res";
 import Drawing2d from "../draw/scene2d";
 import { Vec2 } from "../math/vector";
+import { SpaceNode, RoomGraph, _test_main_ } from "./space";
 
 const TarumaeDesigner = {
 };
@@ -122,7 +123,8 @@ AutoFloor.LayoutDesigner = class {
     //   scale: 1,
     // };
 
-    this._obj_test();
+    // this._obj_test();
+    _test_main_(this.scene);
 
     // this.createLayout(this.data);
     // this.autoLayout();

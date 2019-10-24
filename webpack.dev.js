@@ -90,6 +90,7 @@ module.exports = {
       {from: 'src/css', to: 'css', force: true}
     ]),
   ],
+  devtool: 'source-map',
   output: {
     path: path.resolve(__dirname, 'build'),
     filename: '[name].js',

@@ -185,7 +185,7 @@ Tarumae.MathFunctions = {
   },
 
   distancePointToPoint2D: function(p1, p2) {
-
+    return this.distancePointToPoint2DXY(p1.x, p1.y, p2.x, p2.y);
   },
 
   distancePointToPoint2DXY: function(p1x, p1y, p2x, p2y) {
@@ -197,7 +197,11 @@ Tarumae.MathFunctions = {
     return Tarumae.MathFunctions.distancePointToLine2DXY(p, l.x1, l.y1, l.x2, l.y2);
   },
   
-  distancePointToLine2DXY: function(p, x1, y1, x2, y2) {
+  distancePointToLine2DXY: function(p, lp1, lp2) {
+    return this.distancePointToLine2DXYXY(p, lp1.x, lp1.y, lp2.x, lp2.y);
+  },
+
+  distancePointToLine2DXYXY: function(p, x1, y1, x2, y2) {
     const a = y2 - y1,
       b = x1 - x2,
       c = x2 * y1 - x1 * y2;
@@ -208,7 +212,11 @@ Tarumae.MathFunctions = {
     return this.distancePointToLineSegment2DXY(p, l.x1, l.y1, l.x2, l.y2);
   },
 
-  distancePointToLineSegment2DXY: function(p, x1, y1, x2, y2) {
+  distancePointToLineSegment2DXY: function(p, lp1, lp2) {
+    return this.distancePointToLineSegment2DXYXY(p, lp1.x, lp1.y, lp2.x, lp2.y);
+  },
+
+  distancePointToLineSegment2DXYXY: function(p, x1, y1, x2, y2) {
     // source: https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
 
     var A = p.x - x1;
@@ -246,8 +254,12 @@ Tarumae.MathFunctions = {
   nearestPointToLineSegment2D: function(p, l) {
     return this.nearestPointToLineSegment2DXY(p, l.x1, l.y1, l.x2, l.y2);
   },
+  
+  nearestPointToLineSegment2DXY: function(p, lp1, lp2) {
+    return this.nearestPointToLineSegment2DXYXY(p, lp1.x, lp1.y, lp2.x, lp2.y);
+  },
 
-  nearestPointToLineSegment2DXY: function(p, x1, y1, x2, y2) {
+  nearestPointToLineSegment2DXYXY: function(p, x1, y1, x2, y2) {
     // source: https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
 
     var A = p.x - x1;

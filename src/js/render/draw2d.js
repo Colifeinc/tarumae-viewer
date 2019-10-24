@@ -452,7 +452,7 @@ Tarumae.Polygon = class {
 	constructor(points) {
 		this.bbox = new Tarumae.BBox2D();
 		this.points = points;
-	}
+	}		
 
 	set points(points) {
 		this._points = points;
@@ -461,6 +461,10 @@ Tarumae.Polygon = class {
 
 	get points() {
 		return this._points;
+	}
+
+	get origin() {
+		return this.bbox.origin;
 	}
 
 	updateBoundingBox() {
@@ -626,8 +630,8 @@ Tarumae.DrawingContext2D = class {
 		}
 	}
 
-	drawPoint(p, size = 3, color = "black") {
-		this.drawEllipse(new Tarumae.Rect(p.x - size / 2, p.y - size / 2, size, size), 0, null, color);
+	drawPoint(p, size = 3, strikeColor = "transparent", fillColor = "black") {
+		this.drawEllipse(new Tarumae.Rect(p.x - size / 2, p.y - size / 2, size, size), 0, strikeColor, fillColor);
 	}
 
 	// drawEllipse(p, size, strokeWidth, strokeColor, fillColor) {
@@ -738,8 +742,24 @@ Tarumae.DrawingContext2D = class {
 		ctx.fillText(text, p.x, p.y);
   }
   		
-	drawLine(from, to, width, color) {
-		this.drawLineSegments([from, to], width, color);
+	drawLine(from, to, strokeWidth, strokeColor) {
+		const ctx = this.ctx;
+
+		ctx.lineWidth = strokeWidth || this.strokeWidth || 1;
+		ctx.strokeStyle = strokeColor || this.strokeColor || "black";
+
+		ctx.beginPath();
+
+		if (Array.isArray(from)) {
+			ctx.moveTo(from[0], from[1]);
+			ctx.lineTo(to[0], to[1]);
+		} else {
+			ctx.moveTo(from.x, from.y);
+			ctx.lineTo(to.x, to.y);
+		}
+
+		ctx.closePath();
+		ctx.stroke();
 	};
 		
 	drawLineSegments() {
@@ -751,8 +771,8 @@ Tarumae.DrawingContext2D = class {
 	
 		const ctx = this.ctx;
 	
-		if (width == undefined) width = this.strokeWidth;
-		if (color == undefined) color = this.strokeColor;
+		if (width === undefined) width = this.strokeWidth;
+		if (color === undefined) color = this.strokeColor;
 
 		if (width > 0 && color != "transparent") {
 			ctx.lineWidth = width || 1;
@@ -771,7 +791,7 @@ Tarumae.DrawingContext2D = class {
 
 				for (let i = 1; i < lines.length; i++) {
 					const to = lines[i];
-					if (Array.isArray(from)) {
+					if (Array.isArray(to)) {
 						ctx.lineTo(to[0], to[1]);
 					} else {
 						ctx.lineTo(to.x, to.y);
@@ -840,30 +860,44 @@ Tarumae.DrawingContext2D = class {
 		ctx.fill();
 	};
 		
-	drawPolygon(points, strokeWidth, strokeColor, fillColor) {
-		var ctx = this.ctx;
-		
-		if (points.length < 2) return;
+	drawPolygon(p, strokeWidth, strokeColor, fillColor) {
+		const ctx = this.ctx;
+		const points = p.points;
+
+		if (!points || points.length < 2) return;
 		
 		ctx.beginPath();
 		
 		var p0 = points[0];
-		ctx.moveTo(p0.x, p0.y);
+		if (Array.isArray(p0))
+			ctx.moveTo(p0[0], p0[1]);
+		else
+			ctx.moveTo(p0.x, p0.y);
 		
 		for (var i = 1; i < points.length; i++) {
 			var p = points[i];
-			ctx.lineTo(p.x, p.y);
+			if (Array.isArray(p))
+				ctx.lineTo(p[0], p[1]);
+			else
+				ctx.lineTo(p.x, p.y);
 		}
 		
-		ctx.lineTo(p0.x, p0.y);
+		if (Array.isArray(p0))
+			ctx.lineTo(p0[0], p0[1]);
+		else
+			ctx.lineTo(p0.x, p0.y);
 
 		ctx.closePath();
+				
+		strokeWidth = strokeWidth || this.strokeWidth || 1;
+		strokeColor = strokeColor || this.strokeColor || "black";
+		fillColor = fillColor || this.fillColor;
 		
 		if (fillColor) {
 			ctx.fillStyle = fillColor;
 			ctx.fill();
 		}
-		
+
 		if (strokeWidth || strokeColor) {
 			ctx.lineWidth = strokeWidth || 1;
 			ctx.strokeStyle = strokeColor || "black";
