@@ -206,19 +206,38 @@ Tarumae.Renderer = class {
 		this.gl.viewport(0, 0, width, height);
 	}
 
+	set2DViewport(size) {
+		const canvas = this.canvas2d;
+
+		canvas.width = size.width;
+		canvas.height = size.height;
+
+		// Get the device pixel ratio, falling back to 1.
+		var dpr = this.options.renderPixelRatio || 1;
+		// Get the size of the canvas in CSS pixels.
+		var rect = canvas.getBoundingClientRect();
+		// Give the canvas pixel dimensions of their CSS
+		// size * the device pixel ratio.
+		canvas.width = rect.width * dpr;
+		canvas.height = rect.height * dpr;
+		var ctx = canvas.getContext('2d');
+		// Scale all drawing operations by the dpr, so you
+		// don't have to worry about the difference.
+		ctx.scale(dpr, dpr);
+	}
+
 	resetViewport() {
 		const size = this.renderSize;
 	
 		size.width = this.container.clientWidth;
 		size.height = this.container.clientHeight;
-	
+
 		this.aspectRate = size.width / size.height;
-	
+
 		this.canvas.width = size.width * this.options.renderPixelRatio;
 		this.canvas.height = size.height * this.options.renderPixelRatio;
-		this.canvas2d.width = size.width;
-		this.canvas2d.height = size.height;
-
+	
+		this.set2DViewport(size);
 		this.setGLViewport();
 
 		if (this.currentScene) {

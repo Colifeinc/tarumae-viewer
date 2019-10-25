@@ -222,6 +222,18 @@ Tarumae.Viewer = class {
 					return false;
 				}
 			});
+			
+			surface.addEventListener("mouseout", function(e) {
+				const scene = viewer.renderer.currentScene;
+				
+				if (scene) {
+					Tarumae.Utility.invokeIfExist(scene, "mouseout");
+				}
+
+				if (viewer.renderer.current2DScene) {
+					Tarumae.Utility.invokeIfExist(viewer.renderer.current2DScene, "mouseout");
+				}
+			});
 
 			surface.addEventListener("blur", function(e) {
 				viewer.pressedKeys._t_clear();
@@ -233,7 +245,7 @@ Tarumae.Viewer = class {
 				viewer.mouse.pressedButtons._t_clear();
 			});
 
-			window.addEventListener('keyup', function(e) {
+			window.addEventListener("keyup", function(e) {
 				viewer.pressedKeys._t_remove(e.keyCode);
 
 				var scene = viewer.renderer.currentScene;

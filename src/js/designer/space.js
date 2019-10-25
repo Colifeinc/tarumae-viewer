@@ -6,6 +6,7 @@ let _scene = null;
 
 function _test_main_(scene) {
   _scene = scene;
+  
 
   // const points = [[100, 100], [800, 100], [800, 700], [100, 700]];
 
@@ -22,21 +23,28 @@ class WallDesigner {
   constructor(scene) {
     this.scene = scene;
     this.enabled = false;
+    this.gridSize = 15;
+
+    this._mode = "drawing";
+    this._status = "nothing";
 
     this.hover = null;
-    this.drawingStartPoint = null;
+    this.mouseStartPoint = null;
     this.drawingEndPoint = null;
-    this._status = "nothing";
     this.points = [];
     this.outlinePoints = [];
     this.nodes = [];
     this.lines = [];
     this.drawingDockNode = null;
+    this.selectedObjects = [];
     // this.drawingStartNode = null;
 
     this.scene.on("mousedown", e => this.mousedown(e));
     this.scene.on("mousemove", e => this.mousemove(e));
+    this.scene.on("mouseout", e => this.mouseout(e));
     this.scene.on("mouseup", e => this.mouseup(e));
+    this.scene.on("ondrag", e => this.drag(e));
+    this.scene.on("enddrag", e => this.enddrag(e));
     this.scene.on("keydown", key => this.keydown(key));
     this.scene.on("draw", g => this.draw(g));
   }
@@ -49,71 +57,191 @@ class WallDesigner {
     this._status = v;
     console.log("change status to: " + v);
   }
+  
+  get mode() {
+    return this._mode;
+  }
+
+  set mode(v) {
+    this._mode = v;
+    
+    if (this._mode !== "drawing") {
+      this.hover = null;
+      this.invalidate();
+    }
+
+    console.log("change mode to: " + v);
+  }
 
   mousedown(e) {
-    switch (this.status) {
-      case "nothing":
-        {
-          this.status = "startDraw";
+    const p = e.position;
 
-          if (this.hover && this.hover.position) {
-            this.startDrawingWall(this.hover.position);
+    if (this.mode === "drawing") {
+      switch (this.status) {
+        case "nothing":
+          {
+            this.status = "startDraw";
+
+            if (this.hover && this.hover.position) {
+              this.startDrawingWall(this.hover.position);
+            } else {
+              this.startDrawingWall(p);
+            }
+          }
+          break;
+      
+        case "drawing":
+          {
+            const snappedPos = this.positionSnapToGrid(p);
+
+            const fromStart = new Tarumae.Point(p.x - this.mouseStartPoint.x, p.y - this.mouseStartPoint.y);
+            if (this.scene.renderer.viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Shift)) {
+              if (Math.abs(fromStart.x) > Math.abs(fromStart.y)) {
+                snappedPos.y = this.mouseStartPoint.y;
+              } else {
+                snappedPos.x = this.mouseStartPoint.x;
+              }
+            }
+          
+            const line = this.commitWallNode(snappedPos);
+            this.startDrawingWall(snappedPos, line.endNode);
+          }
+          break;
+      }
+    } else if (this.mode === "move") {
+      const ret = this.findItemByPosition(p);
+
+      if (ret) {
+        if (ret.obj) {
+          this.selectObject(ret.obj);
+
+          this.mouseStartPoint = new Tarumae.Point(p);
+          this.mode = "moving";
+        }
+      }
+    }
+  }
+
+  mousemove(e) {
+    const p = e.position;
+
+    // drawing
+    if (this.mode === "drawing") {
+      if (this.status === "startDraw") {
+        this.status = "drawing";
+      }
+
+      if (this.status === "drawing") {
+        const snappedPos = this.positionSnapToGrid(p);
+     
+        const fromStart = new Tarumae.Point(p.x - this.mouseStartPoint.x, p.y - this.mouseStartPoint.y);
+        if (this.scene.renderer.viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Shift)) {
+          if (Math.abs(fromStart.x) > Math.abs(fromStart.y)) {
+            snappedPos.y = this.mouseStartPoint.y;
           } else {
-            this.startDrawingWall(e.position);
+            snappedPos.x = this.mouseStartPoint.x;
           }
         }
-        break;
-      
-      case "drawing":
-        const line = this.commitWallNode(e.position);
-        this.startDrawingWall(e.position, line.endNode);
-        break;
+
+        this.drawingEndPoint.x = snappedPos.x;
+        this.drawingEndPoint.y = snappedPos.y;
+        this.scene.requireUpdateFrame();
+      }
+
+      if (this.status === "drawing" || this.status === "nothing") {
+        this.hover = null;
+
+        const ret = this.findItemByPosition(this.positionSnapToGrid(p));
+
+        if (this.mode === "drawing") {
+          if (ret) {
+            this.hover = ret;
+          }
+        }
+
+        this.invalidate();
+      }
+    }
+
+    // move
+    if (this.mode === "move") {
+      const ret = this.findItemByPosition(this.positionSnapToGrid(p));
+
+      if (this.hover) {
+        if (this.hover.obj) this.hover.obj.hover = false;
+      }
+
+      if (ret) {        
+        if (ret.obj) {
+          ret.obj.hover = true;
+        }
+
+        this.hover = ret;
+        this.scene.renderer.viewer.setCursor("move");
+      } else {
+        this.hover = null;
+        this.scene.renderer.viewer.setCursor("default");
+      }
+
+      this.invalidate();
     }
   }
 
   mouseup(e) {
-    
+  }
+  
+  mouseout() {
   }
 
-  mousemove(e) {
-    if (this.status === "startDraw") {
-      this.status = "drawing";
-    }
+  drag(e) {
+    const p = e.position;
 
-    if (this.status === "drawing") {
-      this.drawingEndPoint.x = e.position.x;
-      this.drawingEndPoint.y = e.position.y;
-      this.scene.requireUpdateFrame();
-    }
+    if (this.mode === "moving") {
+      const fromStart = new Tarumae.Point(p.x - this.mouseStartPoint.x, p.y - this.mouseStartPoint.y);
+      const offset = new Tarumae.Point(e.movement);
 
-    if (this.status === "drawing" || this.status === "nothing") {
-      const p = e.position;
-      const ret = this.findItemByPosition(p);
-
-      if (ret) {
-        this.scene.renderer.viewer.setCursor("move");
-        this.hover = ret;
-      } else {
-        this.scene.renderer.viewer.setCursor("default");
-        this.hover = null;
+      if (this.scene.renderer.viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Shift)) { 
+        if (Math.abs(fromStart.x) > Math.abs(fromStart.y)) {
+          offset.y = 0;
+        } else {
+          offset.x = 0;
+        }
       }
 
-      this.scene.requireUpdateFrame();
+      this.offsetSelectedObjects(offset);
+    }
+  }
+
+  enddrag(e) {
+    if (this.mode === "moving") {
+      this.mode = "move";
     }
   }
 
   keydown(key) {
     switch (key) {
+
+      case Tarumae.Viewer.Keys.D1:
+        this.mode = "drawing";
+        break;
+
+      case Tarumae.Viewer.Keys.D2:
+          this.mode = "move";
+          break;
+    
       case Tarumae.Viewer.Keys.Escape:
         this.status = "nothing";
-        this.drawingStartPoint = null;
+        this.mouseStartPoint = null;
         this.drawingEndPoint = null;
-        this.scene.requireUpdateFrame();
+        this.invalidate();
         break;
     }
   }
 
   draw(g) {
+    this.drawGuideGrid(g);
+
+    // walls
     for (let i = 0; i < this.lines.length; i++) {
       this.lines[i].draw(g);
     }
@@ -122,35 +250,70 @@ class WallDesigner {
       this.nodes[i].draw(g);
     }
     
+    // drawing
     if (this.status === "drawing") {
-      if (this.drawingStartPoint && this.drawingEndPoint) {
-        g.drawLine(this.drawingStartPoint, this.drawingEndPoint, 2, "red");
+      if (this.mouseStartPoint && this.drawingEndPoint) {
+        g.drawLine(this.mouseStartPoint, this.drawingEndPoint, 2, "red");
       }
     }
 
-    if (this.status === "drawing" || this.status === "nothing") {
-      if (this.hover) {
-        if (this.hover.position) {
-          g.drawPoint(this.hover.position, 20, "transparent", "gray");
+    // drawing & hover
+    if (this.mode === "drawing") {
+      if (this.status === "drawing" || this.status === "nothing") {
+        if (this.hover) {
+          if (this.hover.position) {
+            g.drawPoint(this.hover.position, 20, "transparent", "gray");
+          }
         }
       }
     }
   }
 
+  drawGuideGrid(g) {
+    const renderWidth = this.scene.renderer.renderSize.width;
+    const renderHeight = this.scene.renderer.renderSize.height;
+
+    // small grid
+    for (let y = 0; y < renderHeight; y += this.gridSize) {
+      g.drawLine([0, y], [renderWidth, y], 1, "#eee");       
+    }
+
+    for (let x = 0; x < renderWidth; x += this.gridSize) {
+      g.drawLine([x, 0], [x, renderHeight], 1, "#eee"); 
+    }
+
+    // large grid
+
+    for (let y = 0; y < renderHeight; y += this.gridSize * 5) {
+      g.drawLine([0, y], [renderWidth, y], 2, "#ddd");
+    }
+
+    for (let x = 0; x < renderWidth; x += this.gridSize * 5) {
+      g.drawLine([x, 0], [x, renderHeight], 2, "#ddd"); 
+    }
+  }
+
+  invalidate() {
+    this.scene.requireUpdateFrame();
+  }
+
   startDrawingWall(p, dockedNode) {
-    this.drawingStartPoint = new Tarumae.Point(p);
-    this.drawingEndPoint = new Tarumae.Point(p);
+    const sp = this.positionSnapToGrid(p);
+    this.mouseStartPoint = new Tarumae.Point(sp);
+    this.drawingEndPoint = new Tarumae.Point(sp);
     this.drawingDockNode = dockedNode;
   }
 
   commitWallNode(p) {
-    const wallLine = new WallLine(null, new WallNode(p));
+    const endNode = new WallNode(p);
+    const wallLine = new WallLine(null, endNode);
+    endNode.lines.push(wallLine);
 
     if (this.drawingDockNode) {
       wallLine.startNode = this.drawingDockNode;
       this.drawingDockNode.lines.push(wallLine);
     } else {
-      wallLine.startNode = new WallNode(this.drawingStartPoint);
+      wallLine.startNode = new WallNode(this.mouseStartPoint);
       // this.nodes.push(wallLine.startNode);
     }
 
@@ -164,6 +327,15 @@ class WallDesigner {
     this.scene.requireUpdateFrame();
 
     return wallLine;
+  }
+
+  positionSnapToGrid(p) {
+    const h = this.gridSize / 2;
+    const dx = p.x % this.gridSize, dy = p.y % this.gridSize;
+    const x = p.x + (dx < h ? -dx : (this.gridSize - dx));
+    const y = p.y + (dy < h ? -dy : (this.gridSize - dy));
+    
+    return new Tarumae.Point(x, y);
   }
 
   updateWallOutline() {
@@ -181,16 +353,82 @@ class WallDesigner {
       if (ret) return ret;
     }
   }
+
+  selectObject(obj, append) {
+    if (!append) {
+      this.deselectAllObjects();
+    }
+    obj.selected = true;
+    this.selectedObjects._t_pushIfNotExist(obj);
+    this.invalidate();
+  }
+
+  deselectAllObjects() {
+    this.selectedObjects.forEach(obj => obj.selected = false);
+    this.selectedObjects._t_clear();
+    this.invalidate();
+  }
+
+  moveToSelectedObjects(p) {
+    for (let i = 0; i < this.selectedObjects.length; i++) {
+      this.moveToObject(this.selectedObjects[i], p);
+    }
+  }
+
+  moveToObject(obj, p) {
+    obj.moveTo(p);
+    this.invalidate();
+  }
+
+  offsetSelectedObjects(offset) {
+    for (let i = 0; i < this.selectedObjects.length; i++) {
+      this.offsetObject(this.selectedObjects[i], offset);
+    }
+  }
+
+  offsetObject(obj, offset) {
+    if (obj instanceof WallNode) {
+      obj.offset(offset);
+    } else if (obj instanceof WallLine) {
+      obj.startNode.offset(offset);
+      obj.endNode.offset(offset);
+    }
+
+    this.invalidate();
+  }
 }
 
 class WallNode {
   constructor(pos) {
     this.position = new Tarumae.Point(pos);
     this.lines = [];
+
+    this.hover = false;
+    this.selected = false;
+  }
+
+  offset(offset) {
+    if (offset.x === 0 && offset.y === 0) return;
+
+    this.position.x += offset.x;
+    this.position.y += offset.y;
+
+    for (let i = 0; i < this.lines.length; i++) {
+      this.lines[i].update();
+    }
+  }
+
+  moveTo(p) {
+    this.position.x = p.x;
+    this.position.y = p.y;
+
+    for (let i = 0; i < this.lines.length; i++) {
+      this.lines[i].update();
+    }
   }
 
   draw(g) {
-    g.drawPoint(this.position, 15, "transparent", "silver");
+    g.drawPoint(this.position, 15, "transparent", this.hover ? "#0dd" : ( this.selected ? "green" : "silver"));
 
     // for (let i = 0; i < this.lines.length; i++) {
     //   this.lines[i].draw(g);
@@ -198,7 +436,7 @@ class WallNode {
   }
 
   hitTestByPosition(p) {
-    if (_mf.distancePointToPoint2D(p, this.position) < 10) {
+    if (_mf.distancePointToPoint2D(p, this.position) < 15) {
       return { obj: this, type: "node", position: this.position };
     }
 
@@ -215,6 +453,9 @@ class WallLine {
     this.startNode = startNode;
     this.endNode = endNode;
 
+    this.hover = false;
+    this.selected = false;
+
     this.line1Start = new Tarumae.Point();
     this.line1End = new Tarumae.Point();
     this.line2Start = new Tarumae.Point();
@@ -224,6 +465,15 @@ class WallLine {
     this.mat = new Tarumae.Matrix3();
   }
 
+  moveTo(p) {
+    const diff = new Tarumae.Point(
+      p.x - this.startNode.position.x,
+      p.y - this.startNode.position.y);
+    
+    this.startNode.offset(diff);
+    this.endNode.offset(diff);
+  }
+
   update() {
     if (!this.startNode || !this.endNode) return;
 
@@ -231,7 +481,6 @@ class WallLine {
     const x = this.endNode.position.x - this.startNode.position.x;
     
     this.angle = Math.atan2(y, x) / Math.PI * 360;
-    console.log(this.angle);
 
     const start = new Vec2(this.startNode.position), end = new Vec2(this.endNode.position);
     const v = new Vec2(x, y), nor = v.normalize();
@@ -255,8 +504,10 @@ class WallLine {
     //   this.endNode.draw(g);
     // }
 
-    g.drawLine(this.line1Start, this.line1End, 1, "green");
-    g.drawLine(this.line2Start, this.line2End, 1, "gray");
+    const color = this.hover ? "#0dd" : (this.selected ? "green" : "gray");
+
+    g.drawLine(this.line1Start, this.line1End, 2, color);
+    g.drawLine(this.line2Start, this.line2End, 2, color);
 
     g.drawLine(this.startNode.position, this.endNode.position, 5, "silver");
   }
@@ -264,7 +515,7 @@ class WallLine {
   hitTestByPosition(p) {
     const test = _mf.nearestPointToLineSegment2DXY(p, this.startNode.position, this.endNode.position);
 
-    if (test.dist < 10) {
+    if (test.dist < 13) {
       return { obj: this, type: "line", position: { x: test.x, y: test.y } };
     }
   }

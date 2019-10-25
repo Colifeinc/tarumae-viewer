@@ -13,17 +13,18 @@ import "../math/bbox";
 
 export class Vec2 {
 	constructor() {
+		this.x = 0; this.y = 0;
 		this.set(...arguments);
 	}
 	
 	set() {
 		switch (arguments.length) {
-			case 0:
-				this.x = 0; this.y = 0;
-				break;
-			
 			case 1:
-				this.x = arguments[0].x; this.y = arguments[0].y;
+				const arg0 = arguments[0];
+				if (arg0) {
+					this.x = arg0.x;
+					this.y = arg0.y;
+				}
 				break;
 			
 			case 2:

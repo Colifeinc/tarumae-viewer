@@ -160,6 +160,11 @@ Draw2D.Scene2D = class {
     this.onmousemove(this.createEventArgument());
   }
 
+  mouseout() {
+    console.log('mouse out');
+    this.onmouseout();
+  }
+
   begindrag() {
     const evtArg = this.createEventArgument(this.dragObject);
     
@@ -224,7 +229,8 @@ Draw2D.Scene2D = class {
 
 // Event declarations
 new Tarumae.EventDispatcher(Draw2D.Scene2D).registerEvents(
-	"mousedown", "mouseup", "mousemove", "mousewheel",
+  "mousedown", "mouseup", "mousemove", "mouseout",
+  "mousewheel",
   "begindrag", "drag", "enddrag",
   "getFocus", "lostFocus",
 	"keyup", "keydown",
