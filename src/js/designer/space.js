@@ -320,18 +320,7 @@ class WallDesigner {
       p = hotdock.position;
     }
 
-    let endNode;
-    if (hotdock && hotdock.obj instanceof WallNode) {
-      endNode = hotdock.obj;
-    } else if (hotdock && hotdock.obj instanceof WallLine) {
-      endNode = this.splitLine(hotdock.obj, hotdock.position);
-    }
-    else {
-      endNode = new WallNode(p);
-      this.nodes.push(endNode);
-    }
-
-    let startNode;
+    let startNode, endNode;
 
     if (this.hotDockStart) {
       if (this.hotDockStart.obj instanceof WallNode) {
@@ -342,6 +331,17 @@ class WallDesigner {
     } else {
       startNode = new WallNode(this.mouseStartPoint);
       this.nodes.push(startNode);
+    }
+
+    if (hotdock) {
+      if (hotdock.obj instanceof WallNode) {
+        endNode = hotdock.obj;
+      } else if (hotdock && hotdock.obj instanceof WallLine) {
+        endNode = this.splitLine(hotdock.obj, hotdock.position);
+      }
+    } else {
+      endNode = new WallNode(p);
+      this.nodes.push(endNode);
     }
 
     const wallLine = new WallLine(startNode, endNode);
