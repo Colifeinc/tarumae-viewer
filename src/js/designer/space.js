@@ -35,7 +35,7 @@ class WallDesigner {
     this.outlinePoints = [];
     this.nodes = [];
     this.lines = [];
-    this.drawingDockNode = null;
+    this.hotDockStart = null;
     this.selectedObjects = [];
     // this.drawingStartNode = null;
 
@@ -67,7 +67,10 @@ class WallDesigner {
     
     if (this._mode !== "drawing") {
       this.hover = null;
+      this.status = "nothing";
+      this.drawingEndPoint = null;
       this.invalidate();
+    } else if (this._mode === "drawing") {
     }
 
     console.log("change mode to: " + v);
@@ -77,34 +80,42 @@ class WallDesigner {
     const p = e.position;
 
     if (this.mode === "drawing") {
+      const sp = this.positionSnapToGrid(p);
+
       switch (this.status) {
         case "nothing":
           {
             this.status = "startDraw";
 
             if (this.hover && this.hover.position) {
-              this.startDrawingWall(this.hover.position);
+              this.startDrawingWall(this.hover.position, this.hover);
             } else {
-              this.startDrawingWall(p);
+              this.startDrawingWall(sp);
             }
           }
           break;
       
         case "drawing":
           {
-            const snappedPos = this.positionSnapToGrid(p);
-
             const fromStart = new Tarumae.Point(p.x - this.mouseStartPoint.x, p.y - this.mouseStartPoint.y);
             if (this.scene.renderer.viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Shift)) {
               if (Math.abs(fromStart.x) > Math.abs(fromStart.y)) {
-                snappedPos.y = this.mouseStartPoint.y;
+                sp.y = this.mouseStartPoint.y;
               } else {
-                snappedPos.x = this.mouseStartPoint.x;
+                sp.x = this.mouseStartPoint.x;
               }
             }
           
-            const line = this.commitWallNode(snappedPos);
-            this.startDrawingWall(snappedPos, line.endNode);
+            let dockedNode;
+
+            if (this.hover) {
+              // if (this.hover.obj instanceof WallNode) {
+                dockedNode = this.hover.obj;
+              // }
+            }
+
+            const line = this.commitWallNode(sp, this.hover);
+            this.startDrawingWall(sp, { obj: line.endNode, position: sp });
           }
           break;
       }
@@ -251,7 +262,7 @@ class WallDesigner {
     }
     
     // drawing
-    if (this.status === "drawing") {
+    if (this.mode === "drawing" && this.status === "drawing") {
       if (this.mouseStartPoint && this.drawingEndPoint) {
         g.drawLine(this.mouseStartPoint, this.drawingEndPoint, 2, "red");
       }
@@ -262,7 +273,7 @@ class WallDesigner {
       if (this.status === "drawing" || this.status === "nothing") {
         if (this.hover) {
           if (this.hover.position) {
-            g.drawPoint(this.hover.position, 20, "transparent", "gray");
+            g.drawPoint(this.hover.position, 15, "transparent", "red");
           }
         }
       }
@@ -297,36 +308,73 @@ class WallDesigner {
     this.scene.requireUpdateFrame();
   }
 
-  startDrawingWall(p, dockedNode) {
-    const sp = this.positionSnapToGrid(p);
-    this.mouseStartPoint = new Tarumae.Point(sp);
-    this.drawingEndPoint = new Tarumae.Point(sp);
-    this.drawingDockNode = dockedNode;
+  startDrawingWall(p, hotdock) {
+    this.mouseStartPoint = new Tarumae.Point(p);
+    this.drawingEndPoint = new Tarumae.Point(p);
+    this.hotDockStart = hotdock;
+    console.log("start dock node = " + this.hotDockStart);
   }
 
-  commitWallNode(p) {
-    const endNode = new WallNode(p);
-    const wallLine = new WallLine(null, endNode);
-    endNode.lines.push(wallLine);
-
-    if (this.drawingDockNode) {
-      wallLine.startNode = this.drawingDockNode;
-      this.drawingDockNode.lines.push(wallLine);
-    } else {
-      wallLine.startNode = new WallNode(this.mouseStartPoint);
-      // this.nodes.push(wallLine.startNode);
+  commitWallNode(p, hotdock) {
+    if (hotdock) {
+      p = hotdock.position;
     }
 
-    wallLine.startNode.lines.push(wallLine);
-    wallLine.update();
+    let endNode;
+    if (hotdock && hotdock.obj instanceof WallNode) {
+      endNode = hotdock.obj;
+    } else if (hotdock && hotdock.obj instanceof WallLine) {
+      endNode = this.splitLine(hotdock.obj, hotdock.position);
+    }
+    else {
+      endNode = new WallNode(p);
+      this.nodes.push(endNode);
+    }
 
+    let startNode;
+
+    if (this.hotDockStart) {
+      if (this.hotDockStart.obj instanceof WallNode) {
+        startNode = this.hotDockStart.obj;
+      } else if (this.hotDockStart.obj instanceof WallLine) {
+        startNode = this.splitLine(this.hotDockStart.obj, this.hotDockStart.position);
+      }
+    } else {
+      startNode = new WallNode(this.mouseStartPoint);
+      this.nodes.push(startNode);
+    }
+
+    const wallLine = new WallLine(startNode, endNode);
+    startNode.lines.push(wallLine);
+    endNode.lines.push(wallLine);
+    
+    wallLine.update();
     this.lines.push(wallLine);
-    this.nodes.push(wallLine.startNode);
-    this.nodes.push(wallLine.endNode);
 
     this.scene.requireUpdateFrame();
 
     return wallLine;
+  }
+
+  splitLine(line, position) {
+    const newNode = new WallNode(position);
+    const newLine = new WallLine(newNode, line.endNode);
+    
+    // existing line
+    line.endNode.lines._t_remove(line);
+    line.endNode = newNode;
+
+    // new line
+    newLine.endNode.lines.push(newLine);
+
+    // new node
+    newNode.lines.push(line);
+    newNode.lines.push(newLine);
+
+    this.nodes.push(newNode);
+    this.lines.push(newLine);
+
+    return newNode;
   }
 
   positionSnapToGrid(p) {
@@ -437,7 +485,7 @@ class WallNode {
 
   hitTestByPosition(p) {
     if (_mf.distancePointToPoint2D(p, this.position) < 15) {
-      return { obj: this, type: "node", position: this.position };
+      return { obj: this, position: this.position };
     }
 
     // for (let i = 0; i < this.lines.length; i++) {
@@ -516,7 +564,7 @@ class WallLine {
     const test = _mf.nearestPointToLineSegment2DXY(p, this.startNode.position, this.endNode.position);
 
     if (test.dist < 13) {
-      return { obj: this, type: "line", position: { x: test.x, y: test.y } };
+      return { obj: this, position: { x: test.x, y: test.y } };
     }
   }
 }
