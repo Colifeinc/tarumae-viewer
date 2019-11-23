@@ -38,7 +38,7 @@ window.addEventListener('load', e => {
 		// for (let i = 0; i < vertices.length; i++) {
 		// 	const v = vertices[i];
 			// r.drawPoint(v, 9, window.selectedVertices._t_contains(v) ? "red" : "black");
-			// r.drawText(v, i);
+			// r.drawText(i, v);
 		// }e
 	};
 

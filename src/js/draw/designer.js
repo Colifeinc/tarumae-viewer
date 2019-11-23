@@ -359,7 +359,7 @@ Object.assign(PlanDesigner.Area.prototype, {
               countX * this.gridSizeX, countY * this.gridSizeY);
 
             renderer.drawRect(rect, 0, null, '#ffddcf');
-            renderer.drawText(rect.origin, countX + " x " + countY, 'black', 'center');
+            renderer.drawText(countX + " x " + countY, rect.origin, 'black', 'center');
           }
         }
         break;

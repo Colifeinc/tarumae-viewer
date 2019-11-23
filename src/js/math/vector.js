@@ -33,6 +33,22 @@ export class Vec2 {
 		}
 	}
 
+	add(v2) {
+		return new Vec2(this.x + v2.x, this.y + v2.y);
+	}
+
+	static add(v1, v2) {
+		return new Vec2(v1.x + v2.x, v1.y + v2.y);
+	}
+
+	sub(v2) {
+		return new Vec2(this.x - v2.x, this.y - v2.y);
+	}
+		
+	static sub(v1, v2) {
+		return new Vec2(v1.x - v2.x, v1.y - v2.y);
+	}
+
 	scale(scaleX, scaleY) {
 		this.x *= scaleX;
 		this.y *= scaleY;
@@ -56,6 +72,10 @@ export class Vec2 {
 		return new Vec2(
 			this.x * m.a1 + this.y * m.a2 + m.a3,
 			this.x * m.b1 + this.y * m.b2 + m.b3);
+	}
+
+	div(s) {
+		return new Vec2(this.x / s, this.y / s);
 	}
 
 	neg() {
@@ -88,28 +108,24 @@ export class Vec2 {
 		return "[" + toStringDigits(this.x) + ", " + (this.y) + "]";
 	}
 
-	add(v2) {
-		return new Vec2(this.x + v2.x, this.y + v2.y);
-	}
-
-	static add(v1, v2) {
-		return new Vec2(v1.x + v2.x, v1.y + v2.y);
-	}
-
-	sub(v2) {
-		return new Vec2(this.x - v2.x, this.y - v2.y);
-	}
-		
-	static sub(v1, v2) {
-		return new Vec2(v1.x - v2.x, v1.y - v2.y);
-	}
-
 	dot(v2) {
 		return this.x * v2.x + this.y * v2.y;
 	}
 
 	static dot(v1, v2) {
 		return v1.x * v2.x + v1.y * v2.y;
+	}
+
+	get angle() {
+		let angle = Math.atan2(this.y, this.x) * 180 / Math.PI;
+		if (angle < 0) angle += 360;
+		return angle;
+	}
+
+	static angleOf(v1, v2) {
+		let angle = Math.atan2((v2.y - v1.y), (v2.x - v1.x));
+		angle = angle * 180 / Math.PI;
+		return angle;
 	}
 }	
 

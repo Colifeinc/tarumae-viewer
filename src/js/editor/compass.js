@@ -94,8 +94,9 @@ TarumaeCompass.prototype.drawArrow = function(arrow) {
   arrow.screenPosition = new Tarumae.Point(this.screenPosition.x + to.x, this.screenPosition.y - to.y);
   
   renderer.drawArrow2D(this.screenPosition, arrow.screenPosition, 3.2, arrow.color);
+  
   if (arrow.name) {
-      renderer.drawText2D(new Tarumae.Point(arrow.screenPosition.x + 10, arrow.screenPosition.y + 5), arrow.name, "white");
+    renderer.drawText2D(new Tarumae.Point(arrow.screenPosition.x + 10, arrow.screenPosition.y + 5), arrow.name, "white");
   }
 };
 

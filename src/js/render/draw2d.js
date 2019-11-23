@@ -723,18 +723,17 @@ Tarumae.DrawingContext2D = class {
 		ctx.drawImage(image, p.x, p.y);
 	}
 
-	drawText(p, text, color, halign, font) {
+	drawText(text, p, color, halign, font) {
 		var ctx = this.ctx;
 	
 		ctx.fillStyle = color || "black";
-	
-		var size = ctx.measureText(text);
-	
+		
 		// TODO: get text height, allow to change text font
 		ctx.font = "12px Arial";
 	
 		if (halign == "center") {
-			p.x -= size.width / 2;
+			const size = ctx.measureText(text);
+			p = { x: p.x - size.width / 2, y: p.y };
 		}
 
 		if (font) ctx.font = font;
@@ -860,9 +859,8 @@ Tarumae.DrawingContext2D = class {
 		ctx.fill();
 	};
 		
-	drawPolygon(p, strokeWidth, strokeColor, fillColor) {
+	drawPolygon(points, strokeWidth, strokeColor, fillColor) {
 		const ctx = this.ctx;
-		const points = p.points;
 
 		if (!points || points.length < 2) return;
 		

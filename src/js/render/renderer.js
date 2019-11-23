@@ -1164,8 +1164,8 @@ Tarumae.Renderer = class {
 		}
 	};
 		
-	drawText(location, text, color, halign) {
-		this.drawingContext2D.drawText(this.transformPoint(location), text, color, halign);
+	drawText(text, location, color, halign) {
+		this.drawingContext2D.drawText(text, this.transformPoint(location), color, halign);
 	};
 
 	// 2D Drawing by 3D coordinates - End

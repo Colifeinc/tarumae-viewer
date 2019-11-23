@@ -750,7 +750,7 @@ Tarumae.EditorRefRange.prototype.draw = function(renderer) {
   }, 0.1, 2, this.color);
 
   // temporary hide text label of range guide 
-  //renderer.drawText(Vec3.add(loc, new Vec3(0, -0.5, 0)), this.name, "black", "center");
+  //renderer.drawText(this.name, Vec3.add(loc, new Vec3(0, -0.5, 0)), "black", "center");
 };
 
 //////////////// EditorResizeGuideBoundingBox /////////////////
