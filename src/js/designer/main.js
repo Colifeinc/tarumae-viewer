@@ -478,7 +478,7 @@ AutoFloor.LayoutDesigner = class {
       const o = c.rect.origin;
       
       g.drawRect(c.rect, 1, "white", color);
-      g.drawText(o, c.index, c.taken ? "red" : "silver", "center", "5px Arial");
+      g.drawText(c.index, o, c.taken ? "red" : "silver", "center", "5px Arial");
     }
   }
 };
@@ -548,7 +548,7 @@ class LayoutObject extends Drawing2d.Object {
 
   drawDimension(g, x, y) {
     const w = this.size.width, h = this.size.height;
-    g.drawText({ x, y }, `${w * 20} mm x ${h * 20} mm`, "black", "center", "0.3em Arial");
+    g.drawText(`${w * 20} mm x ${h * 20} mm`, { x, y }, "black", "center", "0.3em Arial");
   }
 
   pointToObject(p) {

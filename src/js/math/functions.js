@@ -17,6 +17,15 @@ Tarumae.MathFunctions = {
   angleToDegree: function(a) {
     return a * Tarumae.MathFunctions._PIAngleDelta;
   },
+
+  fixAngle(angle) {
+		if (angle < 0) {
+			while (angle < 0) angle += 360;
+		} else {
+			while (angle > 360) angle -= 360;
+		}
+		return angle;
+	},
   
   abs: function(v) {
     if (v instanceof Vec3) {
@@ -420,6 +429,22 @@ Tarumae.MathFunctions = {
       && this.polygonContainsPoint(polygon, rect.topRight)
       && this.polygonContainsPoint(polygon, rect.bottomLeft)
       && this.polygonContainsPoint(polygon, rect.bottomRight);
+  },
+
+  calcPolygonArea(points) {
+    if (points.length < 2) return 0;
+
+    let a = 0;
+    
+    for (let i = 0; i < points.length - 1; i++) {
+      const p1 = points[i], p2 = points[i + 1];
+      a += p1.x * p2.y - p1.y * p2.x;
+    }
+    
+    const p1 = points[points.length - 1], p2 = points[0];
+    const last = p1.x * p2.y - p1.y * p2.x;
+    
+    return Math.abs(a + last) * 0.5;
   },
 
   lineIntersectsRect: function(l, r) {

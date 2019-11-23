@@ -1,7 +1,9 @@
 import Tarumae from "../entry";
 import { Vec2 } from "../math/vector";
+import { WallNode, WallLine, Area } from "./wall";
 
 const _mf = Tarumae.MathFunctions;
+
 let _scene = null;
 
 function _test_main_(scene) {
@@ -38,12 +40,15 @@ class WallDesigner {
     this.hotDockStart = null;
     this.selectedObjects = [];
     // this.drawingStartNode = null;
+    this.rooms = [];
+    this.areas = [];
+    this.hoverArea = null;
 
     this.scene.on("mousedown", e => this.mousedown(e));
     this.scene.on("mousemove", e => this.mousemove(e));
     this.scene.on("mouseout", e => this.mouseout(e));
     this.scene.on("mouseup", e => this.mouseup(e));
-    this.scene.on("ondrag", e => this.drag(e));
+    this.scene.on("drag", e => this.drag(e));
     this.scene.on("enddrag", e => this.enddrag(e));
     this.scene.on("keydown", key => this.keydown(key));
     this.scene.on("draw", g => this.draw(g));
@@ -196,6 +201,8 @@ class WallDesigner {
 
       this.invalidate();
     }
+
+    this.hoverArea = null;
   }
 
   mouseup(e) {
@@ -208,8 +215,9 @@ class WallDesigner {
     const p = e.position;
 
     if (this.mode === "moving") {
-      const fromStart = new Tarumae.Point(p.x - this.mouseStartPoint.x, p.y - this.mouseStartPoint.y);
-      const offset = new Tarumae.Point(e.movement);
+      const fromStart = new Vec2(p.x - this.mouseStartPoint.x,
+        p.y - this.mouseStartPoint.y);
+      const offset = new Vec2(e.movement);
 
       if (this.scene.renderer.viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Shift)) { 
         if (Math.abs(fromStart.x) > Math.abs(fromStart.y)) {
@@ -226,6 +234,8 @@ class WallDesigner {
   enddrag(e) {
     if (this.mode === "moving") {
       this.mode = "move";
+
+      this.scanRooms();
     }
   }
 
@@ -249,22 +259,39 @@ class WallDesigner {
     }
   }
 
+  positionSnapToGrid(p) {
+    const h = this.gridSize / 2;
+    const dx = p.x % this.gridSize, dy = p.y % this.gridSize;
+    const x = p.x + (dx < h ? -dx : (this.gridSize - dx));
+    const y = p.y + (dy < h ? -dy : (this.gridSize - dy));
+    
+    return new Tarumae.Point(x, y);
+  }
+
   draw(g) {
     this.drawGuideGrid(g);
 
-    // walls
-    for (let i = 0; i < this.lines.length; i++) {
-      this.lines[i].draw(g);
-    }
+    // rooms
+    this.areas.forEach(area => {
+      g.drawPolygon(area.polygon, 0, "transparent", '#ffffee');
+      g.drawText((area.areaValue / 1000) + " m²", area.centerPoint, "#000000", "center", "14px Arial");
+    });
 
-    for (let i = 0; i < this.nodes.length; i++) {
-      this.nodes[i].draw(g);
-    }
-    
+    // walls
+    this.lines.forEach(l => l.draw(g));
+    this.nodes.forEach(n => n.draw(g));
+
     // drawing
     if (this.mode === "drawing" && this.status === "drawing") {
       if (this.mouseStartPoint && this.drawingEndPoint) {
+        
         g.drawLine(this.mouseStartPoint, this.drawingEndPoint, 2, "red");
+
+        const angle = Math.round(this.drawingEndPoint.sub(this.mouseStartPoint).angle);
+        g.drawText(angle + "˚", {
+          x: this.drawingEndPoint.x,
+          y: this.drawingEndPoint.y - 10
+        }, "red");
       }
     }
 
@@ -353,6 +380,8 @@ class WallDesigner {
 
     this.scene.requireUpdateFrame();
 
+    this.scanRooms();
+
     return wallLine;
   }
 
@@ -377,17 +406,152 @@ class WallDesigner {
     return newNode;
   }
 
-  positionSnapToGrid(p) {
-    const h = this.gridSize / 2;
-    const dx = p.x % this.gridSize, dy = p.y % this.gridSize;
-    const x = p.x + (dx < h ? -dx : (this.gridSize - dx));
-    const y = p.y + (dy < h ? -dy : (this.gridSize - dy));
-    
-    return new Tarumae.Point(x, y);
-  }
-
   updateWallOutline() {
 
+  }
+
+  scanRooms() {
+    this.scanAreas();
+  }
+
+  scanAreas() {
+    this.areas = [];
+
+    this.lines.forEach(l => this.scanFromLine(l.startNode, l.endNode));
+    this.lines.forEach(l => this.scanFromLine(l.endNode, l.startNode));
+  }
+
+  scanFromLine(start, end) {
+    // skip if n1 has only one line, no closure path
+    if (start.lines.length <= 1 || end.lines.length <= 1) return;
+
+    const ss = new ScanSessionStack();
+    const area = this.scanFromTwoNode(start, end, ss);
+
+    if (area != null
+      && area.totalAngle <= ((area.polygon.length - 2) * 180) + 1
+      && !this.existedArea(area)
+    ) {
+      area.update();
+      this.areas.push(area);
+      console.debug('found area: ', area);
+      return area;
+    }
+  }
+
+  scanFromTwoNode(start, end, ss) {
+    // // can remove?
+    // if (ss.visitedNode(end) && !ss.isStartNode(end))
+    // {
+    // 	// never reached
+    // 	return;
+    // }
+
+    if (ss.isStartNode(end)) {
+      let desc = "";
+      const polygon = [];
+      const nodes = [];
+      let centerPoint = new Vec2();
+
+      ss.getPath().forEach(pn => {
+        desc += pn.id + "  ";
+        polygon.push(pn.position);
+        nodes.push(pn);
+      });
+
+      desc += start.id;
+      polygon.push(start.position);
+      nodes.push(start);
+
+      if (nodes.length > 2) {
+        const a1 = nodes[0].position.sub(start.position).angle;
+        const a2 = nodes[0].position.sub(nodes[1].position).angle;
+          
+        const lastAngle = _mf.fixAngle(a1 - a2);
+
+        const area = new Area();
+        area.nodes = nodes;
+        area.polygon = polygon;
+        area.desc = desc;
+        area.totalAngle = ss.current.totalAngle + lastAngle;
+
+        return area;
+      }
+
+      // number of vertices for a polygon is less than 3, illegal polygon?
+      console.debug("vertices of polygon lesses than 3");
+      return;
+    }
+
+    ss.addVisit(start, end);
+
+    const nexts = end.nextNodes(start);
+
+    if (nexts.length == 1) {
+      const ni = nexts[0];
+
+      if (ss.visitedPath(end, ni.node)) return;
+
+      ss.current.totalAngle += ni.angle;
+      const area = this.scanFromTwoNode(end, ni.node, ss);
+      if (area) return area;
+    }
+    else if (nexts.length > 1) {
+      for (let i = 0; i < nexts.length; i++) {
+        const ni = nexts[i];
+
+        if (ss.visitedPath(end, ni.node)) return;
+
+        ss.push();
+        ss.current.totalAngle += ni.angle;
+        const area = this.scanFromTwoNode(end, ni.node, ss);
+        if (area) return area;
+        ss.pop();
+      }
+    }
+  }
+
+  existedArea(a) {
+    for (let i = 0; i < this.areas.length; i++) {
+      if (WallDesigner.isSameArea(this.areas[i].nodes, a.nodes)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static isSameArea(n1, n2) {
+    if (n1.length !== n2.length) return false;
+
+    for (let j = 0; j < n1.length; j++) {
+      let same = true;
+
+      for (let i = j, k = 0; k < n2.length; i++ , k++) {
+        if (i >= n1.length) i = 0;
+
+        if (n1[i] != n2[k]) {
+          same = false;
+          break;
+        }
+      }
+
+      if (same) return true;
+
+      same = true;
+
+      for (let i = j, k = 0; k < n2.length; i-- , k++) {
+        if (i < 0) i = n1.length - 1;
+
+        if (n1[i] != n2[k]) {
+          same = false;
+          break;
+        }
+      }
+
+      if (same) return true;
+    }
+
+    return false;
   }
 
   findItemByPosition(p) {
@@ -400,6 +564,10 @@ class WallDesigner {
       const ret = this.lines[i].hitTestByPosition(p);
       if (ret) return ret;
     }
+  }
+
+  findAreaByPosition(p) {
+
   }
 
   selectObject(obj, append) {
@@ -446,202 +614,76 @@ class WallDesigner {
   }
 }
 
-class WallNode {
-  constructor(pos) {
-    this.position = new Tarumae.Point(pos);
-    this.lines = [];
-
-    this.hover = false;
-    this.selected = false;
-  }
-
-  offset(offset) {
-    if (offset.x === 0 && offset.y === 0) return;
-
-    this.position.x += offset.x;
-    this.position.y += offset.y;
-
-    for (let i = 0; i < this.lines.length; i++) {
-      this.lines[i].update();
-    }
-  }
-
-  moveTo(p) {
-    this.position.x = p.x;
-    this.position.y = p.y;
-
-    for (let i = 0; i < this.lines.length; i++) {
-      this.lines[i].update();
-    }
-  }
-
-  draw(g) {
-    g.drawPoint(this.position, 15, "transparent", this.hover ? "#0dd" : ( this.selected ? "green" : "silver"));
-
-    // for (let i = 0; i < this.lines.length; i++) {
-    //   this.lines[i].draw(g);
-    // }
-  }
-
-  hitTestByPosition(p) {
-    if (_mf.distancePointToPoint2D(p, this.position) < 15) {
-      return { obj: this, position: this.position };
-    }
-
-    // for (let i = 0; i < this.lines.length; i++) {
-    //   const line = this.lines[i];
-    //   const ret = line.hitTestByPosition(p);
-    //   if (ret) return ret;
-    // }
-  }
-}
-
-class WallLine {
-  constructor(startNode, endNode) {
-    this.startNode = startNode;
-    this.endNode = endNode;
-
-    this.hover = false;
-    this.selected = false;
-
-    this.line1Start = new Tarumae.Point();
-    this.line1End = new Tarumae.Point();
-    this.line2Start = new Tarumae.Point();
-    this.line2End = new Tarumae.Point();
-
-    this.angle = 0;
-    this.mat = new Tarumae.Matrix3();
-  }
-
-  moveTo(p) {
-    const diff = new Tarumae.Point(
-      p.x - this.startNode.position.x,
-      p.y - this.startNode.position.y);
-    
-    this.startNode.offset(diff);
-    this.endNode.offset(diff);
-  }
-
-  update() {
-    if (!this.startNode || !this.endNode) return;
-
-    const y = this.endNode.position.y - this.startNode.position.y;
-    const x = this.endNode.position.x - this.startNode.position.x;
-    
-    this.angle = Math.atan2(y, x) / Math.PI * 360;
-
-    const start = new Vec2(this.startNode.position), end = new Vec2(this.endNode.position);
-    const v = new Vec2(x, y), nor = v.normalize();
-    const p1 = start.add(new Vec2(nor.y, -nor.x).mul(10));
-    const p2 = end.add(new Vec2(nor.y, -nor.x).mul(10));
-    const p3 = start.add(new Vec2(-nor.y, nor.x).mul(10));
-    const p4 = end.add(new Vec2(-nor.y, nor.x).mul(10));
-
-    this.line1Start.x = p1.x;
-    this.line1Start.y = p1.y;
-    this.line1End.x = p2.x;
-    this.line1End.y = p2.y;
-    this.line2Start.x = p3.x;
-    this.line2Start.y = p3.y;
-    this.line2End.x = p4.x;
-    this.line2End.y = p4.y;
-  }
-
-  draw(g) {
-    // if (this.endNode) {
-    //   this.endNode.draw(g);
-    // }
-
-    const color = this.hover ? "#0dd" : (this.selected ? "green" : "gray");
-
-    g.drawLine(this.line1Start, this.line1End, 2, color);
-    g.drawLine(this.line2Start, this.line2End, 2, color);
-
-    g.drawLine(this.startNode.position, this.endNode.position, 5, "silver");
-  }
-
-  hitTestByPosition(p) {
-    const test = _mf.nearestPointToLineSegment2DXY(p, this.startNode.position, this.endNode.position);
-
-    if (test.dist < 13) {
-      return { obj: this, position: { x: test.x, y: test.y } };
-    }
-  }
-}
-
-class LayoutGen {
+class ScanSession {
   constructor() {
+    this.lines = {};
+    this.route = [];
+    this.totalAngle = 0;
+  }
+}
+
+class ScanSessionStack {
+  constructor() {
+    this.stack = [];
+    this.push();
   }
 
-  static calcFloorArea(points) {
-    if (points.length < 2) return 0;
+  get current() {
+    if (this.stack.length <= 0) return;
+    return this.stack[this.stack.length - 1];
+  }
+  
+  push() {
+    const ss = new ScanSession();
+    if (this.current) ss.totalAngle = this.current.totalAngle;
+    this.stack.push(ss);
+  }
 
-    let a = 0;
-    for (let i = 0; i < points.length - 1; i++) {
-      const p1 = points[i], p2 = points[i + 1];
-      a += p1[0] * p2[1] - p1[1] * p2[0];
+  pop() {
+    this.stack.pop();
+  }
+
+  addVisit(start, end) {
+    this.current.lines[start.id] = end.id;
+    this.current.route.push(start);
+  }
+
+  // visitedNode(node) {
+  //   for (let i = 0; i < this.stack.length; i++) {
+  //     const ss = this.stack[i];
+  //     for (let k = 0; k < ss.route.length; k++) {
+  //       if (ss.route[k].id === node.id) {
+  //         return true;
+  //       }
+  //     }
+  //   }
+  //   return false;
+  // }
+
+  isStartNode(node) {
+    if (this.stack.length > 0) {
+      if (this.stack[0].route.length > 0) {
+        return this.stack[0].route[0].id === node.id;
+      }
     }
-    
-    const last = points[points.length - 1][0] * points[0][1] - points[points.length - 1][1] * points[0][0];
-    return Math.abs(a + last) / 2;
-  }
-}
-
-class RoomGraph {
-  constructor() {
-    this.entry = new SpaceEntry();
-    this.entry.origin.set(400, 700);
-
-    // room 1
-    this.entry.node = new SpaceNode();
-    this.entry.node.bounds = [[100, 100], [800, 100], [800, 700], [100, 700]];
+    return false;
   }
 
-  draw(g) {
-    this.entry.draw(g);
-  }
-}
-
-class SpaceEntry {
-  constructor() {
-    this.node = null;
-    this.origin = new Tarumae.Point();
-  }
-
-  draw(g) {
-    g.drawEllipse({ x: this.origin.x - 10, y: this.origin.y - 10, width: 20, height: 20}, 5, 'red');
-
-    if (this.node) {
-      this.node.draw(g);
+  visitedPath(start, end) {
+    for (let i = 0; i < this.stack.length; i++) {
+      const ss = this.stack[i];
+      if (ss.lines[start.id] === end.id) {
+        return true;
+      }
     }
+    return false;
+  }
+
+  getPath() {
+    const path = [];
+    this.stack.forEach(s => path.push(...s.route));
+    return path;
   }
 }
 
-class SpaceNode {
-  constructor() {
-    this.entries = [];
-    
-    this._bounds = new Tarumae.Polygon();
-  }
-
-  set bounds(points) {
-    this._bounds.points = points;
-  }
-
-  get bounds() {
-    return this._bounds;
-  }
-
-  get origin() {
-    return this._bounds.origin;
-  }
-
-  draw(g) {
-    g.drawPoint(this.origin, 10, 'blue');
-    g.drawPolygon(this._bounds, 2, 'black', 'transparent');
-
-    this.entries.forEach(e => e.draw(g));
-  }
-}
-
-export { _test_main_, RoomGraph, SpaceEntry, SpaceNode };
+export { _test_main_ };
