@@ -124,7 +124,6 @@ AutoFloor.LayoutDesigner = class {
     // };
 
     // this._obj_test();
-    _test_main_(this.scene);
 
     // this.createLayout(this.data);
     // this.autoLayout();
@@ -233,6 +232,7 @@ AutoFloor.LayoutDesigner = class {
           },
         };
 
+        // TODO: change polygon element to vec2
         if (_mf.polygonContainsPoint(wallPolygon, rect.origin)) {
           
           const wallDist = _mf.distancePointToPolygon(rect.origin, wallPolygon);
@@ -495,8 +495,7 @@ window.addEventListener("load", function() {
 
   const designer = new AutoFloor.LayoutDesigner(renderer);
   designer.show();
-
-  // __test__(renderer);
+  
 });
 
 class Room extends Drawing2d.Object {
@@ -932,15 +931,4 @@ class AssetObject extends InteriorObject {
       this.objProto.draw(g, w, h, hw, hh); 
     }
   }
-}
-
-function __test__(renderer) {
-  const scene = new Drawing2d.Scene2D();
-  scene.renderer = renderer;
-  renderer.scene = scene;
-
-  const wall1 = new WallLine(100, 100, 400, 200);
-  scene.add(wall1);
-
-  scene.show();
 }

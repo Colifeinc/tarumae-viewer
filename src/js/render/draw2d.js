@@ -452,7 +452,7 @@ Tarumae.Polygon = class {
 	constructor(points) {
 		this.bbox = new Tarumae.BBox2D();
 		this.points = points;
-	}		
+	}
 
 	set points(points) {
 		this._points = points;
@@ -472,19 +472,17 @@ Tarumae.Polygon = class {
 			return;
 		}
 
-		const min = this.bbox.min, max = this.bbox.max;
-		min.x = this._points[0][0];
-		min.y = this._points[0][1];
+		const { min, max } = this.bbox;
+		
+		min.x = this._points[0].x;
+		min.y = this._points[0].y;
 
-		for (let i = 0; i < this._points.length; i++) {
-			const point = this._points[i];
-			const x = point[0], y = point[1];
-
+		this._points.forEach(({ x, y }) => {
 			if (min.x > x) min.x = x;
 			if (min.y > y) min.y = y;
 			if (max.x < x) max.x = x;
 			if (max.y < y) max.y = y;
-		}
+		});
 	}
 
 	containsPoint(p) {
@@ -508,7 +506,7 @@ Tarumae.Polygon = class {
 ////////// DrawingContext2D //////////
 
 Tarumae.DrawingContext2D = class {
-	constructor(canvas, ctx) {
+	constructor(canvas, ctx, options) {
 		this.canvas = canvas;
 		this.ctx = ctx;
 
@@ -516,12 +514,15 @@ Tarumae.DrawingContext2D = class {
 
 		this.currentTransform = new Tarumae.Matrix3().loadIdentity();
 		this.transformStack = new Array();
+
+		if (options.scale) {
+			// this.pushScale(options.scale.x, options.scale.y);
+		}
 	}
 
 	pushTransform(t) {
-		this.transformStack.push(this.currentTransform.clone());
-		this.currentTransform = t.mul(this.currentTransform);
-		t = this.currentTransform;
+		this.transformStack.push(this.currentTransform);
+		t = t.mul(this.currentTransform);
 		this.ctx.setTransform(t.a1, t.b1, t.a2, t.b2, t.a3, t.b3);
 	}
 
@@ -539,6 +540,12 @@ Tarumae.DrawingContext2D = class {
 
 	pushRotation(angle, x, y) {
 		const m = Tarumae.Matrix3.makeRotation(angle, x, y);
+		this.pushTransform(m);
+		return m;
+	}
+
+	pushScale(x, y) {
+		const m = Tarumae.Matrix3.makeScale(x, y);
 		this.pushTransform(m);
 		return m;
 	}

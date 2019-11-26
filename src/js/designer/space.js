@@ -1,33 +1,39 @@
 import Tarumae from "../entry";
+import "../scene/scene";
+import "../scene/viewer";
+import "../utility/archive";
+import "../utility/res";
 import { Vec2 } from "../math/vector";
+import Drawing2D from "../draw/scene2d";
 import { WallNode, WallLine, Area } from "./wall";
 
 const _mf = Tarumae.MathFunctions;
 
 let _scene = null;
 
-function _test_main_(scene) {
-  _scene = scene;
-  
+window.addEventListener("load", function() {
 
-  // const points = [[100, 100], [800, 100], [800, 700], [100, 700]];
+	const renderer = new Tarumae.Renderer({
+    enableLighting: false,
+    renderPixelRatio: window.devicePixelRatio,
+  });
 
-  // scene.ondraw = g => {
-  //   g.drawLines(points, 2, "black", "transparent", true);
-  // };
+  _scene = new Drawing2D.Scene2D();
+  _scene.renderer = renderer;
+  _scene.show();
 
-  // console.log(LayoutGen.calcFloorArea([[4, 10], [10, 8], [11, 2], [-4, -3]]));
+  window._scene = _scene;
+  window._designer = new WallDesigner(_scene);
 
-  new WallDesigner(scene);
-}
+});
 
 class WallDesigner {
   constructor(scene) {
     this.scene = scene;
     this.enabled = false;
-    this.gridSize = 15;
+    this.gridSize = 20;
 
-    this._mode = "drawing";
+    this._mode = "draw";
     this._status = "nothing";
 
     this.hover = null;
@@ -70,12 +76,15 @@ class WallDesigner {
   set mode(v) {
     this._mode = v;
     
-    if (this._mode !== "drawing") {
+    if (this._mode !== "draw") {
       this.hover = null;
       this.status = "nothing";
       this.drawingEndPoint = null;
       this.invalidate();
-    } else if (this._mode === "drawing") {
+    }
+    
+    if (this._mode === "draw") {
+      this.status = "nothing";
     }
 
     console.log("change mode to: " + v);
@@ -84,7 +93,7 @@ class WallDesigner {
   mousedown(e) {
     const p = e.position;
 
-    if (this.mode === "drawing") {
+    if (this.mode === "draw") {
       const sp = this.positionSnapToGrid(p);
 
       switch (this.status) {
@@ -132,7 +141,7 @@ class WallDesigner {
           this.selectObject(ret.obj);
 
           this.mouseStartPoint = new Tarumae.Point(p);
-          this.mode = "moving";
+          this.status = "moving";
         }
       }
     }
@@ -142,7 +151,7 @@ class WallDesigner {
     const p = e.position;
 
     // drawing
-    if (this.mode === "drawing") {
+    if (this.mode === "draw") {
       if (this.status === "startDraw") {
         this.status = "drawing";
       }
@@ -150,7 +159,8 @@ class WallDesigner {
       if (this.status === "drawing") {
         const snappedPos = this.positionSnapToGrid(p);
      
-        const fromStart = new Tarumae.Point(p.x - this.mouseStartPoint.x, p.y - this.mouseStartPoint.y);
+        const fromStart = new Tarumae.Point(p.x - this.mouseStartPoint.x,
+          p.y - this.mouseStartPoint.y);
         if (this.scene.renderer.viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Shift)) {
           if (Math.abs(fromStart.x) > Math.abs(fromStart.y)) {
             snappedPos.y = this.mouseStartPoint.y;
@@ -161,7 +171,8 @@ class WallDesigner {
 
         this.drawingEndPoint.x = snappedPos.x;
         this.drawingEndPoint.y = snappedPos.y;
-        this.scene.requireUpdateFrame();
+
+        this.invalidate();
       }
 
       if (this.status === "drawing" || this.status === "nothing") {
@@ -169,7 +180,7 @@ class WallDesigner {
 
         const ret = this.findItemByPosition(this.positionSnapToGrid(p));
 
-        if (this.mode === "drawing") {
+        if (this.mode === "draw") {
           if (ret) {
             this.hover = ret;
           }
@@ -181,7 +192,7 @@ class WallDesigner {
 
     // move
     if (this.mode === "move") {
-      const ret = this.findItemByPosition(this.positionSnapToGrid(p));
+      const ret = this.findItemByPosition(p);
 
       if (this.hover) {
         if (this.hover.obj) this.hover.obj.hover = false;
@@ -202,10 +213,20 @@ class WallDesigner {
       this.invalidate();
     }
 
+    // update hover area
     this.hoverArea = null;
+
+    if (this.status !== "drawing") {
+      this.hoverArea = this.findAreaByPosition(p);
+    }
   }
 
   mouseup(e) {
+    const p = e.position;
+    console.log('mouse up');
+    if (this.status === "moving") {
+      this.status = "move";
+    }
   }
   
   mouseout() {
@@ -214,7 +235,7 @@ class WallDesigner {
   drag(e) {
     const p = e.position;
 
-    if (this.mode === "moving") {
+    if (this.status === "moving") {
       const fromStart = new Vec2(p.x - this.mouseStartPoint.x,
         p.y - this.mouseStartPoint.y);
       const offset = new Vec2(e.movement);
@@ -232,10 +253,11 @@ class WallDesigner {
   }
 
   enddrag(e) {
-    if (this.mode === "moving") {
-      this.mode = "move";
+    if (this.status === "moving") {
+      this.status = "move";
 
       this.scanRooms();
+      this.invalidate();
     }
   }
 
@@ -243,7 +265,7 @@ class WallDesigner {
     switch (key) {
 
       case Tarumae.Viewer.Keys.D1:
-        this.mode = "drawing";
+        this.mode = "draw";
         break;
 
       case Tarumae.Viewer.Keys.D2:
@@ -273,8 +295,8 @@ class WallDesigner {
 
     // rooms
     this.areas.forEach(area => {
-      g.drawPolygon(area.polygon, 0, "transparent", '#ffffee');
-      g.drawText((area.areaValue / 1000) + " m²", area.centerPoint, "#000000", "center", "14px Arial");
+      g.drawPolygon(area.polygon.points, 0, "transparent", this.hoverArea===area?'#ddddee': '#ffffee');
+      g.drawText(Math.round(area.areaValue / 10000) + " m²", area.centerPoint, "#000000", "center", "14px Arial");
     });
 
     // walls
@@ -282,21 +304,26 @@ class WallDesigner {
     this.nodes.forEach(n => n.draw(g));
 
     // drawing
-    if (this.mode === "drawing" && this.status === "drawing") {
+    if (this.mode === "draw" && this.status === "drawing") {
       if (this.mouseStartPoint && this.drawingEndPoint) {
-        
         g.drawLine(this.mouseStartPoint, this.drawingEndPoint, 2, "red");
 
-        const angle = Math.round(this.drawingEndPoint.sub(this.mouseStartPoint).angle);
-        g.drawText(angle + "˚", {
-          x: this.drawingEndPoint.x,
-          y: this.drawingEndPoint.y - 10
-        }, "red");
+        const v = Vec2.sub(this.drawingEndPoint, this.mouseStartPoint);
+        if (v.magnitude > 0) {
+          const cp = this.mouseStartPoint.add(v.mul(0.5));
+          let angle = v.angle;
+          if (angle > 90 && angle < 270) angle += 180;
+          const lenValue = Number(parseFloat(Math.round(v.magnitude * 100) / 10000).toFixed(2));
+        
+          g.pushRotation(angle, cp.x, cp.y);
+          g.drawText(lenValue + " m", new Vec2(0, -2), "black", "center", "0.7em Arial");
+          g.popTransform();
+        }
       }
     }
 
     // drawing & hover
-    if (this.mode === "drawing") {
+    if (this.mode === "draw") {
       if (this.status === "drawing" || this.status === "nothing") {
         if (this.hover) {
           if (this.hover.position) {
@@ -400,6 +427,8 @@ class WallDesigner {
     newNode.lines.push(line);
     newNode.lines.push(newLine);
 
+    newLine.update();
+
     this.nodes.push(newNode);
     this.lines.push(newLine);
 
@@ -429,7 +458,7 @@ class WallDesigner {
     const area = this.scanFromTwoNode(start, end, ss);
 
     if (area != null
-      && area.totalAngle <= ((area.polygon.length - 2) * 180) + 1
+      && area.totalAngle <= ((area.nodes.length - 2) * 180) + 1
       && !this.existedArea(area)
     ) {
       area.update();
@@ -471,7 +500,7 @@ class WallDesigner {
 
         const area = new Area();
         area.nodes = nodes;
-        area.polygon = polygon;
+        area.polygon = new Tarumae.Polygon(polygon);
         area.desc = desc;
         area.totalAngle = ss.current.totalAngle + lastAngle;
 
@@ -529,7 +558,7 @@ class WallDesigner {
       for (let i = j, k = 0; k < n2.length; i++ , k++) {
         if (i >= n1.length) i = 0;
 
-        if (n1[i] != n2[k]) {
+        if (n1[i] !== n2[k]) {
           same = false;
           break;
         }
@@ -542,7 +571,7 @@ class WallDesigner {
       for (let i = j, k = 0; k < n2.length; i-- , k++) {
         if (i < 0) i = n1.length - 1;
 
-        if (n1[i] != n2[k]) {
+        if (n1[i] !== n2[k]) {
           same = false;
           break;
         }
@@ -567,15 +596,23 @@ class WallDesigner {
   }
 
   findAreaByPosition(p) {
-
+    for (let i = 0; i < this.areas.length; i++) {
+      const area = this.areas[i];
+      if (area.polygon.containsPoint(p)) {
+        return area;
+      }
+    }
+    return null;
   }
 
   selectObject(obj, append) {
     if (!append) {
       this.deselectAllObjects();
     }
-    obj.selected = true;
-    this.selectedObjects._t_pushIfNotExist(obj);
+    if (obj) {
+      obj.selected = true;
+      this.selectedObjects._t_pushIfNotExist(obj);
+    }
     this.invalidate();
   }
 
@@ -663,7 +700,7 @@ class ScanSessionStack {
   isStartNode(node) {
     if (this.stack.length > 0) {
       if (this.stack[0].route.length > 0) {
-        return this.stack[0].route[0].id === node.id;
+        return this.stack[0].route[0] === node;
       }
     }
     return false;
@@ -686,4 +723,4 @@ class ScanSessionStack {
   }
 }
 
-export { _test_main_ };
+export {  };

@@ -83,6 +83,14 @@ Tarumae.Matrix3 = class {
 		return m;
 	}
 
+	static makeScale(x, y) {
+		const m = new Tarumae.Matrix3();
+		m.a1 = x; m.b1 = 0; m.c1 = 0;
+		m.a2 = 0; m.b2 = y; m.c2 = 0;
+		m.a3 = 0; m.b3 = 0; m.c3 = 1;
+		return m;
+	}
+
 	scale(x, y) {
 		if (x === 1 && y === 1) return this;
 	

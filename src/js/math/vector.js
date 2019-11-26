@@ -86,6 +86,10 @@ export class Vec2 {
 		return Math.sqrt(this.x * this.x + this.y * this.y);
 	}
 
+	get magnitude() {
+		return Math.sqrt(this.x * this.x + this.y * this.y);
+	}
+
 	normalize() {
 		const delta = 1 / this.length();
 		return new Vec2(this.x * delta, this.y * delta);

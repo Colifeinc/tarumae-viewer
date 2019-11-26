@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>White Screen</title>
+	<meta charset="utf-8" />
+	<link href="css/demo-fullsize.css" rel="stylesheet" type="text/css" />
+	<script src="designer.js"></script>
+	<style type="text/css">
+		.left-panel {
+			top: 0;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			margin-top: auto;
+			margin-right: auto;
+			margin-bottom: auto;
+			position: absolute;
+			width: 60px;
+			height: 400px;
+			background-color: rgba(100, 100, 100, .1);
+			padding: 20px;
+			box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, .2);
+		}
+
+		.left-panel button {
+			width: 100%;
+			height: 50px;
+			border-radius: 3px;
+			margin-bottom: 10px;
+		}
+
+		.top-menu {
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			margin-left: auto;
+			margin-right: auto;
+			margin-bottom: auto;
+			width: 400px;
+			display: inline-table;
+			position: absolute;
+			text-align: center;
+			background-color: rgba(100, 100, 100, .1);
+			padding: 10px;
+			box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, .2);
+		}
+
+		.top-menu button {
+			height: 40px;
+			border-radius: 3px;
+			margin-right: 5px;
+		}
+	</style>
+</head>
+<body>
+	<div id="canvas-container">
+	</div>
+
+	<div class="left-panel">
+		
+	</div>
+
+	<div class="top-menu">
+			<button onclick="_designer.mode = 'draw'">Draw Wall</button>
+			<button onclick="_designer.mode = 'move'">Select</button>
+			<button>Add Doors</button>
+			<button>Add Windows</button>
+		</div>
+</body>
+</html>

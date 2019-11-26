@@ -408,15 +408,14 @@ Tarumae.MathFunctions = {
     return s > 0 && t > 0 && (s + t) <= area;
   },
 
-  polygonContainsPoint: function(polygon, p) {    
+  polygonContainsPoint(polygon, p) {    
     let inside = false;
 
     for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-      const xi = polygon[i][0], yi = polygon[i][1];
-      const xj = polygon[j][0], yj = polygon[j][1];
+      const p1 = polygon[i], p2 = polygon[j];
         
-      const intersect = ((yi > p.y) != (yj > p.y))
-        && (p.x < (xj - xi) * (p.y - yi) / (yj - yi) + xi);
+      const intersect = ((p1.y > p.y) != (p2.y > p.y))
+        && (p.x < (p2.x - p1.x) * (p.y - p1.y) / (p2.y - p1.y) + p1.x);
       
       if (intersect) inside = !inside;
     }
@@ -424,7 +423,8 @@ Tarumae.MathFunctions = {
     return inside;
   },
 
-  polygonContainsRect: function(polygon, rect) {
+  // TODO: change polygon element to vec2
+  polygonContainsRect(polygon, rect) {
     return this.polygonContainsPoint(polygon, rect.topLeft)
       && this.polygonContainsPoint(polygon, rect.topRight)
       && this.polygonContainsPoint(polygon, rect.bottomLeft)

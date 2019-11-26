@@ -5,12 +5,13 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: {
-    animationDemo: "./src/js/examples/animation.js",
-    particleDemo: "./src/js/examples/particle.js",
-    modelDemo: "./src/js/examples/model.js",
-    showcaseDemo: "./src/js/examples/showcase.js",
-    shibauraDemo: "./src/js/examples/house_shibaura.js",
-    designer: "./src/js/designer/main.js",
+    // animationDemo: "./src/js/examples/animation.js",
+    // particleDemo: "./src/js/examples/particle.js",
+    // modelDemo: "./src/js/examples/model.js",
+    // showcaseDemo: "./src/js/examples/showcase.js",
+    // shibauraDemo: "./src/js/examples/house_shibaura.js",
+    // designer: "./src/js/designer/main.js",
+    designer: "./src/js/designer/space.js",
   },
   module: {
     rules: [
@@ -50,40 +51,40 @@ module.exports = {
     ]
   },
   plugins: [ 
+    // new HtmlWebpackPlugin({
+    //   inject: false,
+    //   hash: true,
+    //   template: './src/examples/animation.html',
+    //   filename: 'animation.html'
+    // }),
+    // new HtmlWebpackPlugin({
+    //   inject: false,
+    //   hash: true,
+    //   template: './src/examples/particle.html',
+    //   filename: 'particle.html'
+    // }),
+    // new HtmlWebpackPlugin({
+    //   inject: false,
+    //   hash: true,
+    //   template: './src/examples/model.html',
+    //   filename: 'model.html'
+    // }),
+    // new HtmlWebpackPlugin({
+    //   inject: false,
+    //   hash: true,
+    //   template: './src/examples/showcase.html',
+    //   filename: 'showcase.html'
+    // }),
+    // new HtmlWebpackPlugin({
+    //   inject: false,
+    //   hash: true,
+    //   template: './src/examples/house_shibaura.html',
+    //   filename: 'house_shibaura.html'
+    // }),
     new HtmlWebpackPlugin({
       inject: false,
       hash: true,
-      template: './src/examples/animation.html',
-      filename: 'animation.html'
-    }),
-    new HtmlWebpackPlugin({
-      inject: false,
-      hash: true,
-      template: './src/examples/particle.html',
-      filename: 'particle.html'
-    }),
-    new HtmlWebpackPlugin({
-      inject: false,
-      hash: true,
-      template: './src/examples/model.html',
-      filename: 'model.html'
-    }),
-    new HtmlWebpackPlugin({
-      inject: false,
-      hash: true,
-      template: './src/examples/showcase.html',
-      filename: 'showcase.html'
-    }),
-    new HtmlWebpackPlugin({
-      inject: false,
-      hash: true,
-      template: './src/examples/house_shibaura.html',
-      filename: 'house_shibaura.html'
-    }),
-    new HtmlWebpackPlugin({
-      inject: false,
-      hash: true,
-      template: './src/designer.html',
+      template: './src/examples/designer.html',
       filename: 'designer.html'
     }),
     new CopyWebpackPlugin([

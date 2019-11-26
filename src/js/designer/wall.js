@@ -92,6 +92,9 @@ class WallLine {
     this.line2Start = new Tarumae.Point();
     this.line2End = new Tarumae.Point();
 
+    this._vector = null;
+    this._vectorMagnitude = 0;
+    this._normalizedVector = null;
     this.angle = 0;
     this.mat = new Tarumae.Matrix3();
   }
@@ -101,10 +104,10 @@ class WallLine {
   }
 
   selectNode(previous) {
-    if (previous.id === this.startNode.id) {
+    if (previous === this.startNode) {
       return this.endNode;
     }
-    else if (previous.id === this.endNode.id) {
+    else if (previous === this.endNode) {
       return this.startNode;
     }
 
@@ -123,13 +126,13 @@ class WallLine {
   update() {
     if (!this.startNode || !this.endNode) return;
 
-    const y = this.endNode.position.y - this.startNode.position.y;
-    const x = this.endNode.position.x - this.startNode.position.x;
-    
-    this.angle = Math.atan2(y, x) / Math.PI * 360;
+    this._vector = Vec2.sub(this.endNode.position, this.startNode.position);
+    this._normalizedVector = this._vector.normalize();
+    this._vectorMagnitude = this._vector.magnitude;
+    this._angle = this._vector.angle;
 
-    const start = new Vec2(this.startNode.position), end = new Vec2(this.endNode.position);
-    const v = new Vec2(x, y), nor = v.normalize();
+    const start = this.startNode.position, end = this.endNode.position;
+    const nor = this._normalizedVector;
     const p1 = start.add(new Vec2(nor.y, -nor.x).mul(10));
     const p2 = end.add(new Vec2(nor.y, -nor.x).mul(10));
     const p3 = start.add(new Vec2(-nor.y, nor.x).mul(10));
@@ -146,16 +149,20 @@ class WallLine {
   }
 
   draw(g) {
-    // if (this.endNode) {
-    //   this.endNode.draw(g);
-    // }
-
     const color = this.hover ? "#0dd" : (this.selected ? "green" : "gray");
 
     g.drawLine(this.line1Start, this.line1End, 2, color);
     g.drawLine(this.line2Start, this.line2End, 2, color);
 
     g.drawLine(this.startNode.position, this.endNode.position, 5, "silver");
+
+    const cp = this.startNode.position.add(this._vector.mul(0.5));
+    let angle = this._angle;
+    if (angle > 90 && angle < 270) angle += 180;
+    const lenValue = Number(parseFloat(Math.round(this._vectorMagnitude * 100) / 10000).toFixed(2));
+    g.pushRotation(angle, cp.x, cp.y);
+    g.drawText(lenValue + " m", new Vec2(0, -2), "black", "center", "0.7em Arial");
+    g.popTransform();
   }
 
   hitTestByPosition(p) {
@@ -175,13 +182,13 @@ class Area {
 
   update() {
     // update area value
-    this.areaValue = _mf.calcPolygonArea(this.polygon);
+    this.areaValue = _mf.calcPolygonArea(this.polygon.points);
 
     // update center point
     let cp = new Vec2(0, 0);
     cp = new Vec2(0, 0);
-    this.polygon.forEach(p => cp = cp.add(p));
-    this.centerPoint = cp.div(this.polygon.length);
+    this.polygon.points.forEach(p => cp = cp.add(p));
+    this.centerPoint = cp.div(this.polygon.points.length);
   }
 }
 

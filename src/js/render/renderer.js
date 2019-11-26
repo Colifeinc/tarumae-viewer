@@ -115,7 +115,12 @@ Tarumae.Renderer = class {
 			}
 		}
 
-		this.drawingContext2D = new Tarumae.DrawingContext2D(this.canvas2d, this.ctx);
+		const dpr = this.options.renderPixelRatio || 1;
+
+		this.ctx.scale(dpr, dpr);
+		this.drawingContext2D = new Tarumae.DrawingContext2D(this.canvas2d, this.ctx, {
+			scale: { x: dpr, y: dpr }
+		});
 
 		this.currentScene = null;
 		this.current2DScene = null;
@@ -207,23 +212,16 @@ Tarumae.Renderer = class {
 	}
 
 	set2DViewport(size) {
+		const dpr = this.options.renderPixelRatio || 1;
+		
 		const canvas = this.canvas2d;
+		const rect = canvas.getBoundingClientRect();
+		// canvas.width = rect.width * dpr;
+		// canvas.height = rect.height * dpr;
+		// this.ctx.scale(dpr, dpr);
+		canvas.width = rect.width;
+		canvas.height = rect.height;
 
-		canvas.width = size.width;
-		canvas.height = size.height;
-
-		// Get the device pixel ratio, falling back to 1.
-		var dpr = this.options.renderPixelRatio || 1;
-		// Get the size of the canvas in CSS pixels.
-		var rect = canvas.getBoundingClientRect();
-		// Give the canvas pixel dimensions of their CSS
-		// size * the device pixel ratio.
-		canvas.width = rect.width * dpr;
-		canvas.height = rect.height * dpr;
-		var ctx = canvas.getContext('2d');
-		// Scale all drawing operations by the dpr, so you
-		// don't have to worry about the difference.
-		ctx.scale(dpr, dpr);
 	}
 
 	resetViewport() {
