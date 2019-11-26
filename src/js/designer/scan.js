@@ -2,6 +2,7 @@ import Tarumae from "../entry";
 import { Vec2 } from "../math/vector";
 import "../math/functions";
 import { Area } from "./floor";
+import { Array } from "core-js";
 
 const _mf = Tarumae.MathFunctions;
 
@@ -51,7 +52,6 @@ class RoomScanner {
       let desc = "";
       const polygon = [];
       const nodes = [];
-      let centerPoint = new Vec2();
 
       ss.getPath().forEach(pn => {
         desc += pn.id + "  ";
@@ -118,6 +118,40 @@ class RoomScanner {
       }
     }
     return false;
+  }
+
+  findExpandableWalls(areas) {
+    let exwalls = [];
+    areas.forEach(area => {
+      area.eachWall((n1, n2) => {
+        if (!RoomScanner.isSharedAreaWall(areas, area, n1, n2)) {
+          exwalls.push({ area, n1, n2 });
+        }
+      });
+    });
+    return exwalls;
+  }
+
+  static isSharedAreaWall(areas, currentArea, n1, n2) {
+    let shared = false;
+    for (let i = 0; i < areas.length; i++){
+      const area = areas[i];
+      if (area === currentArea) continue;
+
+      area.eachWall((w2n1, w2n2) => {
+        const ret = RoomScanner.isSameWallNodes(n1, n2, w2n1, w2n2);
+        if (ret) {
+          shared = true;
+          return true;
+        }
+      });
+    }
+    return shared;
+  }
+
+  static isSameWallNodes(w1n1, w1n2, w2n1, w2n2) {
+    return (w1n1 === w2n1 && w1n2 === w2n2)
+      || (w1n1 == w2n2 && w1n2 === w2n1);
   }
 }
 
@@ -193,4 +227,21 @@ class ScanSessionStack {
   }
 }
 
+if (!Array.prototype.any) {
+  Array.prototype.any = function(p) {
+    for (let i = 0; i < this.length; i++) {
+      if (p(this[i])) return true;
+    }
+    return false;
+  };
+}
+
+if (!Array.prototype.all) {
+  Array.prototype.all = function(p) {
+    for (let i = 0; i < this.length; i++) {
+      if (!p(this[i])) return false;
+    }
+    return true;
+  };
+}
 export { RoomScanner };

@@ -51,6 +51,9 @@ class WallDesigner {
     this.areas = [];
     this.hoverArea = null;
     this.roomScanner = new RoomScanner();
+    this.expandingWall = null;
+    this._activeWall = null;
+    this.moveStartOffset = null;
 
     this.scene.on("mousedown", e => this.mousedown(e));
     this.scene.on("mousemove", e => this.mousemove(e));
@@ -68,7 +71,7 @@ class WallDesigner {
 
   set status(v) {
     this._status = v;
-    console.log("change status to: " + v);
+    console.trace("change status to: " + v);
   }
   
   get mode() {
@@ -89,7 +92,16 @@ class WallDesigner {
       this.status = "nothing";
     }
 
-    console.log("change mode to: " + v);
+    console.trace("change mode to: " + v);
+  }
+
+  get activeWall() {
+    return this._activeWall;
+  }
+
+  set activeWall(wall) {
+    this._activeWall = wall;
+    console.trace("change active wall to: " + wall);
   }
 
   mousedown(e) {
@@ -114,6 +126,7 @@ class WallDesigner {
         case "drawing":
           {
             const fromStart = new Tarumae.Point(p.x - this.mouseStartPoint.x, p.y - this.mouseStartPoint.y);
+            
             if (this.scene.renderer.viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Shift)) {
               if (Math.abs(fromStart.x) > Math.abs(fromStart.y)) {
                 sp.y = this.mouseStartPoint.y;
@@ -140,10 +153,27 @@ class WallDesigner {
 
       if (ret) {
         if (ret.obj) {
+          if (ret.obj instanceof WallLine) {
+            this.activeWall = ret.obj;
+          }
+
           this.selectObject(ret.obj);
 
           this.mouseStartPoint = new Tarumae.Point(p);
-          this.status = "moving";
+          
+          if (ret.obj instanceof WallLine) {
+            this.moveStartOffset = Vec2.sub(p, ret.obj.startNode.position);
+          } else if (ret.obj instanceof WallNode) {
+            this.moveStartOffset = Vec2.sub(p, ret.obj.position);
+          }
+
+          if (this.scene.renderer.viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Control)) {
+            this.status = "expanding";
+            this.expandingWall = this.activeWall;
+            this.drawingEndPoint = new Vec2(p);
+          } else {
+            this.status = "moving";
+          }
         }
       }
     }
@@ -200,7 +230,7 @@ class WallDesigner {
         if (this.hover.obj) this.hover.obj.hover = false;
       }
 
-      if (ret) {        
+      if (ret) {
         if (ret.obj) {
           ret.obj.hover = true;
         }
@@ -237,20 +267,24 @@ class WallDesigner {
   drag(e) {
     const p = e.position;
 
-    if (this.status === "moving") {
-      const fromStart = new Vec2(p.x - this.mouseStartPoint.x,
-        p.y - this.mouseStartPoint.y);
-      const offset = new Vec2(e.movement);
+    if (this.mode === "move") {
+      if (this.status === "moving") {
+        const fromStart = new Vec2(p.x - this.mouseStartPoint.x, p.y - this.mouseStartPoint.y);
+        const offset = new Vec2(e.movement);
 
-      if (this.scene.renderer.viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Shift)) { 
-        if (Math.abs(fromStart.x) > Math.abs(fromStart.y)) {
-          offset.y = 0;
-        } else {
-          offset.x = 0;
+        if (this.scene.renderer.viewer.pressedKeys._t_contains(Tarumae.Viewer.Keys.Shift)) {
+          if (Math.abs(fromStart.x) > Math.abs(fromStart.y)) {
+            offset.y = 0;
+          } else {
+            offset.x = 0;
+          }
         }
-      }
 
-      this.offsetSelectedObjects(offset);
+        this.offsetSelectedObjects(offset);
+      } else if (this.status === "expanding") {
+        this.drawingEndPoint = new Vec2(p);
+        this.invalidate();
+      }
     }
   }
 
@@ -258,6 +292,34 @@ class WallDesigner {
     if (this.status === "moving") {
       this.status = "move";
 
+      this.scanRooms();
+      this.invalidate();
+    } else if (this.status === "expanding") {
+
+      const activeV = this.activeWall._vector;
+      const sv = this.drawingEndPoint.sub(this.moveStartOffset);
+      const ev = this.drawingEndPoint.add(Vec2.sub(activeV, this.moveStartOffset));
+
+      const newStartNode = new WallNode(sv);
+      const newEndNode = new WallNode(ev);
+      
+      const newLine1 = new WallLine(this.activeWall.startNode, newStartNode);
+      const newLine2 = new WallLine(newStartNode, newEndNode);
+      const newLine3 = new WallLine(newEndNode, this.activeWall.endNode);
+
+      this.activeWall.startNode.lines.push(newLine1);
+      this.activeWall.endNode.lines.push(newLine3);
+      newStartNode.lines.push(newLine1, newLine2);
+      newEndNode.lines.push(newLine2, newLine3);
+
+      newLine1.update();
+      newLine2.update();
+      newLine3.update();
+
+      this.nodes.push(newStartNode, newEndNode);
+      this.lines.push(newLine1, newLine2, newLine3);
+
+      this.status = "move";
       this.scanRooms();
       this.invalidate();
     }
@@ -333,6 +395,16 @@ class WallDesigner {
           }
         }
       }
+    }
+
+    if (this.mode === "move" && this.status === "expanding") {
+      const activeV = this.activeWall._vector;
+      const sv = this.drawingEndPoint.sub(this.moveStartOffset);
+      const ev = this.drawingEndPoint.add(Vec2.sub(activeV, this.moveStartOffset));
+        
+      g.drawLine(this.activeWall.startNode.position, sv, 2, "red");
+      g.drawLine(this.activeWall.endNode.position, ev, 2, "red");
+      g.drawLine(sv, ev, 2, "red");
     }
   }
 
@@ -444,6 +516,10 @@ class WallDesigner {
 
   scanRooms() {
     this.areas = this.roomScanner.scanAreas(this.nodes, this.lines);
+
+    // const exwalls = this.roomScanner.findExpandableWalls(this.areas);
+    // console.log(exwalls);
+    this.expandableWalls = [];
   }
 
   findItemByPosition(p) {

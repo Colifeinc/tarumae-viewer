@@ -485,6 +485,18 @@ Tarumae.Polygon = class {
 		});
 	}
 
+	eachEdge(iterator) {
+		if (!this.points || this.points.length < 2) return;
+
+		for (let i = 0; i < this.points.length - 1; i++) {
+			const ret = iterator(this.points[i], this.points[i + 1]);
+			if (ret) return;
+		}
+
+		const last1 = this.points[this.points.length - 1], last2 = this.points[0];
+		iterator(last1, last2);
+	}
+
 	containsPoint(p) {
 		if (!this._points)
 			return false;

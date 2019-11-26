@@ -13,6 +13,7 @@ class Floor {
 
 class Area {
   constructor() {
+    this.nodes = null;
     this.areaValue = 0;
     this.centerPoint = null;
   }
@@ -27,6 +28,17 @@ class Area {
     this.polygon.points.forEach(p => cp = cp.add(p));
     this.centerPoint = cp.div(this.polygon.points.length);
   }
+
+  eachWall(iterator) {
+		if (!this.nodes || this.nodes.length < 2) return;
+
+		for (let i = 0; i < this.nodes.length - 1; i++) {
+			const ret = iterator(this.nodes[i], this.nodes[i + 1]);
+			if (ret) return;
+		}
+
+		iterator(this.nodes[this.nodes.length - 1], this.nodes[0]);
+	}
 
   static isSameArea(n1, n2) {
     if (n1.length !== n2.length) return false;

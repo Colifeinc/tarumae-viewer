@@ -75,6 +75,10 @@ class WallNode {
     //   if (ret) return ret;
     // }
   }
+
+  toString() {
+    return "wall" + this.id;
+  }
 }
 
 class WallLine {
