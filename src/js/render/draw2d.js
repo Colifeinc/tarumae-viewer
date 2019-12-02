@@ -198,6 +198,11 @@ Tarumae.BBox2D = class {
 			&& p.y >= this.min.y && p.y <= this.max.y;
 	}
 
+	containsRect(rect) {
+		return rect.x >= this.min.x && rect.y >= this.min.y
+			&& rect.right < this.max.x && rect.bottom < this.max.y;
+	}
+
 	intersectsBBox2D(box2) {
 		if (this.max.x < box2.min.x) return false;
 		if (this.min.x > box2.max.x) return false;
@@ -498,13 +503,25 @@ Tarumae.Polygon = class {
 	}
 
 	containsPoint(p) {
-		if (!this._points)
+		if (!this._points) {
 			return false;
-		else if (!this.bbox.containsPoint(p))
-			return false;
-		else
-			return Tarumae.MathFunctions.polygonContainsPoint(this._points, p);
+		}
 		
+		if (!this.bbox.containsPoint(p)) {
+			return false;
+		}
+		
+		return Tarumae.MathFunctions.polygonContainsPoint(this._points, p);
+	}
+
+	containsRect(rect) {
+		if (!this._points) return false;
+
+		if (!this.bbox.containsRect(rect)) {
+			return false;
+		}
+
+		return Tarumae.MathFunctions.polygonContainsRect(this._points, rect);
 	}
 
 	distanceToPoint(p) {
