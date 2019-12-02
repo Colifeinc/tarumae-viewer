@@ -66,6 +66,8 @@ class WallDesigner {
     this.scene.on("enddrag", e => this.enddrag(e));
     this.scene.on("keydown", key => this.keydown(key));
     this.scene.on("draw", g => this.draw(g));
+
+    _create_test_room_(this);
   }
 
   get status() {
