@@ -91,9 +91,9 @@ class Room extends Draw2D.Object {
     if (window._debug) {
       if (this.area.grid) {
         for (const c of this.area.grid) {
-          const cp = c.dists.wallp * 75 + 180;
+          const cp = c.dists.wallp * 100 + 155;
           if (c.taken) cp = "0";
-          g.drawRect(c.rect, 1, "#dddddd", `rgb(${cp}, ${cp}, ${cp})`);
+          g.drawRect(c.rect, 1, "#dddddd", `rgba(${cp}, ${cp}, ${cp}, 0.5)`);
         }
       }
     }

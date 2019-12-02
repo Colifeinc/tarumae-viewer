@@ -278,10 +278,8 @@ class WallDesigner {
       this.invalidate();
     }
 
-    // update hover area
-    this.hoverArea = null;
-
-    if (this.move === "move") {
+    if (this.mode === "move") {
+      // update hover area
       this.hoverArea = this.findAreaByPosition(p);
     }
   }
@@ -373,6 +371,15 @@ class WallDesigner {
       
       case Tarumae.Viewer.Keys.Z:
         window._debug = !window._debug;
+        this.invalidate();
+        break;
+      
+      case Tarumae.Viewer.Keys.R:
+        this.nodes = [];
+        this.lines = [];
+        this.areas = [];
+        this.rooms = [];
+        this.roomHolder.objects = [];
         this.invalidate();
         break;
     }

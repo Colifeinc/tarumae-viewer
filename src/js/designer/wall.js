@@ -160,14 +160,16 @@ class WallLine {
     g.drawLine(this.line1Start, this.line1End, 2, color);
     g.drawLine(this.line2Start, this.line2End, 2, color);
 
-    g.drawLine(this.startNode.position, this.endNode.position, 5, "silver");
+    // g.drawLine(this.startNode.position, this.endNode.position, 5, "silver");
+    g.drawPolygon([this.line1Start, this.line1End, this.line2End, this.line2Start],
+      2, color, "#ddd");
 
     const cp = this.startNode.position.add(this._vector.mul(0.5));
     let angle = this._angle;
     if (angle > 90 && angle < 270) angle += 180;
     const lenValue = Number(parseFloat(Math.round(this._vectorMagnitude * 100) / 10000).toFixed(2));
     g.pushRotation(angle, cp.x, cp.y);
-    g.drawText(lenValue + " m", new Vec2(0, -2), "black", "center", "0.7em Arial");
+    g.drawText(lenValue + " m", new Vec2(0, 3), "black", "center", "0.7em Arial");
     g.popTransform();
   }
 
