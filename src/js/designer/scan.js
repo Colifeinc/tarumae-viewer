@@ -97,9 +97,7 @@ class RoomScanner {
       if (area) return area;
     }
     else if (nexts.length > 1) {
-      for (let i = 0; i < nexts.length; i++) {
-        const ni = nexts[i];
-
+      for (const ni of nexts) {
         if (ss.visitedPath(end, ni.node)) return;
 
         ss.push();
@@ -112,8 +110,8 @@ class RoomScanner {
   }
 
   existedArea(a) {
-    for (let i = 0; i < this.areas.length; i++) {
-      if (Area.isSameArea(this.areas[i].nodes, a.nodes)) {
+    for (const area of this.areas) {
+      if (Area.isSameArea(area.nodes, a.nodes)) {
         return true;
       }
     }
@@ -134,8 +132,7 @@ class RoomScanner {
 
   static isSharedAreaWall(areas, currentArea, n1, n2) {
     let shared = false;
-    for (let i = 0; i < areas.length; i++){
-      const area = areas[i];
+    for (const area of areas){
       if (area === currentArea) continue;
 
       area.eachWall((w2n1, w2n2) => {
@@ -211,8 +208,7 @@ class ScanSessionStack {
   }
 
   visitedPath(start, end) {
-    for (let i = 0; i < this.stack.length; i++) {
-      const ss = this.stack[i];
+    for (const ss of this.stack) {
       if (ss.lines[start.id] === end.id) {
         return true;
       }
@@ -244,4 +240,5 @@ if (!Array.prototype.all) {
     return true;
   };
 }
+
 export { RoomScanner };

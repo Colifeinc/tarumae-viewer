@@ -4,12 +4,12 @@ import "../scene/viewer";
 import "../utility/archive";
 import "../utility/res";
 import { Vec2 } from "../math/vector";
-import Drawing2D from "../draw/scene2d";
+import Draw2D from "../draw/scene2d";
 import { WallNode, WallLine } from "./wall";
 import { RoomScanner } from "./scan";
 import { _create_test_room_ } from "./test";
 import { Area } from "./floor";
-import { autoLayout } from "./autolayout";
+import { LayoutGenerator } from "./autolayout";
 
 const _mf = Tarumae.MathFunctions;
 
@@ -22,7 +22,7 @@ window.addEventListener("load", function() {
     renderPixelRatio: window.devicePixelRatio,
   });
 
-  _scene = new Drawing2D.Scene2D();
+  _scene = new Draw2D.Scene2D();
   _scene.renderer = renderer;
   _scene.show();
 
@@ -37,7 +37,7 @@ class WallDesigner {
     this.enabled = false;
     this.gridSize = 20;
 
-    this._mode = "draw";
+    this._mode = "move";
     this._status = "nothing";
 
     this.hover = null;
@@ -49,7 +49,6 @@ class WallDesigner {
     this.lines = [];
     this.hotDockStart = null;
     this.selectedObjects = [];
-    // this.drawingStartNode = null;
     this.rooms = [];
     this.areas = [];
     this._hoverArea = null;
@@ -57,6 +56,14 @@ class WallDesigner {
     this.expandingWall = null;
     this._activeWall = null;
     this.moveStartOffset = null;
+    this.layoutGenerator = new LayoutGenerator(this);
+    
+    this.ground = new Ground(this);
+    this.ground.size = new Tarumae.Size(this.scene.renderer.renderSize);
+    this.scene.add(this.ground);
+
+    this.roomHolder = new RoomHolder(this);
+    this.scene.add(this.roomHolder);
 
     this.scene.on("mousedown", e => this.mousedown(e));
     this.scene.on("mousemove", e => this.mousemove(e));
@@ -281,7 +288,7 @@ class WallDesigner {
 
   mouseup(e) {
     const p = e.position;
-    console.log('mouse up');
+
     if (this.status === "moving") {
       this.status = "move";
     }
@@ -363,6 +370,11 @@ class WallDesigner {
         this.drawingEndPoint = null;
         this.invalidate();
         break;
+      
+      case Tarumae.Viewer.Keys.Z:
+        window._debug = !window._debug;
+        this.invalidate();
+        break;
     }
   }
 
@@ -376,8 +388,6 @@ class WallDesigner {
   }
 
   draw(g) {
-    this.drawGuideGrid(g);
-
     // nodes, lines and areas
     this.areas.forEach(area => area.draw(g));
     this.lines.forEach(line => line.draw(g));
@@ -421,30 +431,6 @@ class WallDesigner {
       g.drawLine(this.activeWall.startNode.position, sv, 2, "red");
       g.drawLine(this.activeWall.endNode.position, ev, 2, "red");
       g.drawLine(sv, ev, 2, "red");
-    }
-  }
-
-  drawGuideGrid(g) {
-    const renderWidth = this.scene.renderer.renderSize.width;
-    const renderHeight = this.scene.renderer.renderSize.height;
-
-    // small grid
-    for (let y = 0; y < renderHeight; y += this.gridSize) {
-      g.drawLine([0, y], [renderWidth, y], 1, "#eee");       
-    }
-
-    for (let x = 0; x < renderWidth; x += this.gridSize) {
-      g.drawLine([x, 0], [x, renderHeight], 1, "#eee"); 
-    }
-
-    // large grid
-
-    for (let y = 0; y < renderHeight; y += this.gridSize * 5) {
-      g.drawLine([0, y], [renderWidth, y], 2, "#ddd");
-    }
-
-    for (let x = 0; x < renderWidth; x += this.gridSize * 5) {
-      g.drawLine([x, 0], [x, renderHeight], 2, "#ddd"); 
     }
   }
 
@@ -520,9 +506,12 @@ class WallDesigner {
   scanRooms() {
     this.areas = this.roomScanner.scanAreas(this.nodes, this.lines);
 
-    this.areas.forEach(area => {
-      autoLayout(this, area);
-    });
+    this.roomHolder.objects._t_clear();
+    this.rooms = [];
+
+    for (const area of this.areas) {
+      this.layoutGenerator.autoLayout(area);
+    }
 
     // const exwalls = this.roomScanner.findExpandableWalls(this.areas);
     // console.log(exwalls);
@@ -530,20 +519,19 @@ class WallDesigner {
   }
 
   findItemByPosition(p) {
-    for (let i = 0; i < this.nodes.length; i++) {
-      const ret = this.nodes[i].hitTestByPosition(p);
+    for (const node of this.nodes) {
+      const ret = node.hitTestByPosition(p);
       if (ret) return ret;
     }
 
-    for (let i = 0; i < this.lines.length; i++) {
-      const ret = this.lines[i].hitTestByPosition(p);
+    for (const line of this.lines) {
+      const ret = line.hitTestByPosition(p);
       if (ret) return ret;
     }
   }
 
   findAreaByPosition(p) {
-    for (let i = 0; i < this.areas.length; i++) {
-      const area = this.areas[i];
+    for (const area of this.areas) {
       if (area.polygon.containsPoint(p)) {
         return area;
       }
@@ -569,8 +557,8 @@ class WallDesigner {
   }
 
   moveToSelectedObjects(p) {
-    for (let i = 0; i < this.selectedObjects.length; i++) {
-      this.moveToObject(this.selectedObjects[i], p);
+    for (const obj of this.selectedObjects) {
+      this.moveToObject(obj, p);
     }
   }
 
@@ -580,8 +568,8 @@ class WallDesigner {
   }
 
   offsetSelectedObjects(offset) {
-    for (let i = 0; i < this.selectedObjects.length; i++) {
-      this.offsetObject(this.selectedObjects[i], offset);
+    for (const obj of this.selectedObjects) {
+      this.offsetObject(obj, offset);
     }
   }
 
@@ -597,8 +585,7 @@ class WallDesigner {
   }
 
   findArea(nodeList) {
-    for (let i = 0; i < this.areas.length; i++) {
-      const area = this.areas[i];
+    for (const area of this.areas) {
       if (Area.isSameArea(area.nodes, nodeList)) {
         return area;
       }
@@ -606,5 +593,42 @@ class WallDesigner {
   }
 }
 
+class Ground extends Draw2D.Object {
+  constructor(designer) {
+    super();
+
+    this.designer = designer;
+  }
+
+  draw(g) { 
+    const width = this.size.width;
+    const height = this.size.height;
+    const gridSize = this.designer.gridSize;
+
+    for (let y = 0; y < height; y += gridSize) {
+      if ((y % 50) === 0) {
+        g.drawLine([0, y], [width, y], 2, "#ddd");
+      } else {
+        g.drawLine([0, y], [width, y], 1, "#eee");
+      }
+    }
+
+    for (let x = 0; x < width; x += gridSize) {
+      if ((x % 50) == 0) {
+        g.drawLine([x, 0], [x, height], 2, "#ddd");
+      } else {
+        g.drawLine([x, 0], [x, height], 1, "#eee");
+      }
+    }
+  }
+}
+
+class RoomHolder extends Draw2D.Object {
+  constructor(designer) { 
+    super();
+
+    this.designer = designer;
+  }
+}
 
 export {  };

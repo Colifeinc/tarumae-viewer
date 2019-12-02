@@ -20,8 +20,7 @@ class WallNode {
     let nodes = [];
     const edge1 = this.position.sub(previous.position);
 
-    for (let i = 0; i < this.lines.length; i++) {
-      const l = this.lines[i];
+    for (const l of this.lines) {
       const next = l.selectNode(this);
       
       if (next.id !== previous.id) {
@@ -42,8 +41,8 @@ class WallNode {
     this.position.x += offset.x;
     this.position.y += offset.y;
 
-    for (let i = 0; i < this.lines.length; i++) {
-      this.lines[i].update();
+    for (const line of this.lines) {
+      line.update();
     }
   }
 
@@ -51,16 +50,16 @@ class WallNode {
     this.position.x = p.x;
     this.position.y = p.y;
 
-    for (let i = 0; i < this.lines.length; i++) {
-      this.lines[i].update();
+    for (const line of this.lines) {
+      line.update();
     }
   }
 
   draw(g) {
     g.drawPoint(this.position, 15, "transparent", this.hover ? "#0dd" : ( this.selected ? "green" : "silver"));
 
-    // for (let i = 0; i < this.lines.length; i++) {
-    //   this.lines[i].draw(g);
+    // for (const line of this.lines) {
+    //   line.draw(g);
     // }
   }
 

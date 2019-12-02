@@ -55,10 +55,7 @@ Tarumae.Designer = class {
   }
 };
 
-const AutoFloor = {
-};
-
-AutoFloor.LayoutDesigner = class {
+class LayoutDesigner {
 
   constructor(renderer) {
     this.renderer = renderer;
@@ -114,19 +111,17 @@ AutoFloor.LayoutDesigner = class {
     //   ],
     // };
 
+    // this.viewport = {
+    //   origin: new Vec2(200, 200),
+    //   scale: 2,
+    // };
     this.viewport = {
       origin: new Vec2(200, 200),
-      scale: 2,
+      scale: 1,
     };
-    // this.viewport = {
-    //   origin: new Vec2(0, 0),
-    //   scale: 1,
-    // };
 
-    // this._obj_test();
-
-    // this.createLayout(this.data);
-    // this.autoLayout();
+    this.createLayout(this.data);
+    this.autoLayout();
 
     // this.generateInterior();
 
@@ -493,7 +488,7 @@ window.addEventListener("load", function() {
   // const designer = new Tarumae.Designer(renderer);
   // designer.show();
 
-  const designer = new AutoFloor.LayoutDesigner(renderer);
+  const designer = new LayoutDesigner(renderer);
   designer.show();
   
 });

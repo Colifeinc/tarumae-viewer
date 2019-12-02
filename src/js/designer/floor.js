@@ -1,6 +1,6 @@
 import Tarumae from "../entry";
-import { Vec2 } from "../math/vector";
 import "../math/functions";
+import Draw2D from "../draw/scene2d";
 
 const _mf = Tarumae.MathFunctions;
 
@@ -15,18 +15,12 @@ class Area {
   constructor() {
     this.nodes = null;
     this.areaValue = 0;
-    this.centerPoint = null;
+    this.objects = [];
   }
 
   update() {
     // update area value
     this.areaValue = _mf.calcPolygonArea(this.polygon.points) / 10000;
-
-    // update center point
-    let cp = new Vec2(0, 0);
-    cp = new Vec2(0, 0);
-    this.polygon.points.forEach(p => cp = cp.add(p));
-    this.centerPoint = cp.div(this.polygon.points.length);
   }
 
   eachWall(iterator) {
@@ -47,17 +41,8 @@ class Area {
   }
 
   draw(g) {
-    g.drawPolygon(this.polygon.points, 0, null, this.hover ? '#ddddee' : '#ffffee');
-
-    if (this.grid) {
-      for (const gr of this.grid) {
-        const cp = gr.dists.wallp * 100 + 155;
-        g.drawRect(gr.rect, 1, "#dddddd", `rgb(${cp}, ${cp}, ${cp})`);
-      }
-    }
-
     g.drawText("Untitled space\n" + Math.round(this.areaValue) + " m²",
-      this.centerPoint, this.hover ? "red" : "black", "center", "14px Arial");
+      this.polygon.bbox.origin, this.hover ? "red" : "black", "center", "14px Arial");
   }
 
   static isSameArea(nl1, nl2) {
@@ -95,4 +80,24 @@ class Area {
   }
 }
 
-export { Floor, Area };
+class Room extends Draw2D.Object {
+  constructor() {
+    super();
+  }
+
+  draw(g) {
+    g.drawPolygon(this.area.polygon.points, 0, null, this.area.hover ? '#ddddee' : '#ffffee');
+
+    if (window._debug) {
+      if (this.area.grid) {
+        for (const c of this.area.grid) {
+          const cp = c.dists.wallp * 75 + 180;
+          if (c.taken) cp = "0";
+          g.drawRect(c.rect, 1, "#dddddd", `rgb(${cp}, ${cp}, ${cp})`);
+        }
+      }
+    }
+  }
+}
+
+export { Floor, Area, Room };

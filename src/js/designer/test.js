@@ -1,25 +1,25 @@
 import { WallNode, WallLine } from "./wall";
 import { Vec2 } from "../math/vector";
-import { autoLayout } from "./autolayout";
+import { LayoutGenerator } from "./autolayout";
 
 let de = null;
 
 function _create_test_room_(designer) {
   de = designer;
 
-  const n1 = newNode(300, 200);
-  const n2 = newNode(800, 200);
-  const n3 = newNode(800, 500);
-  const n4 = newNode(300, 500);
+  const n1 = newNode(200, 200);
+  const n2 = newNode(1200, 200);
+  const n3 = newNode(1200, 500);
+  const n4 = newNode(200, 500);
 
   newRoom(n1, n2, n3, n4);
 
   de.scanRooms();
 
-  const area1 = de.findArea([n1, n2, n3, n4]);
-  if (area1) {
-    autoLayout(de, area1);
-  }
+  // const area1 = de.findArea([n1, n2, n3, n4]);
+  // if (area1) {
+  //   this.layoutGenerator.autoLayout(area1);
+  // }
 }
 
 function newNode(x, y) {

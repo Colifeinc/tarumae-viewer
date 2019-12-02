@@ -51,7 +51,7 @@ Tarumae.Size = class {
 				break;
 
 			case 1:
-				var obj = arguments;
+				var obj = arguments[0];
 				if (typeof obj === "object") {
 					this.width = obj.width;
 					this.height = obj.height;
@@ -67,6 +67,10 @@ Tarumae.Size = class {
 	
 	clone() {
 		return new Tarumae.Size(this.width, this.height);
+	}
+
+	mul(s) {
+		return new Tarumae.Size(this.width * s, this.height * s);
 	}
 
 	toArray() {
@@ -113,8 +117,15 @@ Tarumae.BBox2D = class {
 	}
 
 	get size() {
-		return new Tarumae.Size(this.max.x - this.min.x,
-			this.max.y - this.min.y);
+		return new Tarumae.Size(this.width, this.height);
+	}
+
+	get width() {
+		return this.max.x - this.min.x;
+	}
+
+	get height() {
+		return this.max.y - this.min.y;
 	}
 
 	get origin() {
@@ -170,6 +181,7 @@ Tarumae.BBox2D = class {
 		}
 	}
 
+	// FIXME: change to Vec2 element
 	updateFromPolygon(p) {
 		if (p.length <= 0) {
 			throw new Error("polygon doesn't contain any points");

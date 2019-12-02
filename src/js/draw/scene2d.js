@@ -471,15 +471,9 @@ Draw2D.Object = class {
 
   update() {
     this.updateTransform();
-    
-    for (const child of this.objects) {
-      child.updateBoundingBox();
-    }
-   
+    this.updateChildren();
     this.updateBoundingBox();
     this.updateWorldBoundingBox();
-    
-    this.updateChildren();
   }
 
   updateTransform() {
@@ -526,7 +520,8 @@ Draw2D.Object = class {
     const p3 = new Vec2(this.bbox.max.x, this.bbox.max.y).mulMat(t);
     const p4 = new Vec2(this.bbox.min.x, this.bbox.max.y).mulMat(t);
 
-    this.bounds.points = [[p1.x, p1.y], [p2.x, p2.y], [p3.x, p3.y], [p4.x, p4.y]];
+    this.bounds.points = [new Vec2(p1.x, p1.y), new Vec2(p2.x, p2.y),
+      new Vec2(p3.x, p3.y), new Vec2(p4.x, p4.y)];
     this.wbbox = this.bounds.bbox;
   }
 
