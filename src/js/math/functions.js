@@ -340,10 +340,9 @@ Tarumae.MathFunctions = {
     let minDist = Infinity;
 
     for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-      const px1 = polygon[i][0], py1 = polygon[i][1],
-        px2 = polygon[j][0], py2 = polygon[j][1];
+      const p1 = polygon[i], p2 = polygon[j];
       
-      const dist = this.distancePointToLineSegment2DXY(p, px1, py1, px2, py2);
+      const dist = this.distancePointToLineSegment2DXYXY(p, p1.x, p1.y, p2.x, p2.y);
       if (dist < minDist) minDist = dist;
     }
 
@@ -423,7 +422,6 @@ Tarumae.MathFunctions = {
     return inside;
   },
 
-  // TODO: change polygon element to vec2
   polygonContainsRect(polygon, rect) {
     return this.polygonContainsPoint(polygon, rect.topLeft)
       && this.polygonContainsPoint(polygon, rect.topRight)

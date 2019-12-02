@@ -5,8 +5,11 @@ import "../utility/archive";
 import "../utility/res";
 import { Vec2 } from "../math/vector";
 import Drawing2D from "../draw/scene2d";
-import { WallNode, WallLine, Area } from "./wall";
+import { WallNode, WallLine } from "./wall";
 import { RoomScanner } from "./scan";
+import { _create_test_room_ } from "./test";
+import { Area } from "./floor";
+import { autoLayout } from "./autolayout";
 
 const _mf = Tarumae.MathFunctions;
 
@@ -49,7 +52,7 @@ class WallDesigner {
     // this.drawingStartNode = null;
     this.rooms = [];
     this.areas = [];
-    this.hoverArea = null;
+    this._hoverArea = null;
     this.roomScanner = new RoomScanner();
     this.expandingWall = null;
     this._activeWall = null;
@@ -70,8 +73,10 @@ class WallDesigner {
   }
 
   set status(v) {
-    this._status = v;
-    console.trace("change status to: " + v);
+    if (this._status !== v) {
+      this._status = v;
+      console.debug("change status to: " + v);
+    }
   }
   
   get mode() {
@@ -79,20 +84,22 @@ class WallDesigner {
   }
 
   set mode(v) {
-    this._mode = v;
+    if (this._mode !== v) {
+      this._mode = v;
     
-    if (this._mode !== "draw") {
-      this.hover = null;
-      this.status = "nothing";
-      this.drawingEndPoint = null;
-      this.invalidate();
-    }
+      if (this._mode !== "draw") {
+        this.hover = null;
+        this.status = "nothing";
+        this.drawingEndPoint = null;
+        this.invalidate();
+      }
     
-    if (this._mode === "draw") {
-      this.status = "nothing";
-    }
+      if (this._mode === "draw") {
+        this.status = "nothing";
+      }
 
-    console.trace("change mode to: " + v);
+      console.debug("change mode to: " + v);
+    }
   }
 
   get activeWall() {
@@ -100,8 +107,23 @@ class WallDesigner {
   }
 
   set activeWall(wall) {
-    this._activeWall = wall;
-    console.trace("change active wall to: " + wall);
+    if (this._activeWall !== wall) {
+      this._activeWall = wall;
+      console.debug("change active wall to: " + wall);
+    }
+  }
+  
+  get hoverArea() {
+    return this._hoverArea;
+  }
+
+  set hoverArea(area) {
+    if (this._hoverArea !== area) {
+      if (this._hoverArea) this._hoverArea.hover = false;
+      this._hoverArea = area;
+      if (this._hoverArea) this._hoverArea.hover = true;
+      this.invalidate();
+    }
   }
 
   mousedown(e) {
@@ -208,17 +230,19 @@ class WallDesigner {
       }
 
       if (this.status === "drawing" || this.status === "nothing") {
-        this.hover = null;
 
         const ret = this.findItemByPosition(this.positionSnapToGrid(p));
 
         if (this.mode === "draw") {
+          this.hover = null;
+
           if (ret) {
             this.hover = ret;
           }
-        }
 
-        this.invalidate();
+          // FIXME: improve redraw timing
+          this.invalidate();
+        }
       }
     }
 
@@ -248,7 +272,7 @@ class WallDesigner {
     // update hover area
     this.hoverArea = null;
 
-    if (this.status !== "drawing") {
+    if (this.move === "move") {
       this.hoverArea = this.findAreaByPosition(p);
     }
   }
@@ -307,11 +331,6 @@ class WallDesigner {
       const newLine2 = new WallLine(newStartNode, newEndNode);
       const newLine3 = new WallLine(newEndNode, this.activeWall.endNode);
 
-      this.activeWall.startNode.lines.push(newLine1);
-      this.activeWall.endNode.lines.push(newLine3);
-      newStartNode.lines.push(newLine1, newLine2);
-      newEndNode.lines.push(newLine2, newLine3);
-
       newLine1.update();
       newLine2.update();
       newLine3.update();
@@ -357,15 +376,10 @@ class WallDesigner {
   draw(g) {
     this.drawGuideGrid(g);
 
-    // rooms
-    this.areas.forEach(area => {
-      g.drawPolygon(area.polygon.points, 0, "transparent", this.hoverArea===area?'#ddddee': '#ffffee');
-      g.drawText(Math.round(area.areaValue / 10000) + " m²", area.centerPoint, "#000000", "center", "14px Arial");
-    });
-
-    // walls
-    this.lines.forEach(l => l.draw(g));
-    this.nodes.forEach(n => n.draw(g));
+    // nodes, lines and areas
+    this.areas.forEach(area => area.draw(g));
+    this.lines.forEach(line => line.draw(g));
+    this.nodes.forEach(node => node.draw(g));
 
     // drawing
     if (this.mode === "draw" && this.status === "drawing") {
@@ -473,9 +487,6 @@ class WallDesigner {
     }
 
     const wallLine = new WallLine(startNode, endNode);
-    startNode.lines.push(wallLine);
-    endNode.lines.push(wallLine);
-    
     wallLine.update();
     this.lines.push(wallLine);
 
@@ -490,16 +501,10 @@ class WallDesigner {
     const newNode = new WallNode(position);
     const newLine = new WallLine(newNode, line.endNode);
     
-    // existing line
+    // modify existing line
     line.endNode.lines._t_remove(line);
     line.endNode = newNode;
-
-    // new line
-    newLine.endNode.lines.push(newLine);
-
-    // new node
     newNode.lines.push(line);
-    newNode.lines.push(newLine);
 
     line.update();
     newLine.update();
@@ -510,12 +515,12 @@ class WallDesigner {
     return newNode;
   }
 
-  updateWallOutline() {
-
-  }
-
   scanRooms() {
     this.areas = this.roomScanner.scanAreas(this.nodes, this.lines);
+
+    this.areas.forEach(area => {
+      autoLayout(this, area);
+    });
 
     // const exwalls = this.roomScanner.findExpandableWalls(this.areas);
     // console.log(exwalls);
@@ -587,6 +592,15 @@ class WallDesigner {
     }
 
     this.invalidate();
+  }
+
+  findArea(nodeList) {
+    for (let i = 0; i < this.areas.length; i++) {
+      const area = this.areas[i];
+      if (Area.isSameArea(area.nodes, nodeList)) {
+        return area;
+      }
+    }
   }
 }
 

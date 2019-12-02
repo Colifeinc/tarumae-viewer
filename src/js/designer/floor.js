@@ -20,7 +20,7 @@ class Area {
 
   update() {
     // update area value
-    this.areaValue = _mf.calcPolygonArea(this.polygon.points);
+    this.areaValue = _mf.calcPolygonArea(this.polygon.points) / 10000;
 
     // update center point
     let cp = new Vec2(0, 0);
@@ -38,18 +38,38 @@ class Area {
 		}
 
 		iterator(this.nodes[this.nodes.length - 1], this.nodes[0]);
-	}
+  }
+  
+  get bounds() {
+    if (!this.polygon) return;
 
-  static isSameArea(n1, n2) {
-    if (n1.length !== n2.length) return false;
+    return this.polygon.bbox;
+  }
 
-    for (let j = 0; j < n1.length; j++) {
+  draw(g) {
+    g.drawPolygon(this.polygon.points, 0, null, this.hover ? '#ddddee' : '#ffffee');
+
+    if (this.grid) {
+      for (const gr of this.grid) {
+        const cp = gr.dists.wallp * 100 + 155;
+        g.drawRect(gr.rect, 1, "#dddddd", `rgb(${cp}, ${cp}, ${cp})`);
+      }
+    }
+
+    g.drawText("Untitled space\n" + Math.round(this.areaValue) + " m²",
+      this.centerPoint, this.hover ? "red" : "black", "center", "14px Arial");
+  }
+
+  static isSameArea(nl1, nl2) {
+    if (nl1.length !== nl2.length) return false;
+
+    for (let j = 0; j < nl1.length; j++) {
       let same = true;
 
-      for (let i = j, k = 0; k < n2.length; i++ , k++) {
-        if (i >= n1.length) i = 0;
+      for (let i = j, k = 0; k < nl2.length; i++ , k++) {
+        if (i >= nl1.length) i = 0;
 
-        if (n1[i] !== n2[k]) {
+        if (nl1[i] !== nl2[k]) {
           same = false;
           break;
         }
@@ -59,10 +79,10 @@ class Area {
 
       same = true;
 
-      for (let i = j, k = 0; k < n2.length; i-- , k++) {
-        if (i < 0) i = n1.length - 1;
+      for (let i = j, k = 0; k < nl2.length; i-- , k++) {
+        if (i < 0) i = nl1.length - 1;
 
-        if (n1[i] !== n2[k]) {
+        if (nl1[i] !== nl2[k]) {
           same = false;
           break;
         }

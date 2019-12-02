@@ -88,6 +88,9 @@ class WallLine {
     this.startNode = startNode;
     this.endNode = endNode;
 
+    startNode.lines.push(this);
+    endNode.lines.push(this);
+
     this.hover = false;
     this.selected = false;
 
