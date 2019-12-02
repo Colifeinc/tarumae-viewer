@@ -743,22 +743,30 @@ Tarumae.DrawingContext2D = class {
 	}
 
 	drawText(text, p, color, halign, font) {
-		var ctx = this.ctx;
+		const ctx = this.ctx;
 	
-		ctx.fillStyle = color || "black";
-		
-		// TODO: get text height, allow to change text font
-		ctx.font = "12px Arial";
-	
-		if (halign == "center") {
-			const size = ctx.measureText(text);
-			p = { x: p.x - size.width / 2, y: p.y };
-		}
+		ctx.fillStyle = color || "black";		
+		ctx.font = font || "12px Arial";
+		let { x, y } = p;
 
 		if (font) ctx.font = font;
 	
-		ctx.fillText(text, p.x, p.y);
-  }
+		const lines = text.split('\n');
+		const lineheight = 18;
+
+		for (var i = 0; i < lines.length; i++) {
+			const line = lines[i];
+			let lx = x;
+			
+			if (halign === "center") {
+				const size = ctx.measureText(line);
+				lx -= size.width / 2;
+			}
+			
+			ctx.fillText(line, lx, y);
+			y += lineheight;
+		}
+	}
   		
 	drawLine(from, to, strokeWidth, strokeColor) {
 		const ctx = this.ctx;
