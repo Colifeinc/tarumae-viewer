@@ -606,7 +606,7 @@ Draw2D.Image = class extends Draw2D.Rect {
   }
 
   draw(g) {
-    g.drawImage(this.rect, this.img);
+    g.drawImage(this.img, this.rect);
   }
 };
 

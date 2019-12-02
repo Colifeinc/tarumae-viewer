@@ -641,7 +641,7 @@ _s3_Class("EditorImageObject", Tarumae.EditorObject, function() {
 Tarumae.EditorImageObject.prototype.draw = function(renderer) {
   if (this.model && this.model.gizmoImage instanceof Image
   && (this.editor.displayMode & TarumaeEditor.DisplayModes.Image) === TarumaeEditor.DisplayModes.Image) {
-    renderer.drawImage(this.worldLocation, this.model.gizmoImage);
+    renderer.drawImage(this.model.gizmoImage, this.worldLocation);
   }
 };
 

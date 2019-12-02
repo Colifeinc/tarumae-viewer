@@ -765,10 +765,10 @@ Tarumae.DrawingContext2D = class {
 		}
 	}
 
-	drawImage(p, image) {
+	drawImage(image, x, y) {
 		var ctx = this.ctx;
 		
-		ctx.drawImage(image, p.x, p.y);
+		ctx.drawImage(image, x, y);
 	}
 
 	drawText(text, p, color, halign, font) {

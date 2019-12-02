@@ -1150,7 +1150,7 @@ Tarumae.Renderer = class {
 		this.drawingContext2D.drawEllipse(this.transformPoint(v), size, strokeWidth, strokeColor, fillColor);
 	};
 
-	drawImage(location, image) {
+	drawImage(image, location) {
 		var p = this.transformPoint(location);
 				
 		var x = p.x - image.width / 2;
@@ -1158,7 +1158,7 @@ Tarumae.Renderer = class {
 				
 		if (x >= 0 && y >= 0
 			&& x < this.renderSize.width && y < this.renderSize.height) {
-			return this.drawingContext2D.drawImage({ x: x, y: y }, image);
+			return this.drawingContext2D.drawImage(image, { x: x, y: y });
 		}
 	};
 		
