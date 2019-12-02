@@ -250,8 +250,8 @@ class RoundRestTableGroup extends InteriorObject {
     for (let i = 0; i < this.seats; i++) {
       const chair = new Chair();
       const angle = i * segAngle;
-      chair.origin.set(Math.sin(_mf.angleToDegree(angle)) * this.tableRadius * 0.5,
-        Math.cos(_mf.angleToDegree(angle)) * this.tableRadius * 0.5);
+      chair.origin.set(Math.sin(_mf.angleToDegree(angle)) * this.tableRadius * 0.6,
+        Math.cos(_mf.angleToDegree(angle)) * this.tableRadius * 0.6);
       chair.angle = (180 - angle);
       this.chairs.push(chair);
       this.add(chair);
