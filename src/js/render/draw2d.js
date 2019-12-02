@@ -582,13 +582,13 @@ Tarumae.DrawingContext2D = class {
 	
 		strokeWidth = strokeWidth || this.strokeWidth || 1;
 		strokeColor = strokeColor || this.strokeColor || "black";
-		fillColor = fillColor || this.fillColor;
+		// fillColor = fillColor || this.fillColor;
 
 		// ctx.beginPath();
 
-		ctx.fillStyle = fillColor;
 		if (fillColor) {
-				ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
+			ctx.fillStyle = fillColor;
+			ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
 		}
 		
 		if (typeof strokeWidth !== "undefined") {
