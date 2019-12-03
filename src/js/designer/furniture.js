@@ -1,48 +1,9 @@
 import Tarumae from "../entry";
 import Draw2D from "../draw/scene2d";
 import { Vec2 } from "../math/vector";
+import { LayoutObject } from "./intbase";
 
 const _mf = Tarumae.MathFunctions;
-
-class LayoutObject extends Draw2D.Object {
-  constructor() {
-    super();
-    
-    this.style.strokeColor = "gray";
-
-    this.draggable = true;
-  }
-
-  drawDimension(g, x, y) {
-    const w = this.size.width, h = this.size.height;
-    g.drawText(`${w * 20} mm x ${h * 20} mm`, { x, y }, "black", "center", "0.3em Arial");
-  }
-
-  pointToObject(p) {
-    p = new Vec2((p.x - 200) * 0.5, (p.y - 200) * 0.5);
-    return super.pointToObject(p);
-  }
-
-  mouseenter(e) {
-    this.style.strokeWidth = 4;
-    this.style.strokeColor = "orangered";
-    e.requireUpdateFrame();
-  }
-
-  mouseout(e) {
-    this.style.strokeWidth = 3;
-    this.style.strokeColor = "gray";
-    e.requireUpdateFrame();
-  }
-
-  drag(e) {
-    if (!this.draggable) return;
-
-    this.offset(e.movement);
-
-    e.requireUpdateFrame();
-  }
-}
 
 class InteriorObject extends LayoutObject {
   constructor() {

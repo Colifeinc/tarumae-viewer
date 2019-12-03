@@ -178,23 +178,29 @@ Draw2D.Scene2D = class {
 
   drag() {
     const evtArg = this.createEventArgument(this.dragObject);
+    let isProcessed = false;
 
     if (this.dragObject) {
-      this.dragObject.drag(evtArg);
+      isProcessed = this.dragObject.drag(evtArg);
       this.requireUpdateFrame();
     }
+
+    if (isProcessed) return;
 
     this.ondrag(evtArg);
   }
 
   enddrag() {
     const evtArg = this.createEventArgument(this.dragObject);
-    
+    let isProcessed = false;
+
     if (this.dragObject) {
-      this.dragObject.enddrag(evtArg);
+      isProcessed = this.dragObject.enddrag(evtArg);
       this.dragObject = null;
       this.requireUpdateFrame();
     }
+
+    if (isProcessed) return;
     
     this.onenddrag(evtArg);
   }

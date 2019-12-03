@@ -57,6 +57,8 @@ class WallDesigner {
     this._activeWall = null;
     this.moveStartOffset = null;
     this.layoutGenerator = new LayoutGenerator(this);
+    this.doors = [];
+    this.wallAssets = [];
     
     this.ground = new Ground(this);
     this.ground.size = new Tarumae.Size(this.scene.renderer.renderSize);
@@ -64,6 +66,12 @@ class WallDesigner {
 
     this.roomHolder = new RoomHolder(this);
     this.scene.add(this.roomHolder);
+
+    this.wallHolder = new WallHolder(this);
+    this.scene.add(this.wallHolder);
+
+    this.doorHolder = new Draw2D.Object();
+    this.scene.add(this.doorHolder);
 
     this.scene.on("mousedown", e => this.mousedown(e));
     this.scene.on("mousemove", e => this.mousemove(e));
@@ -395,10 +403,6 @@ class WallDesigner {
   }
 
   draw(g) {
-    // nodes, lines and areas
-    this.areas.forEach(area => area.draw(g));
-    this.lines.forEach(line => line.draw(g));
-    this.nodes.forEach(node => node.draw(g));
 
     // drawing
     if (this.mode === "draw" && this.status === "drawing") {
@@ -525,12 +529,22 @@ class WallDesigner {
     this.expandableWalls = [];
   }
 
+  // FIXME: rename method
   findItemByPosition(p) {
+    const ret = this.findWallNodeByPosition(p);
+    if (ret) return ret;
+    
+    return this.findWallLineByPosition(p);
+  }
+
+  findWallNodeByPosition(p) {
     for (const node of this.nodes) {
       const ret = node.hitTestByPosition(p);
       if (ret) return ret;
     }
+  }
 
+  findWallLineByPosition(p) {
     for (const line of this.lines) {
       const ret = line.hitTestByPosition(p);
       if (ret) return ret;
@@ -581,13 +595,7 @@ class WallDesigner {
   }
 
   offsetObject(obj, offset) {
-    if (obj instanceof WallNode) {
-      obj.offset(offset);
-    } else if (obj instanceof WallLine) {
-      obj.startNode.offset(offset);
-      obj.endNode.offset(offset);
-    }
-
+    obj.offset(offset);
     this.invalidate();
   }
 
@@ -635,6 +643,20 @@ class RoomHolder extends Draw2D.Object {
     super();
 
     this.designer = designer;
+  }
+}
+
+class WallHolder extends Draw2D.Object {
+  constructor(designer) {
+    super();
+    this.designer = designer;
+  }
+
+  draw(g) {
+    // nodes, lines and areas
+    this.designer.areas.forEach(area => area.draw(g));
+    this.designer.lines.forEach(line => line.draw(g));
+    this.designer.nodes.forEach(node => node.draw(g));
   }
 }
 

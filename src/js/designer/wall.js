@@ -1,5 +1,7 @@
 import Tarumae from "../entry";
 import { Vec2 } from "../math/vector";
+import Draw2D from "../draw/scene2d";
+import { LayoutObject } from "./intbase";
 
 const _mf = Tarumae.MathFunctions;
 
@@ -90,6 +92,8 @@ class WallLine {
     startNode.lines.push(this);
     endNode.lines.push(this);
 
+    this.width = 20;
+
     this.hover = false;
     this.selected = false;
 
@@ -103,6 +107,8 @@ class WallLine {
     this._normalizedVector = null;
     this.angle = 0;
     this.mat = new Tarumae.Matrix3();
+
+    this.objects = [];
   }
 
   getVector() {
@@ -121,12 +127,15 @@ class WallLine {
   }
 
   moveTo(p) {
-    const diff = new Tarumae.Point(
-      p.x - this.startNode.position.x,
-      p.y - this.startNode.position.y);
-    
-    this.startNode.offset(diff);
-    this.endNode.offset(diff);
+    this.startNode.moveTo(diff);
+    this.endNode.moveTo(diff);
+  }
+
+  // FIXME: stop use offset to move objects
+  offset(off) {
+    this.startNode.offset(off);
+    this.endNode.offset(off);
+    this.objects.forEach(o => o.offset(off));
   }
 
   update() {
@@ -139,10 +148,11 @@ class WallLine {
 
     const start = this.startNode.position, end = this.endNode.position;
     const nor = this._normalizedVector;
-    const p1 = start.add(new Vec2(nor.y, -nor.x).mul(10));
-    const p2 = end.add(new Vec2(nor.y, -nor.x).mul(10));
-    const p3 = start.add(new Vec2(-nor.y, nor.x).mul(10));
-    const p4 = end.add(new Vec2(-nor.y, nor.x).mul(10));
+    const halfWidth = this.width * 0.5;
+    const p1 = start.add(new Vec2(nor.y, -nor.x).mul(halfWidth));
+    const p2 = end.add(new Vec2(nor.y, -nor.x).mul(halfWidth));
+    const p3 = start.add(new Vec2(-nor.y, nor.x).mul(halfWidth));
+    const p4 = end.add(new Vec2(-nor.y, nor.x).mul(halfWidth));
 
     this.line1Start.x = p1.x;
     this.line1Start.y = p1.y;
@@ -180,6 +190,129 @@ class WallLine {
       return { obj: this, position: { x: test.x, y: test.y } };
     }
   }
+
+  add(obj) {
+    obj.wall = this;
+    this.objects.push(obj);
+  }
+
+  remove(obj) {
+    obj.wall = null;
+    this.objects._t_remove(obj);
+  }
 }
 
-export { WallLine, WallNode };
+class WallChildObject extends LayoutObject {
+  constructor(width = 80) {
+    super();
+    this._wall = null;
+
+    this.width = width;
+    this.line = new Tarumae.LineSegment2D();
+
+    this.designer = null;
+  }
+
+  get wall() {
+    return this._wall;
+  }
+
+  set wall(wall) {
+    this._wall = wall;
+    this.angle = this._wall._angle;
+    this.size = new Tarumae.Size(this.width, this.wall.width);
+    this.update();
+  }
+
+  updateBoundingBox() {
+    if (this.wall) {
+      const angle = this.wall._angle;
+
+      const m = Tarumae.Matrix3.makeRotation(angle);
+      const hw = this.size.width * 0.5, hh = this.wall.width * 0.5;
+    
+      this.line.start = new Vec2(-hw, 0).mulMat(m);
+      this.line.end = new Vec2(hw, 0).mulMat(m);
+
+      const v1 = new Vec2(-hw, -hh).mulMat(m);
+      const v2 = new Vec2(hw, hh).mulMat(m);
+
+      this.bbox.min.x = Math.min(v1.x, v2.x);
+      this.bbox.min.y = Math.min(v1.y, v2.y);
+      this.bbox.max.x = Math.max(v1.x, v2.x);
+      this.bbox.max.y = Math.max(v1.y, v2.y);
+    }
+  }
+
+  drag(e) {
+    if (this.designer) {
+      // const p = this.pointToObject(e.position);
+
+      const ret = this.designer.findWallLineByPosition(e.position);
+
+      if (ret && ret.obj) {
+        const wall = ret.obj;
+        if (this.wall !== wall) {
+          this.wall = wall;
+        }
+
+        this.origin.set(ret.position);
+        this.update();
+        e.requireUpdateFrame();
+      }
+    }
+    
+    return true;
+  }
+
+  enddrag(e) {
+    if (this.designer) {
+      e.requireUpdateFrame();
+    }
+
+    return true;
+  }
+}
+
+class Door extends WallChildObject {
+  constructor(width = 80, dir = 0, type = "one_side") {
+    super(width);
+
+    this.style.strokeWidth = 3;
+
+    this.dir = dir;
+    this.type = type;
+  }
+
+  render(g) {
+    super.render(g);
+    // g.drawLine(this.line.start, this.line.end, 4, "red");
+    // g.drawLine({ x: this.bbox.minx, y: this.bbox.miny },
+    //   { x: this.bbox.maxx, y: this.bbox.maxy }, 4, "red");
+  }
+
+  draw(g) {
+    if (this.wall) {
+      const w = this.size.width, hw = w * 0.5, h = this.wall.width, hh = h * 0.5;
+
+      switch (this.type) {
+        case "one_side":
+          defaut:
+          g.drawRect(new Tarumae.Rect(-hw, -hh, w, h), this.style.strokeWidth, this.style.strokeColor, "white");
+          g.drawArc(new Tarumae.Rect(hw, hh, w, h), 90, 180);
+          break;
+        
+        case "one_slide":
+          g.drawRect(new Tarumae.Rect(-w - hw, -hh, w, h));
+          g.drawRect(new Tarumae.Rect(-hw, -hh, w, h), 0, "white");
+          g.drawLine({ x: -w - hw + 2, y: 0 }, { x: hw - 2, y: 0 }, 1);
+          g.drawLine({ x: 0, y: -hh }, { x: 0, y: hh }, 1);
+          break;
+      }
+
+      super.drawDimension(g, 0, (-hh - 3));
+    }
+  }
+}
+
+export { WallLine, WallNode, Door };

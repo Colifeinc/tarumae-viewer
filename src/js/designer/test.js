@@ -1,4 +1,4 @@
-import { WallNode, WallLine } from "./wall";
+import { WallNode, WallLine, Door } from "./wall";
 import { Vec2 } from "../math/vector";
 import { LayoutGenerator } from "./autolayout";
 
@@ -20,6 +20,14 @@ function _create_test_room_(designer) {
   // if (area1) {
   //   this.layoutGenerator.autoLayout(area1);
   // }
+
+  const door = new Door();
+  door.designer = de;
+  door.origin.set(500, 200);
+  door.wall = de.lines[0];
+  
+  de.doors.push(door);
+  de.doorHolder.add(door);
 }
 
 function newNode(x, y) {
