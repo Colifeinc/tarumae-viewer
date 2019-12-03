@@ -129,7 +129,7 @@ class LayoutGenerator {
   }
 
   putInterior(room, obj) {
-    const objSize = obj.size;
+    const objSize = obj.wbbox.size;
     const cw = Math.ceil(objSize.width / gridSize);
     const ch = Math.ceil(objSize.height / gridSize);
 
