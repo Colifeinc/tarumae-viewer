@@ -133,7 +133,10 @@ class LayoutGenerator {
     const cw = Math.ceil(objSize.width / gridSize);
     const ch = Math.ceil(objSize.height / gridSize);
 
-    const list = this.findAvailableSpace(room.area, cw, ch);
+    const list = this.findAvailableSpace(room.area, cw, ch,
+      scores => {
+        return scores.doorp * scores.doorp + (1 - scores.windowp);
+      });
 
     if (list.length > 0) {
       list.sort((a, b) => b.scores.work - a.scores.work);
@@ -164,7 +167,7 @@ class LayoutGenerator {
     this.designer.invalidate();
   }
 
-  findAvailableSpace(area, cw, ch) {
+  findAvailableSpace(area, cw, ch, scoreCalculator) {
    
     const poslist = [];
     const needrun = cw * ch;
@@ -189,8 +192,7 @@ class LayoutGenerator {
             break;
           }
 
-          // workscore += c.dists.doorp * c.dists.doorp + (1 - c.dists.windowp);
-          workscore += (cell.dists.wallp);
+          workscore += scoreCalculator(cell.dists);
           
           runs++;
         }
