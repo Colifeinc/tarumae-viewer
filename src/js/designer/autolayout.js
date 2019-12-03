@@ -1,7 +1,7 @@
 import Tarumae from "../entry";
 import { TableChairSet, RoundRestTableGroup, InteriorAsset } from "./furniture";
 import { Room } from "./floor";
-import { Door } from "./wall";
+import { Door, Window } from "./wall";
 
 const _mf = Tarumae.MathFunctions;
 
@@ -82,16 +82,21 @@ class LayoutGenerator {
         if (!c.invalid) {
           cellId++;
 
+          // wall
           const wallDist = _mf.distancePointToPolygon(rect.origin, area.polygon.points);
           c.dists.wall = wallDist;
           if (wallDist > maxDists.wall) maxDists.wall = wallDist;
 
-          let minDoorDist = Infinity;
+          let minDoorDist = Infinity, minWindowDist = Infinity;
+
           for (const wall of area.lines) {
             for (const obj of wall.objects) {
               if (obj instanceof Door) {
                 const doorDist = _mf.distancePointToPoint2D(rect.origin, obj.origin);
                 if (minDoorDist > doorDist) minDoorDist = doorDist;
+              } else if (obj instanceof Window) {
+                const windowDist = _mf.distancePointToPoint2D(rect.origin, obj.origin);
+                if (minWindowDist > windowDist) minWindowDist = windowDist;
               }
             }
           }
@@ -99,6 +104,11 @@ class LayoutGenerator {
           if (minDoorDist < Infinity) {
             c.dists.door = minDoorDist;
             if (maxDists.door < minDoorDist) maxDists.door = minDoorDist;
+          }
+
+          if (minWindowDist < Infinity) {
+            c.dists.window = minWindowDist;
+            if (maxDists.window < minWindowDist) maxDists.window = minWindowDist;
           }
 
           area.grid.push(c);
@@ -119,24 +129,34 @@ class LayoutGenerator {
     for (let i = 0; i < 2; i++) {
       const horsets = 2, versets = 1, opposite = true;
       const ts = new TableChairSet(horsets, versets, opposite);
-      this.putInterior(room, ts);
+      this.putInterior(room, ts, 
+        scores => {
+          return scores.doorp * scores.doorp + (1 - scores.windowp);
+        });
     }
 
     const restTableGroup = new RoundRestTableGroup();
-    this.putInterior(room, restTableGroup);
-
-    this.putInterior(room, new InteriorAsset("print_mfp_w1500", 270, 100));
-  }
-
-  putInterior(room, obj) {
-    const objSize = obj.wbbox.size;
-    const cw = Math.ceil(objSize.width / gridSize);
-    const ch = Math.ceil(objSize.height / gridSize);
-
-    const list = this.findAvailableSpace(room.area, cw, ch,
+    this.putInterior(room, restTableGroup, 
       scores => {
         return scores.doorp * scores.doorp + (1 - scores.windowp);
       });
+
+    this.putInterior(room, new InteriorAsset("print_mfp_w1500", 220, 80));
+  }
+
+  putInterior(room, obj, scoreCalculator) {
+
+    if (typeof scoreCalculator !== "function") {
+      scoreCalculator = scores => {
+        return scores.doorp * scores.doorp + (1 - scores.windowp);
+      }
+    }
+
+    const objSize = obj.wbbox.size;
+    const cw = Math.ceil(objSize.width / gridSize) + 3;
+    const ch = Math.ceil(objSize.height / gridSize) + 2;
+
+    const list = this.findAvailableSpace(room.area, cw, ch, scoreCalculator);
 
     if (list.length > 0) {
       list.sort((a, b) => b.scores.work - a.scores.work);

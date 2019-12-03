@@ -769,10 +769,10 @@ Tarumae.DrawingContext2D = class {
 		}
 	}
 
-	drawImage(image, x, y) {
+	drawImage(image, x, y, width, height) {
 		var ctx = this.ctx;
 		
-		ctx.drawImage(image, x, y);
+		ctx.drawImage(image, x, y, width, height);
 	}
 
 	drawText(text, p, color, halign, font) {
@@ -783,19 +783,20 @@ Tarumae.DrawingContext2D = class {
 		let { x, y } = p;
 
 		if (font) ctx.font = font;
-	
+
+		if (halign === "center") {
+			ctx.textAlign = "center";
+			ctx.textBaseline = "middle";
+		}
+
 		const lines = text.split('\n');
 		const lineheight = 18;
+
 
 		for (var i = 0; i < lines.length; i++) {
 			const line = lines[i];
 			let lx = x;
-			
-			if (halign === "center") {
-				const size = ctx.measureText(line);
-				lx -= size.width / 2;
-			}
-			
+		
 			ctx.fillText(line, lx, y);
 			y += lineheight;
 		}

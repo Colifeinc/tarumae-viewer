@@ -179,7 +179,7 @@ class WallLine {
     if (angle > 90 && angle < 270) angle += 180;
     const lenValue = Number(parseFloat(Math.round(this._vectorMagnitude * 100) / 10000).toFixed(2));
     g.pushRotation(angle, cp.x, cp.y);
-    g.drawText(lenValue + " m", new Vec2(0, 3), "black", "center", "0.7em Arial");
+    g.drawText(lenValue + " m", new Vec2(0, 0), "black", "center", "0.7em Arial");
     g.popTransform();
   }
 
@@ -230,31 +230,33 @@ class WallChildObject extends LayoutObject {
   }
   
   update() {
-    this.angle = this._wall._angle;
-    this.size = new Tarumae.Size(this.width, this.wall.width);
+    if (this._wall) {
+      this.angle = this._wall._angle;
+      this.size = new Tarumae.Size(this.width, this._wall.width);
+    }
 
     super.update();
   }
 
-  updateBoundingBox() {
-    if (this.wall) {
-      const angle = this.wall._angle;
+  // updateBoundingBox() {
+  //   if (this.wall) {
+  //     const angle = this.wall._angle;
 
-      const m = Tarumae.Matrix3.makeRotation(angle);
-      const hw = this.size.width * 0.5, hh = this.wall.width * 0.5;
+  //     const m = Tarumae.Matrix3.makeRotation(angle);
+  //     const hw = this.size.width * 0.5, hh = this.wall.width * 0.5;
     
-      this.line.start = new Vec2(-hw, 0).mulMat(m);
-      this.line.end = new Vec2(hw, 0).mulMat(m);
+  //     this.line.start = new Vec2(-hw, 0).mulMat(m);
+  //     this.line.end = new Vec2(hw, 0).mulMat(m);
 
-      const v1 = new Vec2(-hw, -hh).mulMat(m);
-      const v2 = new Vec2(hw, hh).mulMat(m);
+  //     const v1 = new Vec2(-hw, -hh).mulMat(m);
+  //     const v2 = new Vec2(hw, hh).mulMat(m);
 
-      this.bbox.min.x = Math.min(v1.x, v2.x);
-      this.bbox.min.y = Math.min(v1.y, v2.y);
-      this.bbox.max.x = Math.max(v1.x, v2.x);
-      this.bbox.max.y = Math.max(v1.y, v2.y);
-    }
-  }
+  //     this.bbox.min.x = Math.min(v1.x, v2.x);
+  //     this.bbox.min.y = Math.min(v1.y, v2.y);
+  //     this.bbox.max.x = Math.max(v1.x, v2.x);
+  //     this.bbox.max.y = Math.max(v1.y, v2.y);
+  //   }
+  // }
 
   drag(e) {
     if (this.designer) {
@@ -322,21 +324,42 @@ class Door extends WallChildObject {
           break;
       }
 
-      super.drawDimension(g, 0, (-hh - 3));
+      super.drawDimension(g, 0, (-hh - 8));
     }
   }
 
   updateBoundingBox() {
-    const w = this.size.width, hw = w * 0.5, h = this.wall.width, hh = h * 0.5;
+    if (this.wall) {
+      const w = this.size.width, hw = w * 0.5, h = this.wall.width, hh = h * 0.5;
 
-    switch (this.type) {
-      case "one_side":
-        defaut:
-        this.bbox.min.set(-hw, -hh);
-        this.bbox.max.set(hw, w);
-        break;
+      switch (this.type) {
+        case "one_side":
+          defaut:
+          this.bbox.min.set(-hw, -hh);
+          this.bbox.max.set(hw, w);
+          break;
+      }
     }
   }
 }
 
-export { WallLine, WallNode, Door };
+class Window extends WallChildObject {
+  constructor(width = 100, dir) {
+    super(width);
+    this.dir = dir;
+  }
+
+  draw(g) {
+    if (this.wall) {
+      const w = this.width, hw = w * 0.5;
+      const h = this.wall.width, hh = h * 0.5;
+
+      g.drawRect(new Tarumae.Rect(-hw, -hh, w, h), this.style.strokeWidth, this.style.strokeColor, "white");
+      g.drawRect(new Tarumae.Rect(-hw, -hh-8, w, 8), this.style.strokeWidth, this.style.strokeColor, "white");
+    }
+
+    this.drawDimension(g, 0, -27);
+  }
+}
+
+export { WallLine, WallNode, Door, Window };

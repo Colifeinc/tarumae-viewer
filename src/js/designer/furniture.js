@@ -11,17 +11,6 @@ class InteriorObject extends LayoutObject {
     
     this.style.strokeWidth = 3;
   }
-
-  render(g) {
-    super.render(g);
-
-    // debug
-    if (window._debug) {
-      if (this.bounds.points) {
-        g.drawLines(this.bounds.points, 1, "blue", "transparent");
-      }
-    }
-  }
 }
 
 class InteriorGroup extends InteriorObject {
@@ -48,14 +37,6 @@ class InteriorGroup extends InteriorObject {
       for (let i = 1; i < this.objects.length; i++) {
         this.wbbox.expendToBBox(this.objects[i].wbbox);
       }
-    }
-  }
-
-  render(g) {
-    super.render(g);
-
-    if (window._debug) {
-      g.drawRect(this.wbbox.rect, 1, "red");
     }
   }
 }
@@ -254,7 +235,8 @@ class InteriorAsset extends InteriorObject {
   }
 
   draw(g) {
-    g.drawImage(this.image, -this.size.width * 0.5, -this.size.height * 0.5);
+    g.drawImage(this.image, -this.size.width * 0.5, -this.size.height * 0.5,
+      this.size.width, this.size.height);
   }
 }
 

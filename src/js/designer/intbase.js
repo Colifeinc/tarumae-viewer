@@ -17,10 +17,14 @@ class LayoutObject extends Draw2D.Object {
   drawDimension(g, x = 0, y = 0) {
     const w = this.size.width, h = this.size.height;
 
+
+    const mat = Tarumae.Matrix3.makeRotation(this.angle);
+    const tp = new Vec2(x, y).mulMat(mat);
+
     let angle = this.angle;
     if (angle > 90 && angle < 270) angle += 180;
     g.pushRotation(angle, this.origin.x, this.origin.y);
-    g.drawText(`${w} cm x ${h} cm`, { x, y }, "black", "center", "0.7em Arial");
+    g.drawText(`${w} cm x ${h} cm`, tp, "black", "center", "0.7em Arial");
     g.popTransform();
   }
 
@@ -42,6 +46,19 @@ class LayoutObject extends Draw2D.Object {
     this.offset(e.movement);
 
     e.requireUpdateFrame();
+  }
+
+  render(g) {
+    super.render(g);
+
+    // debug
+    if (window._debug) {
+      if (this.bounds.points) {
+        g.drawLines(this.bounds.points, 1, "blue", "transparent");
+      }
+
+      g.drawRect(this.wbbox.rect, 1, "red");
+    }
   }
 
   draw(g) {

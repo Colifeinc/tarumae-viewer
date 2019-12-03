@@ -5,7 +5,7 @@ import "../utility/archive";
 import "../utility/res";
 import { Vec2 } from "../math/vector";
 import Draw2D from "../draw/scene2d";
-import { WallNode, WallLine } from "./wall";
+import { WallNode, WallLine, Door, Window } from "./wall";
 import { RoomScanner } from "./scan";
 import { _create_test_room_ } from "./test";
 import { Area } from "./floor";
@@ -72,6 +72,14 @@ class WallDesigner {
 
     this.doorHolder = new Draw2D.Object();
     this.scene.add(this.doorHolder);
+
+    this.addingDoor = new Door();
+    this.addingDoor.visible = false;
+    this.doorHolder.add(this.addingDoor);
+
+    this.addingWindow = new Window();
+    this.addingWindow.visible = false;
+    this.doorHolder.add(this.addingWindow);
 
     this.scene.on("mousedown", e => this.mousedown(e));
     this.scene.on("mousemove", e => this.mousemove(e));
@@ -284,11 +292,35 @@ class WallDesigner {
       }
 
       this.invalidate();
-    }
-
-    if (this.mode === "move") {
+  
       // update hover area
       this.hoverArea = this.findAreaByPosition(p);
+    }
+
+    if (this.mode === "addDoor") {
+      const ret = this.findWallLineByPosition(p);
+      if (ret && ret.obj) {
+        this.addingDoor.visible = true;
+        this.addingDoor.wall = ret.obj;
+        this.addingDoor.origin.set(ret.position);
+        this.addingDoor.update();
+        this.invalidate();
+      } else {
+        this.addingDoor.visible = false;
+      }
+    }
+
+    if (this.mode === "addWindow") {
+      const ret = this.findWallLineByPosition(p);
+      if (ret && ret.obj) {
+        this.addingWindow.visible = true;
+        this.addingWindow.wall = ret.obj;
+        this.addingWindow.origin.set(ret.position);
+        this.addingWindow.update();
+        this.invalidate();
+      } else {
+        this.addingWindow.visible = false;
+      }
     }
   }
 
@@ -297,6 +329,40 @@ class WallDesigner {
 
     if (this.status === "moving") {
       this.status = "move";
+    }
+
+    if (this.mode === "addDoor") {
+      const ret = this.findWallLineByPosition(p);
+      if (ret && ret.obj) {
+        const newDoor = new Door();
+        newDoor.visible = true;
+        newDoor.wall = ret.obj;
+        newDoor.designer = this;
+        newDoor.origin.set(ret.position);
+        newDoor.update();
+        this.doors.push(newDoor);
+        this.doorHolder.add(newDoor);
+
+        this.addingDoor.visible = false;
+        this.invalidate();
+      }
+    }
+    
+    if (this.mode === "addWindow") {
+      const ret = this.findWallLineByPosition(p);
+      if (ret && ret.obj) {
+        const newWindow = new Window();
+        newWindow.visible = true;
+        newWindow.wall = ret.obj;
+        newWindow.designer = this;
+        newWindow.origin.set(ret.position);
+        newWindow.update();
+        this.doors.push(newWindow);
+        this.doorHolder.add(newWindow);
+
+        this.addingWindow.visible = false;
+        this.invalidate();
+      }
     }
   }
   

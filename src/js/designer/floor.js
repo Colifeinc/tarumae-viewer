@@ -92,10 +92,10 @@ class Room extends Draw2D.Object {
     if (window._debug) {
       if (this.area.grid) {
         for (const c of this.area.grid) {
-          const cp = c.dists.doorp * 100 + 155;
+          const cp = c.dists.doorp * 200 + 55;
           if (c.taken) cp = "0";
           g.drawRect(c.rect, 1, "#dddddd", `rgba(${cp}, ${cp}, ${cp}, 0.5)`);
-          g.drawText(new String(Math.round(c.dists.door)), c.rect.origin, "balck", "center");
+          // g.drawText(new String(Math.round(c.dists.door)), c.rect.origin, "balck", "center");
         }
       }
     }
