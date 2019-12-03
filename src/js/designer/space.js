@@ -385,9 +385,12 @@ class WallDesigner {
       case Tarumae.Viewer.Keys.R:
         this.nodes = [];
         this.lines = [];
+        this.wallHolder.objects = [];
         this.areas = [];
         this.rooms = [];
         this.roomHolder.objects = [];
+        this.doors = [];
+        this.doorHolder.objects = [];
         this.invalidate();
         break;
     }

@@ -16,18 +16,18 @@ class RoomScanner {
 
     this.areas = [];
 
-    this.lines.forEach(l => this.scanFromLine(l.startNode, l.endNode));
-    this.lines.forEach(l => this.scanFromLine(l.endNode, l.startNode));
+    this.lines.forEach(l => this.scanFromLine(l.startNode, l.endNode, l));
+    this.lines.forEach(l => this.scanFromLine(l.endNode, l.startNode, l));
 
     return this.areas;
   }
 
-  scanFromLine(start, end) {
+  scanFromLine(start, end, line) {
     // skip if n1 has only one line, no closure path
     if (start.lines.length <= 1 || end.lines.length <= 1) return;
 
     const ss = new ScanSessionStack();
-    const area = this.scanFromTwoNode(start, end, ss);
+    const area = this.scanFromTwoNode(start, end, line, ss);
 
     if (area != null
       && area.totalAngle <= ((area.nodes.length - 2) * 180) + 1
@@ -35,23 +35,24 @@ class RoomScanner {
     ) {
       area.update();
       this.areas.push(area);
-      // console.debug('found area: ', area);
       return area;
     }
   }
 
-  scanFromTwoNode(start, end, ss) {
+  scanFromTwoNode(start, end, line, ss) {
     // // can remove?
     // if (ss.visitedNode(end) && !ss.isStartNode(end))
     // {
     // 	// never reached
     // 	return;
     // }
+    if (!line) debugger;
 
     if (ss.isStartNode(end)) {
       let desc = "";
       const polygon = [];
       const nodes = [];
+      const lines = [];
 
       ss.getPath().forEach(pn => {
         desc += pn.id + "  ";
@@ -62,6 +63,11 @@ class RoomScanner {
       desc += start.id;
       polygon.push(start.position);
       nodes.push(start);
+
+      for (const line of ss.getLines()) {
+        lines.push(line);
+      }
+      lines.push(line);
 
       if (nodes.length > 2) {
         const a1 = nodes[0].position.sub(start.position).angle;
@@ -74,6 +80,7 @@ class RoomScanner {
         area.polygon = new Tarumae.Polygon(polygon);
         area.desc = desc;
         area.totalAngle = ss.current.totalAngle + lastAngle;
+        area.lines = lines;
 
         return area;
       }
@@ -83,7 +90,7 @@ class RoomScanner {
       return;
     }
 
-    ss.addVisit(start, end);
+    ss.addVisit(start, end, line);
 
     const nexts = end.nextNodes(start);
 
@@ -93,7 +100,7 @@ class RoomScanner {
       if (ss.visitedPath(end, ni.node)) return;
 
       ss.current.totalAngle += ni.angle;
-      const area = this.scanFromTwoNode(end, ni.node, ss);
+      const area = this.scanFromTwoNode(end, ni.node, ni.line, ss);
       if (area) return area;
     }
     else if (nexts.length > 1) {
@@ -102,7 +109,7 @@ class RoomScanner {
 
         ss.push();
         ss.current.totalAngle += ni.angle;
-        const area = this.scanFromTwoNode(end, ni.node, ss);
+        const area = this.scanFromTwoNode(end, ni.node, ni.line, ss);
         if (area) return area;
         ss.pop();
       }
@@ -120,19 +127,19 @@ class RoomScanner {
 
   findExpandableWalls(areas) {
     let exwalls = [];
-    areas.forEach(area => {
+    for (const area of areas) {
       area.eachWall((n1, n2) => {
         if (!RoomScanner.isSharedAreaWall(areas, area, n1, n2)) {
           exwalls.push({ area, n1, n2 });
         }
       });
-    });
+    }
     return exwalls;
   }
 
   static isSharedAreaWall(areas, currentArea, n1, n2) {
     let shared = false;
-    for (const area of areas){
+    for (const area of areas) {
       if (area === currentArea) continue;
 
       area.eachWall((w2n1, w2n2) => {
@@ -154,8 +161,9 @@ class RoomScanner {
 
 class ScanSession {
   constructor() {
-    this.lines = {};
+    this.path = {};
     this.route = [];
+    this.lines = [];
     this.totalAngle = 0;
   }
 }
@@ -181,9 +189,10 @@ class ScanSessionStack {
     this.stack.pop();
   }
 
-  addVisit(start, end) {
-    this.current.lines[start.id] = end.id;
+  addVisit(start, end, line) {
+    this.current.path[start.id] = end.id;
     this.current.route.push(start);
+    this.current.lines.push(line);
   }
 
   // visitedNode(node) {
@@ -209,7 +218,7 @@ class ScanSessionStack {
 
   visitedPath(start, end) {
     for (const ss of this.stack) {
-      if (ss.lines[start.id] === end.id) {
+      if (ss.path[start.id] === end.id) {
         return true;
       }
     }
@@ -220,6 +229,12 @@ class ScanSessionStack {
     const path = [];
     this.stack.forEach(s => path.push(...s.route));
     return path;
+  }
+
+  getLines() {
+    const lines = [];
+    this.stack.forEach(s => lines.push(...s.lines));
+    return lines;
   }
 }
 

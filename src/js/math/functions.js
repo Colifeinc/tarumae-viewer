@@ -310,6 +310,15 @@ Tarumae.MathFunctions = {
   //   return this.distancePointToLine2D(l1.start, l2);
   // },
 
+  distancePointToRect(p, rect) {
+    const de1 = this.distancePointToLineSegment2D(p, rect.topEdge); 
+    const de2 = this.distancePointToLineSegment2D(p, rect.bottomEdge);
+    const de3 = this.distancePointToLineSegment2D(p, rect.leftEdge);
+    const de4 = this.distancePointToLineSegment2D(p, rect.rightEdge);
+
+    return Math.min(de1, de2, de3, de4);
+  },
+
   pointToNearestPolygon: function(p, polygon, mindist) {
     let ret = {
       dist: Infinity,

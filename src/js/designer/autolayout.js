@@ -1,6 +1,7 @@
 import Tarumae from "../entry";
 import { TableChairSet, RoundRestTableGroup, InteriorAsset } from "./furniture";
 import { Room } from "./floor";
+import { Door } from "./wall";
 
 const _mf = Tarumae.MathFunctions;
 
@@ -60,14 +61,45 @@ class LayoutGenerator {
           },
         };
         
+        c.invalid = false;
+
         if (!area.polygon.containsRect(rect)) {
           c.invalid = true;
-        } else {
+        }
+
+        if (!c.invalid) {
+          for (const wall of area.lines) {
+            for (const obj of wall.objects) {
+              if (rect.intersectsRect(obj.wbbox.rect)) {
+                c.invalid = true;
+                break;
+              }
+            }
+            if (c.invalid) break;
+          }
+        }
+
+        if (!c.invalid) {
           cellId++;
 
           const wallDist = _mf.distancePointToPolygon(rect.origin, area.polygon.points);
           c.dists.wall = wallDist;
           if (wallDist > maxDists.wall) maxDists.wall = wallDist;
+
+          let minDoorDist = Infinity;
+          for (const wall of area.lines) {
+            for (const obj of wall.objects) {
+              if (obj instanceof Door) {
+                const doorDist = _mf.distancePointToPoint2D(rect.origin, obj.origin);
+                if (minDoorDist > doorDist) minDoorDist = doorDist;
+              }
+            }
+          }
+          
+          if (minDoorDist < Infinity) {
+            c.dists.door = minDoorDist;
+            if (maxDists.door < minDoorDist) maxDists.door = minDoorDist;
+          }
 
           area.grid.push(c);
         }

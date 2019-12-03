@@ -289,11 +289,6 @@ Tarumae.Rect = class {
 		return new Tarumae.Rect(this.x, this.y, this.width, this.height);
 	}
 
-	contains(pos) {
-		return this.x <= pos.x && this.y <= pos.y
-			&& this.right >= pos.x && this.bottom >= pos.y;
-	}
-	
 	moveTo(x, y) {
 		this.x = x;
 		this.y = y;
@@ -381,6 +376,15 @@ Tarumae.Rect = class {
 		const hw = w * 0.5, hh = h * 0.5;
 		this.x -= hw; this.y -= hh;
 		this.width += hw; this.height += hh;
+	}
+
+	contains(pos) {
+		return this.x <= pos.x && this.y <= pos.y
+			&& this.right >= pos.x && this.bottom >= pos.y;
+	}
+	
+	intersectsRect(r2) {
+		return Tarumae.MathFunctions.rectIntersectsRect(this, r2);
 	}
 
 	bbox() {

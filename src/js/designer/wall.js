@@ -29,7 +29,7 @@ class WallNode {
         const edge2 = this.position.sub(next.position);
         const angle = _mf.fixAngle(edge1.angle - edge2.angle);
         
-        nodes.push({ node: next, angle });
+        nodes.push({ node: next, angle, line: l });
       }
     }
 
@@ -218,10 +218,17 @@ class WallChildObject extends LayoutObject {
   }
 
   set wall(wall) {
-    this._wall = wall;
-    this.angle = this._wall._angle;
-    this.size = new Tarumae.Size(this.width, this.wall.width);
-    this.update();
+    if (this._wall !== wall) {
+      if (this._wall) {
+        this._wall.objects._t_remove(this);
+      }
+
+      this._wall = wall;
+      this.angle = this._wall._angle;
+      this.size = new Tarumae.Size(this.width, this.wall.width);
+      this._wall.objects._t_pushIfNotExist(this);
+      this.update();
+    }
   }
 
   updateBoundingBox() {
@@ -313,6 +320,10 @@ class Door extends WallChildObject {
       super.drawDimension(g, 0, (-hh - 3));
     }
   }
+
+  // updateBoundingBox() {
+  //   this.bbox.updateFromPoints(
+  // }
 }
 
 export { WallLine, WallNode, Door };

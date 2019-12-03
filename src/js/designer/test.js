@@ -14,13 +14,6 @@ function _create_test_room_(designer) {
 
   newRoom(n1, n2, n3, n4);
 
-  de.scanRooms();
-
-  // const area1 = de.findArea([n1, n2, n3, n4]);
-  // if (area1) {
-  //   this.layoutGenerator.autoLayout(area1);
-  // }
-
   const door = new Door();
   door.designer = de;
   door.origin.set(500, 200);
@@ -28,6 +21,9 @@ function _create_test_room_(designer) {
   
   de.doors.push(door);
   de.doorHolder.add(door);
+
+  de.scanRooms();
+
 }
 
 function newNode(x, y) {

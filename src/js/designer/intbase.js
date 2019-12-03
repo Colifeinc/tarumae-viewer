@@ -8,6 +8,7 @@ class LayoutObject extends Draw2D.Object {
   constructor() {
     super();
     
+    this.style.strokeWidth = 3;
     this.style.strokeColor = "gray";
 
     this.draggable = true;
@@ -22,11 +23,6 @@ class LayoutObject extends Draw2D.Object {
     g.drawText(`${w} cm x ${h} cm`, { x, y }, "black", "center", "0.7em Arial");
     g.popTransform();
   }
-
-  // pointToObject(p) {
-  //   p = new Vec2((p.x - 200) * 0.5, (p.y - 200) * 0.5);
-  //   return super.pointToObject(p);
-  // }
 
   mouseenter(e) {
     this.style.strokeWidth = 4;

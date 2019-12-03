@@ -49,8 +49,6 @@ class InteriorGroup extends InteriorObject {
         this.wbbox.expendToBBox(this.objects[i].wbbox);
       }
     }
-    
-    this.size = this.wbbox.size;
   }
 
   render(g) {
