@@ -42,9 +42,12 @@ class Area {
   }
 
   draw(g) {
+    if (!this.room) {
+      g.drawPolygon(this.polygon.points, 0, null, this.hover ? '#ddddee' : '#ffffee');
+    }
     g.drawText("Untitled space\n" + Math.round(this.areaValue) + " m²",
       this.polygon.bbox.origin, this.hover ? "red" : "black", "center", "14px Arial");
-  }
+    }
 
   static isSameArea(nl1, nl2) {
     if (nl1.length !== nl2.length) return false;

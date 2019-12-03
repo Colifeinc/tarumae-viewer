@@ -18,13 +18,19 @@ class LayoutGenerator {
 
     this.generateCells(area);
 
-    const room = new Room();
-    room.area = area;
+    let room = area.room;
+
+    if (!room) {
+      room = new Room();
+      room.area = area;
+      area.room = room;
+    }
+
     this.designer.roomHolder.add(room);
     this.designer.rooms.push(room);
 
     this.generateLayout(room);
-
+    this.designer.invalidate();
   }
 
   generateCells(area) {

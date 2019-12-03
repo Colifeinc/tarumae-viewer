@@ -7,22 +7,22 @@ let de = null;
 function _create_test_room_(designer) {
   de = designer;
 
-  const n1 = newNode(200, 200);
-  const n2 = newNode(1200, 200);
-  const n3 = newNode(1200, 500);
-  const n4 = newNode(200, 500);
+  // const n1 = newNode(200, 200);
+  // const n2 = newNode(1200, 200);
+  // const n3 = newNode(1200, 500);
+  // const n4 = newNode(200, 500);
 
-  newRoom(n1, n2, n3, n4);
+  // newRoom(n1, n2, n3, n4);
 
-  const door = new Door();
-  door.designer = de;
-  door.origin.set(500, 200);
-  door.wall = de.lines[0];
+  // const door = new Door();
+  // door.designer = de;
+  // door.origin.set(500, 200);
+  // door.wall = de.lines[0];
   
-  de.doors.push(door);
-  de.doorHolder.add(door);
+  // de.doors.push(door);
+  // de.doorHolder.add(door);
 
-  de.scanRooms();
+  // de.scanRooms();
 
 }
 

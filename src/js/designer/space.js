@@ -8,7 +8,7 @@ import Draw2D from "../draw/scene2d";
 import { WallNode, WallLine, Door, Window } from "./wall";
 import { RoomScanner } from "./scan";
 import { _create_test_room_ } from "./test";
-import { Area } from "./floor";
+import { Area, Room } from "./floor";
 import { LayoutGenerator } from "./autolayout";
 
 const _mf = Tarumae.MathFunctions;
@@ -29,6 +29,14 @@ window.addEventListener("load", function() {
   window._scene = _scene;
   window._designer = new WallDesigner(_scene);
 
+  window._designer.onActiveAreaChanged = function() {
+    document.getElementsByClassName("pop-center-menu")[0].style.visibility = "visible";
+  }
+
+  window._autolayoutCurrentRoom = function() {
+    document.getElementsByClassName("pop-center-menu")[0].style.visibility = "hidden";
+    window._designer.autoLayoutCurrentArea();
+  };
 });
 
 class WallDesigner {
@@ -222,6 +230,13 @@ class WallDesigner {
             this.status = "moving";
           }
         }
+      } else {
+        
+        this.activeArea = this.findAreaByPosition(p);
+      
+        if (this.activeArea && this.onActiveAreaChanged) {
+          this.onActiveAreaChanged();
+        }
       }
     }
   }
@@ -331,7 +346,7 @@ class WallDesigner {
       this.status = "move";
     }
 
-    if (this.mode === "addDoor") {
+    else if (this.mode === "addDoor") {
       const ret = this.findWallLineByPosition(p);
       if (ret && ret.obj) {
         const newDoor = new Door();
@@ -348,7 +363,7 @@ class WallDesigner {
       }
     }
     
-    if (this.mode === "addWindow") {
+    else if (this.mode === "addWindow") {
       const ret = this.findWallLineByPosition(p);
       if (ret && ret.obj) {
         const newWindow = new Window();
@@ -363,6 +378,10 @@ class WallDesigner {
         this.addingWindow.visible = false;
         this.invalidate();
       }
+    }
+
+    else if (this.mode === "move") {
+    
     }
   }
   
@@ -586,16 +605,25 @@ class WallDesigner {
   scanRooms() {
     this.areas = this.roomScanner.scanAreas(this.nodes, this.lines);
 
-    this.roomHolder.objects._t_clear();
+    this.roomHolder.objects = [];
     this.rooms = [];
 
-    for (const area of this.areas) {
-      this.layoutGenerator.autoLayout(area);
-    }
+    this.activeArea = null;
+    this.hoverArea = null;
+    
+    // for (const area of this.areas) {
+    //   this.layoutGenerator.autoLayout(area);
+    // }
 
     // const exwalls = this.roomScanner.findExpandableWalls(this.areas);
     // console.log(exwalls);
     this.expandableWalls = [];
+  }
+
+  autoLayoutCurrentArea() {
+    if (this.activeArea) {
+      this.layoutGenerator.autoLayout(this.activeArea);
+    }
   }
 
   // FIXME: rename method
