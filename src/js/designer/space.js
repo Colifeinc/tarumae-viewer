@@ -27,15 +27,20 @@ window.addEventListener("load", function() {
   _scene.show();
 
   window._scene = _scene;
-  window._designer = new WallDesigner(_scene);
+  const designer = new WallDesigner(_scene);
+  window._designer = designer;
 
-  window._designer.onActiveAreaChanged = function() {
-    document.getElementsByClassName("pop-center-menu")[0].style.visibility = "visible";
-  }
+  window._designer.on("activeAreaChanged", function() {
+    if (designer.activeArea) {
+      document.getElementById("autolayout-panel").style.visibility = "visible";
+    } else {
+      document.getElementById("autolayout-panel").style.visibility = "hidden";
+    }
+  });
 
   window._autolayoutCurrentRoom = function() {
-    document.getElementsByClassName("pop-center-menu")[0].style.visibility = "hidden";
-    window._designer.autoLayoutCurrentArea();
+    const typeValue = document.getElementById("area-type").value;
+    window._designer.autoLayoutCurrentArea(typeValue);
   };
 });
 
@@ -60,6 +65,7 @@ class WallDesigner {
     this.rooms = [];
     this.areas = [];
     this._hoverArea = null;
+    this._activeArea = null;
     this.roomScanner = new RoomScanner();
     this.expandingWall = null;
     this._activeWall = null;
@@ -155,7 +161,24 @@ class WallDesigner {
       if (this._hoverArea) this._hoverArea.hover = false;
       this._hoverArea = area;
       if (this._hoverArea) this._hoverArea.hover = true;
+     
       this.invalidate();
+      this.onhoverAreaChanged(area);
+    }
+  }
+
+  get activeArea() {
+    return this._activeArea;
+  }
+
+  set activeArea(area) {
+    if (this._activeArea !== area) {
+      if (this._activeArea) this._activeArea.active = false;
+      this._activeArea = area;
+      if (this._activeArea) this._activeArea.active = true;
+      
+      this.invalidate();
+      this.onactiveAreaChanged(area);
     }
   }
 
@@ -603,10 +626,33 @@ class WallDesigner {
   }
 
   scanRooms() {
-    this.areas = this.roomScanner.scanAreas(this.nodes, this.lines);
+    const newAreas = this.roomScanner.scanAreas(this.nodes, this.lines);
 
-    this.roomHolder.objects = [];
-    this.rooms = [];
+    for (const existedArea of this.areas) {
+      const newArea = Area.findArea(newAreas, existedArea.nodes);
+     
+      if (!newArea) {
+        this.roomHolder.remove(existedArea.room);
+        this.rooms._t_remove(existedArea.room);
+      } else {
+        newArea.room = existedArea.room;
+        existedArea.room.area = newArea;
+      }
+    }
+
+    for (const area of newAreas) {
+      if (!area.room) {
+        area.room = new Room();
+        area.room.area = area;
+        this.roomHolder.add(area.room);
+        this.rooms._t_pushIfNotExist(area.room);    
+      }
+    }
+
+    this.areas = newAreas;
+
+    // this.roomHolder.objects = [];
+    // this.rooms = [];
 
     this.activeArea = null;
     this.hoverArea = null;
@@ -620,10 +666,16 @@ class WallDesigner {
     this.expandableWalls = [];
   }
 
-  autoLayoutCurrentArea() {
+  autoLayoutCurrentArea(type) {
     if (this.activeArea) {
-      this.layoutGenerator.autoLayout(this.activeArea);
+      this.autoLayoutArea(this.activeArea, type);
     }
+  }
+
+  autoLayoutArea(area, type) {
+    console.log("auto layout, type: " + type);
+    this.layoutGenerator.autoLayout(area, type);
+    this.invalidate();
   }
 
   // FIXME: rename method
@@ -695,15 +747,12 @@ class WallDesigner {
     obj.offset(offset);
     this.invalidate();
   }
-
-  findArea(nodeList) {
-    for (const area of this.areas) {
-      if (Area.isSameArea(area.nodes, nodeList)) {
-        return area;
-      }
-    }
-  }
 }
+
+// Event declarations
+new Tarumae.EventDispatcher(WallDesigner).registerEvents(
+  "hoverAreaChanged", "activeAreaChanged");
+
 
 class Ground extends Draw2D.Object {
   constructor(designer) {

@@ -82,6 +82,14 @@ class Area {
 
     return false;
   }
+  
+  static findArea(areaList, nodeList) {
+    for (const area of areaList) {
+      if (Area.isSameArea(area.nodes, nodeList)) {
+        return area;
+      }
+    }
+  }
 }
 
 class Room extends Draw2D.Object {

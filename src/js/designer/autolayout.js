@@ -13,24 +13,12 @@ class LayoutGenerator {
     this.designer = designer;
   }
 
-  autoLayout(area) {
+  autoLayout(area, type) {
     this.area = area;
+    this.type = type;
 
     this.generateCells(area);
-
-    let room = area.room;
-
-    if (!room) {
-      room = new Room();
-      room.area = area;
-      area.room = room;
-    }
-
-    this.designer.roomHolder.add(room);
-    this.designer.rooms.push(room);
-
-    this.generateLayout(room);
-    this.designer.invalidate();
+    this.generateLayout(area.room, type);
   }
 
   generateCells(area) {
@@ -148,6 +136,8 @@ class LayoutGenerator {
       });
 
     this.putInterior(room, new InteriorAsset("print_mfp_w1500", 220, 80));
+
+    
   }
 
   putInterior(room, obj, scoreCalculator) {
