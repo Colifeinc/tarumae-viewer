@@ -10,7 +10,6 @@ class Floor {
   }
 }
 
-
 class Area {
   constructor() {
     this.nodes = null;

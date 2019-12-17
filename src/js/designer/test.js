@@ -7,12 +7,12 @@ let de = null;
 function _create_test_room_(designer) {
   de = designer;
 
-  // const n1 = newNode(200, 200);
-  // const n2 = newNode(1200, 200);
-  // const n3 = newNode(1200, 500);
-  // const n4 = newNode(200, 500);
+  const n1 = newNode(100, 200);
+  const n2 = newNode(1000, 200);
+  const n3 = newNode(1000, 500);
+  const n4 = newNode(100, 500);
 
-  // newRoom(n1, n2, n3, n4);
+  newWalls(n1, n2, n3, n4);
 
   // const door = new Door();
   // door.designer = de;
@@ -22,8 +22,9 @@ function _create_test_room_(designer) {
   // de.doors.push(door);
   // de.doorHolder.add(door);
 
-  // de.scanRooms();
+  de.scanRooms();
 
+  de.autoLayoutArea(de.areas[0]);
 }
 
 function newNode(x, y) {
@@ -39,7 +40,7 @@ function newLine(n1, n2) {
   return line;
 }
 
-function newRoom() {
+function newWalls() {
   if (arguments.length < 2) return;
   
   for (let i = 0; i < arguments.length - 1; i++) {

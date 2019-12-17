@@ -221,6 +221,37 @@ class RoundTable extends InteriorObject {
   }
 }
 
+class MeetingTableSet extends InteriorObject {
+  constructor(seats = 6) {
+    super();
+
+    this.seats = seats;
+    this.seatWidth = 90;
+    this.tableWidth = seats * (this.seatWidth / 2);
+    this.tableDepth = 140;
+    this.size.set(this.tableWidth, this.tableDepth + 100);
+  
+    this.table = new Table(this.tableWidth, this.tableDepth);
+    this.chairs = [];
+
+    const hw = this.tableWidth / 2;
+    const hh = this.tableDepth / 2;
+
+    for (let i = 0; i < this.seats / 2; i++) {
+      const chair1 = new Chair2(), chair2 = new Chair2();
+      const x = i * this.seatWidth - hw + this.seatWidth / 2;
+      chair1.origin.set(x, -hh);
+      chair2.origin.set(x, hh);
+      chair2.angle = 180;
+      this.add(chair1, chair2);
+      this.chairs.push(chair1, chair2);
+    }
+
+    this.add(this.table);
+    this.update();
+  }
+}
+
 class InteriorAsset extends InteriorObject {
   constructor(assetId, width, height) {
     super();
@@ -229,7 +260,7 @@ class InteriorAsset extends InteriorObject {
     this.size.set(width, height);
     
     this.image = new Image();
-    this.image.src = `https://itoki-uploads.autofloor.jp/previews/256/${assetId}-topview.png`;
+    this.image.src = `/static/images/${assetId}.png`;
 
     this.update();
   }
@@ -240,4 +271,4 @@ class InteriorAsset extends InteriorObject {
   }
 }
 
-export { TableChairSet, RoundRestTableGroup, InteriorAsset }
+export { TableChairSet, RoundRestTableGroup, InteriorAsset, MeetingTableSet }

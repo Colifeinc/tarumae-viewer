@@ -1,5 +1,5 @@
 import Tarumae from "../entry";
-import { TableChairSet, RoundRestTableGroup, InteriorAsset } from "./furniture";
+import { TableChairSet, RoundRestTableGroup, InteriorAsset, MeetingTableSet } from "./furniture";
 import { Room } from "./floor";
 import { Door, Window } from "./wall";
 
@@ -16,6 +16,8 @@ class LayoutGenerator {
   autoLayout(area, type) {
     this.area = area;
     this.type = type;
+
+    area.room.objects = [];
 
     this.generateCells(area);
     this.generateLayout(area.room, type);
@@ -135,8 +137,21 @@ class LayoutGenerator {
         return scores.doorp * scores.doorp + (1 - scores.windowp);
       });
 
-    this.putInterior(room, new InteriorAsset("print_mfp_w1500", 220, 80));
 
+    const meetingTable = new MeetingTableSet();
+    this.putInterior(room, meetingTable, 
+      scores => {
+        return scores.doorp * scores.doorp + (1 - scores.windowp);
+      });
+   
+    this.putInterior(room, new InteriorAsset("printer", 90, 80));
+
+    for (let i = 0; i < 4; i++) {
+      this.putInterior(room, new InteriorAsset("plant", 35, 35), 
+      scores => {
+        return Math.pow(scores.wallp, -10);
+      });
+    }
     
   }
 

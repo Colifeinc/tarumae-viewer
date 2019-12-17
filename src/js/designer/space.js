@@ -645,7 +645,7 @@ class WallDesigner {
         area.room = new Room();
         area.room.area = area;
         this.roomHolder.add(area.room);
-        this.rooms._t_pushIfNotExist(area.room);    
+        this.rooms._t_pushIfNotExist(area.room);
       }
     }
 
