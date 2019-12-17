@@ -144,10 +144,10 @@ class LayoutGenerator {
         return scores.doorp * scores.doorp + (1 - scores.windowp);
       });
    
-    this.putInterior(room, new InteriorAsset("printer", 90, 80));
+    this.putInterior(room, new InteriorAsset("printer", 90, 79.2));
 
     for (let i = 0; i < 4; i++) {
-      this.putInterior(room, new InteriorAsset("plant", 35, 35), 
+      this.putInterior(room, new InteriorAsset("plant", 25.74, 35), 
       scores => {
         return Math.pow(scores.wallp, -10);
       });

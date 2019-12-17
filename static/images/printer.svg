@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="990px" height="870px" viewBox="0 0 990 870" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 58 (84663) - https://sketch.com -->
+    <title>印刷機</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <radialGradient cx="0%" cy="100%" fx="0%" fy="100%" r="190.371822%" gradientTransform="translate(0.000000,1.000000),scale(0.878788,1.000000),rotate(-90.671101),scale(1.000000,1.074705),translate(-0.000000,-1.000000)" id="radialGradient-1">
+            <stop stop-color="#EEEEEE" offset="0%"></stop>
+            <stop stop-color="#ECECEC" offset="47.1878022%"></stop>
+            <stop stop-color="#DDDDDD" offset="47.792633%"></stop>
+            <stop stop-color="#D8D8D8" offset="100%"></stop>
+        </radialGradient>
+        <rect id="path-2" x="35" y="32" width="920" height="641" rx="20"></rect>
+        <filter x="-1.8%" y="-2.6%" width="103.6%" height="105.1%" filterUnits="objectBoundingBox" id="filter-3">
+            <feGaussianBlur stdDeviation="2.5" in="SourceAlpha" result="shadowBlurInner1"></feGaussianBlur>
+            <feOffset dx="-20" dy="-20" in="shadowBlurInner1" result="shadowOffsetInner1"></feOffset>
+            <feComposite in="shadowOffsetInner1" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="shadowInnerInner1"></feComposite>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.15 0" type="matrix" in="shadowInnerInner1"></feColorMatrix>
+        </filter>
+        <path d="M395,210 L825,210 L825,210 L825,360 C825,481.502645 726.502645,580 605,580 L395,580 C383.954305,580 375,571.045695 375,560 L375,230 C375,218.954305 383.954305,210 395,210 Z" id="path-4"></path>
+        <filter x="-3.7%" y="-4.5%" width="107.3%" height="108.9%" filterUnits="objectBoundingBox" id="filter-5">
+            <feGaussianBlur stdDeviation="2.5" in="SourceAlpha" result="shadowBlurInner1"></feGaussianBlur>
+            <feOffset dx="-20" dy="-20" in="shadowBlurInner1" result="shadowOffsetInner1"></feOffset>
+            <feComposite in="shadowOffsetInner1" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="shadowInnerInner1"></feComposite>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.15 0" type="matrix" in="shadowInnerInner1"></feColorMatrix>
+        </filter>
+        <path d="M374,210 L624,210 L624,210 L624,445 C624,519.558441 563.558441,580 489,580 L374,580 C362.954305,580 354,571.045695 354,560 L354,230 C354,218.954305 362.954305,210 374,210 Z" id="path-6"></path>
+        <filter x="-6.1%" y="-4.5%" width="112.2%" height="108.9%" filterUnits="objectBoundingBox" id="filter-7">
+            <feGaussianBlur stdDeviation="2.5" in="SourceAlpha" result="shadowBlurInner1"></feGaussianBlur>
+            <feOffset dx="-20" dy="-20" in="shadowBlurInner1" result="shadowOffsetInner1"></feOffset>
+            <feComposite in="shadowOffsetInner1" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="shadowInnerInner1"></feComposite>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.15 0" type="matrix" in="shadowInnerInner1"></feColorMatrix>
+        </filter>
+        <path d="M343,32 L935,32 C946.045695,32 955,40.954305 955,52 L955,172 C955,194.09139 937.09139,212 915,212 L363,212 L363,623 L274.108147,673 L55,673 C43.954305,673 35,664.045695 35,653 L35,52 C35,40.954305 43.954305,32 55,32 L343,32 Z" id="path-8"></path>
+        <filter x="-3.1%" y="-4.4%" width="106.2%" height="108.9%" filterUnits="objectBoundingBox" id="filter-9">
+            <feGaussianBlur stdDeviation="2.5" in="SourceAlpha" result="shadowBlurInner1"></feGaussianBlur>
+            <feOffset dx="35" dy="44" in="shadowBlurInner1" result="shadowOffsetInner1"></feOffset>
+            <feComposite in="shadowOffsetInner1" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="shadowInnerInner1"></feComposite>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.2 0" type="matrix" in="shadowInnerInner1" result="shadowMatrixInner1"></feColorMatrix>
+            <feGaussianBlur stdDeviation="2.5" in="SourceAlpha" result="shadowBlurInner2"></feGaussianBlur>
+            <feOffset dx="-15" dy="-15" in="shadowBlurInner2" result="shadowOffsetInner2"></feOffset>
+            <feComposite in="shadowOffsetInner2" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="shadowInnerInner2"></feComposite>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.16 0" type="matrix" in="shadowInnerInner2" result="shadowMatrixInner2"></feColorMatrix>
+            <feMerge>
+                <feMergeNode in="shadowMatrixInner1"></feMergeNode>
+                <feMergeNode in="shadowMatrixInner2"></feMergeNode>
+            </feMerge>
+        </filter>
+    </defs>
+    <g id="印刷機" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M20,4 C11.163444,4 4,11.163444 4,20 L4,830 C4,849.882251 20.117749,866 40,866 L950,866 C969.882251,866 986,849.882251 986,830 L986,20 C986,11.163444 978.836556,4 970,4 L20,4 Z" id="Rectangle" stroke="#000000" stroke-width="8" fill="url(#radialGradient-1)"></path>
+        <g id="Rectangle-Copy-26">
+            <use fill="#EEEEEE" fill-rule="evenodd" xlink:href="#path-2"></use>
+            <use fill="black" fill-opacity="1" filter="url(#filter-3)" xlink:href="#path-2"></use>
+            <use stroke="#000000" stroke-width="8" xlink:href="#path-2"></use>
+        </g>
+        <g id="Rectangle-Copy-29">
+            <use fill="#EEEEEE" fill-rule="evenodd" xlink:href="#path-4"></use>
+            <use fill="black" fill-opacity="1" filter="url(#filter-5)" xlink:href="#path-4"></use>
+            <use stroke="#000000" stroke-width="8" xlink:href="#path-4"></use>
+        </g>
+        <g id="Rectangle-Copy-28">
+            <use fill="#EEEEEE" fill-rule="evenodd" xlink:href="#path-6"></use>
+            <use fill="black" fill-opacity="1" filter="url(#filter-7)" xlink:href="#path-6"></use>
+            <use stroke="#000000" stroke-width="8" xlink:href="#path-6"></use>
+        </g>
+        <g id="Combined-Shape">
+            <use fill="#EEEEEE" fill-rule="evenodd" xlink:href="#path-8"></use>
+            <use fill="black" fill-opacity="1" filter="url(#filter-9)" xlink:href="#path-8"></use>
+            <use stroke="#000000" stroke-width="8" xlink:href="#path-8"></use>
+        </g>
+        <rect id="Rectangle-Copy-30" stroke="#000000" stroke-width="8" fill="#D8D8D8" x="363" y="281" width="260" height="25"></rect>
+        <rect id="Rectangle-Copy-31" stroke="#000000" stroke-width="8" fill="#D8D8D8" x="625" y="281" width="220" height="25"></rect>
+        <rect id="Rectangle-Copy-33" stroke="#000000" stroke-width="8" fill="#D8D8D8" x="363" y="361" width="260" height="25"></rect>
+        <rect id="Rectangle-Copy-32" stroke="#000000" stroke-width="8" fill="#D8D8D8" x="625" y="361" width="220" height="25"></rect>
+        <rect id="Rectangle-Copy-35" stroke="#000000" stroke-width="8" fill="#D8D8D8" x="363" y="441" width="260" height="25"></rect>
+        <rect id="Rectangle-Copy-37" stroke="#000000" stroke-width="8" fill="#D8D8D8" x="35" y="718" width="260" height="110"></rect>
+        <rect id="Rectangle-Copy-38" stroke="#000000" stroke-width="8" fill="#000000" x="325" y="718" width="400" height="110"></rect>
+        <rect id="Rectangle-Copy-39" stroke="#000000" stroke-width="8" fill="#D8D8D8" x="745" y="718" width="210" height="110"></rect>
+        <rect id="Rectangle-Copy-34" stroke="#000000" stroke-width="8" fill="#D8D8D8" x="625" y="441" width="220" height="25"></rect>
+        <rect id="Rectangle-Copy-36" fill="#999999" x="505" y="644" width="200" height="20"></rect>
+        <path d="M38.5,744.5 L295.5,744.5" id="Line" stroke="#000000" stroke-width="8" stroke-linecap="square"></path>
+        <g id="Group-3" transform="translate(90.221366, 720.500000)" stroke="#000000" stroke-linecap="square" stroke-width="8">
+            <path d="M0.278634084,4.61852778e-13 L0.721365916,100.500126" id="Line-Copy-3"></path>
+            <path d="M50.2786341,4.61852778e-13 L50.7213659,100.500126" id="Line-Copy-4"></path>
+            <path d="M100.278634,4.61852778e-13 L100.721366,100.500126" id="Line-Copy-5"></path>
+            <path d="M150.278634,4.61852778e-13 L150.721366,100.500126" id="Line-Copy-6"></path>
+        </g>
+        <path d="M38.5,772.5 L295.5,772.5" id="Line-Copy" stroke="#000000" stroke-width="8" stroke-linecap="square"></path>
+        <path d="M38.5,800.5 L295.5,800.5" id="Line-Copy-2" stroke="#000000" stroke-width="8" stroke-linecap="square"></path>
+        <path d="M359,621 L39,621 L39,654 C39,662.284271 45.7157288,669 54,669 L272.108147,669 L272.108147,669 L359,621 Z" id="Path-5" fill="#BBBBBB"></path>
+    </g>
+</svg>

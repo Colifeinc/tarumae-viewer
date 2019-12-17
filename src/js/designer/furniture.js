@@ -260,7 +260,7 @@ class InteriorAsset extends InteriorObject {
     this.size.set(width, height);
     
     this.image = new Image();
-    this.image.src = `/static/images/${assetId}.png`;
+    this.image.src = `/static/images/${assetId}.svg`;
 
     this.update();
   }
