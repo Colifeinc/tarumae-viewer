@@ -321,7 +321,7 @@ Tarumae.Renderer = class {
 	}
 	
 	orthographicProject(m) {
-		const scale = ((this.viewer.originDistance - 0.5) * 10);
+		const scale = this.viewer.originDistance;
 		m.ortho(-this.aspectRate * scale, this.aspectRate * scale, -scale, scale, -this.options.perspective.far, this.options.perspective.far);
 	}
 	
