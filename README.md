@@ -1,3 +1,5 @@
+![npm](https://img.shields.io/npm/v/tarumae-viewer.svg)
+
 # Tarumae
 
 Tarumae is optimized WebGL engine for showcase application. 
