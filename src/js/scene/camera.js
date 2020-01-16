@@ -111,7 +111,7 @@ Tarumae.Camera = class extends Tarumae.SceneObject {
 	
 		if (options.animation === false) {
 			this.location = targetpos;
-			this.lookAt(out.targetLocation);
+			this.lookAt(out.targetLocation, options.lookup);
 	
 			var scene = this.scene;
 			if (scene) scene.requireUpdateFrame();
