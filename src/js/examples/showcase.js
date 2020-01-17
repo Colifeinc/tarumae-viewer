@@ -266,9 +266,9 @@ window.addEventListener("load", function() {
  
 	scene.sun.location.set(0.1, 1, 0.1);
 	// scene.sun.mat.color = [.1, .09, .08];
-	scene.sun.mat.color = [.65, .65, .7];
+	scene.sun.mat.color = [.85, .85, 0.9];
 	// scene.sun.mat.color = [.05, .05, .1];
-	
+
 	scene.mainCamera.fieldOfView = 75;
 	scene.mainCamera.location.set(-2.55, 1.5, 2.12);
 	scene.mainCamera.angle.set(-3, 310, 0);

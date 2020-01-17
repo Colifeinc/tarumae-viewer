@@ -141,7 +141,8 @@ void main(void) {
 			finalColor += traceLight(vertexNormal, cameraNormal);
 		}
 
-		finalColor = finalColor * 0.5 + finalColor * (max(dot(vertexNormal, sundir), 0.0) * 0.5);
+		float vtos = max(dot(vertexNormal, sundir), 0.0);
+		finalColor = finalColor * 0.8 + finalColor * (0.2 * vtos);
 		finalColor *= sunlight;
 	}
 
