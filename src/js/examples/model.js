@@ -31,7 +31,7 @@ window.addEventListener("load", function() {
 		},
 		bloomEffect: {
 			threshold: 0.25,
-			gamma: 1.6,
+			gamma: 1.8,
 		},
 		postprocess: {
 			gamma: 1.0,
@@ -48,35 +48,6 @@ window.addEventListener("load", function() {
 		// { name: "chair_adv_01.toba" },
 
 		// { name: "itoki/CZR-187BAC.toba" },
-		// { name: "itoki/CZR-187CBC.toba" },
-		// { name: "itoki/HLL-1114S.toba" },
-		// { name: "itoki/JP-1407S.toba" },
-		// { name: "itoki/JP-1407WCA.toba" },
-		// { name: "itoki/JP-1414HWA.toba" },
-		// { name: "itoki/JP-2244TWA.toba" },
-		// { name: "itoki/JP-2414HWA.toba" },
-
-		// { name: "itoki/JVB-1207GL.toba" },
-		// { name: "itoki/JVB-1207GLWM.toba" },
-		// { name: "itoki/JVD-6677KW.toba" },
-		{ name: "itoki/JVT-1809HW.toba" },
-		// { name: "itoki/JVT-1809HWWM.toba" },
-		// { name: "itoki/JWL-241GES.toba" },
-		// { name: "itoki/JZD-1407HB-C.toba" },
-		// { name: "itoki/JZD-1414HB.toba" },
-		// { name: "itoki/JZD-6677KA.toba" },
-
-		// { name: "itoki/KF-577JB-ZT.toba" },
-		{ name: "itoki/KF-835GC-ZT.toba" },
-		// { name: "itoki/KG-177JB-W9.toba" },
-		// { name: "itoki/KG-367JB-ZW.toba" },
-		// { name: "itoki/KLL-110.toba" },
-		// { name: "itoki/KLL-120C-TN.toba" },
-		// { name: "itoki/KLL-130C-T1.toba" },
-		// { name: "itoki/KZ-337JB-W9.toba" },		
-		// { name: "itoki/LLL-07CLN.toba" },
-		// { name: "itoki/LLL-12SLN.toba" },
-
 		// { name: "chair_compact_01.toba" },
 		// { name: "chair_jati.toba" },
 		// { name: "char_stand_01-baked.toba", scale: [.1, .1, .1], color: [.7, .7, .7] },
@@ -85,6 +56,11 @@ window.addEventListener("load", function() {
 		// { name: "print_mfp_w1500.toba", color: [.7, .7, .7] },
 		// { name: "rice_cooker_01.toba", z: 1, color: [.8, .8, .8] },
 		// { name: "sofa_leather_3s.toba" },
+
+		{ name: "layoutAssets/KG-367JB_ZWM4.toba" },
+		{ name: "layoutAssets/JZD-1407HB_CWK.toba" },
+		{ name: "layoutAssets/JZD-1407HB_CTH.toba" },
+		// { name: "models/floor-glossy.toba" },
 	];
 
 
@@ -115,7 +91,7 @@ window.addEventListener("load", function() {
 
 	for (const [i, mod] of models.entries()) {
 		
-		scene.createObjectFromURL("../static/models/" + mod.name, obj => {
+		scene.createObjectFromURL("../static/" + mod.name, obj => {
 			mod.obj = obj;
 			obj.location.x = 5;
 			obj.visible = false;
@@ -198,10 +174,10 @@ window.addEventListener("load", function() {
 	scene.add(lights);
 
 
-	// scene.sun.mat.color = [0.55, 0.55, 0.55];
-	scene.sun.mat.color = [0.45, 0.45, 0.45];
 	// scene.sun.mat.color = [0.5, 0.5, 0.5];
-	// scene.sun.mat.color = [0.1, 0.1, 0.1];
+	scene.sun.mat.color = [0.85, 0.85, 0.85];
+	// scene.sun.mat.color = [0.95, 0.95, 0.95];
+	// scene.sun.mat.color = [0.01, 0.01, 0.01];
 
 	// new Tarumae.TouchController(scene);
 	const objController = new Tarumae.ObjectViewController(scene, {
@@ -222,7 +198,9 @@ window.addEventListener("load", function() {
 	]);
 		
 	window.setObjectRefmap = (obj) => {
-		obj.eachChild(c => c.meshes[0]._refmap = window.refmap);
+		obj.eachChild(c => {
+			if (c.meshes.length > 0) c.meshes[0]._refmap = window.refmap;
+		});
 	};
 
 	cubebox.on('load', _ => {

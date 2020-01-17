@@ -127,27 +127,23 @@ void main(void) {
 
 	vec3 cameraRay = vertex - cameraLoc;
 	vec3 cameraNormal = normalize(cameraRay);
+	vec3 finalColor = color * textureColor.rgb;
+
+	//////////////// LightMap ////////////////
+
+	vec3 lightmapColor = texture2D(lightMap, texcoord2).rgb;
+	finalColor *= lightmapColor;
 
 	//////////////// Lights ////////////////
-	
-	vec3 finalColor = color;
 
 	if (receiveLight) {
 		if (lightCount > 0 || glossy > 0.0) {
 			finalColor += traceLight(vertexNormal, cameraNormal);
 		}
 
-		finalColor = (finalColor + finalColor * max(dot(vertexNormal, sundir), 0.0)) * sunlight;
+		finalColor = finalColor * 0.5 + finalColor * (max(dot(vertexNormal, sundir), 0.0) * 0.5);
+		finalColor *= sunlight;
 	}
-
-	finalColor = finalColor * textureColor.rgb;
-
-	//////////////// LightMap ////////////////
-
-	vec3 lightmapColor = vec3(0.0);
-
-	lightmapColor = texture2D(lightMap, texcoord2).rgb;
-	finalColor = finalColor * 0.3 + finalColor * lightmapColor * 0.7;
 
 	//////////////// RefMap ////////////////
 
