@@ -86,7 +86,7 @@ Tarumae.Renderer = class {
 			let gl;
 
 			try {
-				gl = this.canvas.getContext("webgl");
+				gl = this.canvas.getContext("webgl", { alpha: false });
 				if (!gl) gl = this.canvas.getContext("experimental-webgl");
 			} catch (e) {
 				console.error("cannot create webgl context: " + e);
@@ -158,9 +158,12 @@ Tarumae.Renderer = class {
 			gl.depthFunc(gl.LEQUAL);
 			gl.enable(gl.CULL_FACE);
 			gl.cullFace(gl.BACK);
-			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-			gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA,
-				gl.ONE_MINUS_DST_ALPHA, gl.ONE);
+			// gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+			// gl.blendFunc(gl.ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+			gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+			// gl.blendFunc(gl.SRC_ALPHA, gl.SRC_ALPHA);
+			// gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA,　gl.ONE_MINUS_DST_ALPHA, gl.ONE);
+			gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA, gl.ONE_MINUS_DST_ALPHA, gl.ONE);
 			
 			window.addEventListener("resize", _ => this.resetViewport(), false);
 
