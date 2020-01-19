@@ -1222,7 +1222,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 			}
 			
 			// roughness
-			if (mat.roughness) {
+			if (!isNaN(mat.roughness)) {
 				this.roughnessUniform.set(mat.roughness);
 			} else {
 				this.roughnessUniform.set(0.5);
