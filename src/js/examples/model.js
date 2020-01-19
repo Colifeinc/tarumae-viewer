@@ -57,6 +57,8 @@ window.addEventListener("load", function() {
 		// { name: "rice_cooker_01.toba", z: 1, color: [.8, .8, .8] },
 		// { name: "sofa_leather_3s.toba" },
 
+		{ name: "layoutAssets/areca_palm.toba" },
+		// { name: "layoutAssets/ficus.toba" },
 		{ name: "layoutAssets/KG-367JB_ZWM4.toba" },
 		{ name: "layoutAssets/JZD-1407HB_CWK.toba" },
 		{ name: "layoutAssets/JZD-1407HB_CTH.toba" },

@@ -116,6 +116,9 @@ void main(void) {
 	vec4 textureColor = texture2D(texture, uv1);
 
 	float alpha = opacity * textureColor.a;
+	if (alpha < 0.01){
+		discard;
+	}
 
 	//////////////// NormalMap ////////////////
 
@@ -141,8 +144,8 @@ void main(void) {
 			finalColor += traceLight(vertexNormal, cameraNormal);
 		}
 
-		float vtos = max(dot(vertexNormal, sundir), 0.0);
-		finalColor = finalColor * 0.8 + finalColor * (0.2 * vtos);
+		float vtos = clamp(dot(vertexNormal, sundir), 0.0, 1.0);
+		finalColor = finalColor * 0.8 + finalColor * (vtos * 0.2);
 		finalColor *= sunlight;
 	}
 
@@ -154,10 +157,10 @@ void main(void) {
 		refmapLookup = normalize(correctBoundingBoxIntersect(refMapBox, refmapLookup));
 	}
 
-	vec3 refColor = textureCube(refMap, refmapLookup, roughness).rgb;
-	
-	float gg = clamp(pow(glossy, 5.0), 0.0, 1.0) * (1.0 - roughness);
-	finalColor = finalColor * (1.0 - gg) + (finalColor * refColor * gg);
+	vec3 refColor = textureCube(refMap, refmapLookup, roughness * 100.0).rgb;
+	float rg = clamp(glossy * (1.0 - roughness), 0.0, 1.0);
+	refColor = pow(refColor, vec3(rg)) * glossy;
+	finalColor = finalColor * (1.0 - glossy) + finalColor * refColor;
 
 	//////////////// ShadowMap ////////////////
 
@@ -183,4 +186,5 @@ void main(void) {
 	}
 
 	gl_FragColor = vec4(finalColor, alpha);
+	//  gl_FragColor.rgb *= gl_FragColor.a;
 }
