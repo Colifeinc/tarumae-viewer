@@ -91,14 +91,12 @@ vec3 traceLight(vec3 vertexNormal, vec3 cameraNormal) {
 
 		float ln = dot(lightNormal, vertexNormal);
 		float ld = length(lightRay);
-		ld = pow(2.718282, -ld);
-
-		diff += lights[i].color * max(ln * ld, 0.0);
+		float lda = pow(2.718282, -ld);
+		diff += lights[i].color * max(ln * lda, 0.0);
 
 		vec3 lightReflection = reflect(lightNormal, vertexNormal);
-		float refd = dot(lightReflection, cameraNormal);
-
-		float sf = max(pow(2.718282, -ld / 5.0) * pow(refd, glossy * 10.0) * pow(glossy, 5.0), 0.0);
+		float refd = max(dot(lightReflection, cameraNormal), 0.0);
+		float sf = pow(refd, pow(glossy, -2.0)) * glossy * (1.0 / ld);
 		specular += lights[i].color * sf;
 	}
 
@@ -158,8 +156,8 @@ void main(void) {
 	}
 
 	vec3 refColor = textureCube(refMap, refmapLookup, roughness * 100.0).rgb;
-	float rg = clamp(glossy * (1.0 - roughness), 0.0, 1.0);
-	refColor = pow(refColor, vec3(rg)) * glossy;
+	float rg = glossy * (1.0 - roughness);
+	refColor = clamp(pow(refColor, vec3(rg)) * glossy, 0.0, 1.0);
 	finalColor = finalColor * (1.0 - glossy) + finalColor * refColor;
 
 	//////////////// ShadowMap ////////////////
