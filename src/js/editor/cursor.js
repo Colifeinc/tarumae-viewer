@@ -5,6 +5,8 @@
 // Copyright(c) 2016-2019 BULB Corp., Jingwood, all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
+import { MathFunctions } from "@jingwood/graphics-math";
+
 Tarumae.Axis3DCursor = function(renderer) {
   this.renderer = renderer;
 
@@ -178,7 +180,7 @@ Object.assign(Tarumae.Axis3DCursor.prototype, {
 
     return arrow.enabled
       && bounds.contains(p)
-      && (Tarumae.MathFunctions.distancePointToLine2D(this.screenPosition, arrow.screenPosition, p) < 6);
+      && (MathFunctions.distancePointToLine2D(this.screenPosition, arrow.screenPosition, p) < 6);
   },
 
 });

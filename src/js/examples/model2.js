@@ -8,7 +8,7 @@
 import Tarumae from "../entry";
 import "../utility/*";
 import "../scene/*";
-import { Color3, Color4 } from "../math/vector";
+import { Color3 } from "@jingwood/graphics-math";
 
 window.addEventListener("load", function() {
 

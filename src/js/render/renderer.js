@@ -7,7 +7,8 @@
 
 import Tarumae from "../entry";
 import "../utility/utility";
-import { Vec2, Vec3, Vec4, Color3, Color4, Point } from "../math/vector";
+import { Vec3, Vec4, Color4, Matrix4, Ray } from "@jingwood/graphics-math";
+import { MathFunctions } from "@jingwood/graphics-math";
 import "../scene/scene";
 import { initDOM } from "./dom";
 import "./pipeline";
@@ -127,10 +128,10 @@ Tarumae.Renderer = class {
 		this.respool = new Tarumae.ResourcePool();
 
 		// matrices
-		this.projectionMatrix = new Tarumae.Matrix4();
-		this.viewMatrix = new Tarumae.Matrix4();
-		this.cameraMatrix = new Tarumae.Matrix4();
-		this.modelMatrix = new Tarumae.Matrix4();
+		this.projectionMatrix = new Matrix4();
+		this.viewMatrix = new Matrix4();
+		this.cameraMatrix = new Matrix4();
+		this.modelMatrix = new Matrix4();
 
 		if (this.options.enable3D) {
 
@@ -637,7 +638,7 @@ Tarumae.Renderer = class {
 			parent = parent.parent;
 		}
 	
-		var m = new Tarumae.Matrix4().loadIdentity();
+		var m = new Matrix4().loadIdentity();
 	
 		for (var i = plist.length - 1; i >= 0; i--) {
 			var obj = plist[i];
@@ -719,7 +720,7 @@ Tarumae.Renderer = class {
 	
 		if (!transparencyRendering) {
 			obj._opacity = (!isNaN(obj.opacity) ? obj.opacity : 1)
-				* (1.0 - Tarumae.MathFunctions.clamp((obj.mat && !isNaN(obj.mat.transparency)) ? obj.mat.transparency : 0));
+				* (1.0 - MathFunctions.clamp((obj.mat && !isNaN(obj.mat.transparency)) ? obj.mat.transparency : 0));
 	
 			if (obj._opacity < 1) {
 				this.transparencyList.push(obj);
@@ -915,7 +916,7 @@ Tarumae.Renderer = class {
 					var viewportWidth = viewRange * this.aspectRate;
 					var viewportHeight = viewRange;
 	
-					ray = new Tarumae.Ray(new Vec3(0, 0, 0), new Vec3(
+					ray = new Ray(new Vec3(0, 0, 0), new Vec3(
 						(p.x / this.renderSize.width - 0.5) * viewportWidth,
 						-(p.y / this.renderSize.height - 0.5) * viewportHeight,
 						-0.5).normalize());
@@ -933,14 +934,14 @@ Tarumae.Renderer = class {
 					var x = (p.x / this.renderSize.width - 0.5) * viewportWidth;
 					var y = -(p.y / this.renderSize.height - 0.5) * viewportHeight;
 	
-					ray = new Tarumae.Ray(new Vec3(x, y, 0), new Vec3(0, 0, -1));
+					ray = new Ray(new Vec3(x, y, 0), new Vec3(0, 0, -1));
 				}
 				break;
 		}
 	
 		var m = this.viewMatrix.mul(this.cameraMatrix).inverse();
-		ray.origin = new Vec4(ray.origin, 1).mulMat(m).xyz();
-		ray.dir = new Vec4(ray.dir, 0).mulMat(m).xyz().normalize();
+		ray.origin = new Vec4(ray.origin, 1).mulMat(m).xyz;
+		ray.dir = new Vec4(ray.dir, 0).mulMat(m).xyz.normalize();
 	
 		return ray;
 	}
@@ -1004,15 +1005,15 @@ Tarumae.Renderer = class {
 		const m = this.viewMatrix.mul(this.cameraMatrix);
 		
 		return {
-			v1: new Vec4(triangle.v1, 1.0).mulMat(m).xyz(),
-			v2: new Vec4(triangle.v2, 1.0).mulMat(m).xyz(),
-			v3: new Vec4(triangle.v3, 1.0).mulMat(m).xyz(),
+			v1: new Vec4(triangle.v1, 1.0).mulMat(m).xyz,
+			v2: new Vec4(triangle.v2, 1.0).mulMat(m).xyz,
+			v3: new Vec4(triangle.v3, 1.0).mulMat(m).xyz,
 		};
 	}
 		
 	viewRayHitTestPlaneInWorldSpace(pos, planeVertices) {
 		const ray = this.createWorldRayFromScreenPosition(pos);
-		return Tarumae.MathFunctions.rayIntersectsPlane(ray, planeVertices, Tarumae.Ray.MaxDistance);
+		return MathFunctions.rayIntersectsPlane(ray, planeVertices, Tarumae.Ray.MaxDistance);
 	};
 
 	// 2D Drawing by 3D coordinates - Start
@@ -1194,7 +1195,7 @@ Tarumae.Renderer = class {
 };
 
 Tarumae.Renderer.prototype.toWorldPosition = (function() {
-	var projectionMatrix = new Tarumae.Matrix4();
+	var projectionMatrix = new Matrix4();
 	
 	return function(pos, viewMatrix, projectMethod) {
 	

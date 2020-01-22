@@ -11,7 +11,7 @@ import "../scene/animation"
 import "../scene/viewer";
 import "../utility/archive";
 import "../utility/res";
-import { Color3, Color4, Vec3 } from "../math/vector";
+import { Color4, Vec3, Ray } from "@jingwood/graphics-math";
 
 window.addEventListener("load", function() {
 
@@ -29,7 +29,7 @@ window.addEventListener("load", function() {
 
 	const obj = new Tarumae.SceneObject();
 
-	const ray = new Tarumae.Ray(new Vec3(0, 1, 0), new Vec3(0.2, -1.2, 0));
+	const ray = new Ray(new Vec3(0, 1, 0), new Vec3(0.2, -1.2, 0));
 	
 	
 	let hitpoint;

@@ -6,8 +6,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "../entry";
-import { Vec2, Vec3, Vec4 } from "../math/vector";
-import "../math/matrix";
+import { Vec2, Vec3, Vec4, Matrix4, MathFunctions } from "@jingwood/graphics-math";
+import { BBox3D as BoundingBox } from "@jingwood/graphics-math";
 
 Tarumae.Mesh = class {
 	constructor() {
@@ -812,9 +812,9 @@ Object.assign(Tarumae.Mesh.prototype, {
 			var mmat = session.mmat;
 			var bbox = this.boundingBox;
 
-			bbox = Tarumae.BoundingBox.transformBoundingBox(bbox, mmat);
+			bbox = BoundingBox.transformBoundingBox(bbox, mmat);
 
-			if (!Tarumae.MathFunctions.rayIntersectsBox(ray, bbox)) {
+			if (!MathFunctions.rayIntersectsBox(ray, bbox)) {
 				return null;
 			}
 		}
@@ -857,7 +857,7 @@ Object.assign(Tarumae.Mesh.prototype, {
 	},
 
 	hitTestByRayUsingVertexIndex: (function() {
-		var nmat = new Tarumae.Matrix4();
+		var nmat = new Matrix4();
 
 		return function(ray, vertices, normals, i1, i2, i3, maxt, session, options) {
 
@@ -881,11 +881,11 @@ Object.assign(Tarumae.Mesh.prototype, {
 
 			var mmat = session.mmat;
 
-			var vv1 = v1.mulMat(mmat).xyz();
-			var vv2 = v2.mulMat(mmat).xyz();
-			var vv3 = v3.mulMat(mmat).xyz();
+			var vv1 = v1.mulMat(mmat).xyz;
+			var vv2 = v2.mulMat(mmat).xyz;
+			var vv3 = v3.mulMat(mmat).xyz;
 		
-			var out = Tarumae.MathFunctions.rayIntersectsTriangle(ray, { v1: vv1, v2: vv2, v3: vv3 }, maxt);
+			var out = MathFunctions.rayIntersectsTriangle(ray, { v1: vv1, v2: vv2, v3: vv3 }, maxt);
 
 			if (out) {
 				var f1 = vv1.sub(out.hit);
@@ -907,7 +907,7 @@ Object.assign(Tarumae.Mesh.prototype, {
 
 					nmat.copyFrom(mmat).inverse().transpose();
 
-					var normal = new Vec4(vertexNormal, 0).mulMat(nmat).xyz().normalize();
+					var normal = new Vec4(vertexNormal, 0).mulMat(nmat).xyz.normalize();
 
 					if (Vec3.dot(session.rayNormalizedNegDir, normal) < 0) {
 						return;
@@ -915,7 +915,7 @@ Object.assign(Tarumae.Mesh.prototype, {
 				}
 			
 				out.worldPosition = out.hit;
-				out.localPosition = (v1.mul(a1)).add(v2.mul(a2)).add(v3.mul(a3)).xyz();
+				out.localPosition = (v1.mul(a1)).add(v2.mul(a2)).add(v3.mul(a3)).xyz;
 
 				return out;
 			}
@@ -938,7 +938,7 @@ Object.assign(Tarumae.Mesh.prototype, {
 				cv3.x = v3.x; cv3.y = v3.z;
 				cp1.x = p.x; cp1.y = p.z;
 
-				if (Tarumae.MathFunctions.triangleContainsPoint2D(cv1, cv2, cv3, cp1)) {
+				if (MathFunctions.triangleContainsPoint2D(cv1, cv2, cv3, cp1)) {
 					return true;
 				}
 			}
@@ -1000,7 +1000,7 @@ Object.assign(Tarumae.Mesh.prototype, {
 				for (var i = 0; i < _this.cachedNavmeshBorders.length; i++) {
 					var border = _this.cachedNavmeshBorders[i];
 
-					var out = Tarumae.MathFunctions.lineIntersectsLine2DXY(
+					var out = MathFunctions.lineIntersectsLine2DXY(
 						loc.x, loc.z, target.x, target.z,
 						border.v1.x, border.v1.z, border.v2.x, border.v2.z);
 					
@@ -1105,7 +1105,7 @@ Object.assign(Tarumae.Mesh, {
 	},
 
 	rotate: (function() {
-		var m = new Tarumae.Matrix4();
+		var m = new Matrix4();
 		var v = new Vec3();
 
 		return function(mesh, x, y, z) {

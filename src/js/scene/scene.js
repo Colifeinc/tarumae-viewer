@@ -7,8 +7,8 @@
 
 import Tarumae from "../entry";
 import "../utility/event";
-import { Vec2, Vec3, Vec4, Color3, Color4 } from "../math/vector";
-import "../math/matrix";
+import { Vec2, Vec3, Vec4, Color3, Color4, Matrix3, Matrix4, Ray } from "@jingwood/graphics-math";
+import { BBox3D as BoundingBox } from "@jingwood/graphics-math";
 import "../render/renderer";
 import "../scene/animation";
 import "../scene/shapes";
@@ -123,8 +123,13 @@ Tarumae.Scene = class {
 				for (var i = 0; i < uarr.length; i++) {
 					carr[i] = String.fromCharCode(uarr[i]);
 				}
-				const manifest = JSON.parse(carr.join(""));
-				if (typeof ondone === "function") {
+				let manifest;
+				try {
+					manifest = JSON.parse(carr.join(""));
+				} catch (ex) {
+					console.warn("parse manifest error: " + ex);
+				}
+				if (manifest && typeof ondone === "function") {
 					ondone(archive, manifest);
 				}
 			}
@@ -310,7 +315,7 @@ Tarumae.Scene = class {
 
 			var bbmin = Vec3.fromArray(pValue.bounds.min);
 			var bbmax = Vec3.fromArray(pValue.bounds.max);
-			pValue.cubemap.bbox = new Tarumae.BoundingBox(bbmin, bbmax);
+			pValue.cubemap.bbox = new BoundingBox(bbmin, bbmax);
 			_this._refmaps[pName] = pValue;
 
 			if (!datafileUrl) {
@@ -412,7 +417,7 @@ Tarumae.Scene = class {
 							var bounds = object.getBounds();
 							lightWorldPos = Vec3.add(bounds.min, Vec3.mul(Vec3.sub(bounds.max, bounds.min), 0.5));
 						} else {
-							lightWorldPos = new Vec4(0, 0, 0, 1).mulMat(object._transform).xyz();
+							lightWorldPos = new Vec4(0, 0, 0, 1).mulMat(object._transform).xyz;
 						}
 	
 						var distance = Vec3.sub(lightWorldPos, cameraLocation).length();
@@ -899,8 +904,8 @@ Tarumae.Scene = class {
 							&& !(value instanceof Vec3)
 							&& !(value instanceof Color3)
 							&& !(value instanceof Color4)
-							&& !(value instanceof Tarumae.Matrix3)
-							&& !(value instanceof Tarumae.Matrix4)
+							&& !(value instanceof Matrix3)
+							&& !(value instanceof Matrix4)
 							&& !(value instanceof Array)) {
 							scene.prepareObjects(value, loadingSession, bundle);
 							value.name = name;
@@ -1032,7 +1037,7 @@ Tarumae.Scene = class {
 	
 		options = options || {};
 
-		var out = { object: null, hits: [], t: Tarumae.Ray.MaxDistance };
+		var out = { object: null, hits: [], t: Ray.MaxDistance };
 	
 		var rayNormalizedDir = ray.dir.normalize();
 
@@ -1119,7 +1124,7 @@ Tarumae.Scene = class {
 			for (var k = 0; k < obj.meshes.length; k++) {
 				var mesh = obj.meshes[k];
 			
-				var mout = mesh.hitTestByRay(ray, Tarumae.Ray.MaxDistance, session, options);
+				var mout = mesh.hitTestByRay(ray, Ray.MaxDistance, session, options);
 			
 				if (mout) {
 					out.hits.push({
@@ -1148,7 +1153,7 @@ Tarumae.Scene = class {
 				var objectBBox = object.getBounds(options);
 		
 				if (!options || !options.filter || options.filter(object)) {
-					bbox = Tarumae.BoundingBox.findBoundingBoxOfBoundingBoxes(bbox, objectBBox);
+					bbox = BoundingBox.findBoundingBoxOfBoundingBoxes(bbox, objectBBox);
 				} else if (!bbox) {
 					bbox = objectBBox;
 				}

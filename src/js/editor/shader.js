@@ -5,6 +5,9 @@
 // Copyright(c) 2016-2019 BULB Corp., Jingwood, all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
+import { Matrix3, Matrix4 } from "@jingwood/graphics-math";
+import { MathFunctions } from "@jingwood/graphics-math";
+
 ////////////////// StandardShader ///////////////////////
 
 Tarumae.EditorShader = function(renderer, vertShaderSrc, fragShaderSrc) {
@@ -96,7 +99,7 @@ Object.assign(Tarumae.EditorShader.prototype, {
         var bounds = object.getBounds();
         lightWorldPos = Vec3.add(bounds.min, Vec3.div(Vec3.sub(bounds.max, bounds.min), 2));
       } else {
-        lightWorldPos = new Vec4(0, 0, 0, 1).mulMat(object._transform).xyz();
+        lightWorldPos = new Vec4(0, 0, 0, 1).mulMat(object._transform).xyz;
       }
       
       var lightUniform;
@@ -114,7 +117,7 @@ Object.assign(Tarumae.EditorShader.prototype, {
           var lightDir = rt.extractLookAtVectors();
           lightUniform.dir.set(lightDir.dir);
 
-          var spotRangeDot = Math.cos(Tarumae.MathFunctions.angleToDegree(mat.spotRange * 0.5));
+          var spotRangeDot = Math.cos(MathFunctions.angleToDegree(mat.spotRange * 0.5));
           lightUniform.range.set(spotRangeDot);
 
         }
@@ -293,7 +296,7 @@ Object.assign(Tarumae.EditorShader.prototype, {
         this.useNormalmap = mat.normalmap;
 
         if (typeof mat.normalMipmap !== "undefined") {
-          normalMipmap = -Tarumae.MathFunctions.clamp(mat.normalMipmap, 0, 5) * 5;
+          normalMipmap = -MathFunctions.clamp(mat.normalMipmap, 0, 5) * 5;
         }
 			
         if (typeof mat.normalIntensity !== "undefined") {
@@ -316,7 +319,7 @@ Object.assign(Tarumae.EditorShader.prototype, {
     gl.activeTexture(gl.TEXTURE1);
     if (this.renderer.options.enableNormalMap && this.useNormalmap != null) {
       this.useNormalmap.use(this.renderer);
-      gl.uniformMatrix3fv(this.modelMatrix3x3Uniform, false, new Tarumae.Matrix3(modelMatrix).toArray());
+      gl.uniformMatrix3fv(this.modelMatrix3x3Uniform, false, new Matrix3(modelMatrix).toArray());
       gl.uniform1i(this.hasNormalMapUniform, true);
 
       this.normalMipmapUniform.set(normalMipmap);

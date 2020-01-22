@@ -315,7 +315,7 @@ Object.assign(TarumaeEditor.prototype, {
 
     for (var i = 0; i < ap.arrowPoints.length; i++) {
       var p = ap.arrowPoints[i];
-      ap.arrowPoints[i] = (new Vec4(p, 1.0).mulMat(matrix)).xyz();
+      ap.arrowPoints[i] = (new Vec4(p, 1.0).mulMat(matrix)).xyz;
     }
   },
 

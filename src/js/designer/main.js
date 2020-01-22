@@ -4,12 +4,11 @@ import "../scene/viewer";
 import "../utility/archive";
 import "../utility/res";
 import Drawing2d from "../draw/scene2d";
-import { Vec2 } from "../math/vector";
+import { Vec2, Matrix3 } from "@jingwood/graphics-math";
+import { MathFunctions as _mf } from "@jingwood/graphics-math";
 
 const TarumaeDesigner = {
 };
-
-const _mf = Tarumae.MathFunctions;
 
 TarumaeDesigner.SelectableGrid = class extends Tarumae.SceneObject {
   constructor() {
@@ -604,7 +603,7 @@ class WallChildObject extends LayoutObject {
 
   updateBoundingBox() {
     if (this.wall) {
-      const m = Tarumae.Matrix3.makeRotation(this.angle, this.origin.x, this.origin.y);
+      const m = Matrix3.makeRotation(this.angle, this.origin.x, this.origin.y);
       const hw = this.size.width * 0.5, hh = this.wall.width * 0.5;
     
       this.line.start = new Vec2(-hw, 0).mulMat(m);
@@ -623,7 +622,7 @@ class WallChildObject extends LayoutObject {
   drag(e) {
     const p = this.pointToObject(e.position);
 
-    const ret = Tarumae.MathFunctions.pointToNearestPolygon(p, window._designer.room.polygon);
+    const ret = _mf.pointToNearestPolygon(p, window._designer.room.polygon);
     
     if (ret.dist < 50) {
       const wall = window._designer.room.walls[ret.lineIndex];

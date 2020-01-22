@@ -6,6 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "../entry";
+import { MathFunctions } from "@jingwood/graphics-math";
 
 Tarumae.Animation = class {
 	
@@ -123,11 +124,11 @@ Tarumae.Animation = class {
 			switch (this.effect) {
 			default:
 			case "smooth":
-				t = Tarumae.MathFunctions.smoothstep(0, 1, t);
+				t = MathFunctions.smoothstep(0, 1, t);
 				break;
 
 			case "sharp":
-				t = Tarumae.MathFunctions.smoothstep(0.2, 0.8, t);
+				t = MathFunctions.smoothstep(0.2, 0.8, t);
 				break;
 
 			case "fadein":

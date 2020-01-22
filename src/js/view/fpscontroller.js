@@ -1,5 +1,5 @@
 import Tarumae from "../entry";
-import { Vec3 } from "../math/vector";
+import { Vec3, Matrix4 } from "@jingwood/graphics-math";
 
 Tarumae.FPSController = class {
 
@@ -85,7 +85,7 @@ Tarumae.FPSController.prototype.dragToMoveCamera = (function() {
     var viewer = this.renderer.viewer;
     var camera = this.scene.mainCamera;
 
-    if (m === undefined) m = new Tarumae.Matrix4();
+    if (m === undefined) m = new Matrix4();
     m.loadIdentity().rotate(camera.angle);
           
     var transformedDir = new Vec3(
@@ -102,7 +102,7 @@ Tarumae.FPSController.prototype.dragToMoveCamera = (function() {
 })();
   
 Tarumae.FPSController.prototype.detectFirstPersonMove = (function() {
-  const m = new Tarumae.Matrix4(), dir = new Vec3();
+  const m = new Matrix4(), dir = new Vec3();
     
   return function() {
     var scene = this.scene;
@@ -112,7 +112,7 @@ Tarumae.FPSController.prototype.detectFirstPersonMove = (function() {
     if (scene && scene.mainCamera) {
       var camera = scene.mainCamera;
 
-      dir.setToZero();
+      dir.set(0, 0, 0);
 
       if (viewer.pressedKeys._t_contains(Viewer.Keys.A)) {
         dir.x = -1;

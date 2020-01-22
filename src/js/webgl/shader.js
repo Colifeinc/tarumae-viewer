@@ -8,8 +8,9 @@
 ////////////////// Shader ///////////////////////
 
 import Tarumae from "../entry";
-import { Vec2, Vec3, Vec4, Color3, Color4 } from "../math/vector";
-import "../math/matrix";
+import { Vec2, Vec3, Color3, Color4, Matrix4 } from "@jingwood/graphics-math";
+import { BBox3D as BoundingBox } from "@jingwood/graphics-math";
+import { MathFunctions } from "@jingwood/graphics-math";
 import "../webgl/texture";
 
 Tarumae.Shaders = {}
@@ -398,8 +399,8 @@ Tarumae.Shaders.ShadowMapShader = class extends Tarumae.Shader {
 		// shadow
 		// this.projectionMatrixUniform = this.findUniform('projectionMatrix');
 		// this.directionalLightDirUniform = this.findUniform('directionalLightDir');
-		this.lightMatrix = new Tarumae.Matrix4();
-		this.projectionMatrix = new Tarumae.Matrix4();
+		this.lightMatrix = new Matrix4();
+		this.projectionMatrix = new Matrix4();
 		
 		const aspectRate = this.renderer.aspectRate;
 		const scale = renderer.options.shadowQuality.scale || 5;
@@ -616,7 +617,7 @@ Tarumae.Shaders.SimpleShader = class extends Tarumae.Shader {
 	
 		gl.uniformMatrix4fv(this.modelMatrixUniform, false, modelMatrix.toArray());
 
-		var normalMatrix = new Tarumae.Matrix4(modelMatrix);
+		var normalMatrix = new Matrix4(modelMatrix);
 		normalMatrix.inverse();
 		normalMatrix.transpose();
 
@@ -1024,7 +1025,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		// light source
 		this.lightSources = [];
 		this.lightUniforms = [];
-		this.normalMatrix = new Tarumae.Matrix4();
+		this.normalMatrix = new Matrix4();
 
 		for (var i = 0; i < 50; i++) {
 			var indexName = "lights[" + i + "].";
@@ -1051,7 +1052,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		this.emptyCubemap.enableMipmap = false;
 		this.emptyCubemap.createEmpty();
 
-		this.emptyBoundingBox = new Tarumae.BoundingBox(Vec3.zero, Vec3.zero);
+		this.emptyBoundingBox = new BoundingBox(Vec3.zero, Vec3.zero);
 	}
 
 	beginScene(scene) {
@@ -1195,7 +1196,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 				this.useNormalmap = mat.normalmap;
 
 				if (typeof mat.normalMipmap !== "undefined") {
-					normalMipmap = -Tarumae.MathFunctions.clamp(mat.normalMipmap, 0, 5) * 5;
+					normalMipmap = -MathFunctions.clamp(mat.normalMipmap, 0, 5) * 5;
 				}
 			
 				if (typeof mat.normalIntensity !== "undefined") {
@@ -1553,7 +1554,7 @@ Tarumae.Shaders.ImageShader = class extends Tarumae.Shader {
 		
 		this.enableAntialiasUniform = this.bindUniform("enableAntialias", "bool");
 		this.gammaFactorUniform = this.bindUniform("gammaFactor", "float");
-		this.projectionMatrix = new Tarumae.Matrix4().ortho(-1, 1, -1, 1, -1, 1);
+		this.projectionMatrix = new Matrix4().ortho(-1, 1, -1, 1, -1, 1);
 
 		this.resetParameters();
 	}
@@ -1649,7 +1650,7 @@ Tarumae.Shaders.ScreenShader = class extends Tarumae.Shader {
 		this.gammaFactorUniform = this.bindUniform("gammaFactor", "float");
 		this.gammaFactor = 1;
 
-		this.projectionMatrix = new Tarumae.Matrix4().ortho(-1, 1, -1, 1, -1, 1);
+		this.projectionMatrix = new Matrix4().ortho(-1, 1, -1, 1, -1, 1);
 		this.color = [1, 1, 1];
 		this.opacity = 1;
 		this.texture = undefined;

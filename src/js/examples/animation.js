@@ -21,9 +21,9 @@ class AnimationDemo {
 	}
 	
 	show(scene) {
-		var lastAnimation = undefined;
+		let lastAnimation = undefined;
   
-		var objects = {
+		const objects = {
 			cube1: {
 				mesh: new Tarumae.CubeMesh(),
 				location: [-1, 0.25, 0.2],
@@ -31,12 +31,9 @@ class AnimationDemo {
 				mat: { tex: texWood },
 
 				onmouseup: function() {
-					var cube = this;
-
-					lastAnimation = scene.animate({ duration: 2, delay: 0.5 }, function(t) {
-						var s = 0.25 + Math.abs(Math.sin(t * Math.PI * 5) / 10);
-						cube.location.y = s;
-						// cube.scale = new Vec3(0.25 + s, 0.5, 0.25 + s);
+					lastAnimation = scene.animate({ duration: 2, delay: 0.5 }, (t) => {
+						const s = 0.25 + Math.abs(Math.sin(t * Math.PI * 5) / 10);
+						this.location.y = s;
 					});
 				},
 
@@ -50,7 +47,7 @@ class AnimationDemo {
 				mat: { tex: texWood },
 
 				onmouseup: function() {
-					lastAnimation = scene.animate({ duration: 1, effect: "smooth" }, t => {
+					lastAnimation = scene.animate({ duration: 1, effect: "smooth" }, (t) => {
 						this.angle.y = t * 360;
 					});
 				},
@@ -65,10 +62,8 @@ class AnimationDemo {
 				mat: { tex: texWood },
 
 				onmouseup: function() {
-					var cube = this;
-
-					lastAnimation = scene.animate({ duration: 1, repeat: 2 }, function(t) {
-						cube.location.x = 1.2 + Math.sin(t * Math.PI * 10) / 10;
+					lastAnimation = scene.animate({ duration: 1, repeat: 2 }, (t) => {
+						this.location.x = 1.2 + Math.sin(t * Math.PI * 10) / 10;
 					});
 				},
       
@@ -76,13 +71,13 @@ class AnimationDemo {
 			},
 
 			floor: {
-				mesh: new Tarumae.Shapes.PlaneMesh(2, 2),
-				scale: [3, 3, 3],
+				mesh: new Tarumae.Shapes.PlaneMesh(1, 1),
+				scale: [6, 6, 6],
 				mat: { tex: texFloor },
 			},
 		};
 
-		scene.onkeyup = function(key) {
+		scene.onkeyup = (key) => {
 			if (key === Tarumae.Viewer.Keys.Space) {
 				if (lastAnimation) {
 					if (lastAnimation.isPaused) {
@@ -98,7 +93,7 @@ class AnimationDemo {
   
 		scene.mainCamera.fieldOfView = 30;
 
-		var modelViewer = new Tarumae.ModelViewer(scene);
+		const modelViewer = new Tarumae.ModelViewer(scene);
 		modelViewer.minRotateX = -8;
 		modelViewer.maxRotateX = 70;
 		modelViewer.enableDragAcceleration = true;
@@ -107,7 +102,7 @@ class AnimationDemo {
 	}
 }
 
-window.addEventListener('load', e => {
+window.addEventListener("load", (e) => {
 	const renderer = new Tarumae.Renderer();
 	const scene = renderer.createScene();
 	window._scene = scene;

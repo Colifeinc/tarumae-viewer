@@ -13,10 +13,6 @@ import "./utility/event.js";
 import "./utility/res.js";
 import "./utility/stopwatch.js";
 import "./utility/utility.js";
-import "./math/functions.js";
-import "./math/matrix.js";
-import "./math/spacetree.js";
-import "./math/vector.js";
 import "./scene/animation.js";
 import "./scene/camera.js";
 import "./scene/material.js";
@@ -36,4 +32,3 @@ import "./webgl/shader.js";
 import "./webgl/texture.js";
 
 export default Tarumae;
-export { Vec2, Vec3, Vec4, Color3, Color4 } from "./math/vector";

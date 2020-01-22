@@ -7,7 +7,9 @@
 
 import Tarumae from "../entry";
 import "../webgl/shader.js"
-import { Vec2, Vec3, Vec4, Color3, Color4 } from "../math/vector";
+import { Vec3, Color3, Matrix4 } from "@jingwood/graphics-math";
+import { BBox3D as BoundingBox } from "@jingwood/graphics-math";
+import { MathFunctions } from "@jingwood/graphics-math";
 
 Tarumae.Shaders.PBRShader = class extends Tarumae.Shader {
 	constructor(renderer, vertShaderSrc, fragShaderSrc) {
@@ -63,7 +65,7 @@ Tarumae.Shaders.PBRShader = class extends Tarumae.Shader {
 		// light source
 		this.lightSources = [];
 		this.lightUniforms = [];
-		this.normalMatrix = new Tarumae.Matrix4();
+		this.normalMatrix = new Matrix4();
 
 		for (var i = 0; i < 50; i++) {
 			var indexName = "lights[" + i + "].";
@@ -90,7 +92,7 @@ Tarumae.Shaders.PBRShader = class extends Tarumae.Shader {
 		this.emptyCubemap.enableMipmap = false;
 		this.emptyCubemap.createEmpty();
 
-		this.emptyBoundingBox = new Tarumae.BoundingBox(Vec3.zero, Vec3.zero);
+		this.emptyBoundingBox = new BoundingBox(Vec3.zero, Vec3.zero);
 
 		this.renderer.createTextureFromURL("/static/textures/brdfLUT.png", tex => {
 			this.u_brdfLUTTex = tex;
@@ -235,7 +237,7 @@ Tarumae.Shaders.PBRShader = class extends Tarumae.Shader {
         
         let normalMipmap = 0;
         if (typeof mat.normalMipmap !== "undefined") {
-          normalMipmap = -Tarumae.MathFunctions.clamp(mat.normalMipmap, 0, 5) * 5;
+          normalMipmap = -MathFunctions.clamp(mat.normalMipmap, 0, 5) * 5;
         }
         this.normalMipmapUniform.set(normalMipmap);
       

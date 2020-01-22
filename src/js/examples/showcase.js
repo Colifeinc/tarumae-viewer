@@ -10,7 +10,7 @@ import "../scene/scene";
 import "../scene/viewer";
 import "../utility/archive";
 import "../utility/res";
-import { Vec3, Color4, Color3 } from "../math/vector";
+import { Vec3, Color4 } from "@jingwood/graphics-math";
 
 const ringTobaURL = 
 `data:text/plain;base64,

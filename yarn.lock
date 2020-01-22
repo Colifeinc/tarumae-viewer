@@ -9,6 +9,11 @@
   dependencies:
     commander "^2.15.1"
 
+"@jingwood/graphics-math@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@jingwood/graphics-math/-/graphics-math-1.0.2.tgz#df2e3b50e8f181de6ccb0cde54a37522e4512f7a"
+  integrity sha512-531n7rYIiAG0k+9iDp1+h/NyC2COea1hgsyX/JlFiOuc+dCuVW8vKcclU5zLvAugGGAYUFNMictQFoIaxWxihA==
+
 "@types/events@*":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@types/events/-/events-3.0.0.tgz#2862f3f58a9a7f7c3e78d79f130dd4d71c25c2a7"

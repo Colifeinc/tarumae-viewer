@@ -6,7 +6,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "../entry";
-import { Vec3, Vec4, Color3, Color4 } from "../math/vector";
+import { Vec3, Color4 } from "@jingwood/graphics-math";
+import { BBox3D as BoundingBox } from "@jingwood/graphics-math";
 import "../webgl/mesh";
 import "../utility/event";
 import "./object";
@@ -427,7 +428,7 @@ Tarumae.ParticleGenerator = class extends Tarumae.SceneObject {
 		super();
 
 		this.spriteCount = spriteCount || 1000;
-		this.sourceBox = new Tarumae.BoundingBox();
+		this.sourceBox = new BoundingBox();
 		this.elapsedTime = 0;
 		this.isRunning = false;
 

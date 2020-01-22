@@ -6,7 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "../entry";
-import { Color4 } from "../math/vector";
+import { Color4 } from "@jingwood/graphics-math";
 
 import "../scene/scene";
 import "../scene/animation"
@@ -47,10 +47,10 @@ window.addEventListener("load", function() {
 			ox: Math.random() * 20 - 10,
 			oy: Math.random() * 20 - 10,
 			oz: Math.random() * 20 - 10,
-			r: 1.0, //Math.random(),
-			g: 1, //Math.random() * 0.5,
-			b: 1,//Math.random(),
-			size: 1 + Math.random() * 2,
+			r: 1,//Math.random(),
+			g: Math.random() * 0.5,
+			b: Math.random(),
+			size: 1 + Math.random() * 5,
 		};
 	}
 
@@ -138,26 +138,6 @@ window.addEventListener("load", function() {
 	new Tarumae.ObjectViewController(scene, {
 		object: pobj
 	});
-
-	// setInterval(() => {
-	// 	setAll((p, i) => {
-	// 		// p.ox = Math.sin(i / Math.PI);
-	// 		// p.oy = Math.sin(i / Math.PI);
-	// 		p.oz = Math.sin(i / count * Math.PI);
-	// 	});
-	// }, 2000);
-	// scene.onmousedown = () => {
-	// 	setAll(p => {
-	// 		p.ox = Math.random() * 20 - 10;
-	// 		p.oy = Math.random() * 20 - 10;
-	// 		p.oz = Math.random() * 20 - 10;
-	// 	});
-	// };
-	// scene.onmouseup = collapse;
-	// scene.onenddrag = collapse;
-	// scene.ondrag = () => {
-	// 	pobj.angle.y += renderer.viewer.mouse.movement.x;
-	// };
 
 	scene.show();
 });

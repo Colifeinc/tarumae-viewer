@@ -1,5 +1,5 @@
 import Tarumae from "../entry";
-import { Vec3 } from "../math/vector";
+import { Vec3 } from "@jingwood/graphics-math";
 
 Tarumae.ScenePrologue = class {
   static defaultOptions() {

@@ -1,5 +1,5 @@
 import Tarumae from "../entry";
-import { Vec3 } from "../math/vector";
+import { Vec3, Matrix4 } from "@jingwood/graphics-math";
 
 Tarumae.TouchController = class {
 	static defaultOptions() {
@@ -14,7 +14,7 @@ Tarumae.TouchController = class {
 
 	constructor(scene, options) {
 		this.scene = scene;
-	this.renderer = scene.renderer;
+		this.renderer = scene.renderer;
 		this.options = { ...Tarumae.TouchController.defaultOptions(), ...options };
 		this._enabled = true;
 
@@ -22,13 +22,13 @@ Tarumae.TouchController = class {
 		const Viewer = Tarumae.Viewer;
 		const controller = this;
   
-		var m = new Tarumae.Matrix4(), dir = new Vec3();
+		var m = new Matrix4(), dir = new Vec3();
   
 		var detectFirstPersonMove = () => {
 			if (scene && scene.mainCamera) {
 				var camera = scene.mainCamera;
 
-				dir.setToZero();
+				dir.set(0, 0, 0);
 
 				if (viewer.pressedKeys._t_contains(Viewer.Keys.A)) {
 					dir.x = -1;
@@ -129,7 +129,7 @@ Tarumae.TouchController = class {
 		}
 
 		this.scene.on("drag", (function() {
-			var m = new Tarumae.Matrix4();
+			var m = new Matrix4();
   
 			return function() {
 				if (!controller._enabled) return;

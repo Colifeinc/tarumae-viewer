@@ -5,6 +5,8 @@
 // Copyright(c) 2016-2019 BULB Corp., Jingwood, all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
+import { MathFunctions } from "@jingwood/graphics-math";
+
 function TarumaeCompass(renderer) {
   this.renderer = renderer;
 
@@ -137,5 +139,5 @@ TarumaeCompass.prototype.checkArrowHittedByPosition = function(arrow, p) {
   }
 
   return bounds.contains(p)
-    && (Tarumae.MathFunctions.distancePointToLine2D(this.screenPosition, arrow.screenPosition, p) < 5);
+    && (MathFunctions.distancePointToLine2D(this.screenPosition, arrow.screenPosition, p) < 5);
 };

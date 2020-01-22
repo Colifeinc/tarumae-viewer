@@ -12,7 +12,7 @@ import "../scene/animation"
 import "../scene/viewer";
 import "../utility/archive";
 import "../utility/res";
-import { Color3, Vec3, Vec2 } from "../math/vector";
+import { Vec3, Vec2 } from "@jingwood/graphics-math";
 
 // import data1 from "/Users/jing/Projects/stylerar/reconstruction/data/no16/16_1_2.txt" ;
 import data1 from "/Users/jing/Projects/stylerar/reconstruction/data/no16/16_3.txt" ;

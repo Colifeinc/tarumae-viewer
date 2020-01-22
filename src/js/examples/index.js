@@ -1,6 +1,5 @@
 
 // import Tarumae from "../tarumae"
-// import { Vec2 } from "../math/vector"
 
 window.addEventListener("load", function() {
 

@@ -7,7 +7,8 @@
 
 import Tarumae from "../entry"
 import "../utility/event"
-import { Vec2 } from "../math/vector";
+import "../render/draw2d.js"
+import { Vec2, Matrix3 } from "@jingwood/graphics-math";
 
 var Draw2D = {};
 
@@ -101,7 +102,7 @@ Draw2D.Scene2D = class {
 
   findObjectByPosition(p) {
     let target = null;
-    const transformStack = [new Tarumae.Matrix3().loadIdentity()];
+    const transformStack = [new Matrix3().loadIdentity()];
 
     this.eachObjectInv(obj => {
       if (obj.visible && obj.hitTestPoint(p, transformStack)) {
@@ -263,7 +264,7 @@ Draw2D.Object = class {
 
     this.angle = 0;
     this.scale = new Vec2(1, 1);
-    this.transform = new Tarumae.Matrix3().loadIdentity();
+    this.transform = new Matrix3().loadIdentity();
   }
 
   // set origin(v) {
@@ -319,7 +320,7 @@ Draw2D.Object = class {
     //   || obj.angle !== 0
     //   || obj.scale.x !== 1 || obj.scale.y !== 1) {
 
-    //   t = Tarumae.Matrix3.makeTranslation(obj.origin.x, obj.origin.y);
+    //   t = Matrix3.makeTranslation(obj.origin.x, obj.origin.y);
     //   t.rotate(obj.angle);
     //   t.scale(obj.scale.x, obj.scale.y);
     

@@ -20,6 +20,7 @@
     "url": "git+ssh://git@github.com/bulbinc/tarumae-viewer.git"
   },
   "dependencies": {
+    "@jingwood/graphics-math": "^1.0.2",
     "babel-polyfill": "^6.26.0",
     "pako": "^1.0.6"
   },

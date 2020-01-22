@@ -6,7 +6,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "../entry";
-import { Vec3, Vec4, Color3, Color4 } from "../math/vector";
+import { Vec3, Vec4, Color3, Matrix4, MathFunctions } from "@jingwood/graphics-math";
+import { BBox3D as BoundingBox } from "@jingwood/graphics-math";
 import "../webgl/mesh";
 import "../utility/event";
 import "./material";
@@ -26,8 +27,8 @@ Tarumae.SceneObject = class {
 	constructor() {
 		this._parent = undefined;
 		this._scene = undefined;
-		this._transform = new Tarumae.Matrix4().loadIdentity();
-		this._normalTransform = new Tarumae.Matrix4().loadIdentity();
+		this._transform = new Matrix4().loadIdentity();
+		this._normalTransform = new Matrix4().loadIdentity();
 
 		this._suspendTransformUpdate = true;
 		this._location = new Tarumae.ObjectVectorProperty(this, "onmove");
@@ -119,7 +120,7 @@ Tarumae.SceneObject = class {
 			t.loadIdentity();
 		}
 
-		this._worldLocation = (new Vec4(this._location, 1.0).mulMat(t)).xyz();
+		this._worldLocation = (new Vec4(this._location, 1.0).mulMat(t)).xyz;
 
 		if (!this._location.equals(0, 0, 0)
 			|| !this._angle.equals(0, 0, 0)
@@ -435,7 +436,7 @@ Tarumae.SceneObject = class {
 			return this._transform;
 		}
 			
-		return this._parent ? this._parent._transform : Tarumae.Matrix4.Identity;
+		return this._parent ? this._parent._transform : Matrix4.Identity;
 	}
 
 	getRotationMatrix(selfRotate) {
@@ -447,7 +448,7 @@ Tarumae.SceneObject = class {
 			parent = parent.parent;
 		}
 
-		var m = new Tarumae.Matrix4().loadIdentity();
+		var m = new Matrix4().loadIdentity();
 
 		for (var i = plist.length - 1; i >= 0; i--) {
 			var obj = plist[i];
@@ -468,12 +469,12 @@ Tarumae.SceneObject = class {
 
 	getWorldRotation() {
 		var m = this.getRotationMatrix(true);
-		return Tarumae.MathFunctions.getEulerAnglesFromMatrix(m);
+		return MathFunctions.getEulerAnglesFromMatrix(m);
 	}
 
 	setWorldLocation(loc) {
 		var m = this.getTransformMatrix().inverse();
-		this.location = (new Vec4(loc, 1.0).mulMat(m)).xyz();
+		this.location = (new Vec4(loc, 1.0).mulMat(m)).xyz;
 	}
 
 	setWorldRotation(rot) {
@@ -508,12 +509,12 @@ Tarumae.SceneObject = class {
 						}
 					
 						var planeVectors = {
-							v1: new Vec4(triangle.v1, 1.0).mulMat(this._transform).xyz(),
-							v2: new Vec4(triangle.v2, 1.0).mulMat(this._transform).xyz(),
-							v3: new Vec4(triangle.v3, 1.0).mulMat(this._transform).xyz(),
+							v1: new Vec4(triangle.v1, 1.0).mulMat(this._transform).xyz,
+							v2: new Vec4(triangle.v2, 1.0).mulMat(this._transform).xyz,
+							v3: new Vec4(triangle.v3, 1.0).mulMat(this._transform).xyz,
 						};
 						
-						var hit = Tarumae.MathFunctions.rayIntersectsPlane(ray, planeVectors, 99999);
+						var hit = MathFunctions.rayIntersectsPlane(ray, planeVectors, 99999);
 
 						if (hit) {
 							out.t = hit.t;
@@ -544,9 +545,9 @@ Tarumae.SceneObject = class {
 							radius = this.radiyBody.radius;
 						}
 
-						var loc = new Vec4(0, 0, 0, 1).mulMat(this._transform).xyz();
+						var loc = new Vec4(0, 0, 0, 1).mulMat(this._transform).xyz;
 
-						var inSphere = Tarumae.MathFunctions.rayIntersectsSphere(ray, { origin: loc, radius: radius }, out);
+						var inSphere = MathFunctions.rayIntersectsSphere(ray, { origin: loc, radius: radius }, out);
 						if (inSphere) out.t = 0;
 
 						return inSphere;
@@ -562,12 +563,12 @@ Tarumae.SceneObject = class {
 		// scan meshes
 		if (Array.isArray(this.meshes)) {
 			for (i = 0; i < this.meshes.length; i++) {
-				bbox = Tarumae.BoundingBox.findBoundingBoxOfBoundingBoxes(bbox, this.meshes[i].boundingBox);
+				bbox = BoundingBox.findBoundingBoxOfBoundingBoxes(bbox, this.meshes[i].boundingBox);
 			}
 		}
 	
 		if (bbox) {
-			bbox = Tarumae.BoundingBox.transformBoundingBox(bbox, this._transform);
+			bbox = BoundingBox.transformBoundingBox(bbox, this._transform);
 		}
 
 		// scan children
@@ -579,7 +580,7 @@ Tarumae.SceneObject = class {
 					var objectBBox = object.getBounds();
 					
 					if (!options || !options.filter || options.filter(object)) {
-						bbox = Tarumae.BoundingBox.findBoundingBoxOfBoundingBoxes(bbox, objectBBox);
+						bbox = BoundingBox.findBoundingBoxOfBoundingBoxes(bbox, objectBBox);
 					}
 				}
 			}
@@ -810,7 +811,7 @@ Object.assign(Tarumae.SceneObject.prototype, {
 			}
 
 			if (up === undefined) up = Vec3.up;
-			if (m === undefined) m = new Tarumae.Matrix4();
+			if (m === undefined) m = new Matrix4();
 
 			m.lookAt(this.worldLocation, target, up);
 			this.angle = m.extractEulerAngles().neg();
@@ -971,7 +972,7 @@ Tarumae.Billboard.faceToCamera = function(billboard, camera) {
 
 	var diff = cameraLoc.sub(worldLoc);
 
-	billboard.angle.y = Tarumae.MathFunctions.degreeToAngle(Math.atan2(diff.x, diff.z));
+	billboard.angle.y = MathFunctions.degreeToAngle(Math.atan2(diff.x, diff.z));
 };
 
 Tarumae.BillboardMesh = class extends Tarumae.Mesh {

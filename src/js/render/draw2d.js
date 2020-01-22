@@ -6,7 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "../entry";
-import { Vec2 } from "../math/vector"
+import { Vec2, Matrix3 } from "@jingwood/graphics-math"
 
 ////////// Point //////////
 
@@ -473,7 +473,7 @@ Tarumae.DrawingContext2D = class {
 
 		this.resetDrawingStyle();
 
-		this.currentTransform = new Tarumae.Matrix3().loadIdentity();
+		this.currentTransform = new Matrix3().loadIdentity();
 		this.transformStack = new Array();
 	}
 
@@ -491,13 +491,13 @@ Tarumae.DrawingContext2D = class {
 	}
 
 	pushTranslation(x, y) {
-		const m = Tarumae.Matrix3.makeTranslation(x, y);
+		const m = Matrix3.makeTranslation(x, y);
 		this.pushTransform(m);
 		return m;
 	}
 
 	pushRotation(angle, x, y) {
-		const m = Tarumae.Matrix3.makeRotation(angle, x, y);
+		const m = Matrix3.makeRotation(angle, x, y);
 		this.pushTransform(m);
 		return m;
 	}

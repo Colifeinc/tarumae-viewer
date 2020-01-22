@@ -6,7 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "../entry"
-import { Vec2 } from "../math/vector";
+import { BBox3D as BoundingBox } from "@jingwood/graphics-math";
 
 Tarumae.CubeMap = class {
   constructor(renderer, images) {
@@ -201,7 +201,7 @@ Tarumae.CubeMap = class {
     const resX = res >> 16, resY = res & 0xffff;
 
     const bboxBuffer = new Float32Array(stream, 16, 24);
-    this.bbox = new Tarumae.BoundingBox(bboxBuffer[0], bboxBuffer[1], bboxBuffer[2],
+    this.bbox = new BoundingBox(bboxBuffer[0], bboxBuffer[1], bboxBuffer[2],
       bboxBuffer[3], bboxBuffer[4], bboxBuffer[5]);
 
     var faceDataLen = resX * resY * 3;

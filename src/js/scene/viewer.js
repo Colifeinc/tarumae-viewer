@@ -6,8 +6,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "../entry";
-import { Vec3, Vec4 } from "../math/vector";
-import "../math/matrix";
+import { Vec3, Vec4, Matrix4 } from "@jingwood/graphics-math";
+import { BBox3D as BoundingBox } from "@jingwood/graphics-math";
 import "../view/modelviewer";
 import "../view/touchcontroller";
 import "../view/objectcontroller";
@@ -435,7 +435,7 @@ Tarumae.Viewer = class {
 		if (target instanceof SceneObject) {
 			bbox = target.getBounds();
 			if (bbox) {
-				bbox = new Tarumae.BoundingBox(bbox.min, bbox.max);
+				bbox = new BoundingBox(bbox.min, bbox.max);
 				size = Math.max(bbox.size.x, bbox.size.y, bbox.size.z);
 				target = bbox.origin;
 			} else {
@@ -562,7 +562,7 @@ Tarumae.Viewer.prototype.moveOffset = (function() {
 
 	return function(offsetX, offsetY, offsetZ) {
 
-		if (m === undefined) m = new Tarumae.Matrix4();
+		if (m === undefined) m = new Matrix4();
 		m.loadIdentity().rotate(this.angle).inverse();
 
 		var v = new Vec4(offsetX, offsetY, offsetZ, 1).mulMat(m);

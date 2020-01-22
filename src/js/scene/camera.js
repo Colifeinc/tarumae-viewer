@@ -8,7 +8,7 @@
 ////////////////////////// Camera //////////////////////////
 
 import Tarumae from "../entry";
-import { Vec3 } from "../math/vector";
+import { Vec3, BBox3D as BoundingBox } from "@jingwood/graphics-math";
 import "../scene/object";
 import "../webgl/mesh";
 
@@ -81,7 +81,7 @@ Tarumae.Camera = class extends Tarumae.SceneObject {
 		let target, size, bbox = obj.getBounds();
 	
 		if (bbox) {
-			bbox = new Tarumae.BoundingBox(bbox);
+			bbox = new BoundingBox(bbox);
 			target = bbox.origin;
 			size = Math.max(bbox.size.x, bbox.size.y, bbox.size.z) * 2.0;
 		} else {
