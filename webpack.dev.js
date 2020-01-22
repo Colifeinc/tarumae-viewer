@@ -11,6 +11,7 @@ module.exports = {
     showcaseDemo: "./src/js/examples/showcase.js",
     yukako: "./src/js/examples/yukako.js",
   },
+  devtool: 'source-map',
   module: {
     rules: [
       {
