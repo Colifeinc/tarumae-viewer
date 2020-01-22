@@ -9,8 +9,7 @@ module.exports = {
     particleDemo: "./src/js/examples/particle.js",
     modelDemo: "./src/js/examples/model.js",
     showcaseDemo: "./src/js/examples/showcase.js",
-    shibauraDemo: "./src/js/examples/house_shibaura.js",
-    designer: "./src/js/designer/main.js",
+    yukako: "./src/js/examples/yukako.js",
   },
   module: {
     rules: [
@@ -77,14 +76,8 @@ module.exports = {
     new HtmlWebpackPlugin({
       inject: false,
       hash: true,
-      template: './src/examples/house_shibaura.html',
-      filename: 'house_shibaura.html'
-    }),
-    new HtmlWebpackPlugin({
-      inject: false,
-      hash: true,
-      template: './src/designer.html',
-      filename: 'designer.html'
+      template: './src/examples/yukako.html',
+      filename: 'yukako.html'
     }),
     new CopyWebpackPlugin([
       {from: 'src/css', to: 'css', force: true}

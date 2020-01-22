@@ -6,9 +6,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "../entry";
-import "../utility/*";
-import "../scene/*";
-import { Color3, Color4 } from "../math/vector";
+import { Color3, Color4 } from "@jingwood/graphics-math";
+import "../scene/scene";
+import "../scene/animation"
+import "../scene/shapes";
+import "../scene/viewer";
+import "../utility/archive";
+import "../utility/res";
 
 window.addEventListener("load", function() {
 
@@ -30,7 +34,7 @@ window.addEventListener("load", function() {
 
 	for (var x = -5; x < 5; x++) {
 		for (var y = -5; y < 5; y++) {
-			var cell = new Tarumae.Cube();
+			var cell = new Tarumae.Shapes.Cube();
 
 			cell.location.set(x, 0, y);
 			cell.scale.set(1, 0.5, 1);
