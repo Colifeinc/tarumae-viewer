@@ -82,6 +82,7 @@ vec3 traceLight(vec3 vertexNormal, vec3 cameraNormal) {
 
 	vec3 diff = vec3(0.0);
 	vec3 specular = vec3(0.0);
+	float rg = 1.0 - roughness;
 
 	for (int i = 0; i < MAX_LIGHT_COUNT; i++) {
 		if (i >= lightCount) break;
@@ -92,12 +93,12 @@ vec3 traceLight(vec3 vertexNormal, vec3 cameraNormal) {
 		float ln = dot(lightNormal, vertexNormal);
 		float ld = length(lightRay);
 		float lda = pow(2.718282, -ld);
-		diff += lights[i].color * max(ln * lda, 0.0);
+		diff += lights[i].color * max(ln * lda, 0.0) * rg;
 
 		vec3 lightReflection = reflect(lightNormal, vertexNormal);
 		float refd = max(dot(lightReflection, cameraNormal), 0.0);
 		float sf = pow(refd, pow(glossy, -2.0)) * glossy * (1.0 / ld);
-		specular += lights[i].color * sf;
+		specular += lights[i].color * sf * rg;
 	}
 
 	return diff + specular;
@@ -155,7 +156,7 @@ void main(void) {
 		refmapLookup = normalize(correctBoundingBoxIntersect(refMapBox, refmapLookup));
 	}
 
-	vec3 refColor = textureCube(refMap, refmapLookup, roughness * 100.0).rgb;
+	vec3 refColor = textureCube(refMap, refmapLookup, roughness * 10.0).rgb;
 	float rg = glossy * (1.0 - roughness);
 	refColor = clamp(pow(refColor, vec3(rg)) * glossy, 0.0, 1.0);
 	finalColor = finalColor * (1.0 - glossy) + finalColor * refColor;

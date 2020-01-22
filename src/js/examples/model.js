@@ -12,18 +12,19 @@ import "../scene/viewer";
 import "../utility/archive";
 import "../utility/res";
 import "../view/objectcontroller"
-import { Color3, Color4, Vec3 } from "../math/vector";
 
 window.addEventListener("load", function() {
 
 	const renderer = new Tarumae.Renderer({
 		// backColor: new Color4(0.74, .87, .85, 1),
 		// backgroundImage: "../static/textures/bg-gray-gradient.jpg",
+		renderingPixelRatio: window.devicePixelRatio,
 		showDebugPanel: false,
 		// enableLighting: false,
 		enableShadow: true,
 		// enableAntialias: false,
 		// enablePostprocess: false,
+		enableEnvmap: true,
 		shadowQuality: {
 			scale: 2,
 			viewDepth: 2,
@@ -33,7 +34,7 @@ window.addEventListener("load", function() {
 			threshold: 0.25,
 			gamma: 1.8,
 		},
-		postprocess: {
+		renderingImage: {
 			gamma: 1.0,
 		},
 	});
@@ -57,12 +58,20 @@ window.addEventListener("load", function() {
 		// { name: "rice_cooker_01.toba", z: 1, color: [.8, .8, .8] },
 		// { name: "sofa_leather_3s.toba" },
 
-		{ name: "layoutAssets/areca_palm.toba" },
-		// { name: "layoutAssets/ficus.toba" },
+		// { name: "layoutAssets/areca_palm.toba" },
+		// // { name: "layoutAssets/ficus.toba" },
 		{ name: "layoutAssets/KG-367JB_ZWM4.toba" },
-		{ name: "layoutAssets/JZD-1407HB_CWK.toba" },
-		{ name: "layoutAssets/JZD-1407HB_CTH.toba" },
+		// { name: "layoutAssets/JZD-1407HB_CWK.toba" },
+		// { name: "layoutAssets/JZD-1407HB_CTH.toba" },
 		// { name: "models/floor-glossy.toba" },
+		// { name: "layoutAssets/salemachine_01.toba" },
+		{ name: "layoutAssets/table_round_01.toba" },
+		{ name: "layoutAssets/chair_folding_02.toba" },
+		{ name: "layoutAssets/chair_leather_01.toba" },
+		{ name: "layoutAssets/tel_desk.toba" },
+		// { name: "layoutAssets/bed_sd_01.toba" },
+		{ name: "layoutAssets/chair_adv_01.toba" },
+		
 	];
 
 
@@ -95,8 +104,7 @@ window.addEventListener("load", function() {
 		
 		scene.createObjectFromURL("../static/" + mod.name, obj => {
 			mod.obj = obj;
-			obj.location.x = 5;
-			obj.visible = false;
+			obj.scale.set(0, 0, 0);
 			ground.add(obj);
 
 			if (firstObject) {
@@ -113,8 +121,8 @@ window.addEventListener("load", function() {
 			const mod = window.models[currentIndex];
 			if (mod) {
 				const prevObj = window.models[currentIndex].obj;
-				scene.animate({}, t => {
-					prevObj.location.x = -3 * t;
+				scene.animate({duration: 0.2}, t => {
+					prevObj.scale.set(1 - t, 1 - t, 1 - t);
 					prevObj.opacity = 1 - t;
 				}, _ => prevObj.visible = false);
 			}
@@ -136,8 +144,8 @@ window.addEventListener("load", function() {
 			if (window.refmap) window.setObjectRefmap(window.obj);
 				
 			nextObj.visible = true;
-			scene.animate({ effect: "fadein", duration: 0.5 }, t => {
-				nextObj.location.x = 3 * (1 - t);
+			scene.animate({ effect: "fadein", duration: 0.2 }, t => {
+				nextObj.scale.set(1, t, t);
 				nextObj.opacity = t;
 			});
 			scene.animate({ effect: "fadeout" }, t => {
@@ -159,25 +167,25 @@ window.addEventListener("load", function() {
 	lights.add(light1);
 		
 	const light2 = new Tarumae.PointLight();
-	light2.location.set(2, 3, 5);
-	light2.mat.emission = 3;
+	light2.location.set(5, 5, 10);
+	light2.mat.emission = 7;
 	lights.add(light2);
 
 	const light3 = new Tarumae.PointLight();
 	light3.location.set(2, 4, -5);
-	light3.mat.emission = 2;
+	light3.mat.emission = 1;
 	lights.add(light3);
 
 	const light4 = new Tarumae.PointLight();
-	light4.location.set(-3, 6, -4);
-	light4.mat.emission = 2;
+	light4.location.set(-3, -6, 4);
+	light4.mat.emission = 5;
 	lights.add(light4);
 
 	scene.add(lights);
 
 
 	// scene.sun.mat.color = [0.5, 0.5, 0.5];
-	scene.sun.mat.color = [0.85, 0.85, 0.85];
+	// scene.sun.mat.color = [0.85, 0.85, 0.85];
 	// scene.sun.mat.color = [0.95, 0.95, 0.95];
 	// scene.sun.mat.color = [0.01, 0.01, 0.01];
 
