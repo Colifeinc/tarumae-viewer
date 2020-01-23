@@ -558,11 +558,11 @@ Tarumae.SceneObject = class {
 	}
 
 	getBounds(options) {
-		var bbox, i;
+		let bbox;
 
 		// scan meshes
 		if (Array.isArray(this.meshes)) {
-			for (i = 0; i < this.meshes.length; i++) {
+			for (let i = 0; i < this.meshes.length; i++) {
 				bbox = BoundingBox.findBoundingBoxOfBoundingBoxes(bbox, this.meshes[i].boundingBox);
 			}
 		}
@@ -573,7 +573,7 @@ Tarumae.SceneObject = class {
 
 		// scan children
 		if (Array.isArray(this.objects)) {
-			for (i = 0; i < this.objects.length; i++) {
+			for (let i = 0; i < this.objects.length; i++) {
 				var object = this.objects[i];
 				
 				if (typeof object.visible !== "undefined" && object.visible) {
