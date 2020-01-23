@@ -17,13 +17,12 @@ window.addEventListener("load", function() {
 
 	const renderer = new Tarumae.Renderer({
 		// backColor: new Color4(0.74, .87, .85, 1),
-		// backgroundImage: "../static/textures/bg-gray-gradient.jpg",
-		renderingPixelRatio: window.devicePixelRatio,
+		backgroundImage: "../static/textures/bg-gray-gradient.jpg",
+		renderPixelRatio: window.devicePixelRatio,
 		showDebugPanel: false,
-		// enableLighting: false,
+		enableLighting: true,
 		enableShadow: true,
-		// enableAntialias: false,
-		// enablePostprocess: false,
+		enableAntialias: true,
 		enableEnvmap: true,
 		shadowQuality: {
 			scale: 2,
@@ -60,16 +59,22 @@ window.addEventListener("load", function() {
 
 		// { name: "layoutAssets/areca_palm.toba" },
 		// // { name: "layoutAssets/ficus.toba" },
-		{ name: "layoutAssets/KG-367JB_ZWM4.toba" },
+		// { name: "layoutAssets/bathtub_faucet_set1.toba" },
 		// { name: "layoutAssets/JZD-1407HB_CWK.toba" },
 		// { name: "layoutAssets/JZD-1407HB_CTH.toba" },
 		// { name: "models/floor-glossy.toba" },
 		// { name: "layoutAssets/salemachine_01.toba" },
-		{ name: "layoutAssets/table_round_01.toba" },
+		// { name: "layoutAssets/table_round_01.toba" },
+
+		{ name: "layoutAssets/chair_folding_01.toba" },
+		{ name: "layoutAssets/chair_bar_01.toba" },
+		// { name: "layoutAssets/chair_armrest.toba" },
+		// { name: "layoutAssets/table_circle.toba" },
+		// { name: "layoutAssets/umbrella_stand.toba" },
 		{ name: "layoutAssets/chair_folding_02.toba" },
-		{ name: "layoutAssets/chair_leather_01.toba" },
-		{ name: "layoutAssets/tel_desk.toba" },
-		// { name: "layoutAssets/bed_sd_01.toba" },
+		{ name: "layoutAssets/desk_medical_tool_3s.toba" },
+		// { name: "layoutAssets/tel_desk.toba" },
+		{ name: "layoutAssets/desk_kaari_h750.toba" },
 		{ name: "layoutAssets/chair_adv_01.toba" },
 		
 	];
@@ -80,8 +85,8 @@ window.addEventListener("load", function() {
 	const ground = {
 		mesh: new Tarumae.Shapes.PlaneMesh(3, 3),
 		mat: {
-			color: [1, 1, 1],
-			//tex: "../static/textures/bg-gray-gradient.jpg"
+			color: [1.5, 1.5, 1.5],
+			tex: "../static/textures/bg-gray-gradient.jpg"
 		},
 		angle: [0, 30, 0],
 	};
@@ -161,50 +166,43 @@ window.addEventListener("load", function() {
 
 	const lights = new Tarumae.SceneObject();
 
-	const light1 = new Tarumae.PointLight();
-	light1.location.set(-3, 4, 2);
-	light1.mat.emission = 3;
-	lights.add(light1);
+	// const light1 = new Tarumae.PointLight();
+	// light1.location.set(-3, 4, 2);
+	// light1.mat.emission = 2;
+	// lights.add(light1);
 		
 	const light2 = new Tarumae.PointLight();
-	light2.location.set(5, 5, 10);
-	light2.mat.emission = 7;
+	light2.location.set(5, 7, 10);
+	light2.mat.emission = 20;
 	lights.add(light2);
 
-	const light3 = new Tarumae.PointLight();
-	light3.location.set(2, 4, -5);
-	light3.mat.emission = 1;
-	lights.add(light3);
+	// const light3 = new Tarumae.PointLight();
+	// light3.location.set(2, 4, -5);
+	// light3.mat.emission = 1;
+	// lights.add(light3);
 
 	const light4 = new Tarumae.PointLight();
 	light4.location.set(-3, -6, 4);
-	light4.mat.emission = 5;
+	light4.mat.emission = 10;
 	lights.add(light4);
 
 	scene.add(lights);
-
-
-	// scene.sun.mat.color = [0.5, 0.5, 0.5];
-	// scene.sun.mat.color = [0.85, 0.85, 0.85];
-	// scene.sun.mat.color = [0.95, 0.95, 0.95];
-	// scene.sun.mat.color = [0.01, 0.01, 0.01];
 
 	// new Tarumae.TouchController(scene);
 	const objController = new Tarumae.ObjectViewController(scene, {
 		enableVerticalRotation: true,
 		minVerticalRotateAngle: -10,
 		maxVerticalRotateAngle: 50,
-		
 	});
 	objController.object = ground;
 
 	const cubebox = new Tarumae.ImageCubeBox(renderer, [
-		"../static/textures/office-cubemap/px.jpg",
-		"../static/textures/office-cubemap/nx.jpg",
-		"../static/textures/office-cubemap/py.jpg",
-		"../static/textures/office-cubemap/ny.jpg",
-		"../static/textures/office-cubemap/pz.jpg",
-		"../static/textures/office-cubemap/nz.jpg",
+		"../static/textures/office-cubemap-256/px.jpg",
+		"../static/textures/office-cubemap-256/nx.jpg",
+		"../static/textures/office-cubemap-256/py.jpg",
+		"../static/textures/office-cubemap-256/ny.jpg",
+		"../static/textures/office-cubemap-256/pz.jpg",
+		"../static/textures/office-cubemap-256/nz.jpg",
 	]);
 		
 	window.setObjectRefmap = (obj) => {
