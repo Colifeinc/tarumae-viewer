@@ -6,8 +6,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "../entry";
-import "../webgl/shader"
-import { Vec2, Vec3, Vec4, Color3, Color4 } from "../math/vector";
+
+import { Vec2, Vec3, Color3, Color4, Matrix4 } from "@jingwood/graphics-math";
+import { BBox3D as BoundingBox } from "@jingwood/graphics-math";
+import { MathFunctions } from "@jingwood/graphics-math";
 
 Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 	constructor(renderer, vertShaderSrc, fragShaderSrc) {
@@ -62,7 +64,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		// light source
 		this.lightSources = [];
 		this.lightUniforms = [];
-		this.normalMatrix = new Tarumae.Matrix4();
+		this.normalMatrix = new Matrix4();
 
 		for (var i = 0; i < 50; i++) {
 			var indexName = "lights[" + i + "].";
@@ -89,7 +91,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		this.emptyCubemap.enableMipmap = false;
 		this.emptyCubemap.createEmpty();
 
-		this.emptyBoundingBox = new Tarumae.BoundingBox(Vec3.zero, Vec3.zero);
+		this.emptyBoundingBox = new BoundingBox(Vec3.zero, Vec3.zero);
 	}
 
 	beginScene(scene) {
@@ -98,9 +100,16 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		this.projectViewMatrixUniform.set(this.renderer.projectionViewMatrixArray);
 
 		// camera
-		const cameraLocation = scene.mainCamera ? scene.mainCamera.worldLocation : Vec3.zero;
-		this.cameraLocUniform.set(cameraLocation);
+		const camera = scene.mainCamera;
+		let cameraLocation;
 
+		if (camera) {
+			cameraLocation = camera.worldLocation;
+		} else {
+			cameraLocation = Vec3.zero;
+		}
+
+		this.cameraLocUniform.set(cameraLocation);
 
 		// lights
 		let lightCount = 0;
@@ -135,6 +144,8 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 					}
 				}
 			}
+
+
 		}
 	
 		this.lightCountUniform.set(lightCount);
@@ -157,7 +168,8 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 	
 		// shadow
 
-		if (this._shadowMap2D && this._shadowMap2D instanceof Tarumae.Texture) {
+		if (this.renderer.options.enableShadow
+			&& this._shadowMap2D && this._shadowMap2D instanceof Tarumae.Texture) {
 			this.shadowMapTypeUniform.set(1);
 			this.shadowMapUniform.tex2d.set(this._shadowMap2D);
 			this.shadowMapUniform.texcube.set(this.emptyCubemap);
@@ -173,7 +185,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 					this.shadowMapUniform.texcube.set(scene.shadowMap);
 				}
 	
-				this.shadowMapUniform.boundingBox.set(scene.shadowMap.bbox);	
+				this.shadowMapUniform.boundingBox.set(scene.shadowMap.bbox);
 			} else {
 				this.shadowMapUniform.texcube.set(this.emptyCubemap);
 				this.shadowMapTypeUniform.set(0);
@@ -195,53 +207,47 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		this.receiveShadowUniform.set((typeof obj.receiveShadow === "boolean") ? obj.receiveShadow : true);
 
 		// material
-		const mat = obj.mat;
-		this.usingLightmap = null;
-		
-		let color = Color3.silver;
+		var mat = obj.mat;
 
-		if (typeof mat === "object" && mat != null) {
+		// var transparency = 0;
+		var normalMipmap = 0;
+		var normalIntensity = 1.0;
+
+		this.usingLightmap = null;
+		this.useNormalmap = null;
+	
+		this.textureUniform.set(Tarumae.Shader.emptyTexture);
+		this.hasTextureUniform.set(false);
+
+		let color = this.defaultColor;
+
+		if (mat) {
 			// texture
 			if (mat.tex && typeof mat.tex === "object" && mat.tex instanceof Tarumae.Texture
 				&& !mat.tex.isLoading && mat.tex.image && mat.tex.image.complete) {
 				this.textureUniform.set(mat.tex);
 				this.hasTextureUniform.set(true);
-			} else {
-				this.textureUniform.set(Tarumae.Shader.emptyTexture);
-				this.hasTextureUniform.set(false);
 			}
-				
-      // normal-map
-      if (this.renderer.options.enableNormalMap
-        && mat.normalmap && (mat.normalmap instanceof Tarumae.Texture)
-        && !mat.normalmap.isLoading && mat.normalmap.image && mat.normalmap.image.complete) {
+			
+			// normal-map
+			if (typeof mat.normalmap === "object" && mat.normalmap instanceof Tarumae.Texture
+				&& !mat.normalmap.isLoading && mat.normalmap.image && mat.normalmap.image.complete) {
+				this.useNormalmap = mat.normalmap;
 
-        this.normalMapUniform.set(mat.normalmap);
-        this.modelMatrix3x3Uniform.set(modelMatrix);
-        this.hasNormalMapUniform.set(true);
-        
-        let normalMipmap = 0;
-        if (typeof mat.normalMipmap !== "undefined") {
-          normalMipmap = -Tarumae.MathFunctions.clamp(mat.normalMipmap, 0, 5) * 5;
-        }
-        this.normalMipmapUniform.set(normalMipmap);
-      
-        let normalIntensity = 1.0;
-        if (typeof mat.normalIntensity !== "undefined") {
-          normalIntensity = mat.normalIntensity;
-        }
-        this.normalIntensityUniform.set(normalIntensity);
-      } else {
-        this.normalMapUniform.set(Tarumae.Shader.emptyTexture);
-        this.hasNormalMapUniform.set(false);
-      }
+				if (typeof mat.normalMipmap !== "undefined") {
+					normalMipmap = -MathFunctions.clamp(mat.normalMipmap, 0, 5) * 5;
+				}
+			
+				if (typeof mat.normalIntensity !== "undefined") {
+					normalIntensity = mat.normalIntensity;
+				}
+			}
 
-			// color
 			if (mat.color) {
 				color = mat.color;
 			}
 
-      // texture tiling
+			// texture tiling
 			if (mat.texTiling) {
 				this.texTilingUniform.set(mat.texTiling);
 			} else {
@@ -256,7 +262,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 			}
 			
 			// roughness
-			if (mat.roughness !== undefined) {
+			if (!isNaN(mat.roughness)) {
 				this.roughnessUniform.set(mat.roughness);
 			} else {
 				this.roughnessUniform.set(0.5);
@@ -275,7 +281,19 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 			// }
 		}
 
-		this.colorUniform.set(mat.color);
+		this.colorUniform.set(color);
+
+		// normal-map	
+		if (this.renderer.options.enableNormalMap && this.useNormalmap) {
+			this.normalMapUniform.set(this.useNormalmap);
+			this.modelMatrix3x3Uniform.set(modelMatrix);
+			this.hasNormalMapUniform.set(true);
+			this.normalMipmapUniform.set(normalMipmap);
+			this.normalIntensityUniform.set(normalIntensity);
+		} else {
+			this.normalMapUniform.set(Tarumae.Shader.emptyTexture);
+			this.hasNormalMapUniform.set(false);
+		}
 
 		// lightmap
 		if (this.renderer.options.enableLightmap
@@ -296,7 +314,6 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		
 			if (!obj.refmap.bbox) {
 				this.refmapBoxUniform.set(this.emptyBoundingBox);
-				this.refMapTypeUniform.set(1);
 			} else {
 				this.refmapBoxUniform.set(obj.refmap.bbox);
 				this.refMapTypeUniform.set(2);
@@ -315,7 +332,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		}
 
 		// shadow
-		if (this._shadowMap2D) {
+		if (this.renderer.options.enableShadow && this._shadowMap2D) {
 			const shadowMapShader = Tarumae.Renderer.Shaders.shadowmap.instance;
 			if (shadowMapShader) {
 				const m = modelMatrix.mul(shadowMapShader.lightMatrix).mul(shadowMapShader.projectionMatrix);
@@ -350,10 +367,10 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		if (this.renderer.options.enableEnvmap
 			&& typeof mesh._refmap === "object" && mesh._refmap instanceof Tarumae.CubeMap && mesh._refmap.loaded) {
 			this.refMapUniform.set(mesh._refmap);
+			this.refMapTypeUniform.set(1);
 		
 			if (!mesh._refmap.bbox) {
 				this.refmapBoxUniform.set(this.emptyBoundingBox);
-				this.refMapTypeUniform.set(1);
 			} else {
 				this.refmapBoxUniform.set(mesh._refmap.bbox);
 				this.refMapTypeUniform.set(2);
@@ -364,18 +381,33 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		}
 	}
 
+	endMesh(mesh) {
+		super.endMesh(mesh);
+	}
+
 	endObject(obj) {
 		var gl = this.renderer.gl;
 
 		this.textureUniform.unset();
-    this.normalMapUniform.unset();
 		this.lightMapUniform.unset();
 		this.refMapUniform.unset();
+
+		// normal-map	
+		if (this.useNormalmap !== null) {
+			gl.activeTexture(gl.TEXTURE3);
+			this.useNormalmap.disuse();
+		}
 
 		gl.disable(gl.BLEND);
 		gl.enable(gl.DEPTH_TEST);
 
 		super.endObject(obj);
+	}
+
+	endScene(scene) {
+		// process goes before call endScene of prototype
+
+		super.endScene(scene);
 	}
 };
 
