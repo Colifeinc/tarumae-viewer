@@ -30,12 +30,7 @@ Object.defineProperties(Tarumae.Utility.NumberExtension, {
 });
 
 Object.defineProperties(Tarumae.Utility.StringExtension, {
-	endsWith: {
-		value: function(str, suffix) {
-			return str.indexOf(suffix, str.length - suffix.length) !== -1;
-		}
-	},
-
+	
 	replaceAll: {
 		value: function(str, search, replacement) {
 			//return this.replace(new RegExp(search, 'g'), replacement); // need check illegal chars for regex
@@ -50,16 +45,6 @@ Object.defineProperties(Object.prototype, {
 		value: function(iterator) {
 			if (typeof iterator !== "function") return;
 
-			// good performance on large object, but uses extra memory
-			//
-			// var keys = Object.keys(this);
-			// for (var i = 0; i < keys.length; i++) {
-			// 	var key = keys[i];
-			// 	iterator.call(this, key, this[key]);
-			// }
-
-			// slow than above method on large object, but is generally faster and use fewer memory
-			//
 			for (var key in this) {
 				if (this.hasOwnProperty(key)) {
 					iterator.call(this, key, this[key]);

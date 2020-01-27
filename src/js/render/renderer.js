@@ -41,9 +41,9 @@ Tarumae.Renderer = class {
 			enableHighlightSelectedChildren: true,
 			enableShadow: false,
 			shadowQuality: {
-				scale: 1,
+				scale: 4,
 				viewDepth: 2,
-				resolution: 1024,
+				resolution: 1024 * window.devicePixelRatio,
 			},
 			enablePostprocess: true,
 			renderingImage: {
@@ -1255,7 +1255,7 @@ Tarumae.Renderer.Shaders = {
 	// 	vert: fs.readFileSync(__dirname + "../../../shader/viewer.vert", "utf8"),
 	// 	frag: fs.readFileSync(__dirname + "../../../shader/viewer.frag", "utf8"), class: "ViewerShader"
 	// },
-	// solidcolor: { vert: solidcolorVert, frag: solidcolorFrag, class: "SolidColorShader" },
+	solidcolor: { vert: solidcolorVert, frag: solidcolorFrag, class: "SolidColorShader" },
 	// billboard: { vert: billboardVert, frag: billboardFrag, class: "BillboardShader" },
 	// simple: { vert: simpleVert, frag: simpleFrag, class: "SimpleShader" },
 	// grayscale: { vert: grayscaleVert, frag: grayscaleFrag, class: "GrayscaleShader" },

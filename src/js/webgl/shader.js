@@ -8,9 +8,6 @@
 ////////////////// Shader ///////////////////////
 
 import Tarumae from "../entry";
-import { Vec2, Vec3, Color3, Color4, Matrix4 } from "@jingwood/graphics-math";
-import { BBox3D as BoundingBox } from "@jingwood/graphics-math";
-import { MathFunctions } from "@jingwood/graphics-math";
 import "../webgl/texture";
 
 import "./program";

@@ -16,7 +16,7 @@ Tarumae.ModelViewer = class {
     this.dragAccelerationAttenuation = 0.03;
     this.dragAccelerationIntensity = 5;
     this.maximalZoomDistance = 10;
-    this.minimalZoomDistance = 0.5;
+    this.minimalZoomDistance = 0;
     this.dragBehavior = dragBehavior;
 
     this.sceneDragHandlerListener = undefined;

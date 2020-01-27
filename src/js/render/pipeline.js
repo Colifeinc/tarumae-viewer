@@ -409,9 +409,8 @@ Tarumae.PipelineNodes.ShadowMapRenderer = class extends Tarumae.PipelineNode {
 
     const scene = this.renderer.currentScene;
 
-    this.renderer.prepareRenderMatrices();
+    // this.renderer.prepareRenderMatrices();
 
-    
     // this.renderer.projectionViewMatrix = this.renderer.viewMatrix.mul(this.renderer.cameraMatrix).mul(this.renderer.projectionMatrix);
 		// this.renderer.projectionViewMatrixArray = this.renderer.projectionViewMatrix.toArray();
 
