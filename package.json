@@ -7,10 +7,9 @@
     "/dist"
   ],
   "scripts": {
-    "build": "webpack --config webpack.prod.js --mode production",
+    "build": "npx babel src -d dist",
     "test": ":",
-    "serve": "webpack-dev-server --config webpack.dev.js --mode development",
-    "pub": "npx babel src -d dist"
+    "serve": "webpack-dev-server --config webpack.dev.js --mode development"
   },
   "keywords": [],
   "author": "BULB Corp.",
