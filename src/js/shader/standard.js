@@ -8,7 +8,7 @@
 import Tarumae from "../entry";
 
 import { Vec2, Vec3, Color3, Color4, Matrix4 } from "@jingwood/graphics-math";
-import { BBox3D as BoundingBox } from "@jingwood/graphics-math";
+import { BoundingBox3D } from "@jingwood/graphics-math";
 import { MathFunctions } from "@jingwood/graphics-math";
 
 Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
@@ -91,7 +91,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		this.emptyCubemap.enableMipmap = false;
 		this.emptyCubemap.createEmpty();
 
-		this.emptyBoundingBox = new BoundingBox(Vec3.zero, Vec3.zero);
+		this.emptyBoundingBox = new BoundingBox3D();
 	}
 
 	beginScene(scene) {

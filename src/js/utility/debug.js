@@ -6,7 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "../entry";
-import { BBox3D as BoundingBox } from "@jingwood/graphics-math";
+import { BoundingBox3D } from "@jingwood/graphics-math";
 
 Tarumae.Debugger = class {
 	constructor(renderer) {
@@ -268,7 +268,7 @@ Tarumae.Debugger = class {
       
 			var bbox = obj.getBounds();
 			if (bbox) {
-				bbox = new BoundingBox(bbox);
+				bbox = new BoundingBox3D(bbox);
 				html += "bbmin: " + bbox.min.toArrayDigits() + "<br/>"
           + "bbmax: " + bbox.max.toArrayDigits() + "<br/>"
           + "bborg: " + bbox.origin.toArrayDigits() + "<br/>"

@@ -8,7 +8,7 @@
 import Tarumae from "../entry";
 import "../utility/event";
 import { Vec2, Vec3, Vec4, Color3, Color4, Matrix3, Matrix4, Ray } from "@jingwood/graphics-math";
-import { BBox3D as BoundingBox } from "@jingwood/graphics-math";
+import { BoundingBox3D } from "@jingwood/graphics-math";
 import "../render/renderer";
 import "../scene/animation";
 import "../scene/shapes";
@@ -315,7 +315,7 @@ Tarumae.Scene = class {
 
 			var bbmin = Vec3.fromArray(pValue.bounds.min);
 			var bbmax = Vec3.fromArray(pValue.bounds.max);
-			pValue.cubemap.bbox = new BoundingBox(bbmin, bbmax);
+			pValue.cubemap.bbox = new BoundingBox3D(bbmin, bbmax);
 			_this._refmaps[pName] = pValue;
 
 			if (!datafileUrl) {
@@ -1153,7 +1153,7 @@ Tarumae.Scene = class {
 				var objectBBox = object.getBounds(options);
 		
 				if (!options || !options.filter || options.filter(object)) {
-					bbox = BoundingBox.findBoundingBoxOfBoundingBoxes(bbox, objectBBox);
+					bbox = BoundingBox3D.findBoundingBoxOfBoundingBoxes(bbox, objectBBox);
 				} else if (!bbox) {
 					bbox = objectBBox;
 				}

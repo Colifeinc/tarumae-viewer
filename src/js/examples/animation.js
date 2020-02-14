@@ -94,8 +94,8 @@ class AnimationDemo {
 		scene.mainCamera.fieldOfView = 30;
 
 		const modelViewer = new Tarumae.ModelViewer(scene);
-		modelViewer.minRotateX = -8;
-		modelViewer.maxRotateX = 70;
+		modelViewer.minRotateX = -10;
+		modelViewer.maxRotateX = 80;
 		modelViewer.enableDragAcceleration = true;
 
 		scene.show();
@@ -103,7 +103,9 @@ class AnimationDemo {
 }
 
 window.addEventListener("load", (e) => {
-	const renderer = new Tarumae.Renderer();
+	const renderer = new Tarumae.Renderer({
+		enableShadow: true
+	});
 	const scene = renderer.createScene();
 	window._scene = scene;
 

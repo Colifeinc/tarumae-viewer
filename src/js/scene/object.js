@@ -7,7 +7,8 @@
 
 import Tarumae from "../entry";
 import { Vec3, Vec4, Color3, Matrix4, MathFunctions } from "@jingwood/graphics-math";
-import { BBox3D as BoundingBox } from "@jingwood/graphics-math";
+import { MathFunctions as _mf, MathFunctions as _mf3 } from "@jingwood/graphics-math";
+import { BoundingBox3D  } from "@jingwood/graphics-math";
 import "../webgl/mesh";
 import "../utility/event";
 import "./material";
@@ -469,7 +470,7 @@ Tarumae.SceneObject = class {
 
 	getWorldRotation() {
 		var m = this.getRotationMatrix(true);
-		return MathFunctions.getEulerAnglesFromMatrix(m);
+		return _mf3.getEulerAnglesFromMatrix(m);
 	}
 
 	setWorldLocation(loc) {
@@ -514,7 +515,7 @@ Tarumae.SceneObject = class {
 							v3: new Vec4(triangle.v3, 1.0).mulMat(this._transform).xyz,
 						};
 						
-						var hit = MathFunctions.rayIntersectsPlane(ray, planeVectors, 99999);
+						var hit = _mf3.rayIntersectsPlane(ray, planeVectors, 99999);
 
 						if (hit) {
 							out.t = hit.t;
@@ -539,15 +540,15 @@ Tarumae.SceneObject = class {
 
 				case "sphere":
 					{
-						var radius = 0.1;
+						let radius = 0.1;
 
 						if (typeof this.radiyBody.radius !== "undefined") {
 							radius = this.radiyBody.radius;
 						}
 
-						var loc = new Vec4(0, 0, 0, 1).mulMat(this._transform).xyz;
+						const loc = new Vec4(0, 0, 0, 1).mulMat(this._transform).xyz;
 
-						var inSphere = MathFunctions.rayIntersectsSphere(ray, { origin: loc, radius: radius }, out);
+						const inSphere = _mf3.rayIntersectsSphere(ray, { origin: loc, radius: radius }, out);
 						if (inSphere) out.t = 0;
 
 						return inSphere;
@@ -563,12 +564,12 @@ Tarumae.SceneObject = class {
 		// scan meshes
 		if (Array.isArray(this.meshes)) {
 			for (let i = 0; i < this.meshes.length; i++) {
-				bbox = BoundingBox.findBoundingBoxOfBoundingBoxes(bbox, this.meshes[i].boundingBox);
+				bbox = BoundingBox3D.findBoundingBoxOfBoundingBoxes(bbox, this.meshes[i].boundingBox);
 			}
 		}
 	
 		if (bbox) {
-			bbox = BoundingBox.transformBoundingBox(bbox, this._transform);
+			bbox = BoundingBox3D.transformBoundingBox(bbox, this._transform);
 		}
 
 		// scan children
@@ -580,7 +581,7 @@ Tarumae.SceneObject = class {
 					var objectBBox = object.getBounds();
 					
 					if (!options || !options.filter || options.filter(object)) {
-						bbox = BoundingBox.findBoundingBoxOfBoundingBoxes(bbox, objectBBox);
+						bbox = BoundingBox3D.findBoundingBoxOfBoundingBoxes(bbox, objectBBox);
 					}
 				}
 			}
@@ -972,7 +973,7 @@ Tarumae.Billboard.faceToCamera = function(billboard, camera) {
 
 	var diff = cameraLoc.sub(worldLoc);
 
-	billboard.angle.y = MathFunctions.degreeToAngle(Math.atan2(diff.x, diff.z));
+	billboard.angle.y = _mf.degreeToAngle(Math.atan2(diff.x, diff.z));
 };
 
 Tarumae.BillboardMesh = class extends Tarumae.Mesh {

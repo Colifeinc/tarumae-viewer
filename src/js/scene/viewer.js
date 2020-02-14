@@ -7,7 +7,7 @@
 
 import Tarumae from "../entry";
 import { Vec3, Vec4, Matrix4 } from "@jingwood/graphics-math";
-import { BBox3D as BoundingBox } from "@jingwood/graphics-math";
+import { BoundingBox3D } from "@jingwood/graphics-math";
 import "../view/modelviewer";
 import "../view/touchcontroller";
 import "../view/objectcontroller";
@@ -435,7 +435,7 @@ Tarumae.Viewer = class {
 		if (target instanceof SceneObject) {
 			bbox = target.getBounds();
 			if (bbox) {
-				bbox = new BoundingBox(bbox.min, bbox.max);
+				bbox = new BoundingBox3D(bbox.min, bbox.max);
 				size = Math.max(bbox.size.x, bbox.size.y, bbox.size.z);
 				target = bbox.origin;
 			} else {

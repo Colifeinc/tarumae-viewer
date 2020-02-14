@@ -1,5 +1,6 @@
 
 import Tarumae from "../entry";
+import { Color3 } from "@jingwood/graphics-math";
 
 Tarumae.Shaders.PointShader = class extends Tarumae.Shader {
 	constructor(renderer, vertShaderSrc, fragShaderSrc) {

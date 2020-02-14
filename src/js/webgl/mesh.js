@@ -6,8 +6,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "../entry";
-import { Vec2, Vec3, Vec4, Matrix4, MathFunctions } from "@jingwood/graphics-math";
-import { BBox3D as BoundingBox } from "@jingwood/graphics-math";
+import { Vec2, Vec3, Vec4, Matrix4 } from "@jingwood/graphics-math";
+import { MathFunctions as _mf, MathFunctions2 as _mf2, MathFunctions3 as _mf3 } from "@jingwood/graphics-math";
+import { BoundingBox3D } from "@jingwood/graphics-math";
 
 Tarumae.Mesh = class {
 	constructor() {
@@ -812,9 +813,9 @@ Object.assign(Tarumae.Mesh.prototype, {
 			var mmat = session.mmat;
 			var bbox = this.boundingBox;
 
-			bbox = BoundingBox.transformBoundingBox(bbox, mmat);
+			bbox = BoundingBox3D.transformBoundingBox(bbox, mmat);
 
-			if (!MathFunctions.rayIntersectsBox(ray, bbox)) {
+			if (!_mf3.rayIntersectsBox(ray, bbox)) {
 				return null;
 			}
 		}
@@ -885,7 +886,7 @@ Object.assign(Tarumae.Mesh.prototype, {
 			var vv2 = v2.mulMat(mmat).xyz;
 			var vv3 = v3.mulMat(mmat).xyz;
 		
-			var out = MathFunctions.rayIntersectsTriangle(ray, { v1: vv1, v2: vv2, v3: vv3 }, maxt);
+			var out = _mf3.rayIntersectsTriangle(ray, { v1: vv1, v2: vv2, v3: vv3 }, maxt);
 
 			if (out) {
 				var f1 = vv1.sub(out.hit);
@@ -938,7 +939,7 @@ Object.assign(Tarumae.Mesh.prototype, {
 				cv3.x = v3.x; cv3.y = v3.z;
 				cp1.x = p.x; cp1.y = p.z;
 
-				if (MathFunctions.triangleContainsPoint2D(cv1, cv2, cv3, cp1)) {
+				if (_mf2.triangleContainsPoint(cv1, cv2, cv3, cp1)) {
 					return true;
 				}
 			}
@@ -949,7 +950,7 @@ Object.assign(Tarumae.Mesh.prototype, {
 
 	validateMovementUsingVertexData: (function() {
 
-		var enumerateEdge = function(transformedVertices, iterator) {
+		const enumerateEdge = function(transformedVertices, iterator) {
 			for (var i = 0; i < transformedVertices.length; i += 3) {
 				var v1 = transformedVertices[i], v2 = transformedVertices[i + 1], v3 = transformedVertices[i + 2];
 
@@ -963,14 +964,14 @@ Object.assign(Tarumae.Mesh.prototype, {
 
 		return function(loc, movement, options, transform) {
 			options = options || {};
-			var _this = this;
+			const _this = this;
 
 			if (this.cachedNavmeshBorders === undefined) {
 				this.cachedNavmeshBorders = [];
 
-				var transformedVertices = this.getTranformedVerticesFromCache(transform);
+				const transformedVertices = this.getTranformedVerticesFromCache(transform);
 
-				var findSharedEdge = function(i, e1) {
+				const findSharedEdge = function(i, e1) {
 					return enumerateEdge(transformedVertices, function(i2, e2) {
 						return i !== i2
 							&& ((e1.v1.almostSame(e2.v1) && e1.v2.almostSame(e2.v2))
@@ -987,7 +988,7 @@ Object.assign(Tarumae.Mesh.prototype, {
 				});
 			}
 			
-			var target = Vec3.add(loc, movement);
+			const target = Vec3.add(loc, movement);
 	
 			if (!this.containsPointHorizontally(target, transform)) {
 
@@ -995,12 +996,12 @@ Object.assign(Tarumae.Mesh.prototype, {
 					return false;
 				}
 
-				var hits = [];
+				const hits = [];
 
-				for (var i = 0; i < _this.cachedNavmeshBorders.length; i++) {
-					var border = _this.cachedNavmeshBorders[i];
+				for (let i = 0; i < _this.cachedNavmeshBorders.length; i++) {
+					const border = _this.cachedNavmeshBorders[i];
 
-					var out = MathFunctions.lineIntersectsLine2DXY(
+					const out = _mf2.lineIntersectsLine2DXY(
 						loc.x, loc.z, target.x, target.z,
 						border.v1.x, border.v1.z, border.v2.x, border.v2.z);
 					
@@ -1019,18 +1020,18 @@ Object.assign(Tarumae.Mesh.prototype, {
 
 					border = hits[0];
 					
-					var vmove = new Vec2(movement.x, movement.z);
-					var movedir = vmove.normalize();
+					const vmove = new Vec2(movement.x, movement.z);
+					const movedir = vmove.normalize();
 
-					var vborder = new Vec2(border.v2.x - border.v1.x, border.v2.z - border.v1.z);
-					var borderdir = vborder.normalize();
+					let vborder = new Vec2(border.v2.x - border.v1.x, border.v2.z - border.v1.z);
+					let borderdir = vborder.normalize();
 
 					if (Vec2.dot(borderdir, movedir) < 0) {
 						vborder = vborder.neg();
 						borderdir = borderdir.neg();
 					}
 
-					var fixmove = borderdir.mul(Math.max(vmove.length(), 0));
+					const fixmove = borderdir.mul(Math.max(vmove.length(), 0));
 				
 					// FIXME: need to be optimized without searching mesh again
 					if (!this.containsPointHorizontally(Vec3.add(loc, new Vec3(fixmove.x, 0, fixmove.y)), transform)) {

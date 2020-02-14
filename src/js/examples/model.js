@@ -67,6 +67,7 @@ window.addEventListener("load", function() {
 		// { name: "layoutAssets/table_round_01.toba" },
 
 		{ name: "layoutAssets/chair_folding_01.toba" },
+		{ name: "layoutAssets/JVB-1207GLPN_PH.toba" },
 		{ name: "layoutAssets/chair_bar_01.toba" },
 		// { name: "layoutAssets/chair_armrest.toba" },
 		// { name: "layoutAssets/table_circle.toba" },
@@ -76,6 +77,7 @@ window.addEventListener("load", function() {
 		// { name: "layoutAssets/tel_desk.toba" },
 		{ name: "layoutAssets/desk_kaari_h750.toba" },
 		{ name: "layoutAssets/chair_adv_01.toba" },
+		{ name: "layoutAssets/shredder.toba" },
 		
 	];
 

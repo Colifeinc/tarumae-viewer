@@ -8,7 +8,7 @@
 import Tarumae from "../entry";
 import "../utility/utility";
 import { Vec3, Vec4, Color4, Matrix4, Ray } from "@jingwood/graphics-math";
-import { MathFunctions } from "@jingwood/graphics-math";
+import { MathFunctions as _mf, MathFunctions3 as _mf3 } from "@jingwood/graphics-math";
 import "../scene/scene";
 import { initDOM } from "./dom";
 import "./pipeline";
@@ -720,7 +720,7 @@ Tarumae.Renderer = class {
 	
 		if (!transparencyRendering) {
 			obj._opacity = (!isNaN(obj.opacity) ? obj.opacity : 1)
-				* (1.0 - MathFunctions.clamp((obj.mat && !isNaN(obj.mat.transparency)) ? obj.mat.transparency : 0));
+				* (1.0 - _mf.clamp((obj.mat && !isNaN(obj.mat.transparency)) ? obj.mat.transparency : 0));
 	
 			if (obj._opacity < 1) {
 				this.transparencyList.push(obj);
@@ -1013,7 +1013,7 @@ Tarumae.Renderer = class {
 		
 	viewRayHitTestPlaneInWorldSpace(pos, planeVertices) {
 		const ray = this.createWorldRayFromScreenPosition(pos);
-		return MathFunctions.rayIntersectsPlane(ray, planeVertices, Tarumae.Ray.MaxDistance);
+		return _mf3.rayIntersectsPlane(ray, planeVertices, Tarumae.Ray.MaxDistance);
 	};
 
 	// 2D Drawing by 3D coordinates - Start
