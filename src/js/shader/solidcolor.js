@@ -8,7 +8,7 @@ Tarumae.Shaders.SolidColorShader = class extends Tarumae.Shader {
 		this.use();
 
 		this.vertexPositionAttribute = this.findAttribute("vertexPosition");
-		this.colorUniform = this.bindUniform("color", "vec4");
+		this.colorUniform = this.bindUniform("color", "color4");
 		this.projectViewModelMatrixUniform = this.bindUniform("projectViewModelMatrix", "mat4");
 
 		this.defaultColor4 = [0.8, 0.8, 0.8, 1.0];
