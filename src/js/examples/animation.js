@@ -31,9 +31,10 @@ class AnimationDemo {
 				mat: { tex: texWood },
 
 				onmouseup: function() {
-					lastAnimation = scene.animate({ duration: 2, delay: 0.5 }, (t) => {
+					lastAnimation = scene.animate({ duration: 2, delay: 0.5 }, t => {
 						const s = 0.25 + Math.abs(Math.sin(t * Math.PI * 5) / 10);
 						this.location.y = s;
+
 					});
 				},
 

@@ -547,8 +547,8 @@ Tarumae.Renderer = class {
 			this.currentShader.beginScene(scene);
 		}
 	
-		for (var i = 0; i < scene.objects.length; i++) {
-			this.drawObject(scene.objects[i]);
+		for (const obj of scene.objects) {
+			this.drawObject(obj);
 		}
 
 		if (this.wireframe) {
@@ -563,8 +563,7 @@ Tarumae.Renderer = class {
 
 			// draw selected objects
 			if (Array.isArray(scene.selectedObjects)) {
-				for (var k = 0; k < scene.selectedObjects.length; k++) {
-					var obj = scene.selectedObjects[k];
+				for (const obj of scene.selectedObjects) {
 					if (obj.visible) {
 						this.drawHighlightObject(obj, new Color4(0.1, 0.6, 1.0, 0.5));
 	
@@ -835,16 +834,12 @@ Tarumae.Renderer = class {
 			return;
 		}
 	
-		// var gl = this.gl;
-	
-		var shader = this.useShader("solidcolor");
+		const shader = this.useShader("solidcolor");
 	
 		shader.color = color;
 		shader.beginObject(obj);
 	
-		for (var i = 0; i < obj.meshes.length; i++) {
-			var mesh = obj.meshes[i];
-	
+		for (const mesh of obj.meshes) {	
 			shader.beginMesh(mesh);
 			mesh.draw(this);
 			shader.endMesh(mesh);
@@ -859,8 +854,7 @@ Tarumae.Renderer = class {
 	}
 	
 	drawHighlightChildren(obj, color) {
-		for (var i = 0; i < obj.objects.length; i++) {
-			var child = obj.objects[i];
+		for (const child of obj.objects) {
 			this.drawHighlightObject(child, color);
 	
 			if (child.objects.length > 0) {

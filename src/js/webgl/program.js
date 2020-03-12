@@ -168,17 +168,6 @@ Tarumae.ShaderUniform = class {
 				// }
 				break;
 
-			case "vec2":
-				this.address = this.register(shader, name);
-				this.set = val => {
-					if (Array.isArray(val)) {
-						gl.uniform2fv(this.address, val);
-					} else {
-						gl.uniform2f(this.address, val.x, val.y);
-					}
-				};
-				break;
-
 			case "color3":
 				this.address = this.register(shader, name);
 				this.set = val => {
@@ -190,17 +179,6 @@ Tarumae.ShaderUniform = class {
 				};
 				break;
 
-			case "vec3":
-				this.address = this.register(shader, name);
-				this.set = val => {
-					if (Array.isArray(val)) {
-						gl.uniform3fv(this.address, val);
-					} else {
-						gl.uniform3f(this.address, val.x, val.y, val.z);
-					}
-				};
-				break;
-
 			case "color4":
 				this.address = this.register(shader, name);
 				this.set = val => {
@@ -208,6 +186,28 @@ Tarumae.ShaderUniform = class {
 						gl.uniform4fv(this.address, val);
 					} else {
 						gl.uniform4f(this.address, val.r, val.g, val.b, val.a);
+					}
+				};
+				break;
+			
+			case "vec2":
+				this.address = this.register(shader, name);
+				this.set = val => {
+					if (Array.isArray(val)) {
+						gl.uniform2fv(this.address, val);
+					} else {
+						gl.uniform2f(this.address, val.x, val.y);
+					}
+				};
+				break;
+			
+			case "vec3":
+				this.address = this.register(shader, name);
+				this.set = val => {
+					if (Array.isArray(val)) {
+						gl.uniform3fv(this.address, val);
+					} else {
+						gl.uniform3f(this.address, val.x, val.y, val.z);
 					}
 				};
 				break;

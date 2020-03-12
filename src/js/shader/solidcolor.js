@@ -17,37 +17,36 @@ Tarumae.Shaders.SolidColorShader = class extends Tarumae.Shader {
 	beginObject(obj) {
 		super.beginObject(obj);
 
-		var gl = this.gl;
-
-		var color;
+		let color;
 	
 		if (obj.shader && obj.shader.color) {
-			var cobj = obj.shader.color;
+			const objcolor = obj.shader.color;
 
-			if (Array.isArray(cobj)) {
-				color = cobj;
-			} else if (cobj instanceof Color4) {
-				color = cobj.toArray();
-			} else if (cobj instanceof Color3) {
-				color = [cobj.r, cobj.g, cobj.b, 1.0];
+			if (Array.isArray(objcolor)) {
+				color = objcolor;
+			} else if (objcolor instanceof Color4) {
+				color = objcolor.toArray();
+			} else if (objcolor instanceof Color3) {
+				color = [objcolor.r, objcolor.g, objcolor.b, 1.0];
 			}
+		} else if (this.color) {
+			color = this.color;
+		} else {
+			color = this.defaultColor4;
 		}
-	
-		this.color = color || this.color || this.defaultColor4;
 
-		this.colorUniform.set(this.color);
-
-		var modelMatrix = obj._transform;
+		this.colorUniform.set(color);
 	
 		this.projectViewModelMatrixUniform.set(
-			(modelMatrix.mul(this.renderer.projectionViewMatrix)).toArray());
+			(obj._transform.mul(this.renderer.projectionViewMatrix)).toArray());
 	
+		const gl = this.gl;
 		gl.enable(gl.BLEND);
 		gl.disable(gl.DEPTH_TEST);
 	}
 
 	endObject(obj) {
-		var gl = this.renderer.gl;
+		const gl = this.renderer.gl;
 	
 		gl.disable(gl.BLEND);
 		gl.enable(gl.DEPTH_TEST);
