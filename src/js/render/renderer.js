@@ -539,6 +539,12 @@ Tarumae.Renderer = class {
 
 		scene.beforeDrawFrame(this);
 
+		if (scene.skybox && scene.skybox.loaded) {
+			this.useShader("panorama");
+			this.drawObject(scene.skybox.cube);
+			this.disuseCurrentShader();
+		}
+
 		if (this.wireframe) {
 			this.useShader("wireframe");
 		}

@@ -262,6 +262,7 @@ Tarumae.ImageCubeBox = class {
       throw new Error("renderer cannot be null or undefined");
     }
 
+    this.loaded = false;
     this.renderer = renderer;
 
     if (Array.isArray(imageUrls)) {
@@ -288,7 +289,7 @@ Tarumae.ImageCubeBox = class {
       imageUrls[5], Tarumae.ResourceTypes.Image,
     ]);
 
-    rm.load(() => {
+    rm.load(_ => {
       this.cubemap.setImages([
         rm.get(imageUrls[0]),
         rm.get(imageUrls[1]),
@@ -297,9 +298,13 @@ Tarumae.ImageCubeBox = class {
         rm.get(imageUrls[4]),
         rm.get(imageUrls[5]),
       ]);
-  
-      this.onload();
+      this.initFinished();
     });
+  }
+
+  initFinished() {
+    this.loaded = true;
+    this.onload();
   }
 };
 
@@ -308,12 +313,36 @@ new Tarumae.EventDispatcher(Tarumae.ImageCubeBox).registerEvents("load");
 /////////////////// SkyBox ///////////////////
 
 Tarumae.SkyBox = class extends Tarumae.ImageCubeBox {
-  constructor(renderer, imageUrls) {
+  constructor(renderer, imageUrls, size = 500) {
     super(renderer, imageUrls);
-    this.size = { width: 1000, height: 1000 };
+
+    this.cube = new Tarumae.Shapes.Cube();
+    this.cube.location.set(0, 2, 0);
+    this.cube.scale.set(size, size, size);
   }
 
-  render() {
-
+  initFinished() {
+    this.cube.mat = { tex: this.cubemap };
+    if (this.renderer && this.renderer.currentScene) {
+      this.renderer.currentScene.requireUpdateFrame();
+    }
+    super.initFinished();
   }
+
+  get visible() {
+    return this.cube.visible;
+  }
+
+  set visible(v) {
+    if (this.cube) {
+      if (this.cube.visible !== v) {
+        this.cube.visible = v;
+
+        if (this.cube.scene) {
+          this.cube.scene.requireUpdateFrame();
+        }
+      }
+    }
+  }
+
 };
