@@ -926,13 +926,13 @@ Object.assign(Tarumae.Mesh.prototype, {
 	})(),
 	
 	containsPointHorizontally: (function() {
-		var cp1 = { x: 0, y: 0 }, cv1 = { x: 0, y: 0 }, cv2 = { x: 0, y: 0 }, cv3 = { x: 0, y: 0 };
+		const cp1 = { x: 0, y: 0 }, cv1 = { x: 0, y: 0 }, cv2 = { x: 0, y: 0 }, cv3 = { x: 0, y: 0 };
 
 		return function(p, transform) {
-			var transformedVertices = this.getTranformedVerticesFromCache(transform);
+			const transformedVertices = this.getTranformedVerticesFromCache(transform);
 
-			for (var i = 0; i < transformedVertices.length; i += 3) {
-				var v1 = transformedVertices[i], v2 = transformedVertices[i + 1], v3 = transformedVertices[i + 2];
+			for (let i = 0; i < transformedVertices.length; i += 3) {
+				const v1 = transformedVertices[i], v2 = transformedVertices[i + 1], v3 = transformedVertices[i + 2];
 
 				cv1.x = v1.x; cv1.y = v1.z;
 				cv2.x = v2.x; cv2.y = v2.z;
@@ -1001,7 +1001,7 @@ Object.assign(Tarumae.Mesh.prototype, {
 				for (let i = 0; i < _this.cachedNavmeshBorders.length; i++) {
 					const border = _this.cachedNavmeshBorders[i];
 
-					const out = _mf2.lineIntersectsLine2DXY(
+					const out = _mf2.lineIntersectsLineXYGetPoint(
 						loc.x, loc.z, target.x, target.z,
 						border.v1.x, border.v1.z, border.v2.x, border.v2.z);
 					
@@ -1018,7 +1018,7 @@ Object.assign(Tarumae.Mesh.prototype, {
 						hits.sort(function(a, b) { return a.ta - b.ta; });
 					}
 
-					border = hits[0];
+					const border = hits[0];
 					
 					const vmove = new Vec2(movement.x, movement.z);
 					const movedir = vmove.normalize();
