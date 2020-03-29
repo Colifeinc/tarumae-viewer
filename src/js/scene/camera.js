@@ -50,7 +50,7 @@ Tarumae.Camera = class extends Tarumae.SceneObject {
 		this.viewSize = new Tarumae.Size(800, 600);
 
 		// Field of View (AFOV)
-		this.fieldOfView = 40;
+		this.fieldOfView = 75;
 
 		// Projection Method (Persp/Ortho)
 		this.projectionMethod = Tarumae.ProjectionMethods.Persp;

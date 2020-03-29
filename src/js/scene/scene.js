@@ -41,7 +41,7 @@ Tarumae.Scene = class {
 		// main camera
 		if (typeof Tarumae.Camera === "function") {
 			this.mainCamera = new Tarumae.Camera();
-			this.mainCamera.location.set(0, 1.5, 6);
+			this.mainCamera.location.set(0, 1, 3);
 			this.mainCamera.angle.x = -5;
 			this.add(this.mainCamera);
 		}
@@ -931,17 +931,12 @@ Tarumae.Scene = class {
 	 * Finds objects and children in this scene by specified name. Returns null if nothing found.
 	 */
 	findObjectByName(name) {
-		var obj;
-
-		for (var i = 0; i < this.objects.length; i++) {
-			obj = this.objects[i];
-			if (obj.name == name) return obj;
+		for (const obj of this.objects) {
+			if (obj.name === name) return obj;
 		}
 
-		for (var k = 0; k < this.objects.length; k++) {
-			obj = this.objects[k];
-
-			var child = obj.findObjectByName(name);
+		for (const obj of this.objects) {
+			const child = obj.findObjectByName(name);
 			if (child) return child;
 		}
 
