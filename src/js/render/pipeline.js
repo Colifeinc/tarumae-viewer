@@ -307,7 +307,7 @@ Tarumae.PipelineNodes.ImageFilterRenderer = class extends Tarumae.PipelineNode {
     if (this._input.output) {
       const imageShader = this.shader;
       imageShader.texture = this._input.output;
-      imageShader.tex2 = undefined;
+      // imageShader.tex2 = undefined;
 
       if (typeof this.enableAntialias !== "undefined") {
         imageShader.enableAntialias = this.enableAntialias;

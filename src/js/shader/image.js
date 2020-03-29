@@ -14,7 +14,7 @@ Tarumae.Shaders.ImageShader = class extends Tarumae.Shader {
 
 		this.textureUniform = this.bindUniform("texture", "tex", 0);
 		this.texture2Uniform = this.bindUniform("tex2", "tex", 1);
-		this.hasTex2Uniform = this.bindUniform("hasTex2", "bool");
+		// this.hasTex2Uniform = this.bindUniform("hasTex2", "bool");
 		
 		this.colorUniform = this.bindUniform("color", "color3");
 		this.opacityUniform = this.bindUniform("opacity", "float");
@@ -58,10 +58,10 @@ Tarumae.Shaders.ImageShader = class extends Tarumae.Shader {
 
 		if (this.tex2) {
 			this.texture2Uniform.set(this.tex2);
-			this.hasTex2Uniform.set(true);
+			// this.hasTex2Uniform.set(true);
 		} else {
 			this.texture2Uniform.set(Tarumae.Shader.emptyTexture);
-			this.hasTex2Uniform.set(false);
+			// this.hasTex2Uniform.set(false);
 		}
 
 		this.gl.depthMask(false);

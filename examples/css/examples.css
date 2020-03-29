@@ -1,0 +1,46 @@
+html body {
+  background-color: #333333;
+  font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  color: #999999;
+}
+
+.header {
+  position: absolute;
+  top: 0;
+  height: 100px;
+  left: 0;
+  right: 0;
+}
+
+.header .logo {
+  position: absolute;
+  right: 0;
+  width: 340px;
+  height: 30px;
+  background-image: url("../img/logo_text.svg");
+  background-size: 20em;
+  background-repeat: no-repeat;
+}
+
+.tips {
+  position: absolute;
+  top: 200px;
+  left: 0;
+  right: 0;
+  text-align: center;
+}
+
+.see-code {
+  position: absolute;
+  bottom: 1em;
+  left: 1em;
+  border: solid 2px silver;
+  background-color: rgba(100, 100, 100, .1);
+}
+
+.see-code a {
+  text-decoration: none;
+  color: gray;
+  margin: 1em;
+  font-size: small;
+}

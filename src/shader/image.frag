@@ -8,10 +8,10 @@
 precision mediump float;
 
 uniform sampler2D texture;
-uniform sampler2D tex2;
+// uniform sampler2D tex2;
 
-uniform bool hasTex2;
-uniform vec2 tex2Resolution;
+// uniform bool hasTex2;
+// uniform vec2 tex2Resolution;
 
 uniform float opacity;
 uniform vec3 color;

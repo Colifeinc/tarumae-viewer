@@ -52,12 +52,12 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		this.lightMapUniform = this.bindUniform("lightMap", "tex", 2);
 		this.refMapUniform = this.bindUniform("refMap", "texcube", 4);
 
-		this.hasTextureUniform = this.bindUniform("hasTexture", "bool");
-		this.hasLightMapUniform = this.bindUniform("hasLightMap", "bool");
+		// this.hasTextureUniform = this.bindUniform("hasTexture", "bool");
+		// this.hasLightMapUniform = this.bindUniform("hasLightMap", "bool");
 		this.refMapTypeUniform = this.bindUniform("refMapType", "int");
 		this.shadowMapTypeUniform = this.bindUniform("shadowMapType", "int");
 		this.hasNormalMapUniform = this.bindUniform("hasNormalMap", "bool");
-		this.hasUV2Uniform = this.bindUniform("hasUV2", "bool");
+		// this.hasUV2Uniform = this.bindUniform("hasUV2", "bool");
 
 		this.cameraLocUniform = this.bindUniform("cameraLoc", "vec3");
 
@@ -217,7 +217,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		this.useNormalmap = null;
 	
 		this.textureUniform.set(Tarumae.Shader.emptyTexture);
-		this.hasTextureUniform.set(false);
+		// this.hasTextureUniform.set(false);
 
 		let color = this.defaultColor;
 
@@ -226,7 +226,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 			if (mat.tex && typeof mat.tex === "object" && mat.tex instanceof Tarumae.Texture
 				&& !mat.tex.isLoading && mat.tex.image && mat.tex.image.complete) {
 				this.textureUniform.set(mat.tex);
-				this.hasTextureUniform.set(true);
+				// this.hasTextureUniform.set(true);
 			}
 			
 			// normal-map
@@ -300,10 +300,10 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 			&& obj.lightmap && (obj.lightmap instanceof Tarumae.Texture)
 			&& !obj.lightmap.isLoading) {
 			this.lightMapUniform.set(obj.lightmap);
-			this.hasLightMapUniform.set(true);
+			// this.hasLightMapUniform.set(true);
 		} else {
 			this.lightMapUniform.set(Tarumae.Shader.emptyTexture);
-			this.hasLightMapUniform.set(false);
+			// this.hasLightMapUniform.set(false);
 		}
 
 		// refmap
@@ -346,7 +346,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 	
 		var gl = this.gl;
 
-		this.hasUV2Uniform.set(mesh.meta && mesh.meta.uvCount > 1);
+		// this.hasUV2Uniform.set(mesh.meta && mesh.meta.uvCount > 1);
 
 		// lightmap
 		if (this.usingLightmap === null) {
@@ -356,10 +356,10 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 				&& !mesh._lightmap.isLoading) {
 				this.usingLightmap = mesh._lightmap;
 				this.usingLightmap.use(this.renderer);
-				this.hasLightMapUniform.set(true);
+				// this.hasLightMapUniform.set(true);
 			} else {
 				Tarumae.Shader.emptyTexture.use(this.renderer);
-				this.hasLightMapUniform.set(false);
+				// this.hasLightMapUniform.set(false);
 			}
 		}
 

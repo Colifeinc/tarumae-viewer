@@ -156,7 +156,7 @@ void main(void) {
 		refmapLookup = normalize(correctBoundingBoxIntersect(refMapBox, refmapLookup));
 	}
 
-	vec3 refColor = textureCube(refMap, refmapLookup, roughness * 10.0).rgb;
+	vec3 refColor = textureCube(refMap, refmapLookup, roughness).rgb;
 	float rg = glossy * (1.0 - roughness);
 	refColor = clamp(pow(refColor, vec3(rg)) * glossy, 0.0, 1.0);
 	finalColor = finalColor * (1.0 - glossy) + finalColor * refColor;
