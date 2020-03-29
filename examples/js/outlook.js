@@ -20,7 +20,7 @@ window.addEventListener('load', function() {
   //   baseurl + "heading=180&pitch=0" + key,
   //   ];
 
-  const baseurl = "../img/cubemap/landscape/"
+  const baseurl = "img/cubemap/landscape/"
   const skyImageUrls = [
     baseurl + "px.jpg", baseurl + "nx.jpg", baseurl + "py.jpg",
     baseurl + "ny.jpg", baseurl + "pz.jpg", baseurl + "nz.jpg",

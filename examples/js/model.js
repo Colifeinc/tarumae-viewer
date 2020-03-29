@@ -11,7 +11,7 @@ window.addEventListener("load", function() {
 
 	const renderer = new Tarumae.Renderer({
 		// backColor: new Color4(0.74, .87, .85, 1),
-		backgroundImage: "../img/bg-gray-gradient.jpg",
+		backgroundImage: "img/bg-gray-gradient.jpg",
 		renderPixelRatio: window.devicePixelRatio,
 		showDebugPanel: false,
 		enableLighting: true,
@@ -33,56 +33,17 @@ window.addEventListener("load", function() {
 	});
 
 	const scene = renderer.createScene();
-
 	window._scene = scene;
  
-	// scene.add(new Tarumae.GridLine());
 	this.models = [
-		// { name: "test.toba" },
-		// { name: "chair_adv_01.toba" },
-
-		// { name: "itoki/CZR-187BAC.toba" },
-		// { name: "chair_compact_01.toba" },
-		// { name: "chair_jati.toba" },
-		// { name: "char_stand_01-baked.toba", scale: [.1, .1, .1], color: [.7, .7, .7] },
-		// { name: "desk_study_1p-baked.toba", color: [.7, .7, .7] },
-		// { name: "fan_vintage_ceiling.toba", scale: [3, 3, 3] },
-		// { name: "print_mfp_w1500.toba", color: [.7, .7, .7] },
-		// { name: "rice_cooker_01.toba", z: 1, color: [.8, .8, .8] },
-		// { name: "sofa_leather_3s.toba" },
-
-		// { name: "layoutAssets/areca_palm.toba" },
-		// // { name: "layoutAssets/ficus.toba" },
-		// { name: "layoutAssets/bathtub_faucet_set1.toba" },
-		// { name: "layoutAssets/JZD-1407HB_CWK.toba" },
-		// { name: "layoutAssets/JZD-1407HB_CTH.toba" },
-		// { name: "models/floor-glossy.toba" },
-		// { name: "layoutAssets/salemachine_01.toba" },
-		// { name: "layoutAssets/table_round_01.toba" },
-
-		// { name: "layoutAssets/chair_folding_01.toba" },
-		// { name: "layoutAssets/JVB-1207GLPN_PH.toba" },
-		// { name: "layoutAssets/chair_bar_01.toba" },
-		// { name: "layoutAssets/chair_armrest.toba" },
-		// { name: "layoutAssets/table_circle.toba" },
-		// { name: "layoutAssets/umbrella_stand.toba" },
-		// { name: "layoutAssets/chair_folding_02.toba" },
-		// { name: "layoutAssets/desk_medical_tool_3s.toba" },
-		// { name: "layoutAssets/tel_desk.toba" },
-		// { name: "layoutAssets/desk_kaari_h750.toba" },
-		{ name: "layoutAssets/chair_adv_01.toba" },
-		// { name: "layoutAssets/shredder.toba" },
-		
+		{ path: "models/chair_adv_01.toba" },
 	];
 
-
-	// const ground = new Tarumae.Shapes.Sphere();
-	
 	const ground = {
 		mesh: new Tarumae.Shapes.PlaneMesh(3, 3),
 		mat: {
 			color: [1.5, 1.5, 1.5],
-			tex: "../img/bg-gray-gradient.jpg"
+			tex: "img/bg-gray-gradient.jpg"
 		},
 		angle: [0, 30, 0],
 	};
@@ -103,7 +64,7 @@ window.addEventListener("load", function() {
 
 	for (const [i, mod] of models.entries()) {
 		
-		scene.createObjectFromURL("../" + mod.name, obj => {
+		scene.createObjectFromURL(mod.path, obj => {
 			mod.obj = obj;
 			obj.scale.set(0, 0, 0);
 			obj.eachChild(child => {
@@ -202,12 +163,12 @@ window.addEventListener("load", function() {
 	objController.object = ground;
 
 	const cubebox = new Tarumae.ImageCubeBox(renderer, [
-		"../img/cubemap/office-256/px.jpg",
-		"../img/cubemap/office-256/nx.jpg",
-		"../img/cubemap/office-256/py.jpg",
-		"../img/cubemap/office-256/ny.jpg",
-		"../img/cubemap/office-256/pz.jpg",
-		"../img/cubemap/office-256/nz.jpg",
+		"img/cubemap/office-256/px.jpg",
+		"img/cubemap/office-256/nx.jpg",
+		"img/cubemap/office-256/py.jpg",
+		"img/cubemap/office-256/ny.jpg",
+		"img/cubemap/office-256/pz.jpg",
+		"img/cubemap/office-256/nz.jpg",
 	]);
 		
 	window.setObjectRefmap = (obj) => {

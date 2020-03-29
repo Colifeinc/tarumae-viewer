@@ -43,78 +43,10 @@ window.addEventListener("load", function() {
 		},
 	});
 
-	
-	
 	const scene = renderer.createScene();
 	window._scene = scene;
 
-	// const session = this.scene.createObjectFromURL(floorTobaUrl, obj => {
-	// 	this.vr.floorRootObj = obj;
-	// 	this.scene.add(obj);
-
-	// 	const bbox = new BoundingBox(obj.getBounds());
-	// 	const maxbsize = Math.max(bbox.size.x, bbox.size.y, bbox.size.z);
-	// 	let topY = maxbsize / 5;
-
-	// 	if (topY < 10) topY = 10;
-	// 	else if (topY > 40) topY = 40;
-
-	// 	const camera = this.scene.mainCamera;
-
-	// 	camera.location.set(0, topY, 3);
-	// 	camera.lookAt(Vec3.zero, Vec3.forward);
-		
-	// 	this.topViewStatus.topViewHeight = camera.location.y;
-
-	// 	this.planRootObject = obj.findObjectByName('plans');
-	// 	if (!this.planRootObject) console.error("plans not found");
-
-	// 	const ceiling = this.scene.findObjectByName("ceiling");
-	// 	if (ceiling) ceiling.receiveLight = false;
-
-	// 	const wall = this.scene.findObjectByName("wall");
-	// 	if (wall) wall.mat.color = [.9, .9, .9];
-
-	// 	const floor = this.scene.findObjectByName("floor");
-	// 	if (floor) floor.mat.color = [.8, .8, .8];
-
-	// 	for (const [i, obj] of this.planRootObject.objects.entries()) {
-	// 		obj.visible = 0 === i
-	// 	}
-
-	// 	obj.scale.set(0.00001, 0.00001, 0.00001)
-	// 	this.scene.add(obj)
-
-	// 	setTimeout(() => {
-	// 		this.scene.animate({duration: 0.7}, t => {
-	// 			const s = Math.sin(t * 2);
-	// 			obj.scale.set(s, s, s);
-	// 		});
-	// 	}, 500);
-
-	// 	const cubebox = new Tarumae.ImageCubeBox(renderer, [
-	// 		"img/office-env/px.jpg",
-	// 		"img/office-env/nx.jpg",
-	// 		"img/office-env/py.jpg",
-	// 		"img/office-env/ny.jpg",
-	// 		"img/office-env/pz.jpg",
-	// 		"img/office-env/nz.jpg",
-	// 	]);
-			
-	// 	cubebox.on('load', () => {
-	// 		obj.eachChild(o => {
-	// 			if (o.meshes.length > 0) o.meshes[0]._refmap = cubebox.cubemap;
-	// 		});
-	// 	});
-	// });
-
-	// session.on('progress', t => {
-	// 	const w = this.scene.renderer.canvas.width;
-	// 	const h = this.scene.renderer.canvas.height;
-	// 	this.scene.renderer.drawingContext2D.drawRect({x:0, y: h - 10, width: w * t, height: h}, 0, 'white', '#61A9A9');
-	// })
-
-	const showcaseToba = "/floors/floor-ecomode.toba";
+	const showcaseToba = "floors/floor-ecomode.toba";
 	scene.createObjectFromURL(showcaseToba, obj => {
 		const floorObj = obj.findObjectByName("floor");
 		if (floorObj) {
@@ -140,7 +72,7 @@ window.addEventListener("load", function() {
 		}, 500);
 	});
 
-	let baseurl = "../img/cubemap/city/"
+	let baseurl = "img/cubemap/city/"
   const skyImageUrls = [
     baseurl + "px.jpg", baseurl + "nx.jpg", baseurl + "py.jpg",
     baseurl + "ny.jpg", baseurl + "pz.jpg", baseurl + "nz.jpg",
@@ -149,7 +81,7 @@ window.addEventListener("load", function() {
 	scene.skybox = new Tarumae.SkyBox(renderer, skyImageUrls);
 	scene.skybox.visible = false;
 
-	baseurl = "../img/cubemap/office-256/"
+	baseurl = "img/cubemap/office-256/"
   const refBoxUrls = [
     baseurl + "px.jpg", baseurl + "nx.jpg", baseurl + "py.jpg",
     baseurl + "ny.jpg", baseurl + "pz.jpg", baseurl + "nz.jpg",

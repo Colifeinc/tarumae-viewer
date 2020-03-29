@@ -5,7 +5,7 @@ import { Vec3, Color4, MathFunctions as _mf } from "@jingwood/graphics-math";
 window.addEventListener('load', function() {
   const renderer = new Tarumae.Renderer({
     backColor: new Color4(.05, .05, .2, 1),
-		backgroundImage: "../img/bg-gray-gradient.jpg",
+		backgroundImage: "img/bg-gray-gradient.jpg",
   });
 
   const scene = renderer.createScene();
@@ -17,12 +17,12 @@ window.addEventListener('load', function() {
   // };
 
   const navmesh = {
-    mesh: "../models/navmesh.mesh",
+    mesh: "models/navmesh.mesh",
     visible: false,
   };
 
   const navmeshWall = {
-    mesh: "../models/navmesh_bounds.mesh",
+    mesh: "models/navmesh_bounds.mesh",
     location: [0,0.01,0],
     mat: { color: [.4, .5, .6], roughness: 0.1 },
   };

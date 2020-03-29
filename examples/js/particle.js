@@ -108,7 +108,7 @@ window.addEventListener("load", function() {
 
 	scene.animation = true;
 
-	scene.createObjectFromURL("../models/mountain2.mod", mountain => {
+	scene.createObjectFromURL("models/mountain2.mod", mountain => {
 
 		let mesh = mountain.meshes[0];
 		mountainVertices = mesh.points;
