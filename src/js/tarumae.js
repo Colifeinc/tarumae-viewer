@@ -24,6 +24,7 @@ import "./render/pipeline.js";
 import "./view/modelviewer.js";
 import "./view/touchcontroller.js";
 import "./view/fpscontroller.js";
+import "./view/floorviewcontroller.js";
 import "./view/prologue.js";
 import "./webgl/buffers.js";
 import "./webgl/cubemap.js";
