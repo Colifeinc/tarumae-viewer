@@ -9,10 +9,10 @@
   "scripts": {
     "build": "npx babel src -d dist",
     "test": ":",
-    "serve": "webpack-dev-server --config webpack.dev.js --mode development"
+    "serve": "parcel serve examples/index.html --out-dir tmp-out"
   },
   "keywords": [],
-  "author": "BULB Corp.",
+  "author": "Jingwood",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@jingwood/graphics-math": "^1.0.2",
-    "babel-polyfill": "^6.26.0",
+    "babel-runtime": "^6.22.0",
     "pako": "^1.0.6"
   },
   "devDependencies": {
@@ -29,27 +29,12 @@
     "babel-loader": "7",
     "babel-plugin-inline-import": "^3.0.0",
     "babel-plugin-syntax-object-rest-spread": "^6.13.0",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.7.0",
-    "babel-preset-es2015": "^6.24.1",
     "babel-preset-es2017": "^6.24.1",
-    "copy-webpack-plugin": "^5.0.3",
-    "css-loader": "^3.0.0",
-    "extract-text-webpack-plugin": "^3.0.2",
-    "file-loader": "^4.0.0",
-    "glslify": "^7.0.0",
-    "html-loader": "^0.5.5",
-    "html-webpack-plugin": "^3.2.0",
-    "micromatch": "^4.0.2",
-    "raw-loader": "^3.0.0",
-    "style-loader": "^0.23.1",
-    "webpack": "^4.12.0",
-    "webpack-cli": "^3.3.5",
-    "webpack-dev-server": "^3.1.4",
-    "webpack-merge": "^4.1.3",
-    "ws": "^7.0.1"
+    "parcel": "^1.12.4",
+    "parcel-plugin-static-files-copy": "^2.3.1"
   },
   "bugs": {
     "url": "https://github.com/bulbinc/tarumae-viewer/issues"

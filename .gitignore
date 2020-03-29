@@ -2,9 +2,11 @@
 
 .vscode
 .cache
+.env.development
 
 dist
 node_modules
 tarumae-*.tgz
 build/*.js
 build/*.html
+tmp-out/

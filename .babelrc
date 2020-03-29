@@ -1,7 +1,8 @@
 {
   "presets": ["env"],
   "plugins": [
-    "transform-runtime", 
+    // "transform-runtime", 
+    ["transform-runtime", { "polyfill": false }],
     // "transform-es2015-modules-commonjs",
     "babel-plugin-transform-object-rest-spread",
     ["babel-plugin-inline-import", {
