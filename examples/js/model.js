@@ -11,7 +11,7 @@ window.addEventListener("load", function() {
 
 	const renderer = new Tarumae.Renderer({
 		// backColor: new Color4(0.74, .87, .85, 1),
-		backgroundImage: "../textures/bg-gray-gradient.jpg",
+		backgroundImage: "../img/bg-gray-gradient.jpg",
 		renderPixelRatio: window.devicePixelRatio,
 		showDebugPanel: false,
 		enableLighting: true,
@@ -82,7 +82,7 @@ window.addEventListener("load", function() {
 		mesh: new Tarumae.Shapes.PlaneMesh(3, 3),
 		mat: {
 			color: [1.5, 1.5, 1.5],
-			tex: "../textures/bg-gray-gradient.jpg"
+			tex: "../img/bg-gray-gradient.jpg"
 		},
 		angle: [0, 30, 0],
 	};
