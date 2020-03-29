@@ -20,7 +20,7 @@ Tarumae.Texture = class {
 		if (image) {
 			this.image = image;
 
-			if (image instanceof Image) {
+			if (typeof Image === "function" && image instanceof Image) {
 				this.width = image.width;
 				this.height = image.height;
 			}
@@ -117,7 +117,7 @@ Tarumae.Texture = class {
 	
 		if (this.image === null || this.image instanceof Uint8Array || this.image instanceof Float32Array) {
 			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.width, this.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, this.image);
-		} else if (this.image instanceof Image) {
+		} else if (typeof Image === "function" && this.image instanceof Image) {
 			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.image);
 		}
 	
