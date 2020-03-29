@@ -10,3 +10,4 @@ tarumae-*.tgz
 build/*.js
 build/*.html
 tmp-out/
+tmp-build/
