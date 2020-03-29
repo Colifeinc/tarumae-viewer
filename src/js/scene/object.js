@@ -272,16 +272,12 @@ Tarumae.SceneObject = class {
 	}
 
 	findObjectByName(name) {
-		var obj, i;
-
-		for (i = 0; i < this.objects.length; i++) {
-			obj = this.objects[i];
-			if (obj.name == name) return obj;
+		for (const obj of this.objects) {
+			if (obj.name === name) return obj;
 		}
 
-		for (i = 0; i < this.objects.length; i++) {
-			obj = this.objects[i];
-			var child = obj.findObjectByName(name);
+		for (const obj of this.objects) {
+			const child = obj.findObjectByName(name);
 			if (child) return child;
 		}
 
