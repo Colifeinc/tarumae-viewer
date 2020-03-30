@@ -100,7 +100,7 @@ Tarumae.FloorViewController = class {
             const targetPos = new Vec3(wpos.x, this.camera.location.y, wpos.z);
             const startPos = this.camera.location.clone();
 
-            this.scene.animate(_, t =>
+            this.scene.animate({}, t =>
               this.camera.location = startPos.lerp(targetPos, t)
             );
           }
@@ -148,14 +148,15 @@ Tarumae.FloorViewController = class {
     document.addEventListener("mousewheel", e => {
       function onmousewheel(e) {
         if (this.topViewStatus.topViewMode) {
-          scene.mainCamera.location.y += (e.deltaX + e.deltaY + e.deltaZ) / 500;
+          scene.mainCamera.location.y += e.deltaY / 200;
           if (scene.mainCamera.location.y < 9) scene.mainCamera.location.y = 9;
           else if (scene.mainCamera.location.y > 40) scene.mainCamera.location.y = 40;
+  
+          scene.renderer.viewer.angle.y += (e.deltaX) / 10;
+          scene.renderer.viewer.angle.y %= 360;
+  
           scene.requireUpdateFrame();
-        } else {
-          scene.mainCamera.forward(-(e.deltaX + e.deltaY + e.deltaZ) / 500, { animation: true });
         }
-        return false;
       }
 
       onmousewheel.call(this, e);

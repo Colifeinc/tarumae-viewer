@@ -165,6 +165,18 @@ Tarumae.TouchController = class {
 				}
 			};
 		})());
+
+		document.addEventListener("mousewheel", e => {
+			if (!this._enabled) return;
+			
+			scene.mainCamera.angle.y -= (e.deltaX) / 10;
+			scene.mainCamera.angle.y %= 360;
+			scene.mainCamera.forward(-(e.deltaY) / 200, {animation:false});
+			scene.requireUpdateFrame();
+
+      e.preventDefault();
+      return false;
+    }, { passive: false });
 	}
 
 	get enabled() {
