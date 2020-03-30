@@ -5,7 +5,13 @@ import { Vec3, Color4, MathFunctions as _mf } from "@jingwood/graphics-math";
 window.addEventListener('load', function() {
   const renderer = new Tarumae.Renderer({
     backColor: new Color4(.05, .05, .2, 1),
-		backgroundImage: "img/bg-gray-gradient.jpg",
+    backgroundImage: "img/bg-gray-gradient.jpg",
+    enableShadow: true,
+    shadowQuality: {
+      scale: 8,
+      viewDepth: 8,
+      resolution: 1024,
+    },
   });
 
   const scene = renderer.createScene();
@@ -18,17 +24,21 @@ window.addEventListener('load', function() {
 
   const navmesh = {
     mesh: "models/navmesh.mesh",
-    visible: false,
+    location: [0, 0.01, 0],
+    scale: [0.7, 0.7, 0.7],
+    mat: { color: [.2, .2, .2] },
   };
 
   const navmeshWall = {
     mesh: "models/navmesh_bounds.mesh",
-    location: [0,0.01,0],
-    mat: { color: [.4, .5, .6], roughness: 0.1 },
+    location: [0, 0, 0],
+    scale: [0.7, 1, 0.7],
+    mat: { color: [.4, .5, .6] },
+    receiveShadow: false,
   };
 
   const sphere = new Tarumae.Shapes.Sphere();
-  sphere.scale.set(.15, .15, .15);
+  sphere.scale.set(.1, .1, .1);
   sphere.mat = {color : [.6, 1.0, .4], emission: 0.5};
   sphere.location.y = 0.1;
 
@@ -45,8 +55,8 @@ window.addEventListener('load', function() {
 
   scene.add(sphere);
   
-  scene.sun.location.set(-1, 1, 1);
-
+  scene.sun.location.set(5, 5, 4);
+  
   let dirx = 0, diry = 0;
   scene.onmousemove = function() {
     dirx += renderer.viewer.mouse.movement.x * 0.001;
@@ -75,7 +85,7 @@ window.addEventListener('load', function() {
   }, 10);
 
   scene.mainCamera.fieldOfView = 50;
-  scene.mainCamera.location.set(0, 16, 16);
+  scene.mainCamera.location.set(0, 10, 10);
   scene.mainCamera.angle.set(-50, 0, 0);
 
   scene.show();

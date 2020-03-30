@@ -195,41 +195,7 @@ Tarumae.Scene = class {
 		}
 	
 		this.prepareObjects(obj, loadingSession, bundle);
-		// this.objects.push(obj);
-		// obj.scene = this;
-		// obj.updateTransform();
 	}
-
-	// loadArchives(archs, loadingSession) {
-	// 	var _this = this;
-	
-	// 	var loadArchive = function(aName, aValue) {
-	// 		if (!aValue.archive) {
-	// 			aValue.name = aName;
-	// 			_this._bundles[aName] = aValue;
-	
-	// 			var archive = new Tarumae.Utility.Archive();
-	// 			archive.isLoading = true;
-	
-	// 			aValue.archive = archive;
-	// 			loadingSession.downloadArchives.push(archive);
-			
-	// 			loadingSession.rm.add(aValue.url, Tarumae.ResourceTypes.Binary, function(stream) {
-	// 				try {
-	// 					archive.loadFromStream(stream);
-	// 				} catch (e) { }
-	// 				archive.isLoading = false;
-	// 			}, function(e) {
-	// 				archive.dataLength = e.total;
-	// 				archive.loadingLength = e.loaded;
-			
-	// 				if (loadingSession) loadingSession.progress();
-	// 			});
-	// 		}
-	// 	};
-		
-	// 	archs._t_foreach(loadArchive);
-	// }
 
 	add() {
 		for (var i = 0; i < arguments.length; i++) {
