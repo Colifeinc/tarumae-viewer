@@ -68,38 +68,43 @@ Tarumae.PipelineNodes.SceneToImageRenderer = class extends Tarumae.PipelineNode 
     this.nodes = [];
 
     if (resolution) {
-      this.autoSize = false;
-      this._width = resolution.width;
-      this._height = resolution.height;
+      this.width = resolution.width;
+      this.height = resolution.height;
+      this.canvasSizeRatio = this.width / this.renderer.canvas.width;
     } else {
-      this.autoSize = true;
+      this.width = this.renderer.canvas.width;
+      this.height = this.width / this.renderer.aspectRate;
+      this.canvasSizeRatio = 1;
     }
-
+    
     this.createBuffer();
   }
 
-  get width() {
-    if (this.autoSize) {
-      return this.renderer.canvas.width;
-    } else {
-      return this._width;
-    }
-  }
-
-  get height() {
-    if (this.autoSize) {
-      return this.renderer.canvas.height;
-    } else {
-      return this._height;
-    }
-  }
-
   createBuffer() {
-    this.buffer = new Tarumae.FrameBuffer(this.renderer, this.width, this.height);
+    const maxResolution = this.renderer.envParams.MAX_TEXTURE_SIZE;
+    let w = this.width, h = this.height;
+
+    if (this.width > this.height) {
+      if (this.width > maxResolution) {
+        w = maxResolution;
+        h = this.width / this.renderer.aspectRate;
+      }
+    } else if (this.height > maxResolution) {
+      h = maxResolution;
+      w = this.height * this.renderer.aspectRate;
+    }
+
+    this.buffer = new Tarumae.FrameBuffer(this.renderer, w, h);
   }
 
-  render() {    
-    if (this.buffer.width != this.width || this.buffer.height != this.height) {
+  render() {
+
+    if (this.width !== this.renderer.canvas.width
+      || this.height !== this.renderer.canvas.height) {
+      
+      this.width = this.renderer.canvas.width * this.canvasSizeRatio;
+      this.height = this.width / this.renderer.aspectRate;
+
       this.buffer.destroy();
       this.createBuffer();
     }
