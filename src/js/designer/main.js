@@ -473,7 +473,6 @@ window.addEventListener("load", function() {
 
 	const renderer = new Tarumae.Renderer({
     enableLighting: false,
-    renderPixelRatio: window.devicePixelRatio,
   });
 
   // const designer = new Tarumae.Designer(renderer);

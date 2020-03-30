@@ -12,7 +12,6 @@ window.addEventListener("load", function() {
 	const renderer = new Tarumae.Renderer({
 		// backColor: new Color4(0.74, .87, .85, 1),
 		backgroundImage: "img/bg-gray-gradient.jpg",
-		renderPixelRatio: window.devicePixelRatio,
 		showDebugPanel: false,
 		enableLighting: true,
 		enableShadow: true,
@@ -25,7 +24,7 @@ window.addEventListener("load", function() {
 		},
 		bloomEffect: {
 			threshold: 0.25,
-			gamma: 1.8,
+			gamma: 1.6,
 		},
 		renderingImage: {
 			gamma: 1.0,

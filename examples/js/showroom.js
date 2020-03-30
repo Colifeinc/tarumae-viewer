@@ -12,24 +12,16 @@ window.addEventListener("load", function() {
 
 	const renderer = new Tarumae.Renderer({
 		enableLighting: true,
-
 		backColor: new Color4(0.96, .98, 1, 1),
-		backgroundImage: "textures/52642.jpg",
-	
 		enablePostprocess: true,
-		postprocess: {
+		renderingImage: {
 			gamma: 1.0,
 		},
 		enableAntialias: true,
 		enableShadow: false,
-		shadowQuality: {
-			scale: 10,
-			viewDepth: 14,
-			resolution: 4096,
-		},
 		bloomEffect: {
 			threshold: 0.2,
-			gamma: 1.2,
+			gamma: 1.4,
 		},
 	});
 	
@@ -40,7 +32,6 @@ window.addEventListener("load", function() {
 	const showcaseToba = "models/room_01a-baked.toba";
 	scene.createObjectFromURL(showcaseToba, obj => {
 		window.obj = obj;
-
 		scene.add(obj);
 
 		obj.eachChild(child => {
@@ -50,15 +41,25 @@ window.addEventListener("load", function() {
 				}
 			}
 		});
+
+		const floorObj = obj.findObjectByName("floor");
+		if (floorObj) {
+			scene.mainCamera.collisionMode = Tarumae.CollisionModes.NavMesh;
+			scene.mainCamera.collisionTarget = floorObj;
+		}
+
+		setupSkyBox();
 	});
 
-	const baseurl = "img/cubemap/city/"
-  const skyImageUrls = [
-    baseurl + "px.jpg", baseurl + "nx.jpg", baseurl + "py.jpg",
-    baseurl + "ny.jpg", baseurl + "pz.jpg", baseurl + "nz.jpg",
-  ];
+	function setupSkyBox() {
+		const baseurl = "img/cubemap/city-night/"
+		const skyImageUrls = [
+			baseurl + "px.jpg", baseurl + "nx.jpg", baseurl + "py.jpg",
+			baseurl + "ny.jpg", baseurl + "pz.jpg", baseurl + "nz.jpg",
+		];
 
-	scene.skybox = new Tarumae.SkyBox(renderer, skyImageUrls);
+		scene.skybox = new Tarumae.SkyBox(renderer, skyImageUrls);
+	}
 
 	scene.sun.location.set(0, 1, 0);
 	scene.sun.mat.color = [1, 1, 1];
@@ -67,7 +68,7 @@ window.addEventListener("load", function() {
 	scene.mainCamera.location.set(-2.55, 1.5, 2.12);
 	scene.mainCamera.angle.set(-3, 310, 0);
 
-	new Tarumae.TouchController(scene);
+	const cameraController = new Tarumae.TouchController(scene);
 
 	scene.show();
 });

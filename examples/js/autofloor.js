@@ -22,13 +22,11 @@ window.addEventListener("load", function() {
 
 	const renderer = new Tarumae.Renderer({
 		enableLighting: false,
-
 		backColor: new Color4(0.96, .98, 1, 1),
-		// backgroundImage: "/textures/52642.jpg",
-	
+		
 		enablePostprocess: true,
-		postprocess: {
-			gamma: 1.4,
+		renderingImage: {
+			gamma: 1.0,
 		},
 		enableAntialias: true,
 		enableShadow: false,
@@ -39,7 +37,7 @@ window.addEventListener("load", function() {
 		},
 		bloomEffect: {
 			threshold: 0.2,
-			gamma: 1.2,
+			gamma: 1.6,
 		},
 	});
 
@@ -118,6 +116,8 @@ window.addEventListener("load", function() {
 			}
 		}
 	});
+
+	scene.sun.mat.color = [1.1, 1.1, 1.1];
 
 	scene.show();
 });
