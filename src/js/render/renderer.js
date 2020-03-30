@@ -49,7 +49,7 @@ Tarumae.Renderer = class {
 				gamma: 1.0,
 			},
 			bloomEffect: {
-				enabled: true,
+				enabled: false,
 				threshold: 0.2,
 				gamma: 1.4,
 			},
