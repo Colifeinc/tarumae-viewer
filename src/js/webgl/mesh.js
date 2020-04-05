@@ -343,7 +343,7 @@ Tarumae.Mesh = class {
 		var indexBufferLength = (!this.indexBuffer ? 0 : (this.indexBuffer.length * 2));
 		
 		if (renderer.debugger) {
-			this._vertexMemorySize = this.vertexBuffer.length * 4 + indexBufferLength;
+			this._vertexMemorySize = !this.vertexBuffer ? 0 : (this.vertexBuffer.length * 4 + indexBufferLength);
 			renderer.debugger.totalMeshMemoryUsed += this._vertexMemorySize;
 
 			switch (this.composeMode) {
@@ -424,6 +424,10 @@ Tarumae.Mesh = class {
 			if (!this.bind(renderer)) {
 				return;
 			}
+		}
+
+		if (this.meta.vertexCount <= 0) {
+			return;
 		}
 
 		const sp = renderer.currentShader;

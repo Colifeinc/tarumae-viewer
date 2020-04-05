@@ -15,6 +15,7 @@ import "../scene/shapes";
 import "../scene/camera";
 import "../webgl/texture";
 import "../webgl/cubemap";
+import "../utility/objloader";
 
 Tarumae.Scene = class {
 	constructor(renderer) {
@@ -176,6 +177,7 @@ Tarumae.Scene = class {
 	}
 
 	close() {
+		// TODO
 	}
 
 	loadObject(obj, loadingSession, bundle) {
@@ -195,6 +197,13 @@ Tarumae.Scene = class {
 		}
 	
 		this.prepareObjects(obj, loadingSession, bundle);
+	}
+
+	createObjectFromObjFormat(url, callback) {
+		this.resourceManager.add(url, Tarumae.ResourceTypes.Text, text => {
+			callback(Tarumae.loadObjFormat(text));
+		});
+		this.resourceManager.load();
 	}
 
 	add() {
