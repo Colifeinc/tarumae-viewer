@@ -25,6 +25,10 @@ function readLine(s, line) {
       matches[4], matches[5], matches[6],
       matches[7], matches[8], matches[9]].map(e => Number.parseInt(e)));
   }
+  else if ((matches = line.match(/^f\s+(\d+)\/\/(\d+)\s+(\d+)\/\/(\d+)\s+(\d+)\/\/(\d+)/))) {
+    s.faces.push([matches[1], 0, matches[2], matches[3], 0, matches[4], 
+      matches[5], 0, matches[6]].map(e => Number.parseInt(e)));
+  }
 }
 
 function addVector(arr, x, y, z) {
@@ -66,15 +70,7 @@ Tarumae.loadObjFormat = function(text) {
 
   for (const face of s.faces) {
     const i1 = face[2]-1, i2 = face[5]-1, i3 = face[8]-1;
-    if(i1>=s.normals.length){
-      debugger;
-    }
-    if(i2>=s.normals.length){
-      debugger;
-    }
-    if(i3>=s.normals.length){
-      debugger;
-    }
+
     const v1 = s.normals[face[2]-1], v2 = s.normals[face[5]-1], v3 = s.normals[face[8]-1];
     s.vertexBuffer.push(v1.x, v1.y, v1.z, v2.x, v2.y, v2.z, v3.x, v3.y, v3.z);
   }
