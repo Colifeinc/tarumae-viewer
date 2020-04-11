@@ -1078,7 +1078,8 @@ Object.assign(Tarumae.Mesh, {
 
 	StructureTypes: {
 		Array: 0,
-		StructureArray: 1,
+		StructureArray: 1, // v v v n n n t t t
+		GroupArray: 2, // todo: v n t, v n t, v n t
 	},
 
 	createFromStream: function(stream) {
