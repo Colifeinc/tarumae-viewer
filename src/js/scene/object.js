@@ -246,6 +246,7 @@ Tarumae.SceneObject = class {
 	
 		if (scene && obj._scene != scene) {
 			obj.scene = scene;
+			scene.requireUpdateFrame();
 		}
 	}
 

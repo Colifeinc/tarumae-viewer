@@ -42,6 +42,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		this.glossyUniform = this.bindUniform("glossy", "float");
 		this.roughnessUniform = this.bindUniform("roughness", "float");
 		this.emissionUniform = this.bindUniform("emission", "float");
+		this.refractionUniform = this.bindUniform("refraction", "float");
 		this.normalMipmapUniform = this.bindUniform("normalMipmap", "float");
 		this.normalIntensityUniform = this.bindUniform("normalIntensity", "float");
 	
@@ -274,7 +275,13 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 			} else {
 				this.glossyUniform.set(0);
 			}
-
+			
+			// refraction
+			if (mat.refraction) {
+				this.refractionUniform.set(mat.refraction);
+			} else {
+				this.refractionUniform.set(0);
+			}
 			// // transparency
 			// if (typeof mat.transparency !== "undefined" && mat.transparency > 0) {
 			// 	transparency = mat.transparency;

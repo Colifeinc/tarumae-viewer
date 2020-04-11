@@ -28,6 +28,7 @@ uniform float opacity;
 uniform float glossy;
 uniform float roughness;
 uniform float emission;
+uniform float refraction;
 uniform float normalMipmap;
 uniform float normalIntensity;
 
@@ -97,11 +98,26 @@ vec3 traceLight(vec3 vertexNormal, vec3 cameraNormal) {
 
 		vec3 lightReflection = reflect(lightNormal, vertexNormal);
 		float refd = max(dot(lightReflection, cameraNormal), 0.0);
-		float sf = pow(refd, pow(glossy, -2.0)) * glossy * (1.0 / ld);
+		float sf = pow(refd, pow(glossy, -2.0)) * (1.0 / ld);
 		specular += lights[i].color * sf * rg;
 	}
 
 	return diff + specular;
+}
+
+vec3 refract2(vec3 d, vec3 normal, float r) {
+	vec3 nl = dot(d, normal) < 0.0 ? normal : -normal;
+	bool into = dot(nl, normal) > 0.0;
+	if (into) r = 1.0 / r;
+	
+	float c = dot(d, nl);
+	float t = 1.0 - r * r * (1.0 - c * c);
+	
+	if (t < 0.0) {
+		return reflect(d, normal);
+	}
+	
+	return normalize(d * r - normal * ((into ? 1.0 : -1.0) * (c * r + sqrt(t))));
 }
 
 void main(void) {
@@ -160,6 +176,14 @@ void main(void) {
 	float rg = glossy * (1.0 - roughness);
 	refColor = clamp(pow(refColor, vec3(rg)) * glossy, 0.0, 1.0);
 	finalColor = finalColor * (1.0 - glossy) + finalColor * refColor;
+
+	//////////////// RefraMap ////////////////
+
+	vec3 refraLookup = refract2(cameraNormal, vertexNormal, 1.45);
+	vec3 refraColor = textureCube(refMap, refraLookup, roughness).rgb;
+	if (refraction > 0.0) {
+		finalColor = finalColor  * (1.0 - refraction) + finalColor * refraColor;
+	}
 
 	//////////////// ShadowMap ////////////////
 
