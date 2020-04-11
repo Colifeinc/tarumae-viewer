@@ -179,11 +179,9 @@ void main(void) {
 
 	//////////////// RefraMap ////////////////
 
-	vec3 refraLookup = refract2(cameraNormal, vertexNormal, 1.45);
+	vec3 refraLookup = refract2(vec3(-cameraNormal.x, cameraNormal.y, cameraNormal.z), vertexNormal, 1.05);
 	vec3 refraColor = textureCube(refMap, refraLookup, roughness).rgb;
-	if (refraction > 0.0) {
-		finalColor = finalColor  * (1.0 - refraction) + finalColor * refraColor;
-	}
+	finalColor = finalColor * (1.0 - refraction) + finalColor * refraColor;
 
 	//////////////// ShadowMap ////////////////
 
