@@ -7,7 +7,7 @@
 
 import Tarumae from "../entry";
 import "../utility/event";
-import { Vec2, Vec3, Vec4, Color3, Color4, Matrix3, Matrix4, Ray } from "@jingwood/graphics-math";
+import { Vec2, Vec3, Vec4, Color3, Color4, Matrix3, Matrix4, Ray, MathFunctions3 as _mf3 } from "@jingwood/graphics-math";
 import { BoundingBox3D } from "@jingwood/graphics-math";
 import "../render/renderer";
 import "../scene/animation";
@@ -1072,6 +1072,11 @@ Tarumae.Scene = class {
 		}
 
 		if (!Array.isArray(obj.objects) || !Array.isArray(obj.meshes)) {
+			return false;
+		}
+
+		const bbox = obj.getBounds();
+		if (bbox && !_mf3.rayIntersectsBox(ray, bbox)) {
 			return false;
 		}
 

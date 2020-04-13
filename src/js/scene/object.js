@@ -556,6 +556,9 @@ Tarumae.SceneObject = class {
 	}
 
 	getBounds(options) {
+
+		if (this._cachedBbox) return this._cachedBbox;
+
 		let bbox;
 
 		// scan meshes
@@ -571,18 +574,18 @@ Tarumae.SceneObject = class {
 
 		// scan children
 		if (Array.isArray(this.objects)) {
-			for (let i = 0; i < this.objects.length; i++) {
-				var object = this.objects[i];
-				
-				if (typeof object.visible !== "undefined" && object.visible) {
-					var objectBBox = object.getBounds();
+			for (const child of this.objects) {
+				if (child.visible) {
+					const childBBox = child.getBounds();
 					
 					if (!options || !options.filter || options.filter(object)) {
-						bbox = BoundingBox3D.findBoundingBoxOfBoundingBoxes(bbox, objectBBox);
+						bbox = BoundingBox3D.findBoundingBoxOfBoundingBoxes(bbox, childBBox);
 					}
 				}
 			}
 		}
+		
+		this._cachedBbox = bbox;
 
 		return bbox;
 	}
