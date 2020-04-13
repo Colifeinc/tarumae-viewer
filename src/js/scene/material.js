@@ -12,6 +12,8 @@ Tarumae.Material = class {
 		// color
 		if (typeof mat.color === "object" && mat.color instanceof Color3) {
 			this.color = mat.color.clone();
+		} else if (Array.isArray(mat.color)) {
+			this.color = mat.color.slice();
 		}
 		
 		if (typeof mat.tex === "object" && mat.tex instanceof Tarumae.Texture) {
@@ -46,7 +48,12 @@ Tarumae.Material = class {
 		if (typeof mat.transparency !== "undefined") {
 			this.transparency = mat.transparency;
 		}
-	
+		
+		// refraction
+		if (typeof mat.refraction !== "undefined") {
+			this.refraction = mat.refraction;
+		}
+
 		// spot range
 		if (typeof mat.spotRange !== "undefined") {
 			this.spotRange = mat.spotRange;

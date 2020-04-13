@@ -172,16 +172,21 @@ void main(void) {
 		refmapLookup = normalize(correctBoundingBoxIntersect(refMapBox, refmapLookup));
 	}
 
+if(glossy>0.0){
 	vec3 refColor = textureCube(refMap, refmapLookup, roughness).rgb;
 	float rg = glossy * (1.0 - roughness);
 	refColor = clamp(pow(refColor, vec3(rg)) * glossy, 0.0, 1.0);
 	finalColor = finalColor * (1.0 - glossy) + finalColor * refColor;
+}
 
 	//////////////// RefraMap ////////////////
 
+if(refraction>0.0){
 	vec3 refraLookup = refract2(vec3(-cameraNormal.x, cameraNormal.y, cameraNormal.z), vertexNormal, 1.05);
 	vec3 refraColor = textureCube(refMap, refraLookup, roughness).rgb;
+	refraColor = clamp(pow(refraColor, vec3(-refraction)), 0.0, 1.0);
 	finalColor = finalColor * (1.0 - refraction) + finalColor * refraColor;
+}
 
 	//////////////// ShadowMap ////////////////
 
