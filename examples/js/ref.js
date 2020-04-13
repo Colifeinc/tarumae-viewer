@@ -41,39 +41,54 @@ window.addEventListener("load", function() {
 			color: [1.5, 1.5, 1.5],
 			tex: "img/bg-gray-gradient.jpg"
 		},
-		angle: [0, 30, 0],
+		angle: [0, 0, 0],
 	};
 	scene.load(ground);
 
-	// scene.createObjectFromObjFormat("models/ornament_1.obj", obj => {
+	scene.createObjectFromObjFormat("models/cup.obj", obj => {
 
-	// 	obj.location.set(0, 0.6, 0.45);
-	// 	obj.scale.set(2, 2, 2);
+		obj.location.set(0, 1, 0);
+		obj.scale.set(10, 10, 10);
 
-	// 	obj.mat.glossy = 0.2;
-	// 	obj.mat.roughness = 0;
-	// 	// obj.mat.transparency = 0.3;
-	// 	obj.mat.refraction = 0.8;
+		// obj.mat.color = [1, 1, 1];
+		// obj.mat.color = [.6, .6, .6];
+		obj.mat.color = [.7, .7, .7];
+		obj.mat.glossy = .7;
+		obj.mat.roughness = 0;
+		obj.mat.transparency = 0.4;
+		// obj.mat.refraction = 1;
 
-	// 	window.obj = obj;
-	// 	setObjectRefmap(obj);
+		window.obj = obj;
+		setObjectRefmap(obj);
 
-	// 	ground.add(obj);
-	// });
+		ground.add(obj);
 
-	const cube = new Tarumae.Shapes.Cube();
-	cube.mat = { 
-		transparency: 0.2,
-		// glossy: 0.5
-		refraction: 1,
-	};
-	ground.add(cube);
-	this.window.obj = cube;
-	setObjectRefmap(cube);
+	});
+
+	// const cube = new Tarumae.Shapes.Cube();
+	// cube.mat = { 
+	// 	transparency: 0,
+	// 	// glossy: 0.5
+	// 	refraction: 1,
+	// };
+	// ground.add(cube);
+	// this.window.obj = cube;
+	// setObjectRefmap(cube);
+
+	scene.on("keydown", e=>{
+		
+		if(e===65){
+			scene.mainCamera.angle.y+=5;
+			scene.requireUpdateFrame();
+		}	else if(e==68){
+			scene.mainCamera.angle.y-=5;
+			scene.requireUpdateFrame();
+		}
+	});
 
 	scene.mainCamera.fieldOfView = 60;
-	scene.mainCamera.location.set(0, 0.7, 1.4);
-	scene.mainCamera.angle.set(-10, 0, 0);
+	scene.mainCamera.location.set(0, 0.5, 3.4);
+	scene.mainCamera.angle.set(-15, 0, 0);
 	
 	// light sources
 
@@ -84,10 +99,16 @@ window.addEventListener("load", function() {
 	light2.mat.emission = 10;
 	lights.add(light2);
 
-	const light4 = new Tarumae.PointLight();
-	light4.location.set(-3, -6, 4);
-	light4.mat.emission = 5;
-	lights.add(light4);
+	
+	const light3 = new Tarumae.PointLight();
+	light3.location.set(0.2, 15, 5);
+	light3.mat.emission = 5;
+	lights.add(light3);
+
+	// const light4 = new Tarumae.PointLight();
+	// light4.location.set(-3, -6, 4);
+	// light4.mat.emission = 5;
+	// lights.add(light4);
 
 	scene.add(lights);
 
@@ -99,12 +120,6 @@ window.addEventListener("load", function() {
 		maxVerticalRotateAngle: 100,
 	});
 	objController.object = ground;
-
-	// const modelViewerController = new Tarumae.ModelViewer(scene, {
-	// 	enableVerticalRotation: true,
-	// 	minVerticalRotateAngle: -10,
-	// 	maxVerticalRotateAngle: 50,
-	// });
 
 	const skybox = new Tarumae.SkyBox(renderer, [
 		"img/cubemap/office-256/px.jpg",
