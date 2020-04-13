@@ -47,16 +47,19 @@ window.addEventListener("load", function() {
 
 	scene.createObjectFromObjFormat("models/cup.obj", obj => {
 
-		obj.location.set(0, 1, 0);
-		obj.scale.set(10, 10, 10);
+		obj.location.set(0, 0, 0);
+		obj.scale.set(13, 13, 13);
+		obj.angle.set(30, 0, 0);
 
 		// obj.mat.color = [1, 1, 1];
 		// obj.mat.color = [.6, .6, .6];
-		obj.mat.color = [.7, .7, .7];
-		obj.mat.glossy = .7;
+		// obj.mat.color = [.8, .8, .8];
+		obj.mat.color = [.9, .9, .9];
+		// obj.mat.color = [1.0, 1.0, 1.0];
+		obj.mat.glossy = .2;
 		obj.mat.roughness = 0;
-		obj.mat.transparency = 0.4;
-		// obj.mat.refraction = 1;
+		obj.mat.transparency = 0;
+		obj.mat.refraction = .7;
 
 		window.obj = obj;
 		setObjectRefmap(obj);
@@ -88,7 +91,7 @@ window.addEventListener("load", function() {
 
 	scene.mainCamera.fieldOfView = 60;
 	scene.mainCamera.location.set(0, 0.5, 3.4);
-	scene.mainCamera.angle.set(-15, 0, 0);
+	scene.mainCamera.angle.set(0, 0, 0);
 	
 	// light sources
 
