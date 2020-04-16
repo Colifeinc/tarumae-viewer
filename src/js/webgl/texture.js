@@ -103,7 +103,12 @@ Tarumae.Texture = class {
 
 		if (!this.renderer) {
 			this.renderer = renderer;
-		}
+    }
+
+    if (typeof Image === "function" && this.image instanceof Image) {
+      this.width = this.image.width;
+      this.height = this.image.height;
+    }
 
 		const gl = this.renderer.gl;
 
@@ -121,7 +126,9 @@ Tarumae.Texture = class {
 			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.image);
 		}
 	
-		this.canMipmap = this.enableMipmapped && Tarumae.Utility.isPowerOf2(this.width) && Tarumae.Utility.isPowerOf2(this.height);
+    this.canMipmap = this.enableMipmapped
+      // && this.width > 4 && this.height > 4
+      && Tarumae.Utility.isPowerOf2(this.width) && Tarumae.Utility.isPowerOf2(this.height);
 
 		if (this.canMipmap) {
 			this.generateMipmap();
