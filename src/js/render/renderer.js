@@ -38,13 +38,13 @@ Tarumae.Renderer = class {
 			enableNormalMap: true,
 			enableEnvmap: true,
 			enableHighlightSelectedChildren: true,
+			enablePostprocess: true,
 			enableShadow: false,
 			shadowQuality: {
 				scale: 4,
 				viewDepth: 2,
 				resolution: 1024 * window.devicePixelRatio,
 			},
-			enablePostprocess: true,
 			renderingImage: {
 				gamma: 1.0,
 			},
@@ -159,10 +159,6 @@ Tarumae.Renderer = class {
 		this.aspectRate = 1;
 		this.renderSize = new Tarumae.Size();
 
-		// if (this.options.enableShadow && typeof Tarumae.FrameBuffer === "function") {
-		// this.shadowFrameBuffer = new Tarumae.FrameBuffer(this, 2048, 2048, Color4.white);
-		// }
-
 		// if (typeof Tarumae.StencilBuffer === "function") {
 		// this.stencilBuffer = new Tarumae.StencilBuffer(this);
 		// }
@@ -170,13 +166,16 @@ Tarumae.Renderer = class {
 		gl.enable(gl.DEPTH_TEST);
 		gl.depthFunc(gl.LEQUAL);
 		gl.enable(gl.CULL_FACE);
-		gl.cullFace(gl.BACK);
+    gl.cullFace(gl.BACK);
+    
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
 		// gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 		// gl.blendFunc(gl.ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-		gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+		// gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 		// gl.blendFunc(gl.SRC_ALPHA, gl.SRC_ALPHA);
 		// gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA,　gl.ONE_MINUS_DST_ALPHA, gl.ONE);
-		gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA, gl.ONE_MINUS_DST_ALPHA, gl.ONE);
+		// gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA, gl.ONE_MINUS_DST_ALPHA, gl.ONE);
 			
 		window.addEventListener("resize", _ => this.resetViewport(), false);
 
@@ -735,14 +734,13 @@ Tarumae.Renderer = class {
 		}
 	
 		if (!transparencyRendering) {
-			obj._opacity = (!isNaN(obj.opacity) ? obj.opacity : 1)
+			obj.__opacity = (!isNaN(obj._opacity) ? obj._opacity : 1)
 				* (1.0 - _mf.clamp((obj.mat && !isNaN(obj.mat.transparency)) ? obj.mat.transparency : 0));
 	
-			if (obj._opacity < 1) {
+			if (obj.__opacity < 1) {
 				this.transparencyList.push(obj);
 	
-				for (let i = 0; i < obj.objects.length; i++) {
-					let child = obj.objects[i];
+				for (const child of obj.objects) {
 					this.drawObject(child);
 				}
 	

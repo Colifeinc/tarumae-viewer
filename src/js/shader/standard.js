@@ -331,9 +331,9 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		}
 
 		// opacity
-		if (obj._opacity < 1) {
-			gl.enable(gl.BLEND);
-			this.opacityUniform.set(obj._opacity);
+		if (obj.__opacity < 1) {
+      gl.enable(gl.BLEND);
+			this.opacityUniform.set(obj.__opacity);
 		} else {
 			this.opacityUniform.set(1);
 		}

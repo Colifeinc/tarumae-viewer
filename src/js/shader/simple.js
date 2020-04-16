@@ -116,10 +116,10 @@ Tarumae.Shaders.SimpleShader = class extends Tarumae.Shader {
 		}
 
 		// opacity
-		if (obj._opacity < 1.0) {
+		if (obj.__opacity < 1.0) {
 			gl.enable(gl.BLEND);
 			//gl.disable(gl.DEPTH_TEST);
-			this.opacityUniform.set(obj._opacity);
+			this.opacityUniform.set(obj.__opacity);
 		} else {
 			this.opacityUniform.set(1.0);
 		}

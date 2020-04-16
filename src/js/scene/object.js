@@ -44,7 +44,8 @@ Tarumae.SceneObject = class {
 		this.shadowCast = true;
 		this.receiveLight = true;
 		this.visible = true;
-		this.hitable = true;
+    this.hitable = true;
+    this._opacity = 1;
 
 		this.collisionMode = Tarumae.CollisionModes.BoundingBox;
 		this.collisionTarget = null;
@@ -97,7 +98,25 @@ Tarumae.SceneObject = class {
 			this._parent = value;
 			this.onparentChange();
 		}
-	}
+  }
+  
+  get opacity() {
+    return this._opacity;
+  }
+
+  set opacity(v) {
+    if (this._opacity !== v) {
+      this._opacity = v;
+
+      for (const child of this.objects) {
+        if (child.opacity < this._opacity) child.opacity = this._opacity;
+      }
+
+      if (this._scene) {
+        this._scene.requireUpdateFrame();
+      }
+    }
+  }
 
 	get polygonCount() {
 		if (!Array.isArray(this.meshes)) return 0;
@@ -218,7 +237,13 @@ Tarumae.SceneObject = class {
 		}
 		
 		if (movement.x !== 0 || movement.y !== 0 || movement.z !== 0) {
-			this.location.offset(movement);
+      this.location.offset(movement);
+      
+      if (this._cachedBbox) {
+        this._cachedBbox.min.offset(movement);
+        this._cachedBbox.max.offset(movement);
+      }
+
 			if (this.scene) this.scene.requireUpdateFrame();
 			this.onmove();
 		}

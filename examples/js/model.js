@@ -65,7 +65,10 @@ window.addEventListener("load", function() {
 		
 		scene.createObjectFromURL(mod.path, obj => {
 			mod.obj = obj;
-			obj.scale.set(0, 0, 0);
+      
+      obj.scale.set(0, 0, 0);
+      obj.opacity = 0;
+      
 			obj.eachChild(child => {
 				if (child.mat) {
 					if (child.mat.glossy > 0) {
@@ -90,7 +93,7 @@ window.addEventListener("load", function() {
 			const mod = window.models[currentIndex];
 			if (mod) {
 				const prevObj = window.models[currentIndex].obj;
-				scene.animate({duration: 0.2}, t => {
+				scene.animate({duration: 0.3}, t => {
 					prevObj.scale.set(1 - t, 1 - t, 1 - t);
 					prevObj.opacity = 1 - t;
 				}, _ => prevObj.visible = false);
@@ -113,8 +116,8 @@ window.addEventListener("load", function() {
 			if (window.refmap) window.setObjectRefmap(window.obj);
 				
 			nextObj.visible = true;
-			scene.animate({ effect: "fadein", duration: 0.2 }, t => {
-				nextObj.scale.set(1, t, t);
+			scene.animate({ effect: "fadein", duration: 0.3 }, t => {
+				nextObj.scale.set(t, t, t);
 				nextObj.opacity = t;
 			});
 			scene.animate({ effect: "fadeout" }, t => {

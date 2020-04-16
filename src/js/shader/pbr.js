@@ -323,9 +323,9 @@ Tarumae.Shaders.PBRShader = class extends Tarumae.Shader {
 		}
 
 		// opacity
-		if (obj._opacity < 1) {
+		if (obj.__opacity < 1) {
 			gl.enable(gl.BLEND);
-			this.opacityUniform.set(obj._opacity);
+			this.opacityUniform.set(obj.__opacity);
 		} else {
 			this.opacityUniform.set(1);
 		}

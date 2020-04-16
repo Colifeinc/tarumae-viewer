@@ -354,8 +354,8 @@ Object.assign(Tarumae.EditorShader.prototype, {
     }
 
     // opacity
-    if (obj._opacity < 1) {
-      this.opacityUniform.set(obj._opacity);
+    if (obj.__opacity < 1) {
+      this.opacityUniform.set(obj.__opacity);
     } else {
       this.opacityUniform.set(1);
     }
