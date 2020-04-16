@@ -1075,10 +1075,10 @@ Tarumae.Scene = class {
 			return false;
 		}
 
-		const bbox = obj.getBounds();
-		if (bbox && !_mf3.rayIntersectsBox(ray, bbox)) {
-			return false;
-		}
+		// const bbox = obj.getBounds();
+		// if (bbox && !_mf3.rayIntersectsBox(ray, bbox)) {
+		// 	return false;
+		// }
 
 		session.level++;
 
