@@ -1,0 +1,10 @@
+{
+  "presets": ["@babel/env"],
+  "plugins": [
+    ["@babel/transform-runtime"],
+    "@babel/plugin-syntax-object-rest-spread",
+    ["babel-plugin-inline-import", {
+      "extensions": [".vert", ".frag", ".shader"]
+    }]
+  ]
+}

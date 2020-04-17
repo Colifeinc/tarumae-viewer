@@ -7,7 +7,7 @@
     "/dist"
   ],
   "scripts": {
-    "build": "npx babel src -d dist",
+    "build": "npx babel --config-file ./babel.prod.json src -d dist",
     "test": ":",
     "serve": "parcel serve examples/index.html --out-dir tmp-out",
     "build-examples": "rm -rf tmp-build/* && parcel build examples/index.html -d tmp-build --public-url /tarumae-examples"
@@ -20,19 +20,22 @@
     "url": "git+ssh://git@github.com/bulbinc/tarumae-viewer.git"
   },
   "dependencies": {
+    "@babel/runtime": "^7.9.2",
     "@jingwood/graphics-math": "^1.1.3",
-    "babel-runtime": "^6.22.0",
     "pako": "^1.0.6"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.3",
-    "babel-loader": "7",
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.9.0",
+    "@babel/plugin-syntax-object-rest-spread": "^7.8.3",
+    "@babel/plugin-transform-runtime": "^7.9.0",
+    "@babel/preset-env": "^7.9.5",
     "babel-plugin-inline-import": "^3.0.0",
-    "babel-plugin-syntax-object-rest-spread": "^6.13.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.7.0",
+    "glslify-bundle": "^5.1.1",
+    "glslify-deps": "^1.3.1",
     "parcel": "^1.12.4",
     "parcel-plugin-static-files-copy": "^2.3.1"
   },
