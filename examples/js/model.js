@@ -5,7 +5,8 @@
 // Copyright(c) 2016-2019 BULB Corp., Jingwood, all rights reserved
 ////////////////////////////////////////////////////////////////////////////////
 
-import Tarumae from '../../src/js/tarumae.js';
+import Tarumae from "../../src/js/tarumae.js";
+import { Color4 } from "@jingwood/graphics-math";
 
 window.addEventListener("load", function() {
 
@@ -36,6 +37,7 @@ window.addEventListener("load", function() {
  
 	this.models = [
 		{ path: "models/chair_adv_01.toba" },
+		{ path: "models/chair_jati.toba" },
 	];
 
 	const ground = {
