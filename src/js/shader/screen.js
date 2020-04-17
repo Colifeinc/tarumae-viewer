@@ -17,7 +17,7 @@ Tarumae.Shaders.ScreenShader = class extends Tarumae.Shader {
 		this.hasTex2Uniform = this.bindUniform("hasTex2", "bool");
 		
 		this.colorUniform = this.bindUniform("color", "color3");
-		this.opacityUniform = this.bindUniform("opacity", "float");
+		this.alphaUniform = this.bindUniform("alpha", "float");
 		this.resolutionUniform = this.bindUniform("resolution", "vec2");
 		this.resStrideUniform = this.bindUniform("resStride", "vec2");
 		
@@ -32,7 +32,7 @@ Tarumae.Shaders.ScreenShader = class extends Tarumae.Shader {
 
 		this.projectionMatrix = new Matrix4().ortho(-1, 1, -1, 1, -1, 1);
 		this.color = [1, 1, 1];
-		this.opacity = 1;
+		this.alpha = 1;
 		this.texture = undefined;
 		this.resolution = [0, 0];
 		this.resStride = [.001, .001];
@@ -43,7 +43,7 @@ Tarumae.Shaders.ScreenShader = class extends Tarumae.Shader {
 
 		this.projectionMatrixUniform.set(this.projectionMatrix);
 		this.colorUniform.set(this.color);
-		this.opacityUniform.set(this.opacity);
+    this.alphaUniform.set(this.alpha);
 
 		this.resStride[0] = 1 / this.resolution[0];
 		this.resStride[1] = 1 / this.resolution[1];

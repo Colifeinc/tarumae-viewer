@@ -238,6 +238,10 @@ Tarumae.PipelineNodes.ImageToScreenRenderer = class extends Tarumae.PipelineNode
       imageShader.resolution[0] = this.width;
       imageShader.resolution[1] = this.height;
 
+      if (typeof this.renderer.options.renderingImage.alpha !== "undefined") {
+        imageShader.alpha = this.renderer.options.renderingImage.alpha;
+      }
+
       this.renderer.useShader(imageShader);
       imageShader.beginMesh(this.screenPlaneMesh);
       this.screenPlaneMesh.draw(this.renderer);

@@ -46,7 +46,8 @@ Tarumae.Renderer = class {
 				resolution: 1024 * window.devicePixelRatio,
 			},
 			renderingImage: {
-				gamma: 1.0,
+        gamma: 1.0,
+        alpha: 1.0,
 			},
 			bloomEffect: {
 				enabled: false,
@@ -55,7 +56,10 @@ Tarumae.Renderer = class {
 			},
 			debugMode: false,
 			showDebugPanel: false,
-			enableAntialias: false,
+      enableAntialias: false,
+      webglOptions: {
+        alpha: false,
+      },
 		};
 	}
 
@@ -101,7 +105,7 @@ Tarumae.Renderer = class {
 		let gl;
 
 		try {
-			gl = this.canvas.getContext("webgl", { alpha: false });
+			gl = this.canvas.getContext("webgl", this.options.webglOptions);
 			if (!gl) gl = this.canvas.getContext("experimental-webgl");
 		} catch (e) {
 			console.error("cannot create webgl context: " + e);
@@ -373,8 +377,9 @@ Tarumae.Renderer = class {
 				this.ctx.clearRect(0, 0, this.canvas2d.width, this.canvas2d.height);
 				clear2d = true;
 
-				this.renderPipeline();
 				scene.requestedUpdateFrame = false;
+
+				this.renderPipeline();
 
 				if (this.debugMode) {
 					this.debugger.afterDrawFrame();

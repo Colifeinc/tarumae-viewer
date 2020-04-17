@@ -12,11 +12,11 @@ uniform sampler2D tex2;
 
 uniform bool hasTex2;
 
-uniform float opacity;
 uniform vec3 color;
 uniform vec2 resolution;
 uniform vec2 resStride;
 uniform bool enableAntialias;
+uniform float alpha;
 uniform float gammaFactor;
 
 #define BLUR_SAMPLINGS 10
@@ -194,6 +194,7 @@ void main(void) {
 	}
 
 	fc.rgb = gamma(fc.rgb, gammaFactor);
+  fc.a = alpha;
 
 	gl_FragColor = fc;
 }
