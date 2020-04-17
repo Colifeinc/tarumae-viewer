@@ -12,7 +12,7 @@ window.addEventListener("load", function() {
 	const renderer = new Tarumae.Renderer({
 		renderPixelRatio: 1,
 		// backColor: new Color4(0.74, .87, .85, 1),
-		backgroundImage: "img/bg-gray-gradient.jpg",
+		backgroundImage: "textures/bg-gray-gradient.jpg",
 		showDebugPanel: false,
 		enableLighting: true,
 		// enableShadow: true,
@@ -39,7 +39,7 @@ window.addEventListener("load", function() {
 		// mesh: new Tarumae.Shapes.PlaneMesh(3, 3),
 		mat: {
 			color: [1.5, 1.5, 1.5],
-			tex: "img/bg-gray-gradient.jpg"
+			tex: "textures/bg-gray-gradient.jpg"
 		},
 		angle: [0, 0, 0],
 	};
@@ -51,15 +51,15 @@ window.addEventListener("load", function() {
 		obj.scale.set(13, 13, 13);
 		obj.angle.set(30, 0, 0);
 
-		// obj.mat.color = [1, 1, 1];
+		obj.mat.color = [1, 1, 1];
 		// obj.mat.color = [.6, .6, .6];
 		// obj.mat.color = [.8, .8, .8];
-		obj.mat.color = [.9, .9, .9];
+		// obj.mat.color = [.9, .9, .9];
 		// obj.mat.color = [1.0, 1.0, 1.0];
-		obj.mat.glossy = .2;
+		obj.mat.glossy = .6;
 		obj.mat.roughness = 0;
-		obj.mat.transparency = 0;
-		obj.mat.refraction = .7;
+		obj.mat.transparency = 0.2;
+		obj.mat.refraction = .8;
 
 		window.obj = obj;
 		setObjectRefmap(obj);
@@ -125,12 +125,12 @@ window.addEventListener("load", function() {
 	objController.object = ground;
 
 	const skybox = new Tarumae.SkyBox(renderer, [
-		"img/cubemap/office-256/px.jpg",
-		"img/cubemap/office-256/nx.jpg",
-		"img/cubemap/office-256/py.jpg",
-		"img/cubemap/office-256/ny.jpg",
-		"img/cubemap/office-256/pz.jpg",
-		"img/cubemap/office-256/nz.jpg",
+		"textures/cubemap/office-256/px.jpg",
+		"textures/cubemap/office-256/nx.jpg",
+		"textures/cubemap/office-256/py.jpg",
+		"textures/cubemap/office-256/ny.jpg",
+		"textures/cubemap/office-256/pz.jpg",
+		"textures/cubemap/office-256/nz.jpg",
 	]);
 		
 	function setObjectRefmap(obj) {

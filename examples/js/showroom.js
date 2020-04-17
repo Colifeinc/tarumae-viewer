@@ -52,7 +52,7 @@ window.addEventListener("load", function() {
 	});
 
 	function setupSkyBox() {
-		const baseurl = "img/cubemap/city-night/"
+		const baseurl = "textures/cubemap/city-night/"
 		const skyImageUrls = [
 			baseurl + "px.jpg", baseurl + "nx.jpg", baseurl + "py.jpg",
 			baseurl + "ny.jpg", baseurl + "pz.jpg", baseurl + "nz.jpg",

@@ -10,8 +10,8 @@ import Tarumae from '../../src/js/tarumae.js';
 window.addEventListener("load", function() {
 
 	const renderer = new Tarumae.Renderer({
-		// backColor: new Color4(0.74, .87, .85, 1),
-		backgroundImage: "img/bg-gray-gradient.jpg",
+		// backColor: new Color4(0.74, .87, .85, 0.5),
+		backgroundImage: "textures/bg-gray-gradient.jpg",
 		showDebugPanel: false,
 		enableLighting: true,
 		enableShadow: true,
@@ -42,7 +42,7 @@ window.addEventListener("load", function() {
 		mesh: new Tarumae.Shapes.PlaneMesh(3, 3),
 		mat: {
 			color: [1.5, 1.5, 1.5],
-			tex: "img/bg-gray-gradient.jpg"
+			tex: "textures/bg-gray-gradient.jpg"
 		},
 		angle: [0, 30, 0],
 	};
@@ -165,12 +165,12 @@ window.addEventListener("load", function() {
 	objController.object = ground;
 
 	const cubebox = new Tarumae.ImageCubeBox(renderer, [
-		"img/cubemap/office-256/px.jpg",
-		"img/cubemap/office-256/nx.jpg",
-		"img/cubemap/office-256/py.jpg",
-		"img/cubemap/office-256/ny.jpg",
-		"img/cubemap/office-256/pz.jpg",
-		"img/cubemap/office-256/nz.jpg",
+		"textures/cubemap/office-256/px.jpg",
+		"textures/cubemap/office-256/nx.jpg",
+		"textures/cubemap/office-256/py.jpg",
+		"textures/cubemap/office-256/ny.jpg",
+		"textures/cubemap/office-256/pz.jpg",
+		"textures/cubemap/office-256/nz.jpg",
 	]);
 		
 	window.setObjectRefmap = (obj) => {

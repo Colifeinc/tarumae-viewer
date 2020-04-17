@@ -5,7 +5,7 @@ import { Vec3, Color4, MathFunctions as _mf } from "@jingwood/graphics-math";
 window.addEventListener('load', function() {
   const renderer = new Tarumae.Renderer({
     backColor: new Color4(.05, .05, .2, 1),
-    backgroundImage: "img/bg-gray-gradient.jpg",
+    backgroundImage: "textures/bg-gray-gradient.jpg",
     enableShadow: true,
     shadowQuality: {
       scale: 8,

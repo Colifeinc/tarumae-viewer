@@ -70,7 +70,7 @@ window.addEventListener("load", function() {
 		}, 500);
 	});
 
-	let baseurl = "img/cubemap/city/"
+	let baseurl = "textures/cubemap/city/"
   const skyImageUrls = [
     baseurl + "px.jpg", baseurl + "nx.jpg", baseurl + "py.jpg",
     baseurl + "ny.jpg", baseurl + "pz.jpg", baseurl + "nz.jpg",
@@ -79,7 +79,7 @@ window.addEventListener("load", function() {
 	scene.skybox = new Tarumae.SkyBox(renderer, skyImageUrls);
 	scene.skybox.visible = false;
 
-	baseurl = "img/cubemap/office-256/"
+	baseurl = "textures/cubemap/office-256/"
   const refBoxUrls = [
     baseurl + "px.jpg", baseurl + "nx.jpg", baseurl + "py.jpg",
     baseurl + "ny.jpg", baseurl + "pz.jpg", baseurl + "nz.jpg",
