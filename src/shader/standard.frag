@@ -37,6 +37,7 @@ uniform bool hasNormalMap;
 uniform bool receiveShadow;
 uniform int refMapType;
 uniform int shadowMapType;
+uniform float shadowIntensity;
 
 uniform sampler2D texture;
 uniform sampler2D normalMap;
@@ -83,7 +84,6 @@ vec3 traceLight(vec3 vertexNormal, vec3 cameraNormal) {
 
 	vec3 diff = vec3(0.0);
 	vec3 specular = vec3(0.0);
-	float rg = 1.0 - roughness;
 
 	for (int i = 0; i < MAX_LIGHT_COUNT; i++) {
 		if (i >= lightCount) break;
@@ -94,12 +94,12 @@ vec3 traceLight(vec3 vertexNormal, vec3 cameraNormal) {
 		float ln = dot(lightNormal, vertexNormal);
 		float ld = length(lightRay);
 		float lda = pow(2.718282, -ld);
-		diff += lights[i].color * max(ln * lda, 0.0) * rg;
+		diff += lights[i].color * max(ln * lda, 0.0);
 
 		vec3 lightReflection = reflect(lightNormal, vertexNormal);
 		float refd = max(dot(lightReflection, cameraNormal), 0.0);
 		float sf = pow(refd, pow(glossy, -2.0)) * (1.0 / ld);
-		specular += lights[i].color * sf * rg;
+		specular += lights[i].color * sf * glossy;
 	}
 
 	return diff + specular;
@@ -165,6 +165,7 @@ void main(void) {
 	}
 
 	//////////////// RefMap ////////////////
+	float roughdelta = pow(roughness, 10.0);
 
 	vec3 refmapLookup = reflect(cameraNormal, vertexNormal);
 
@@ -173,22 +174,22 @@ void main(void) {
 	}
 
   if (glossy > 0.0) {
-    vec3 refColor = textureCube(refMap, refmapLookup, roughness).rgb;
-    float rg = glossy * (1.0 - roughness);
-    refColor = clamp(pow(refColor, vec3(rg)) * glossy, 0.0, 1.0);
-    finalColor = finalColor * (1.0 - glossy) + finalColor * refColor;
+    vec3 refColor = textureCube(refMap, refmapLookup, roughdelta).rgb;
+    // refColor = clamp(pow(refColor, vec3(pow(glossy, 1.0))), 0.0, 1.0);
+		// float gdelta = pow(clamp(glossy, 0.0, 1.0), 2.0);
+    finalColor = finalColor * (1.0 - glossy) + finalColor * refColor * glossy;
   }
 
 	//////////////// RefraMap ////////////////
 
   if (refraction > 0.0) {
     vec3 refraLookup = refract2(vec3(-cameraNormal.x, cameraNormal.y, cameraNormal.z), vertexNormal, 1.05);
-    vec3 refraColor = textureCube(refMap, refraLookup, roughness).rgb;
-    refraColor = clamp(pow(refraColor, vec3(refraction)), 0.0, 1.0);
-    finalColor = finalColor * (1.0 - refraction) + finalColor * refraColor;
+    vec3 refraColor = textureCube(refMap, refraLookup, roughdelta).rgb;
+		// float rdelta = pow(clamp(refraction, 0.0, 1.0), 2.0);
+    finalColor = finalColor * (1.0 - refraction) + finalColor * refraColor * refraction;
   }
 
-	//////////////// ShadowMap ////////////////
+	// //////////////// ShadowMap ////////////////
 
 	if (receiveShadow) {
 		if (shadowMapType == 1) {
@@ -196,10 +197,11 @@ void main(void) {
 			if (shadowDir > 0.0) {
 
 				float shadowMapDepth;
-				shadowMapDepth = decodeFloatRGBA(texture2D(shadowMap2D, shadowPosition.xy));
+				// shadowMapDepth = decodeFloatRGBA(texture2D(shadowMap2D, shadowPosition.xy));
+				shadowMapDepth = texture2D(shadowMap2D, shadowPosition.xy).r;
 
 				float shadowBlock = 1.0 - smoothstep(0.00001, 0.05, (shadowPosition.z - shadowMapDepth)) / 0.5;
-				finalColor = finalColor + finalColor * shadowBlock * 0.15;
+				finalColor = finalColor + finalColor * shadowBlock * shadowIntensity;
 			}
 		} else if (shadowMapType == 2) {
 			vec3 correctedVertexToSun = vec3(0.0);
