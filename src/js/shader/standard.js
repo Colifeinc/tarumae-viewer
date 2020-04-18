@@ -45,7 +45,8 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		this.refractionUniform = this.bindUniform("refraction", "float");
 		this.normalMipmapUniform = this.bindUniform("normalMipmap", "float");
 		this.normalIntensityUniform = this.bindUniform("normalIntensity", "float");
-	
+		this.shadowIntensityUniform = this.bindUniform("shadowIntensity", "float");
+		
 		this.refmapBoxUniform = this.bindUniform("refMapBox", "bbox");
 
 		this.textureUniform = this.bindUniform("texture", "tex", 0);
@@ -174,6 +175,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 			this.shadowMapTypeUniform.set(1);
 			this.shadowMapUniform.tex2d.set(this._shadowMap2D);
 			this.shadowMapUniform.texcube.set(this.emptyCubemap);
+			this.shadowIntensityUniform.set(this.renderer.options.shadowQuality.intensity || 0.2);
 		} else {
 			this.shadowMapUniform.tex2d.set(Tarumae.Shader.emptyTexture);
 			

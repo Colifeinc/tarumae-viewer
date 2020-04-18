@@ -21,6 +21,7 @@ float decodeFloatRGBA(vec4 rgba) {
 }
 
 void main(void) {
-    // gl_FragColor = vec4(depth, depth, depth, 1.0);
-    gl_FragColor = encodeFloatRGBA(depth);
+  float d = depth;
+  gl_FragColor = vec4(d, d, d, 1.0);
+  // gl_FragColor = encodeFloatRGBA(depth);
 }
