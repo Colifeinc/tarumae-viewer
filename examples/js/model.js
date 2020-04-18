@@ -13,22 +13,24 @@ window.addEventListener("load", function() {
 	const renderer = new Tarumae.Renderer({
 		// backColor: new Color4(0.74, .87, .85, 0.5),
 		backgroundImage: "textures/bg-gray-gradient.jpg",
-		showDebugPanel: false,
+		showDebugPanel: true,
 		enableLighting: true,
+		enablePostprocess: true,
 		enableShadow: true,
 		enableAntialias: true,
 		enableEnvmap: true,
 		shadowQuality: {
 			scale: 2,
 			viewDepth: 2,
-			resolution: 4096,
 		},
 		bloomEffect: {
-			threshold: 0.25,
-			gamma: 1.6,
+			enabled: true,
+			threshold: 0.1,
+			gamma: 1.8,
 		},
 		renderingImage: {
-			gamma: 1.0,
+			gamma: 1.2,
+			resolutionRatio: 1,
 		},
 	});
 
@@ -153,7 +155,7 @@ window.addEventListener("load", function() {
 
 	const light4 = new Tarumae.PointLight();
 	light4.location.set(-3, -6, 4);
-	light4.mat.emission = 10;
+	light4.mat.emission = 5;
 	lights.add(light4);
 
 	scene.add(lights);

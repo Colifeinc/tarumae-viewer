@@ -5,6 +5,12 @@
 	<meta charset="utf-8" />
 	<link href="css/examples.css" rel="stylesheet" type="text/css" />
 	<style type="text/css">
+		html, body {
+			height: 100%;
+			padding: 0;
+			margin: 0;
+		}
+
 		.caption {
 			text-align: center;
 			padding: 1em;
@@ -34,7 +40,7 @@
 			width: 10em;
 			height: 10em;
 			border: none;
-			box-shadow: 0 0 0.3em 0.1em #444;
+			box-shadow: 0 0 0.3em 0.1em #222;
 			text-align: center;
 			position: relative;
 		}
@@ -72,6 +78,16 @@
 			height: 100%;
 			margin: auto;
 		}
+
+		.footer {
+			position: absolute;
+			right: 20px;
+			bottom: 10px;
+			padding: 20px;
+			text-shadow: -1px -1px #090909;
+			font-size: smaller;
+		}
+
 	</style>
 </head>
 <body>
@@ -139,6 +155,8 @@
 		</div>
 	</div>
 
-	
+	<div class="footer">
+		(c) 2020 BULB Corp., Jingwood.
+	</div>
 </body>
 </html>

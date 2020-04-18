@@ -15,13 +15,13 @@ window.addEventListener("load", function() {
 		backColor: new Color4(0.96, .98, 1, 1),
 		enablePostprocess: true,
 		renderingImage: {
-			gamma: 1.0,
+			gamma: 1.2,
 		},
 		enableAntialias: true,
 		enableShadow: false,
 		bloomEffect: {
-			threshold: 0.2,
-			gamma: 1.4,
+			threshold: 0.05,
+			gamma: 2.2,
 		},
 	});
 	

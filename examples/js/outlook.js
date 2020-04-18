@@ -3,7 +3,10 @@ import Tarumae from '../../src/js/tarumae.js';
 
 window.addEventListener('load', function() {
 
-  const renderer = new Tarumae.Renderer();
+  const renderer = new Tarumae.Renderer({
+    enableLighting: false,
+    enablePostprocess: false,
+  });
 
   const scene = renderer.createScene();
   window._scene = scene;

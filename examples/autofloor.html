@@ -5,9 +5,35 @@
 	<meta charset="utf-8" />
 	<link href="css/demo-fullsize.css" rel="stylesheet" type="text/css" />
 	<script src="js/autofloor.js"></script>
+	<style type="text/css">
+		.menu-panel {
+			position: absolute;
+			bottom: 20px;
+			padding-left: 10px;
+		}
+
+		.menu-item {
+			display: inline-block;
+			min-width: 100px;
+			min-height: 100px;
+			box-shadow: 0px 0px 3px 1px silver;
+			border-radius: 3px;
+			opacity: 0.5;
+			text-align: center;
+			vertical-align: middle;
+			margin: 5px;
+			cursor: pointer;
+		}
+
+	</style>
 </head>
 <body>
 	<div id="canvas-container">
 	</div>
+
+	<!-- <div class="menu-panel">
+		<div class="menu-item" onclick="changeToDay()">Day</div>
+		<div class="menu-item" onclick="changeToNight()">Night</div>
+	</div> -->
 </body>
 </html>

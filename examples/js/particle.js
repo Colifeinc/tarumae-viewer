@@ -13,12 +13,15 @@ window.addEventListener("load", function() {
 	const renderer = new Tarumae.Renderer({
 		renderPixelRatio: 1,
 		backColor: new Color4(0.2),
-		postprocess: true,
+		enablePostprocess: true,
 		enableLighting: false,
 		bloomEffect: {
 			threshold: 0.5,
 			gamma: 1.0,
 		},
+		renderingImage: {
+			resolutionRatio: 0.5,
+		}
 	});
 
 	const scene = renderer.createScene();
@@ -44,7 +47,7 @@ window.addEventListener("load", function() {
 			r: 1,//Math.random(),
 			g: Math.random() * 0.5,
 			b: Math.random(),
-			size: 1 + Math.random() * 5,
+			size: 1 + Math.random() * 2,
 		};
 	}
 

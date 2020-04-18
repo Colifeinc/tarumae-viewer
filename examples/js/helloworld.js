@@ -2,7 +2,10 @@ import Tarumae from '../../src/js/tarumae.js';
 
 window.addEventListener("load", function() {
   // create renderer and scene
-  const renderer = new Tarumae.Renderer();
+  const renderer = new Tarumae.Renderer({
+    enablePostprocess: false,
+  });
+  
   const scene = renderer.createScene();
 
   // create a cube object
