@@ -30,7 +30,8 @@ All files published as npm package content are located in `dist` folder.
 ## Hello World
 
 ```js
-import Tarumae, { Vec3, Color3 } from "tarumae"
+import Tarumae from "tarumae";
+import { Vec3, Color3 } from "@jingwood/graphics-math";
 
 // create rendering context
 const renderer = new Tarumae.Renderer();
