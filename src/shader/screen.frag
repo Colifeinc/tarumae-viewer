@@ -10,14 +10,15 @@ precision mediump float;
 uniform sampler2D texture;
 uniform sampler2D tex2;
 
-uniform bool hasTex2;
-
 uniform vec3 color;
+uniform float alpha;
 uniform vec2 resolution;
 uniform vec2 resStride;
-uniform bool enableAntialias;
-uniform float alpha;
 uniform float gammaFactor;
+
+uniform bool enableAntialias;
+uniform bool hasTex2;
+
 
 #define BLUR_SAMPLINGS 10
 uniform float samplingWeight[BLUR_SAMPLINGS];
@@ -60,27 +61,6 @@ vec4 antialiasCross(sampler2D tex) {
   return (c1 + c2 + c3 + c4) * 0.25;
 }
 
-vec4 antialias100(sampler2D tex) {
-  vec4 c = vec4(0);
-
-  for (int y = -2; y <= 2; y++) {
-    for (int x = -2; x <= 2; x++) {
-      c += texture2D(tex, texcoord +
-        vec2(resStride.x * float(x), resStride.y * float(y)));
-    }
-  }
-
-  return c /= 25.0;
-}
-
-// 0.0625   0.125   0.0625   
-// 0.125     0.25    0.125
-// 0.0625   0.125   0.0625
-
-// 0.024879	0.107973	0.024879
-// 0.107973	0.468592	0.107973
-// 0.024879	0.107973	0.024879
-
 vec4 guassBlur3(sampler2D tex) {
 	vec2 uv = texcoord;
   vec4 color = vec4(0.0);
@@ -101,12 +81,6 @@ vec4 guassBlur3(sampler2D tex) {
 
 	return color;
 }
-
-// 0.008173	0.021861	0.030337	0.021861	0.008173
-// 0.021861	0.058473	0.081144	0.058473	0.021861
-// 0.030337	0.081144	0.112606	0.081144	0.030337
-// 0.021861	0.058473	0.081144	0.058473	0.021861
-// 0.008173	0.021861	0.030337	0.021861	0.008173,
 
 vec4 guassBlur5(sampler2D tex) {
 	vec2 uv = texcoord;
@@ -195,6 +169,6 @@ void main(void) {
 
 	fc.rgb = gamma(fc.rgb, gammaFactor);
   fc.a = alpha;
-
+ 
 	gl_FragColor = fc;
 }

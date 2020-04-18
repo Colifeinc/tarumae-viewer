@@ -181,7 +181,7 @@ Tarumae.PipelineNodes.ImageToScreenRenderer = class extends Tarumae.PipelineNode
         this.tex2Input.process();
         imageShader.tex2 = this.tex2Input.output;
       } else {
-        imageShader.tex2 = undefined;
+        imageShader.tex2 = null;
       }
 
       imageShader.texture = this._input.output;
@@ -197,7 +197,7 @@ Tarumae.PipelineNodes.ImageToScreenRenderer = class extends Tarumae.PipelineNode
       }
 
       this.renderer.setGLViewportSize(this.width, this.height);
-      // this.renderer.setViewportToPhysicalRenderSize();
+      //this.renderer.setViewportToPhysicalRenderSize();
 
       imageShader.resolution[0] = this.width;
       imageShader.resolution[1] = this.height;
@@ -280,7 +280,7 @@ Tarumae.PipelineNodes.ImageFilterRenderer = class extends Tarumae.PipelineNode {
         this.tex2Input.process();
         imageShader.tex2 = this.tex2Input.output;
       } else {
-        imageShader.tex2 = undefined;
+        imageShader.tex2 = null;
       }
 
       if (typeof this.enableAntialias !== "undefined") {
@@ -478,7 +478,7 @@ Tarumae.PipelineNodes.MultipleImagePreviewRenderer = class extends Tarumae.Pipel
       const mesh = this.meshes[i];
       shader.texture = pipeline.output;
       shader.enableAntialias = false;
-      shader.tex2 = undefined;
+      shader.tex2 = null;
       shader.resolution[0] = this.width;
       shader.resolution[1] = this.height;
 

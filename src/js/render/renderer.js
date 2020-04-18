@@ -466,13 +466,17 @@ Tarumae.Renderer = class {
 				bluredShadowMapRenderer.input = shadowMapRenderer;
 			}
 	
-			const sceneImageRenderer = new Tarumae.PipelineNodes.SceneToImageRenderer(this);
+			const sceneImageRenderer = new Tarumae.PipelineNodes.SceneToImageRenderer(this, {
+				width: this.renderPhysicalSize.width * (this.options.renderingImage.resolutionRatio || 1.0),
+				height: this.renderPhysicalSize.height * (this.options.renderingImage.resolutionRatio || 1.0)
+			});
 			sceneImageRenderer.shadowMap2DInput = bluredShadowMapRenderer;
 
 			let imgRendererBlur, imgRendererSmall;
 
-			if (!this.options.bloomEffect
-				|| this.options.bloomEffect.enabled !== false) {
+			if (this.options.enablePostprocess !== false 
+				&& (!this.options.bloomEffect || this.options.bloomEffect.enabled !== false)
+				) {
 				imgRendererSmall = new Tarumae.PipelineNodes.ImageFilterRenderer(this, {
 					width: sw,
 					height: sh,
@@ -489,11 +493,14 @@ Tarumae.Renderer = class {
 				imgRendererBlur.input = imgRendererSmall;
 			}
 
-
 			const previewPipeline = false;
 
 			if (previewPipeline) {
-				const finalImagePreviewRenderer = new Tarumae.PipelineNodes.ImageFilterRenderer(this);
+				const finalImagePreviewRenderer = new Tarumae.PipelineNodes.ImageFilterRenderer(this, {
+					width: this.renderPhysicalSize.width * (this.options.renderingImage.resolutionRatio || 1.0),
+					height: this.renderPhysicalSize.height * (this.options.renderingImage.resolutionRatio || 1.0),
+					filter: "linear-interp",
+				});
 				finalImagePreviewRenderer.input = sceneImageRenderer;
 				finalImagePreviewRenderer.gammaFactor = this.options.renderingImage.gamma;
 				finalImagePreviewRenderer.tex2Input = imgRendererBlur;
@@ -511,7 +518,10 @@ Tarumae.Renderer = class {
 			
 			} else {
 			
-				const finalScreenRenderer = new Tarumae.PipelineNodes.ImageToScreenRenderer(this);
+				const finalScreenRenderer = new Tarumae.PipelineNodes.ImageToScreenRenderer(this, {
+					width: this.renderPhysicalSize.width * (this.options.renderingImage.resolutionRatio || 1.0),
+					height: this.renderPhysicalSize.height * (this.options.renderingImage.resolutionRatio || 1.0)
+				});
 				finalScreenRenderer.input = sceneImageRenderer;
 				finalScreenRenderer.gammaFactor = this.options.renderingImage.gamma;
 				finalScreenRenderer.tex2Input = imgRendererBlur;

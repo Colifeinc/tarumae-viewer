@@ -8,18 +8,16 @@
 precision mediump float;
 
 uniform sampler2D texture;
-// uniform sampler2D tex2;
+uniform sampler2D tex2;
 
-// uniform bool hasTex2;
-// uniform vec2 tex2Resolution;
-
-uniform float opacity;
 uniform vec3 color;
+uniform float alpha;
 uniform vec2 resolution;
 uniform vec2 resStride;
-uniform bool enableAntialias;
 uniform float gammaFactor;
 uniform int filterType;
+uniform bool enableAntialias;
+uniform bool hasTex2;
 
 #define BLUR_SAMPLINGS 10
 uniform float samplingWeight[BLUR_SAMPLINGS];
@@ -46,9 +44,18 @@ vec4 antialias(sampler2D tex) {
 	return sample(tex);
 }
 
-// 0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216
+vec4 antialiasCross(sampler2D tex) {
+  vec2 uv = texcoord;
 
-vec4 blur5_h(sampler2D tex) {
+  vec4 c1 = sample(uv - vec2(resStride.x * 0.6, resStride.y * 0.4));
+  vec4 c2 = sample(uv - vec2(resStride.x * 0.4, resStride.y * 0.6));
+  vec4 c3 = sample(uv + vec2(resStride.x * 0.6, resStride.y * 0.4));
+  vec4 c4 = sample(uv + vec2(resStride.x * 0.4, resStride.y * 0.6));
+
+  return (c1 + c2 + c3 + c4) * 0.25;
+}
+
+vec4 guassblur_h(sampler2D tex) {
   vec4 color = texture2D(tex, texcoord) * samplingWeight[0];
   
   for (int i = 1; i < BLUR_SAMPLINGS; i++) {
@@ -59,7 +66,7 @@ vec4 blur5_h(sampler2D tex) {
   return color;
 }
 
-vec4 blur5_v(sampler2D tex) {
+vec4 guassblur_v(sampler2D tex) {
   vec4 color = texture2D(tex, texcoord) * samplingWeight[0];
 
   for (int i = 1; i < BLUR_SAMPLINGS; i++) {
@@ -84,7 +91,7 @@ vec4 light_pass(vec4 color) {
 // 0.125     0.25    0.125
 // 0.0625   0.125   0.0625
 
-vec4 guassBlur3(sampler2D tex) {
+vec4 blur3(sampler2D tex) {
 	vec2 uv = texcoord;
   vec4 color = vec4(0.0);
 	float offx = resStride.x;
@@ -111,7 +118,7 @@ vec4 guassBlur3(sampler2D tex) {
 	// 0.015625, 0.0625, 0.09375, 0.0625, 0.015625,
 	// 0.00390625, 0.015625, 0.0234375, 0.015625, 0.00390625,
 
-vec4 guassBlur5(sampler2D tex) {
+vec4 blur5(sampler2D tex) {
 	vec2 uv = texcoord;
   vec4 color = vec4(0.0);
 
@@ -188,9 +195,22 @@ vec4 gamma(vec4 c, float factor) {
 	return vec4(pow(c.rgb, vec3(factor)), c.a);
 }
 
+vec3 add(vec3 a, vec3 b, float factor) {
+  return a + b * factor;
+}
+
+vec3 sub(vec3 a, vec3 b, float factor) {
+  return a - b * factor;
+}
+
 vec3 lighter(vec3 a, vec3 b, float factor) {
-	vec3 d = clamp(b - a, 0.0, 1.0);
+	vec3 d = max(b - a, 0.0);
 	return a + d * factor;
+}
+
+vec3 lighter2(vec3 a, vec3 b, float factor) {
+	vec3 d = clamp(b - a, 0.0, 1.0);
+	return a + pow(d, vec3(2.0)) * factor;
 }
 
 void main(void) {
@@ -201,20 +221,32 @@ void main(void) {
     fc = sample(texture);
   } else if (filterType == 1) /* linear-interp */ {
     fc = interp(texture);
-  } else if (filterType == 2) /* blur-h */ {
-    fc = blur5_h(texture);
-  } else if (filterType == 3) /* blur-v */ {
-    fc = blur5_v(texture);
+  } else if (filterType == 2) /* guassblur-h */ {
+    fc = guassblur_h(texture);
+  } else if (filterType == 3) /* guassblur-v */ {
+    fc = guassblur_v(texture);
   } else if (filterType == 4) /* light-pass */ {
     fc = light_pass(sample(texture));
     // fc = sample(texture);
-  } else if (filterType == 5) /* guass-blur3 */ {
-    fc = guassBlur3(texture);
-  } else if (filterType == 6) /* guass-blur5 */ {
-    fc = guassBlur5(texture);
+  } else if (filterType == 5) /* blur3 */ {
+    fc = blur3(texture);
+  } else if (filterType == 6) /* blur5 */ {
+    fc = blur5(texture);
+  } else if (filterType == 7) /* antialias-smple */ {
+    fc = antialias(texture);
+  } else if (filterType == 8) /* antialias-cross */ {
+    fc = antialiasCross(texture);
   }
 
+	vec3 t2c = vec3(0);
+	
+	if (hasTex2) {
+		t2c = sample(tex2).rgb;
+		fc.rgb = lighter(fc.rgb, t2c.rgb, 1.0);;
+	}
+
   fc.rgb = gamma(fc.rgb, gammaFactor);
+  fc.a = alpha;
 
 	gl_FragColor = fc;
 }
