@@ -48,7 +48,7 @@ Tarumae.FloorViewController = class {
       this.scene.createObjectFromURL(ringTobaURL, obj => {
         if (obj && obj.meshes.length > 0) {
           obj.visible = false;
-          obj.opacity = 0.5;
+          obj.opacity = 0.7;
           obj.receiveLight = false;
           this.ring = obj;
           this.scene.add(obj);
@@ -66,12 +66,7 @@ Tarumae.FloorViewController = class {
           const wpos = rs.worldPosition;
           this.ring.location.set(wpos.x, 0.005, wpos.z);
           this.ring.visible = true;
-
-          if (this.topViewStatus.topViewMode) {
-            this.ring.scale.set(1, 1, 1);
-          } else {
-            this.ring.scale.set(0.5, 0.5, 0.5);
-          }
+          this.ring.scale.set(0.5, 0.5, 0.5);
 
           this.scene.requireUpdateFrame();
         } else {
