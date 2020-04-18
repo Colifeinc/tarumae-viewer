@@ -289,7 +289,7 @@ Tarumae.ShaderUniform = class {
 	
 		if (!address) {
 			if (shader.renderer.debugMode && shader.renderer.developmentVersion) {
-				console.warn("uniform not found: " + name);
+				//console.warn("uniform not found: " + name);
 			}
 			this.set = function() { };
 			return;

@@ -30,7 +30,7 @@ Tarumae.Renderer = class {
 				far: 100.0,
 			},
 			backColor: new Color4(0.93, 0.93, 0.93, 1.0),
-			backgroundImage: undefined,
+			backgroundImage: null,
 			enableDrawMesh: true,
 			enableCustomDraw: true,
 			enableLighting: true,
@@ -51,9 +51,9 @@ Tarumae.Renderer = class {
         alpha: 1.0,
 			},
 			bloomEffect: {
-				enabled: false,
-				threshold: 0.2,
-				gamma: 1.4,
+				enabled: true,
+				threshold: 0.1,
+				gamma: 2.0,
 			},
 			debugMode: false,
 			showDebugPanel: false,
@@ -117,6 +117,12 @@ Tarumae.Renderer = class {
 			return;
 		}
 
+		this.canvas.addEventListener('webglcontextlost', function(e) {
+			console.error(e);
+			console.error(gl.getError());
+		}, false);
+
+
 		this.gl = gl;
 
 		try {
@@ -162,7 +168,9 @@ Tarumae.Renderer = class {
 		}
 
 		this.aspectRate = 1;
-		this.renderSize = new Tarumae.Size();
+		// this.renderSize = new Tarumae.Size();
+		this.renderLogicalSize = new Tarumae.Size();
+		this.renderPhysicalSize = new Tarumae.Size();
 
 		// if (typeof Tarumae.StencilBuffer === "function") {
 		// this.stencilBuffer = new Tarumae.StencilBuffer(this);
@@ -182,7 +190,16 @@ Tarumae.Renderer = class {
 		// gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA,　gl.ONE_MINUS_DST_ALPHA, gl.ONE);
 		// gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA, gl.ONE_MINUS_DST_ALPHA, gl.ONE);
 			
-		window.addEventListener("resize", _ => this.resetViewport(), false);
+		// window.addEventListener("resize", _ => this.resetViewport(), false);
+
+		const checkCanvasResize = _ => {
+			if (this.canvas.clientWidth !== this.renderLogicalSize.width
+				|| this.canvas.clientHeight !== this.renderLogicalSize.height) {
+				console.log("canvas resized");
+				this.resetCanvasSize();
+			}
+		}
+		setInterval(_ => checkCanvasResize(), 1000);
 
 		this.resetViewport();
 
@@ -215,31 +232,47 @@ Tarumae.Renderer = class {
 		this.resetViewport();
 	}
 
-	setGLViewport() {
-		this.glViewport(this.canvas.width, this.canvas.height);
+	setViewportToPhysicalRenderSize() {
+		this.setGLViewportSize(this.renderPhysicalSize.width, this.renderPhysicalSize.height);
 	}
 
-	glViewport(width, height) {
+	setGLViewportSize(width, height) {
 		this.gl.viewport(0, 0, width, height);
 	}
 
-	resetViewport() {
-		const size = this.renderSize;
-	
-		size.width = this.container.clientWidth;
-		size.height = this.container.clientHeight;
-	
-		this.aspectRate = size.width / size.height;
-	
-		this.canvas.width = size.width * this.options.renderPixelRatio;
-		this.canvas.height = size.height * this.options.renderPixelRatio;
-		this.canvas2d.width = size.width;
-		this.canvas2d.height = size.height;
+	get renderSize() {
+		return this.renderLogicalSize;
+	}
 
-		this.setGLViewport();
+	resetViewport() {
+		const renderSize = this.renderLogicalSize;
+	
+		renderSize.width = this.container.clientWidth;
+		renderSize.height = this.container.clientHeight;
+
+		this.renderPhysicalSize.width = Math.ceil(renderSize.width * this.options.renderPixelRatio);
+		this.renderPhysicalSize.height = Math.ceil(renderSize.height * this.options.renderPixelRatio);
+	
+		this.aspectRate = renderSize.width / renderSize.height;
+	
+		this.canvas.width = this.renderPhysicalSize.width;
+		this.canvas.height = this.renderPhysicalSize.height;
+		
+		this.canvas2d.width = renderSize.width;
+		this.canvas2d.height = renderSize.height;
+
+		this.setViewportToPhysicalRenderSize();
 
 		if (this.currentScene) {
 			this.currentScene.requireUpdateFrame();
+		}
+	}
+
+	resetCanvasSize() {
+		this.resetViewport();
+
+		for (const node of this.pipelineNodes) {
+			node.resize(this.renderPhysicalSize.width, this.renderPhysicalSize.height);
 		}
 	}
 
@@ -363,7 +396,6 @@ Tarumae.Renderer = class {
 
 		if (this.initialized) {
 	
-			this.setGLViewport();
 
 			const scene = this.currentScene;
 
@@ -374,6 +406,8 @@ Tarumae.Renderer = class {
 				if (this.debugMode) {
 					this.debugger.beforeDrawFrame();
 				}
+
+				// this.setViewportToPhysicalRenderSize();
 
 				this.ctx.clearRect(0, 0, this.canvas2d.width, this.canvas2d.height);
 				clear2d = true;
@@ -413,7 +447,7 @@ Tarumae.Renderer = class {
 		}
 		
 		if (this.options.enablePostprocess || this.options.enableShadow) {
-			const width = this.renderSize.width, height = this.renderSize.height,
+			const width = this.renderPhysicalSize.width, height = this.renderPhysicalSize.height,
 				sw = width * (this.options.bloomEffect.threshold || 0.1),
 				sh = height * (this.options.bloomEffect.threshold || 0.1);
 			
@@ -440,41 +474,51 @@ Tarumae.Renderer = class {
 			if (!this.options.bloomEffect
 				|| this.options.bloomEffect.enabled !== false) {
 				imgRendererSmall = new Tarumae.PipelineNodes.ImageFilterRenderer(this, {
-					resolution: {
-						width: sw,
-						height: sh,
-					},
+					width: sw,
+					height: sh,
 					flipTexcoordY: true,
-					filter: "linear-interp",
+					filter: "blur3",
 				});
-				imgRendererSmall.gammaFactor = this.options.bloomEffect.gamma || 1.4;
+				imgRendererSmall.gammaFactor = (this.options.bloomEffect.gamma || 1.4);
 				imgRendererSmall.input = sceneImageRenderer;
 			
 				imgRendererBlur = new Tarumae.PipelineNodes.BlurRenderer(this, {
-					resolution: {
-						width: sw,
-						height: sh,
-					}
+					width: sw,
+					height: sh,
 				});
 				imgRendererBlur.input = imgRendererSmall;
-				// imgRendererBlur.gammaFactor = 1.0;
 			}
 
-			const imgRenderer = new Tarumae.PipelineNodes.ImageToScreenRenderer(this);
-			imgRenderer.input = sceneImageRenderer;
-			imgRenderer.gammaFactor = this.options.renderingImage.gamma;
-			imgRenderer.tex2Input = imgRendererBlur;
-			imgRenderer.enableAntialias = this.options.enableAntialias;
 
-			const previewRenderer = new Tarumae.PipelineNodes.MultipleImagePreviewRenderer(this);
-			previewRenderer.addPreview(sceneImageRenderer);
-			previewRenderer.addPreview(imgRendererSmall);
-			previewRenderer.addPreview(imgRendererBlur);
-			previewRenderer.addPreview(shadowMapRenderer);
-			previewRenderer.enableAntialias = true;
+			const previewPipeline = false;
+
+			if (previewPipeline) {
+				const finalImagePreviewRenderer = new Tarumae.PipelineNodes.ImageFilterRenderer(this);
+				finalImagePreviewRenderer.input = sceneImageRenderer;
+				finalImagePreviewRenderer.gammaFactor = this.options.renderingImage.gamma;
+				finalImagePreviewRenderer.tex2Input = imgRendererBlur;
+				finalImagePreviewRenderer.enableAntialias = this.options.enableAntialias;
+
+				const previewRenderer = new Tarumae.PipelineNodes.MultipleImagePreviewRenderer(this);
+				previewRenderer.addPreview(sceneImageRenderer);
+				// previewRenderer.addPreview(imgRendererSmall);
+				previewRenderer.addPreview(imgRendererBlur);
+				// previewRenderer.addPreview(shadowMapRenderer);
+				previewRenderer.addPreview(bluredShadowMapRenderer);
+				previewRenderer.addPreview(finalImagePreviewRenderer);
+				previewRenderer.enableAntialias = true;
+				this.pipelineNodes.push(previewRenderer);
 			
-			this.pipelineNodes.push(imgRenderer);
-			// this.pipelineNodes.push(previewRenderer);
+			} else {
+			
+				const finalScreenRenderer = new Tarumae.PipelineNodes.ImageToScreenRenderer(this);
+				finalScreenRenderer.input = sceneImageRenderer;
+				finalScreenRenderer.gammaFactor = this.options.renderingImage.gamma;
+				finalScreenRenderer.tex2Input = imgRendererBlur;
+				finalScreenRenderer.enableAntialias = this.options.enableAntialias;
+				this.pipelineNodes.push(finalScreenRenderer);
+				
+			}
 
 		} else {
 			this.pipelineNodes.push(new Tarumae.PipelineNodes.DefaultRenderer(this));
@@ -839,6 +883,9 @@ Tarumae.Renderer = class {
 				}
 				break;
 		}
+
+		// const gle = this.gl.getError();
+		// if (gle !== 0) console.log(gle);
 	
 		this.currentShader.endObject(obj);
 
@@ -1231,6 +1278,10 @@ Tarumae.Renderer.prototype.toWorldPosition = (function() {
 		}
 	};
 })();
+
+
+new Tarumae.EventDispatcher(Tarumae.Renderer).registerEvents(
+	"canvasResized");
 
 Object.assign(Tarumae, {
 	ProjectionMethods: {

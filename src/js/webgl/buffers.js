@@ -73,10 +73,10 @@ Tarumae.FrameBuffer = class extends Tarumae.CommonBuffer {
 		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.texture.glTexture, 0);
 
 		if (depthBuffer) {
-			this.renderbuffer = gl.createRenderbuffer();
-			gl.bindRenderbuffer(gl.RENDERBUFFER, this.renderbuffer);
+			this.renderbufferGL = gl.createRenderbuffer();
+			gl.bindRenderbuffer(gl.RENDERBUFFER, this.renderbufferGL);
 			gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, this.width, this.height);
-			gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, this.renderbuffer);
+			gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, this.renderbufferGL);
 			gl.bindRenderbuffer(gl.RENDERBUFFER, null);
 		}
 		
@@ -103,6 +103,10 @@ Tarumae.FrameBuffer = class extends Tarumae.CommonBuffer {
 		if (this.texture) {
 			this.texture.destroy();
 			this.texture = undefined;
+		}
+
+		if (this.renderbufferGL) {
+			this.gl.deleteRenderBuffer(this.renderbufferGL);
 		}
 	
 		super.destroy(this);

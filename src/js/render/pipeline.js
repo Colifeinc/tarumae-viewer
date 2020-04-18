@@ -10,10 +10,20 @@ import Tarumae from "../entry"
 import "../webgl/buffers"
 
 Tarumae.PipelineNode = class {
-  constructor(renderer) {
+  constructor(renderer, options = {}) {
     this.renderer = renderer;
+    this.options = options;
+
     this.isRendered = false;
-    this._input = undefined;
+    this._input = null;
+
+    this.width = options.width || renderer.renderPhysicalSize.width;
+    this.height = options.height || renderer.renderPhysicalSize.height;
+  }
+
+  resize(width, height) {
+    this.width = width;
+    this.height = height;
   }
 
   process() {
@@ -55,60 +65,36 @@ Tarumae.PipelineNodes.DefaultRenderer = class extends Tarumae.PipelineNode {
   }
 
   render() {
-    this.renderer.setGLViewport();
+    this.renderer.setViewportToPhysicalRenderSize();
     this.renderer.renderBackground();
     this.renderer.renderFrame();
   }
 };
 
 Tarumae.PipelineNodes.SceneToImageRenderer = class extends Tarumae.PipelineNode {
-  constructor(renderer, { resolution } = {}) {
-    super(renderer);
+  constructor(renderer, options = { }) {
+    super(renderer, options);
 
     this.nodes = [];
+    this.buffer = null;
 
-    if (resolution) {
-      this.width = resolution.width;
-      this.height = resolution.height;
-      this.canvasSizeRatio = this.width / this.renderer.canvas.width;
-    } else {
-      this.width = this.renderer.canvas.width;
-      this.height = this.width / this.renderer.aspectRate;
-      this.canvasSizeRatio = 1;
-    }
-    
-    this.createBuffer();
+    this.buffer = new Tarumae.FrameBuffer(this.renderer, this.width, this.height);
   }
 
-  createBuffer() {
-    const maxResolution = this.renderer.envParams.MAX_TEXTURE_SIZE;
-    let w = this.width, h = this.height;
+  resize(width, height) {
+    if (this.width !== width || this.height !== height) {
+      this.width = width;
+      this.height = height;
 
-    if (this.width > this.height) {
-      if (this.width > maxResolution) {
-        w = maxResolution;
-        h = this.width / this.renderer.aspectRate;
+      if (this.buffer) {
+        this.buffer.destroy();
       }
-    } else if (this.height > maxResolution) {
-      h = maxResolution;
-      w = this.height * this.renderer.aspectRate;
-    }
 
-    this.buffer = new Tarumae.FrameBuffer(this.renderer, w, h);
+      this.buffer = new Tarumae.FrameBuffer(this.renderer, this.width, this.height);
+    }
   }
 
   render() {
-
-    if (this.width !== this.renderer.canvas.width
-      || this.height !== this.renderer.canvas.height) {
-      
-      this.width = this.renderer.canvas.width * this.canvasSizeRatio;
-      this.height = this.width / this.renderer.aspectRate;
-
-      this.buffer.destroy();
-      this.createBuffer();
-    }
-
     if (this.shadowMap2DInput) {
       this.shadowMap2DInput.process();
 
@@ -158,41 +144,17 @@ Tarumae.PipelineNodes.ImageSource = class extends Tarumae.PipelineNode {
 };
 
 Tarumae.PipelineNodes.ImageToScreenRenderer = class extends Tarumae.PipelineNode {
-  constructor(renderer, options) {
+  constructor(renderer, options = {}) {
     super(renderer);
     
-    this.options = options;  
+    this.options = options;
     this.screenPlaneMesh = new Tarumae.ScreenMesh();
     
-    if (!options || !options.flipTexcoordY) {
+    if (options.flipTexcoordY !== false) {
       this.screenPlaneMesh.flipTexcoordY();
     }
 
-    if (options && options.resolution) {
-      this._width = options.resolution.width;
-      this._height = options.resolution.height;
-      this.autoSize = false;
-    } else {
-      this.autoSize = true;
-    }
-
     this.shader = Tarumae.Renderer.Shaders.screen.instance;
-  }
-
-  get width() {
-    if (this.autoSize) {
-      return this.renderer.canvas.width;
-    } else {
-      return this._width;
-    }
-  }
-
-  get height() {
-    if (this.autoSize) {
-      return this.renderer.canvas.height;
-    } else {
-      return this._height;
-    }
   }
   
   set input(node) {
@@ -234,7 +196,9 @@ Tarumae.PipelineNodes.ImageToScreenRenderer = class extends Tarumae.PipelineNode
         imageShader.gammaFactor = this.gammaFactor;
       }
 
-      this.renderer.glViewport(this.width, this.height);
+      this.renderer.setGLViewportSize(this.width, this.height);
+      // this.renderer.setViewportToPhysicalRenderSize();
+
       imageShader.resolution[0] = this.width;
       imageShader.resolution[1] = this.height;
 
@@ -271,32 +235,27 @@ Tarumae.ScreenMesh = class extends Tarumae.Mesh {
 };
 
 Tarumae.PipelineNodes.ImageFilterRenderer = class extends Tarumae.PipelineNode {
-  constructor(renderer, {
-      resolution,
-      filter,
-      flipTexcoordY,
-    } = { }) {
-    super(renderer);
+  constructor(renderer, options = {}) {
+    super(renderer, options);
 
-    if (resolution === undefined) {
-      this.width = this.renderer.canvas.width;
-      this.height = this.renderer.canvas.height;
-    } else {
-      this.width = resolution.width;
-      this.height = resolution.height;
-    }
-    this.filter = filter;
+    this.options = options;
+
+    this.filter = options.filter || "linear-interp";
+    this.flipTexcoordY = options.flipTexcoordY || true;
 
     this.screenPlaneMesh = new Tarumae.ScreenMesh();
     
-    if (flipTexcoordY) {
+    if (this.flipTexcoordY) {
       this.screenPlaneMesh.flipTexcoordY();
     }
+
+    this.tex2Input = null;
 
     this.shader = Tarumae.Renderer.Shaders.image.instance;
     
     this.buffer = new Tarumae.FrameBuffer(this.renderer, this.width, this.height, {
-      depthBuffer: false
+      depthBuffer: false,
+      clearBackground: false,
     });
   }
   
@@ -316,7 +275,13 @@ Tarumae.PipelineNodes.ImageFilterRenderer = class extends Tarumae.PipelineNode {
     if (this._input.output) {
       const imageShader = this.shader;
       imageShader.texture = this._input.output;
-      // imageShader.tex2 = undefined;
+      
+      if (this.tex2Input) {
+        this.tex2Input.process();
+        imageShader.tex2 = this.tex2Input.output;
+      } else {
+        imageShader.tex2 = undefined;
+      }
 
       if (typeof this.enableAntialias !== "undefined") {
         imageShader.enableAntialias = this.enableAntialias;
@@ -334,12 +299,14 @@ Tarumae.PipelineNodes.ImageFilterRenderer = class extends Tarumae.PipelineNode {
         default:
         case "none": imageShader.filterType = 0; break;
         case "linear-interp": imageShader.filterType = 1; break;
-        case "blur-hor": imageShader.filterType = 2; break;
-        case "blur-ver": imageShader.filterType = 3; break;
+        case "guassblur-hor": imageShader.filterType = 2; break;
+        case "guassblur-ver": imageShader.filterType = 3; break;
         case "light-pass": imageShader.filterType = 4; break;
-        case "guass-blur3": imageShader.filterType = 5; break;
-        case "guass-blur5": imageShader.filterType = 6; break;
-      }
+        case "blur3": imageShader.filterType = 5; break;
+        case "blur5": imageShader.filterType = 6; break;
+        case "antialias-simple": imageShader.filterType = 7; break;
+        case "antialias-cross": imageShader.filterType = 8; break;
+     }
 
       this.buffer.use();
 
@@ -361,8 +328,8 @@ Tarumae.PipelineNodes.BlurRenderer = class extends Tarumae.PipelineNode {
 
     this.blurHorRenderer = new Tarumae.PipelineNodes.ImageFilterRenderer(renderer, options); 
     this.blurVerRenderer = new Tarumae.PipelineNodes.ImageFilterRenderer(renderer, options);
-    this.blurHorRenderer.filter = 'blur-hor';
-    this.blurVerRenderer.filter = 'blur-ver';
+    this.blurHorRenderer.filter = 'guassblur-hor';
+    this.blurVerRenderer.filter = 'guassblur-ver';
   }
 
   get output() {
@@ -391,25 +358,13 @@ Tarumae.PipelineNodes.BlurRenderer = class extends Tarumae.PipelineNode {
 };
 
 Tarumae.PipelineNodes.ShadowMapRenderer = class extends Tarumae.PipelineNode {
-  constructor(renderer, options) {
+  constructor(renderer, options = { }) {
     super(renderer);
 
-    if (options && options.resolution
-      && options.resolution.width && options.resolution.height) {
-      this.width = options.resolution.width;
-      this.height = options.resolution.height;
-    } else {
-      this.width = renderer.canvas.width;
-      this.height = renderer.canvas.height;
-    }
-
+    this.width = options.width || 1280;
+    this.height = options.height || 720;
+  
     this.shader = Tarumae.Renderer.Shaders.shadowmap.instance;
-    // this.shader.lightMatrix = new Tarumae.Matrix4().loadIdentity();
-
-    this.createBuffer();
-  }
-
-  createBuffer() {
     this.buffer = new Tarumae.FrameBuffer(this.renderer, this.width, this.height);
   }
 
@@ -417,14 +372,6 @@ Tarumae.PipelineNodes.ShadowMapRenderer = class extends Tarumae.PipelineNode {
     this.buffer.use();
 
     const scene = this.renderer.currentScene;
-
-    // this.renderer.prepareRenderMatrices();
-
-    // this.renderer.projectionViewMatrix = this.renderer.viewMatrix.mul(this.renderer.cameraMatrix).mul(this.renderer.projectionMatrix);
-		// this.renderer.projectionViewMatrixArray = this.renderer.projectionViewMatrix.toArray();
-
-    // this.shader.lightMatrix = toArray();
-    // this.shader.projectionMatrix = this.renderer.projectionViewMatrix;
 
     // const gl = this.renderer.gl;
     // gl.disable(gl.CULL_FACE);
@@ -446,7 +393,6 @@ Tarumae.PipelineNodes.ShadowMapRenderer = class extends Tarumae.PipelineNode {
 
     // gl.enable(gl.CULL_FACE);
     // gl.cullFace(gl.BACK);
-
   }
 
   drawObject(obj) {
@@ -481,19 +427,9 @@ Tarumae.PipelineNodes.ShadowMapRenderer = class extends Tarumae.PipelineNode {
 
 Tarumae.PipelineNodes.MultipleImagePreviewRenderer = class extends Tarumae.PipelineNode {
 
-  constructor(renderer, options) {
-    super(renderer);
+  constructor(renderer, options = {}) {
+    super(renderer, options);
     
-    this.options = options || {};
-    
-    if (this.options.resolution) {
-      this.width = this.options.resolution.width;
-      this.height = this.options.resolution.height;
-    } else {
-      this.width = this.renderer.canvas.width;
-      this.height = this.renderer.canvas.height;
-    }
-
     this.rows = this.options.rows || 2;
     this.columns = this.options.columns || 2;
     this.previewWidth = 2 / this.columns;
@@ -546,7 +482,7 @@ Tarumae.PipelineNodes.MultipleImagePreviewRenderer = class extends Tarumae.Pipel
       shader.resolution[0] = this.width;
       shader.resolution[1] = this.height;
 
-      this.renderer.glViewport(this.width, this.height);
+      this.renderer.setGLViewportSize(this.width, this.height);
       this.renderer.useShader(shader);
       shader.beginMesh(mesh);
       mesh.draw(this.renderer);
