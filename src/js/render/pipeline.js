@@ -357,6 +357,8 @@ Tarumae.PipelineNodes.BlurRenderer = class extends Tarumae.PipelineNode {
   }
 };
 
+////////////////////////////////////////////////////////////////////////////////
+
 Tarumae.PipelineNodes.ShadowMapRenderer = class extends Tarumae.PipelineNode {
   constructor(renderer, options = { }) {
     super(renderer);
@@ -374,10 +376,7 @@ Tarumae.PipelineNodes.ShadowMapRenderer = class extends Tarumae.PipelineNode {
     const scene = this.renderer.currentScene;
 
     // const gl = this.renderer.gl;
-    // gl.disable(gl.CULL_FACE);
     // gl.cullFace(gl.FRONT);
-
-    this.renderer.currentPipeline = this;
 
     this.renderer.useShader(this.shader);
     this.shader.beginScene(scene);
@@ -389,9 +388,6 @@ Tarumae.PipelineNodes.ShadowMapRenderer = class extends Tarumae.PipelineNode {
     this.renderer.disuseCurrentShader();
     this.buffer.disuse();
 
-    this.renderer.currentPipeline = null;
-
-    // gl.enable(gl.CULL_FACE);
     // gl.cullFace(gl.BACK);
   }
 
@@ -403,8 +399,7 @@ Tarumae.PipelineNodes.ShadowMapRenderer = class extends Tarumae.PipelineNode {
     this.shader.beginObject(obj);
 
     if (!obj.type || obj.type === Tarumae.ObjectTypes.GenericObject) {
-      for (let i = 0; i < obj.meshes.length; i++) {
-        var mesh = obj.meshes[i];
+      for (const mesh of obj.meshes) {
         if (mesh && this.renderer.options.enableDrawMesh) {
           this.shader.beginMesh(mesh);
           mesh.draw(this.renderer);
@@ -413,8 +408,8 @@ Tarumae.PipelineNodes.ShadowMapRenderer = class extends Tarumae.PipelineNode {
       }
     }
 
-    for (let i = 0; i < obj.objects.length; i++) {
-			this.drawObject(obj.objects[i]);
+    for (const child of obj.objects) {
+			this.drawObject(child);
     }
 
     this.shader.endObject(obj);
@@ -457,8 +452,8 @@ Tarumae.PipelineNodes.MultipleImagePreviewRenderer = class extends Tarumae.Pipel
   clear() {
     super.clear();
 
-    for (const pipeline of this.nodes) {
-      pipeline.clear();
+    for (const node of this.nodes) {
+      node.clear();
     }
   }
 
@@ -471,12 +466,12 @@ Tarumae.PipelineNodes.MultipleImagePreviewRenderer = class extends Tarumae.Pipel
       shader.enableAntialias = false;
     }
 
-    for (let i = 0; i < this.nodes.length; i++) {
-      const pipeline = this.nodes[i];
-      pipeline.process();
+    for (let i = 0; i < this.nodes.length;i++) {
+      const node = this.nodes[i];
+      node.process();
 
       const mesh = this.meshes[i];
-      shader.texture = pipeline.output;
+      shader.texture = node.output;
       shader.enableAntialias = false;
       shader.tex2 = null;
       shader.resolution[0] = this.width;

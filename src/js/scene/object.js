@@ -155,8 +155,8 @@ Tarumae.SceneObject = class {
 		this._normalTransform.copyFrom(t);
 		this._normalTransform.inverse().transpose();
 
-		for (let i = 0; i < this.objects.length; i++) {
-			this.objects[i].updateTransform();
+		for (const child of this.objects) {
+			child.updateTransform();
 		}
 	}
 
