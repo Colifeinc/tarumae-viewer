@@ -12,16 +12,17 @@ Tarumae.Shaders.ImageShader = class extends Tarumae.Shader {
 		this.vertexTexcoordAttribute = this.findAttribute("vertexTexcoord");
 		this.projectionMatrixUniform = this.bindUniform("projectionMatrix", "mat4");
 
-		this.textureUniform = this.bindUniform("texture", "tex", 0);
+		this.texture1Uniform = this.bindUniform("tex1", "tex", 0);
 		this.texture2Uniform = this.bindUniform("tex2", "tex", 1);
-		this.hasTex2Uniform = this.bindUniform("hasTex2", "bool");
-		
+
 		this.colorUniform = this.bindUniform("color", "color3");
 		this.alphaUniform = this.bindUniform("alpha", "float");
 		this.resolutionUniform = this.bindUniform("resolution", "vec2");
 		this.resStrideUniform = this.bindUniform("resStride", "vec2");
 		this.filterTypeUniform = this.bindUniform("filterType", "int");
-
+		this.tex2FilterTypeUniform = this.bindUniform("tex2FilterType", "int");
+		this.tex2IntensityUniform = this.bindUniform("tex2Intensity", "float");
+    
 		this.samplingWeightUniform = this.bindUniform("samplingWeight", "float[]");
 		// this.samplingWeightUniform.set([0.132572, 0.125472, 0.106373, 0.08078, 0.05495, 0.033482, 0.018275, 0.008934, 0.003912, 0.001535]);
 		this.samplingWeightUniform.set([0.114357, 0.109813, 0.097238, 0.079397, 0.059781, 0.041506, 0.026573, 0.015687, 0.00854, 0.004287]);
@@ -51,17 +52,18 @@ Tarumae.Shaders.ImageShader = class extends Tarumae.Shader {
 		this.filterTypeUniform.set(this.filterType);
  
 		if (this.texture) {
-			this.textureUniform.set(this.texture);
+			this.texture1Uniform.set(this.texture);
 		} else {
-			this.textureUniform.set(Tarumae.Shader.emptyTexture);
+			this.texture1Uniform.set(Tarumae.Shader.emptyTexture);
 		}
 
 		if (this.tex2) {
 			this.texture2Uniform.set(this.tex2);
-			this.hasTex2Uniform.set(true);
+      this.tex2FilterTypeUniform.set(this.tex2FilterType);
+      this.tex2IntensityUniform.set(this.tex2Intensity);
 		} else {
 			this.texture2Uniform.set(Tarumae.Shader.emptyTexture);
-			this.hasTex2Uniform.set(false);
+			this.tex2FilterTypeUniform.set(0);
 		}
 		
 		this.gl.depthMask(false);
@@ -77,7 +79,7 @@ Tarumae.Shaders.ImageShader = class extends Tarumae.Shader {
 		this.gl.depthMask(true);
 		this.gl.disable(this.gl.BLEND);
 
-		this.textureUniform.unset();
+		this.texture1Uniform.unset();
 		this.texture2Uniform.unset();
 
 		super.endMesh(mesh);
@@ -92,6 +94,8 @@ Tarumae.Shaders.ImageShader = class extends Tarumae.Shader {
 		this.texture = undefined;
 		this.resolution = [0, 0];
 		this.resStride = [.001, .001];
-		this.filterType = 0;
+    this.filterType = 0;
+    this.tex2FilterType = 0;
+    this.tex2Intensity = 1.0;
 	}
 };
