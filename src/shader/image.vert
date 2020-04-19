@@ -7,7 +7,6 @@
 
 attribute vec3 vertexPosition;
 attribute vec2 vertexTexcoord;
-attribute vec3 vertexColor;
 
 uniform mat4 projectionMatrix;
 

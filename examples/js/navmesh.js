@@ -9,18 +9,14 @@ window.addEventListener('load', function() {
     enableShadow: true,
     shadowQuality: {
       scale: 8,
-      viewDepth: 8,
-      resolution: 1024,
+      viewDepth: 2,
+      resolution: 512,
+      intensity: 0.1,
     },
   });
 
   const scene = renderer.createScene();
   scene.animation = true;
-
-  // scene.onframe = function() {
-  //   renderer.drawText(10, 200, "Moveable direction detecting: " + 
-  //   !renderer.viewer.pressedKeys._s3_contains(Tarumae.Viewer.Keys.Shift));
-  // };
 
   const navmesh = {
     mesh: "models/navmesh.mesh",
@@ -34,7 +30,6 @@ window.addEventListener('load', function() {
     location: [0, 0, 0],
     scale: [0.7, 1, 0.7],
     mat: { color: [.4, .5, .6] },
-    receiveShadow: false,
   };
 
   const sphere = new Tarumae.Shapes.Sphere();
@@ -55,7 +50,7 @@ window.addEventListener('load', function() {
 
   scene.add(sphere);
   
-  scene.sun.location.set(5, 5, 4);
+  scene.sun.location.set(0, 5, 0);
   
   let dirx = 0, diry = 0;
   scene.onmousemove = function() {
@@ -73,13 +68,13 @@ window.addEventListener('load', function() {
 
     if (renderer.viewer.pressedKeys.includes(Tarumae.Viewer.Keys.Up)) {
       diry = -0.05;
-    } else if(renderer.viewer.pressedKeys.includes(Tarumae.Viewer.Keys.Down)) {
+    } else if (renderer.viewer.pressedKeys.includes(Tarumae.Viewer.Keys.Down)) {
       diry = 0.05;
     }
 
     if (renderer.viewer.pressedKeys.includes(Tarumae.Viewer.Keys.Left)) {
       dirx = -0.05;
-    } else if(renderer.viewer.pressedKeys.includes(Tarumae.Viewer.Keys.Right)) {
+    } else if (renderer.viewer.pressedKeys.includes(Tarumae.Viewer.Keys.Right)) {
       dirx = 0.05;
     }
   }, 10);

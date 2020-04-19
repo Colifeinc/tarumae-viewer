@@ -54,7 +54,12 @@ Tarumae.Renderer = class {
 				enabled: true,
 				threshold: 0.1,
 				gamma: 2.0,
-			},
+      },
+      ssao: { /* experimental */
+        enabled: false,
+        resolutionRatio: 0.5,
+        intensity: 0.2,
+      },
 			debugMode: false,
 			showDebugPanel: false,
       enableAntialias: false,
@@ -414,6 +419,7 @@ Tarumae.Renderer = class {
 
 				scene.requestedUpdateFrame = false;
 
+        this.prepareRenderMatrices();
 				this.renderPipeline();
 
 				if (this.debugMode) {
@@ -447,87 +453,140 @@ Tarumae.Renderer = class {
 		}
 		
 		if (this.options.enablePostprocess || this.options.enableShadow) {
-			const width = this.renderPhysicalSize.width, height = this.renderPhysicalSize.height,
-				sw = width * (this.options.bloomEffect.threshold || 0.1),
-				sh = height * (this.options.bloomEffect.threshold || 0.1);
-			
-			let shadowMapRenderer, bluredShadowMapRenderer;
+      const width = this.renderPhysicalSize.width, height = this.renderPhysicalSize.height;
+      
+			let bluredShadowMapNode;
+
+      // shadow
 
 			if (this.options.enableShadow) {
-				shadowMapRenderer = new Tarumae.PipelineNodes.ShadowMapRenderer(this, {
+				const shadowMapRenderer = new Tarumae.PipelineNodes.ShadowMapRenderer(this, {
 					width: this.options.shadowQuality.resolution || 512,
 					height: this.options.shadowQuality.resolution || 512,
 				});
 
-				bluredShadowMapRenderer = new Tarumae.PipelineNodes.BlurRenderer(this, {
-					width: shadowMapRenderer.width, height: shadowMapRenderer.height,
+				bluredShadowMapNode = new Tarumae.PipelineNodes.BlurRenderer(this, {
+          width: shadowMapRenderer.width,
+          height: shadowMapRenderer.height,
 				});
 
-				bluredShadowMapRenderer.input = shadowMapRenderer;
+				bluredShadowMapNode.input = shadowMapRenderer;
 			}
-	
+  
+
+      // scene to image
+
 			const sceneImageRenderer = new Tarumae.PipelineNodes.SceneToImageRenderer(this, {
 				width: this.renderPhysicalSize.width * (this.options.renderingImage.resolutionRatio || 1.0),
 				height: this.renderPhysicalSize.height * (this.options.renderingImage.resolutionRatio || 1.0)
 			});
-			sceneImageRenderer.shadowMap2DInput = bluredShadowMapRenderer;
+			sceneImageRenderer.shadowMap2DInput = bluredShadowMapNode;
 
-			let imgRendererBlur, imgRendererSmall;
+      // bloom
+      
+			let bloomBlurNode;
 
 			if (this.options.enablePostprocess !== false 
 				&& (!this.options.bloomEffect || this.options.bloomEffect.enabled !== false)
 				) {
-				imgRendererSmall = new Tarumae.PipelineNodes.ImageFilterRenderer(this, {
-					width: sw,
-					height: sh,
+				const bloomSmallImageNode = new Tarumae.PipelineNodes.ImageFilterRenderer(this, {
+					width: width * (this.options.bloomEffect.threshold || 0.1),
+          height: height * (this.options.bloomEffect.threshold || 0.1),
 					flipTexcoordY: true,
 					filter: "blur3",
 				});
-				imgRendererSmall.gammaFactor = (this.options.bloomEffect.gamma || 1.4);
-				imgRendererSmall.input = sceneImageRenderer;
-			
-				imgRendererBlur = new Tarumae.PipelineNodes.BlurRenderer(this, {
-					width: sw,
-					height: sh,
+				bloomSmallImageNode.gammaFactor = (this.options.bloomEffect.gamma || 1.4);
+				bloomSmallImageNode.input = sceneImageRenderer;
+      
+				bloomBlurNode = new Tarumae.PipelineNodes.BlurRenderer(this, {
+					width: bloomSmallImageNode.width,
+					height: bloomSmallImageNode.height,
 				});
-				imgRendererBlur.input = imgRendererSmall;
-			}
+				bloomBlurNode.input = bloomSmallImageNode;
+      }
+      
+      // ssao (experimental)
 
-			const previewPipeline = false;
+      let ssaoEffectRenderer, ssaoBlurNode;
+      
+      if (this.options.ssao && this.options.ssao.enabled) {
+        const depthRenderer = new Tarumae.PipelineNodes.AttributeRenderer(this, {
+          type: 0 // depth
+        });
+        const normalRenderer = new Tarumae.PipelineNodes.AttributeRenderer(this, {
+          type: 1 // normal
+        });
+        const ssaoImageRenderer = new Tarumae.PipelineNodes.ImageFilterRenderer(this, {
+          width: this.renderPhysicalSize.width * (this.options.ssao.resolutionRatio || 1.0),
+          height: this.renderPhysicalSize.height * (this.options.ssao.resolutionRatio || 1.0),
+          filter: "ssao",
+          tex2Filter: "none",
+        });
+        ssaoImageRenderer.input = depthRenderer;
+        ssaoImageRenderer.tex2Input = normalRenderer;
 
-			if (previewPipeline) {
+        ssaoBlurNode = new Tarumae.PipelineNodes.BlurRenderer(this, {
+          width: ssaoImageRenderer.width * 0.5,
+          height: ssaoImageRenderer.height * 0.5,
+        });
+        ssaoBlurNode.input = ssaoImageRenderer;
+
+        ssaoEffectRenderer = new Tarumae.PipelineNodes.ImageFilterRenderer(this, {
+          width: this.renderPhysicalSize.width * (this.options.renderingImage.resolutionRatio || 1.0),
+          height: this.renderPhysicalSize.height * (this.options.renderingImage.resolutionRatio || 1.0),
+          filter: "linear-interp",
+          tex2Filter: "darker",
+          tex2Intensity: this.options.ssao.intensity || 0.2,
+        });
+        ssaoEffectRenderer.input = sceneImageRenderer;
+        ssaoEffectRenderer.tex2Input = ssaoBlurNode;
+      } else {
+        ssaoEffectRenderer = sceneImageRenderer;
+      }
+
+
+      // final render
+
+			const pipelinePreview = false;
+
+      if (pipelinePreview) {
+        
 				const finalImagePreviewRenderer = new Tarumae.PipelineNodes.ImageFilterRenderer(this, {
 					width: this.renderPhysicalSize.width * (this.options.renderingImage.resolutionRatio || 1.0),
-					height: this.renderPhysicalSize.height * (this.options.renderingImage.resolutionRatio || 1.0),
-					filter: "linear-interp",
+          height: this.renderPhysicalSize.height * (this.options.renderingImage.resolutionRatio || 1.0),
+          filter: "linear-interp",
+          tex2Filter: "lighter",
 				});
-				finalImagePreviewRenderer.input = sceneImageRenderer;
+				finalImagePreviewRenderer.input = ssaoEffectRenderer;
+				finalImagePreviewRenderer.tex2Input = bloomBlurNode;
 				finalImagePreviewRenderer.gammaFactor = this.options.renderingImage.gamma;
-				finalImagePreviewRenderer.tex2Input = imgRendererBlur;
 				finalImagePreviewRenderer.enableAntialias = this.options.enableAntialias;
 
 				const previewRenderer = new Tarumae.PipelineNodes.MultipleImagePreviewRenderer(this);
 				previewRenderer.addPreview(sceneImageRenderer);
-				// previewRenderer.addPreview(imgRendererSmall);
-				previewRenderer.addPreview(imgRendererBlur);
-				// previewRenderer.addPreview(shadowMapRenderer);
-				previewRenderer.addPreview(bluredShadowMapRenderer);
+				// previewRenderer.addPreview(imgRendererBlur);
+				// previewRenderer.addPreview(bluredShadowMapNode);
+				// previewRenderer.addPreview(bloomBlurNode);
+				previewRenderer.addPreview(ssaoBlurNode);
+				previewRenderer.addPreview(ssaoEffectRenderer);
 				previewRenderer.addPreview(finalImagePreviewRenderer);
 				previewRenderer.enableAntialias = true;
 				this.pipelineNodes.push(previewRenderer);
 			
 			} else {
-			
-				const finalScreenRenderer = new Tarumae.PipelineNodes.ImageToScreenRenderer(this, {
+      
+      
+  			const finalScreenRenderer = new Tarumae.PipelineNodes.ImageToScreenRenderer(this, {
 					width: this.renderPhysicalSize.width * (this.options.renderingImage.resolutionRatio || 1.0),
-					height: this.renderPhysicalSize.height * (this.options.renderingImage.resolutionRatio || 1.0)
+					height: this.renderPhysicalSize.height * (this.options.renderingImage.resolutionRatio || 1.0),
+          filter: "linear-interp",
+          tex2Filter: "lighter",
 				});
-				finalScreenRenderer.input = sceneImageRenderer;
+				finalScreenRenderer.input = ssaoEffectRenderer;
+				finalScreenRenderer.tex2Input = bloomBlurNode;
 				finalScreenRenderer.gammaFactor = this.options.renderingImage.gamma;
-				finalScreenRenderer.tex2Input = imgRendererBlur;
 				finalScreenRenderer.enableAntialias = this.options.enableAntialias;
 				this.pipelineNodes.push(finalScreenRenderer);
-				
 			}
 
 		} else {
@@ -559,7 +618,6 @@ Tarumae.Renderer = class {
 	renderFrame() {		
 		const scene = this.currentScene;
 		if (scene) {
-			this.prepareRenderMatrices();
 			this.drawSceneFrame(scene);
 		}
 	}

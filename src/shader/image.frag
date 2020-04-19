@@ -7,7 +7,7 @@
 
 precision mediump float;
 
-uniform sampler2D texture;
+uniform sampler2D tex1;
 uniform sampler2D tex2;
 
 uniform vec3 color;
@@ -15,9 +15,10 @@ uniform float alpha;
 uniform vec2 resolution;
 uniform vec2 resStride;
 uniform float gammaFactor;
+uniform float tex2Intensity;
 uniform int filterType;
-uniform bool enableAntialias;
-uniform bool hasTex2;
+uniform int tex2FilterType;
+// uniform bool antialias; // TODO
 
 #define BLUR_SAMPLINGS 10
 uniform float samplingWeight[BLUR_SAMPLINGS];
@@ -33,11 +34,11 @@ vec4 sample(sampler2D tex, vec2 uv) {
 }
 
 vec4 sample(vec2 uv) {
-	return texture2D(texture, uv);
+	return texture2D(tex1, uv);
 }
 
 vec4 sample() {
-  return texture2D(texture, texcoord);
+  return texture2D(tex1, texcoord);
 }
 
 vec4 antialias(sampler2D tex) {
@@ -178,6 +179,57 @@ vec4 interp(sampler2D tex) {
   // return f;
 }
 
+vec4 ssao() {
+  // return sample(tex2);
+
+  vec2 uv = texcoord;
+  float color = 0.0;
+	float offx = resStride.x;
+	float offy = resStride.y;
+
+  // vec3 color1 = texture2D(tex, uv + vec2(-offx, -offy)) * 0.0625;
+  // color += texture2D(tex, uv + vec2(0, -offy)) * 0.125;
+  // color += texture2D(tex, uv + vec2(offx, -offy)) * 0.0625;
+
+  // color += texture2D(tex, uv + vec2(-offx, 0)) * 0.125;
+  // color += texture2D(tex, uv + vec2(0, 0)) * 0.25;
+  // color += texture2D(tex, uv + vec2(offx, 0)) * 0.125;
+
+  // color += texture2D(tex, uv + vec2(-offx, offy)) * 0.0625;
+  // color += texture2D(tex, uv + vec2(0, offy)) * 0.125;
+  // color += texture2D(tex, uv + vec2(offx, offy)) * 0.0625;
+
+  const int range = 5;
+
+  vec3 o = texture2D(tex2, uv).xyz;
+
+  for (int y = 0; y < range; y++) {
+    for (int x = 0; x < range; x++) {
+      vec3 t1 = texture2D(tex2, uv + vec2(-offx * float(x), -offy * float(y))).xyz;
+      vec3 t2 = texture2D(tex2, uv + vec2(offx * float(x), offy * float(y))).xyz;
+
+      // vec3 t3 = texture2D(tex2, uv + vec2(-offy * float(x), 0)).xyz;
+      // vec3 t4 = texture2D(tex2, uv + vec2(offy * float(x), 0)).xyz;
+      
+      // color += max(dot(o, t1), 0.0);
+      color += max(dot(o, t1) - dot(o, t2), 0.0);
+      // color += max(dot(o, t3) - dot(o, t4), -0.5);
+      // color += max(1.0 / max(dot(o, t1),0.0) - 1.0 / max(dot(o, t2),0.0), 0.0);
+    }
+  }
+
+  //  for (int y = 0; y < range; y++) {
+  //   vec3 t1 = texture2D(tex2, uv + vec2(-offy * float(y), 0)).xyz;
+  //   vec3 t2 = texture2D(tex2, uv + vec2(offy * float(y), 0)).xyz;
+  //   // color += max(dot(t1, t2), 0.0);
+  //   color += dot(o, t1) - dot(o, t2);
+  // }
+
+
+  color = clamp(color, 0.0, 1.0);
+  return vec4(color, color, color, 1.0);
+}
+
 vec3 grayscale(vec3 rgb) {
   float gray = 0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b;
 	return vec3(gray);
@@ -213,37 +265,46 @@ vec3 lighter2(vec3 a, vec3 b, float factor) {
 	return a + pow(d, vec3(2.0)) * factor;
 }
 
+vec3 darker(vec3 a, vec3 b, float factor) {
+	// vec3 d = min(b - a, 1.0);
+	return a;// a + b * 1.0;
+}
+
 void main(void) {
 
 	vec4 fc = vec4(0);
   
   if (filterType == 0) {
-    fc = sample(texture);
+    fc = sample(tex1);
   } else if (filterType == 1) /* linear-interp */ {
-    fc = interp(texture);
+    fc = interp(tex1);
   } else if (filterType == 2) /* guassblur-h */ {
-    fc = guassblur_h(texture);
+    fc = guassblur_h(tex1);
   } else if (filterType == 3) /* guassblur-v */ {
-    fc = guassblur_v(texture);
+    fc = guassblur_v(tex1);
   } else if (filterType == 4) /* light-pass */ {
-    fc = light_pass(sample(texture));
-    // fc = sample(texture);
+    fc = light_pass(sample(tex1));
   } else if (filterType == 5) /* blur3 */ {
-    fc = blur3(texture);
+    fc = blur3(tex1);
   } else if (filterType == 6) /* blur5 */ {
-    fc = blur5(texture);
+    fc = blur5(tex1);
   } else if (filterType == 7) /* antialias-smple */ {
-    fc = antialias(texture);
+    fc = antialias(tex1);
   } else if (filterType == 8) /* antialias-cross */ {
-    fc = antialiasCross(texture);
+    fc = antialiasCross(tex1);
+  } else if (filterType == 20) {
+    fc = ssao();
   }
 
-	vec3 t2c = vec3(0);
-	
-	if (hasTex2) {
-		t2c = sample(tex2).rgb;
-		fc.rgb = lighter(fc.rgb, t2c.rgb, 1.0);;
-	}
+  if (tex2FilterType == 1) {  /* add */
+    fc.rgb = add(fc.rgb, sample(tex2).rgb, tex2Intensity);
+  } else if (tex2FilterType == 2) {
+    fc.rgb = sub(fc.rgb, sample(tex2).rgb, tex2Intensity);
+  } else if (tex2FilterType == 3) {
+    fc.rgb = lighter(fc.rgb, sample(tex2).rgb, tex2Intensity);
+  } else if (tex2FilterType == 4) {
+    fc.rgb = darker(fc.rgb, sample(tex2).rgb, tex2Intensity);
+  }
 
   fc.rgb = gamma(fc.rgb, gammaFactor);
   fc.a = alpha;
