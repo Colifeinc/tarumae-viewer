@@ -43,8 +43,9 @@ Tarumae.Renderer = class {
 			shadowQuality: {
 				scale: 5,
 				viewDepth: 2,
-				resolution: 512 * window.devicePixelRatio,
-				intensity: 0.2,
+				resolution: 1024 * Math.min(window.devicePixelRatio, 2),
+        intensity: 0.2,
+        enableCache: true,
 			},
 			renderingImage: {
         gamma: 1.0,
@@ -455,7 +456,8 @@ Tarumae.Renderer = class {
 		if (this.options.enablePostprocess || this.options.enableShadow) {
       const width = this.renderPhysicalSize.width, height = this.renderPhysicalSize.height;
       
-			let bluredShadowMapNode;
+			let shadowMapCacheNode;
+
 
       // shadow
 
@@ -465,14 +467,14 @@ Tarumae.Renderer = class {
 					height: this.options.shadowQuality.resolution || 512,
 				});
 
-				bluredShadowMapNode = new Tarumae.PipelineNodes.BlurRenderer(this, {
+				shadowMapCacheNode = new Tarumae.PipelineNodes.ShadowMapBlurCacheRenderer(this, {
           width: shadowMapRenderer.width,
           height: shadowMapRenderer.height,
 				});
 
-				bluredShadowMapNode.input = shadowMapRenderer;
-			}
-  
+				shadowMapCacheNode.input = shadowMapRenderer;
+      }
+      
 
       // scene to image
 
@@ -480,8 +482,9 @@ Tarumae.Renderer = class {
 				width: this.renderPhysicalSize.width * (this.options.renderingImage.resolutionRatio || 1.0),
 				height: this.renderPhysicalSize.height * (this.options.renderingImage.resolutionRatio || 1.0)
 			});
-			sceneImageRenderer.shadowMap2DInput = bluredShadowMapNode;
+			sceneImageRenderer.shadowMap2DInput = shadowMapCacheNode;
 
+      
       // bloom
       
 			let bloomBlurNode;

@@ -21,7 +21,7 @@ window.addEventListener("load", function() {
 		enableEnvmap: true,
 		shadowQuality: {
 			scale: 2,
-			viewDepth: 2,
+      viewDepth: 2,
 		},
 		bloomEffect: {
 			enabled: true,

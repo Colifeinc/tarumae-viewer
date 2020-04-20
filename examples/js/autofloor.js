@@ -78,7 +78,9 @@ window.addEventListener("load", function() {
 			scene.animate({duration: 0.7}, t => {
 				const s = Math.sin(t * 2);
 				obj.scale.set(s, s, s);
-			});
+      }, _ => {
+          renderer.options.shadowQuality.enableCache = true;
+      });
 		}, 500);
 	});
 

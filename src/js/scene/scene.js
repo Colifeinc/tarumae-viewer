@@ -39,6 +39,10 @@ Tarumae.Scene = class {
 		this.animation = false;
 		this.requestedUpdateFrame = true;
 
+    this.shadowMap = null;
+    this.shadowMapUpdateRequested = true;
+    this.skybox = null;
+    
 		// main camera
 		if (typeof Tarumae.Camera === "function") {
 			this.mainCamera = new Tarumae.Camera();
@@ -54,8 +58,6 @@ Tarumae.Scene = class {
 			this.sun.mat = {};
 		}
 
-		this.shadowMap = null;
-		this.skybox = null;
 	}
 
 	loadArchive(name, url, loadingSession, callback) {

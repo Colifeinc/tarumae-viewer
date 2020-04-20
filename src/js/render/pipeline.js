@@ -393,14 +393,17 @@ Tarumae.PipelineNodes.ShadowMapRenderer = class extends Tarumae.PipelineNode {
     this.width = options.width || 1280;
     this.height = options.height || 720;
   
+    this.cacheDirty = true;
+
     this.shader = Tarumae.Renderer.Shaders.shadowmap.instance;
     this.buffer = new Tarumae.FrameBuffer(this.renderer, this.width, this.height);
   }
 
   render() {
-    this.buffer.use();
-
     const scene = this.renderer.currentScene;
+
+
+    this.buffer.use();
 
     // const gl = this.renderer.gl;
     // gl.cullFace(gl.FRONT);
@@ -446,6 +449,26 @@ Tarumae.PipelineNodes.ShadowMapRenderer = class extends Tarumae.PipelineNode {
     return this.buffer.texture;
   }
 };
+
+Tarumae.PipelineNodes.ShadowMapBlurCacheRenderer = class extends Tarumae.PipelineNodes.BlurRenderer {
+  constructor(renderer, options) {
+    super(renderer, options);
+  }
+
+  process() {
+    
+    if (this.renderer.options.enableShadow === false) return;
+
+    const scene = this.renderer.currentScene;
+
+    if (!this.renderer.options.shadowQuality.enableCache
+      || scene.shadowMapUpdateRequested) {
+
+        scene.shadowMapUpdateRequested = false;
+        super.process();
+    }
+  }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
