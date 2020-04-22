@@ -67,9 +67,9 @@ Tarumae.Shaders.PanoramaShader = class extends Tarumae.Shader {
 		// gl.uniformMatrix4fv(this.normalMatrixUniform, false, normalMatrix.toArray());
 
 		// material
-		var mat = obj.mat;
+		const mat = obj.mat;
 
-		var texture = null;
+		let texture = null;
 		// var color = null;
 
 		if (mat) {
@@ -90,7 +90,7 @@ Tarumae.Shaders.PanoramaShader = class extends Tarumae.Shader {
 
 		// texture
 		gl.activeTexture(gl.TEXTURE0);
-		if (texture !== null) {
+		if (texture) {
 			texture.use(this.renderer);
 		} else {
 			this.emptyCubemap.use(this.renderer);

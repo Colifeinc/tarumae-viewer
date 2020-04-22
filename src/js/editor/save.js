@@ -86,8 +86,8 @@ Object.assign(TarumaeEditor.prototype, {
       json.viewVisible = obj.viewVisible;
     }
     
-    if (obj.shadowCast === false) {
-      json.shadowCast = obj.shadowCast;
+    if (obj.castShadow === false) {
+      json.castShadow = obj.castShadow;
     }
     
     if (obj.receiveLight === false) {

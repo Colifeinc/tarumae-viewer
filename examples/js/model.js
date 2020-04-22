@@ -13,15 +13,16 @@ window.addEventListener("load", function() {
 	const renderer = new Tarumae.Renderer({
 		// backColor: new Color4(0.74, .87, .85, 0.5),
 		backgroundImage: "textures/bg-gray-gradient.jpg",
-		showDebugPanel: true,
+		showDebugPanel: false,
 		enableLighting: true,
 		enablePostprocess: true,
-		enableShadow: true,
 		enableAntialias: true,
 		enableEnvmap: true,
+		enableShadow: true,
 		shadowQuality: {
 			scale: 2,
-			viewDepth: 2,
+      viewDepth: 2,
+      resolution: 2048,
 		},
 		bloomEffect: {
 			enabled: true,
@@ -39,7 +40,7 @@ window.addEventListener("load", function() {
  
 	this.models = [
 		{ path: "models/chair_adv_01.toba" },
-		{ path: "models/chair_jati.toba" },
+		// { path: "models/chair_jati.toba" },
 	];
 
 	const ground = {

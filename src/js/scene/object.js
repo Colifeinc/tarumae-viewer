@@ -41,7 +41,8 @@ Tarumae.SceneObject = class {
 		this.meshes = [];
 		this.objects = [];
 
-		this.shadowCast = true;
+    this.castShadow = true;
+    this.receiveShadow = true;
 		this.receiveLight = true;
 		this.visible = true;
     this.hitable = true;
@@ -169,13 +170,22 @@ Tarumae.SceneObject = class {
 		
 		newObj._suspendTransformUpdate = true;
 
+    newObj._parent = obj._parent;
+    newObj._scene = obj._scene;
+
 		newObj.location = obj.location;
 		newObj.angle = obj.angle;
 		newObj.scale = obj.scale;
 
-		newObj.visible = obj.visible;
-		newObj.shadowCast = obj.shadowCast;
+		newObj._transform = obj._transform.clone();
+    newObj._normalTransform = obj._normalTransform.clone();
+		newObj._worldLocation = obj._worldLocation.clone();
+
+		newObj.castShadow = obj.castShadow;
+		newObj.receiveShadow = obj.receiveShadow;
 		newObj.receiveLight = obj.receiveLight;
+		newObj.visible = obj.visible;
+    newObj.hitable = obj.hitable;
 
 		newObj.collisionMode = obj.collisionMode;
 		newObj.collisionTarget = obj.collisionTarget;
@@ -183,20 +193,18 @@ Tarumae.SceneObject = class {
 		newObj.isSelected = obj.isSelected;
 		newObj.wireframe = obj.wireframe;
 
-		newObj._transform = obj._transform;
-
-		newObj.mat = Tarumae.Material.clone(obj.mat);
+		newObj.mat = obj.mat;
 		
 		for (const mesh of obj.meshes) {
 			newObj.addMesh(mesh);
 		}
 
-		for (const newChild of obj.objects) {
-			newObj.add(newChild);
+		for (const child of obj.objects) {
+			newObj.add(child.clone());
 		}
 
 		newObj._suspendTransformUpdate = false;
-		newObj.updateTransform();
+		// newObj.updateTransform();
 
 		return newObj;
 	}

@@ -51,12 +51,13 @@ window.addEventListener("load", function() {
 		obj.scale.set(13, 13, 13);
 		obj.angle.set(30, 0, 0);
 
-		obj.mat.color = [1, 1, 1];
+		obj.mat.color = [1.0, 1.0, 1.0];
+		obj.mat.color = [1.2, 1.2, 1.2];
 		// obj.mat.color = [.6, .6, .6];
 		// obj.mat.color = [.8, .8, .8];
 		// obj.mat.color = [.9, .9, .9];
 		// obj.mat.color = [1.0, 1.0, 1.0];
-		obj.mat.glossy = .6;
+		obj.mat.glossy = .4;
 		obj.mat.roughness = 0;
 		obj.mat.transparency = 0.2;
 		obj.mat.refraction = .8;
