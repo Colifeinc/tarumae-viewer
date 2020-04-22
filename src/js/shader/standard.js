@@ -400,12 +400,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		this.textureUniform.unset();
 		this.lightMapUniform.unset();
 		this.refMapUniform.unset();
-
-		// normal-map	
-		if (this.useNormalmap !== null) {
-			gl.activeTexture(gl.TEXTURE3);
-			this.useNormalmap.disuse();
-		}
+    this.normalMapUniform.unset();
 
 		gl.disable(gl.BLEND);
 		gl.enable(gl.DEPTH_TEST);
