@@ -149,6 +149,81 @@ vec3 lighter2(vec3 a, vec3 b, float factor) {
 	return a + d * n * factor;
 }
 
+// https://stackoverflow.com/questions/15095909/from-rgb-to-hsv-in-opengl-glsl
+vec3 rgb2hsv(vec3 c)
+{
+  vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+  vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+  vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+
+  float d = q.x - min(q.w, q.y);
+  float e = 1.0e-10;
+  return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+}
+
+// https://stackoverflow.com/questions/15095909/from-rgb-to-hsv-in-opengl-glsl
+vec3 hsv2rgb(vec3 c)
+{
+  vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+  vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+  return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
+float cldec(float c) {
+
+  if (c > 0.95) c = 0.95;
+  // else if (c > 0.9) c = 0.9;
+  else if (c > 0.8) c = 0.8;
+	// else if (c > 0.7) c = 0.7;
+	else if (c > 0.6) c = 0.6;
+	// else if (c > 0.5) c = 0.5;
+	else if (c > 0.4) c = 0.4;
+	else if (c > 0.25) c = 0.25;
+	else c = 0.1;
+
+  return c;
+}
+
+vec3 cartoon() {
+  vec3 c = guassBlur3(texture).rgb;
+  // c = vec3(cldec(c.r), cldec(c.g), cldec(c.b));
+  c = rgb2hsv(c);
+  c = vec3(cldec(c.r), c.g, cldec(c.b));
+  
+  c = hsv2rgb(c);
+
+  return c;
+}
+
+
+vec4 edgeDetect() {
+  // return sample(texture);
+
+  vec2 uv = texcoord;
+  float color = 0.0;
+	float offx = resStride.x;
+	float offy = resStride.y;
+
+  const int range = 2;
+
+  vec3 o = texture2D(texture, uv).xyz;
+
+  for (int y = 0; y < range; y++) {
+    for (int x = 0; x < range; x++) {
+      vec3 t1 = texture2D(texture, uv + vec2(-offx * float(x), -offy * float(y))).xyz;
+      vec3 t2 = texture2D(texture, uv + vec2(offx * float(x), offy * float(y))).xyz;
+
+      color += dot(o, t1) - dot(o, t2);
+      // color += max(dot(o, t3) - dot(o, t4), -0.5);
+      // color += max(1.0 / max(dot(o, t1),0.0) - 1.0 / max(dot(o, t2),0.0), 0.0);
+    }
+  }
+
+  color = clamp(color, 0.0, 1.0);
+  return vec4(vec3(color), 1.0);
+}
+
+
 void main(void) {
 
 	vec4 fc;
@@ -159,6 +234,9 @@ void main(void) {
 		fc = sample(texture);
 	}
 
+  // fc.rgb = corton();
+  fc += edgeDetect() * 0.3;
+
 	vec3 t2c = vec3(0);
 	
 	if (hasTex2) {
@@ -168,6 +246,7 @@ void main(void) {
 	}
 
 	fc.rgb = gamma(fc.rgb, gammaFactor);
+
   fc.a = alpha;
  
 	gl_FragColor = fc;

@@ -66,6 +66,50 @@ struct LightReturn {
 uniform BoundingBox refMapBox;
 uniform BoundingBox shadowMapBox;
 
+// https://stackoverflow.com/questions/15095909/from-rgb-to-hsv-in-opengl-glsl
+vec3 rgb2hsv(vec3 c)
+{
+  vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+  vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+  vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+
+  float d = q.x - min(q.w, q.y);
+  float e = 1.0e-10;
+  return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+}
+
+// https://stackoverflow.com/questions/15095909/from-rgb-to-hsv-in-opengl-glsl
+vec3 hsv2rgb(vec3 c)
+{
+  vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+  vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+  return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
+float cldec(float c) {
+
+  if (c > 0.95) c = 0.95;
+  // else if (c > 0.9) c = 0.9;
+  else if (c > 0.8) c = 0.8;
+	// else if (c > 0.7) c = 0.7;
+	else if (c > 0.6) c = 0.6;
+	// else if (c > 0.5) c = 0.5;
+	else if (c > 0.4) c = 0.4;
+	else if (c > 0.2) c = 0.2;
+	else c = 0.1;
+
+  return c;
+}
+
+vec3 cartoon(vec3 c) {
+  // c = vec3(cldec(c.r), cldec(c.g), cldec(c.b));
+  c = rgb2hsv(c);
+  c = vec3(c.r, c.g, cldec(c.b)); 
+  c = hsv2rgb(c);
+
+  return c;
+}
+
 vec3 correctBoundingBoxIntersect(BoundingBox bbox, vec3 dir) {
 	vec3 invdir = vec3(1.0, 1.0, 1.0) / dir;
 	vec3 intersectMaxPointPlanes = (bbox.max - vertex) * invdir;
@@ -119,6 +163,8 @@ vec3 refract2(vec3 d, vec3 normal, float r) {
 	
 	return normalize(d * r - normal * ((into ? 1.0 : -1.0) * (c * r + sqrt(t))));
 }
+
+
 
 void main(void) {
 
@@ -212,6 +258,8 @@ void main(void) {
 			finalColor += vec3(1.0, 1.0, 0.9) * shadowBlock;
 		}
 	}
+
+	finalColor = cartoon(finalColor);
 
 	gl_FragColor = vec4(finalColor, alpha);
 	//  gl_FragColor.rgb *= gl_FragColor.a;
