@@ -38,16 +38,33 @@ window.addEventListener('load', function() {
   sphere.mat = {color : [.6, 1.0, .4], emission: 0.5};
   sphere.location.y = 0.1;
 
+  const sp2 = new Tarumae.Shapes.Sphere();
+  sp2.receiveLight = false;
+  sp2.mat = { color: [0.2, 0.5, 1], transparency: 1 };
+  sphere.add(sp2);
+
+  setInterval(_ => {
+    scene.animate({ duration: 1 }, t => {
+      const d = t * 5;
+      sp2.scale.set(d, d, d);
+      sp2.mat.transparency = t;
+    });
+  }, 2000);
+
   sphere.collisionMode = Tarumae.CollisionModes.NavMesh;
   sphere.collisionTarget = navmesh;
   sphere.collisionOption = {};
 
-  scene.load(navmesh, navmeshWall, {
+  const session = scene.load(navmesh, navmeshWall, {
     light: {
       location: [0, 3, 0],
       mat: { emission: 2.0 },
     }
   });
+
+  // when the mesh is loaded, request to update the shadow map.
+  // (by default, Tarumae caches the shadow map until request to update)
+  session.on("finish", _ => scene.shadowMapUpdateRequested = true);
 
   scene.add(sphere);
   
