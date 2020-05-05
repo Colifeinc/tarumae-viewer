@@ -465,7 +465,11 @@ Tarumae.PipelineNodes.ShadowMapBlurCacheRenderer = class extends Tarumae.Pipelin
       || scene.shadowMapUpdateRequested) {
 
         scene.shadowMapUpdateRequested = false;
-        super.process();
+      super.process();
+      
+      if (this.renderer.debugger) {
+        this.renderer.debugger.shadowRenderCount++;
+      }
     }
   }
 }

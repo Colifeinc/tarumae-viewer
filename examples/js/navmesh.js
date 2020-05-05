@@ -12,6 +12,7 @@ window.addEventListener('load', function() {
       viewDepth: 2,
       resolution: 512,
       intensity: 0.1,
+      enableCache: true,
     },
   });
 

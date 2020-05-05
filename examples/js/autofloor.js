@@ -25,7 +25,8 @@ window.addEventListener("load", function() {
 			scale: 10,
 			viewDepth: 3,
 			resolution: 512,
-			intensity: 0.3,
+			intensity: 0.23,
+      enableCache: false,
 		},
 		bloomEffect: {
 			threshold: 0.3,
@@ -108,19 +109,24 @@ window.addEventListener("load", function() {
 	// });
 
 	const floorViewController = new Tarumae.FloorViewController(scene);
-	floorViewController.on("beginChangeMode", _ => {
-		if (scene.skybox) {
-			if (floorViewController.topViewStatus.topViewMode) {
+  
+  floorViewController.on("beginChangeMode", _ => {
+    if (floorViewController.topViewStatus.topViewMode) {
+      if (scene.skybox) {
 				scene.skybox.visible = false;
 			}
 		}
-	});
+  });
+  
 	floorViewController.on("modeChanged", _ => {
-		if (scene.skybox) {
-			if (!floorViewController.topViewStatus.topViewMode) {
-				scene.skybox.visible = true;
-			}
-		}
+    if (!floorViewController.topViewStatus.topViewMode) {
+      if (scene.skybox) {
+        scene.skybox.visible = true;
+      }
+    }
+
+    // cache the shadowmap on first time the mode changed
+    renderer.options.shadowQuality.enableCache = true;
 	});
 
 	scene.sun.location.set(0, 10, 0);

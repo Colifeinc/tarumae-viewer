@@ -27,7 +27,8 @@ Tarumae.Debugger = class {
 		this.numberOfRenderPassesPerFrame = 0;
 		this.numberOfSceneRendered = 0;
 		this.numberOfPolygonRenderedPerSecond = 0;
-		this._numberOfPolygonRenderedPerSecond = 0;
+    this._numberOfPolygonRenderedPerSecond = 0;
+    this.shadowRenderCount = 0;
 
 		this._maxPathLength = 30;
 
@@ -101,7 +102,8 @@ Tarumae.Debugger = class {
 		this.numberOfRenderPassesPerFrame = 0;
 		this.totalNumberOfObjectRendered = 0;
 		this.totalNumberOfPolygonRendered = 0;
-		this.numberOfSceneRendered = 0;
+    this.numberOfSceneRendered = 0;
+    this.shadowRenderCount = 0;
 	}
 
 	afterDrawFrame() {
@@ -241,7 +243,8 @@ Tarumae.Debugger = class {
 			+ "fps: " + toStringDigits(fm.currentFPS, 2) + " (" + toStringDigits(fm.minFPS, 2) + " ~ " + toStringDigits(fm.maxFPS, 2) + ") / " 
 			+ "pts: " + toStringDigits(this.numberOfPolygonRenderedPerSecond / 1000, 1) + "k" + newline
 			+ "frame time: " + toStringDigits(this.averageFrameRenderingTime, 2) + " ms. / "
-			+ "passes: " + (this.numberOfRenderPassesPerFrame) + newline
+      + "passes: " + (this.numberOfRenderPassesPerFrame)
+      + " / shadowmap: " + this.shadowRenderCount + newline
       + "last raycast operation time: " + toStringDigits(this.lastRaycastElapsedTime, 2) + " ms." + newline
       + "current enabled lights: " + this.currentLightCount + newline
       + "light source filter time: " + this.lightSourceFilterElapsedTime + " ms." + newline
