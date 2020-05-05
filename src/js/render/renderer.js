@@ -580,7 +580,8 @@ Tarumae.Renderer = class {
 					height: this.renderPhysicalSize.height * (this.options.renderingImage.resolutionRatio || 1.0),
           filter: "linear-interp",
           tex2Filter: "lighter",
-				});
+        });
+        finalScreenRenderer.name = "final-screen-pipeline";
 				finalScreenRenderer.input = ssaoEffectRenderer;
 				finalScreenRenderer.tex2Input = bloomBlurNode;
 				finalScreenRenderer.gammaFactor = this.options.renderingImage.gamma;
