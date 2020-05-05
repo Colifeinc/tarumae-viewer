@@ -251,7 +251,7 @@ Tarumae.Shapes.Sphere = class extends Tarumae.SceneObject {
 
 	generateMesh(segments, rings, composeMode) {
 
-		for (var i = 0; i < this.meshes.length; i++) {
+		for (const mesh of this.meshes) {
 			this.meshes[i].destroy();
 		}
 	
@@ -297,41 +297,41 @@ Tarumae.Shapes.Sphere = class extends Tarumae.SceneObject {
 			this.addMesh(mesh);
 	
 		} else {
-			var generateSphereFan = function(starty) {
-				var mesh = new Tarumae.Mesh();
+			function generateSphereFan(symbol) {
+				const mesh = new Tarumae.Mesh();
 				mesh.composeMode = Tarumae.Mesh.ComposeModes.TriangleFan;
 				mesh.vertices = [];
 				mesh.normals = [];
-				mesh.vertices.push(0, starty, 0);
-				mesh.normals.push(0, starty, 0);
+				mesh.vertices.push(0, symbol, 0);
+				mesh.normals.push(0, symbol, 0);
 	
-				for (var i = 0, hangle = 0; i <= rings; i++ , hangle += anglePerRing) {
-					var y = Math.sin(vangle), l = Math.sin(vangle + halfPI);
-					var x = Math.sin(hangle) * l, z = Math.cos(hangle) * l;
+				for (let i = 0, hangle = 0; i <= rings; i++ , hangle += (anglePerRing * symbol)) {
+					const y = Math.sin(vangle), l = Math.sin(vangle + halfPI);
+					const x = Math.sin(hangle) * l, z = Math.cos(hangle) * l;
 					mesh.vertices.push(x, y, z);
 					mesh.normals.push(x, y, z);
 				}
 	
 				return mesh;
-			};
+      };
 	
-			var topMesh = generateSphereFan(1);
+			const topMesh = generateSphereFan(1);
 		
-			var middleMesh = new Tarumae.Mesh();
+			const middleMesh = new Tarumae.Mesh();
 			middleMesh.composeMode = Tarumae.Mesh.ComposeModes.TriangleStrip;
 			middleMesh.vertices = [];
 			middleMesh.normals = [];
 		
-			for (var j = 1; j < segments - 1; j++) {
-				var a1 = vangle, a2 = vangle - anglePerSeg;
+			for (let j = 1; j < segments - 1; j++) {
+				const a1 = vangle, a2 = vangle - anglePerSeg;
 	
-				var y1 = Math.sin(a1), y2 = Math.sin(a2);
-				var l1 = Math.sin(a1 + halfPI), l2 = Math.sin(a2 + halfPI);
+				const y1 = Math.sin(a1), y2 = Math.sin(a2);
+				const l1 = Math.sin(a1 + halfPI), l2 = Math.sin(a2 + halfPI);
 	
-				for (var i = 0, hangle = 0; i <= rings; i++ , hangle += anglePerRing) {
+				for (let i = 0, hangle = 0; i <= rings; i++ , hangle += anglePerRing) {
 				
-					var s = Math.sin(hangle), c = Math.cos(hangle);
-					var x1 = s * l1, z1 = c * l1, x2 = s * l2, z2 = c * l2;
+					const s = Math.sin(hangle), c = Math.cos(hangle);
+					const x1 = s * l1, z1 = c * l1, x2 = s * l2, z2 = c * l2;
 				
 					middleMesh.vertices.push(x1, y1, z1);
 					middleMesh.vertices.push(x2, y2, z2);
@@ -342,7 +342,7 @@ Tarumae.Shapes.Sphere = class extends Tarumae.SceneObject {
 				vangle -= anglePerSeg;
 			}
 	
-			var bottomMesh = generateSphereFan(-1);
+			const bottomMesh = generateSphereFan(-1);
 		
 			this.addMesh(topMesh);
 			this.addMesh(middleMesh);
