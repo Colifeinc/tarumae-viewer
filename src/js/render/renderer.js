@@ -187,13 +187,9 @@ Tarumae.Renderer = class {
 		gl.enable(gl.CULL_FACE);
     gl.cullFace(gl.BACK);
     
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-		// gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-		// gl.blendFunc(gl.ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-		// gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-		// gl.blendFunc(gl.SRC_ALPHA, gl.SRC_ALPHA);
-		// gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA,　gl.ONE_MINUS_DST_ALPHA, gl.ONE);
+		gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE_MINUS_DST_ALPHA, gl.ONE);
 		// gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA, gl.ONE_MINUS_DST_ALPHA, gl.ONE);
 			
 		// window.addEventListener("resize", _ => this.resetViewport(), false);
