@@ -160,7 +160,7 @@ void main(void) {
 		}
 
 		float vtos = clamp(dot(vertexNormal, sundir), 0.0, 1.0);
-		finalColor = finalColor * 0.8 + finalColor * (vtos * 0.2);
+		finalColor = finalColor * 0.75 + finalColor * (vtos * 0.25);
 		finalColor *= sunlight;
 	}
 
