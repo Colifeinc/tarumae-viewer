@@ -56,7 +56,7 @@ Tarumae.Camera = class extends Tarumae.SceneObject {
 		this.projectionMethod = Tarumae.ProjectionMethods.Persp;
 
 		// keep only one camera mesh instance	
-		if (Tarumae.Camera.meshInstance === null) {
+		if (!Tarumae.Camera.meshInstance) {
 			Tarumae.Camera.meshInstance = new Tarumae.CameraMesh();
 		}
 
@@ -70,13 +70,11 @@ Tarumae.Camera = class extends Tarumae.SceneObject {
 		this.filters = [];
 	}
 
-	calcVisibleDistanceToObject(obj, padding, out) {
+	calcVisibleDistanceToObject(obj, out) {
 		if (!this.scene || !this.scene.renderer) {
 			throw "camera must be added into a scene before use this function";
 		}
 	
-		if (padding === undefined) padding = 0.1;
-		const paddingAngle = this.fieldOfView * padding;
 		const renderer = this.scene.renderer;
 		let target, size, bbox = obj.getBounds();
 	
@@ -93,33 +91,57 @@ Tarumae.Camera = class extends Tarumae.SceneObject {
 			out.targetLocation = target;
 		}
 		
-		var distance = size * 0.5 + ((size / renderer.aspectRate) / Math.tan((this.fieldOfView - paddingAngle) * Math.PI / 180));
+		const distance = size * 0.5 + ((size / renderer.aspectRate) / Math.tan((this.fieldOfView) * Math.PI / 180));
 	
 		return distance;
 	}
 	
-	focusAt(obj, options) {
-		options = options || {};
+  focusAt(objectOrPoint, options = {
+    distance: 1,
+  }) {
 		
-		var out = {};
-		var distance = this.calcVisibleDistanceToObject(obj, options.padding, out);
-	
-		var worldpos = this.worldLocation;
-		var dir = Vec3.sub(worldpos, out.targetLocation).normalize();
-	
-		var targetpos = out.targetLocation.add(dir.mul(distance));
+    let targetMovePos, targetLookatPos, vectorToTarget, distanceToTarget;
+    
+    const worldpos = this.worldLocation;
+    
+    if (objectOrPoint instanceof Tarumae.SceneObject) {
+      const out = {};
+      distanceToTarget = this.calcVisibleDistanceToObject(objectOrPoint, out);
+      targetLookatPos = out.targetLocation;
+      vectorToTarget = Vec3.sub(targetLookatPos, worldpos);
+    } else if (objectOrPoint instanceof Vec3) {
+      targetLookatPos = objectOrPoint;
+      vectorToTarget = Vec3.sub(targetLookatPos, worldpos);
+      distanceToTarget = Vec3.length(vectorToTarget);
+    } else if (typeof objectOrPoint === "object") {
+      const { x, y, z } = objectOrPoint;
+      targetLookatPos = new Vec3(x, y, z);
+      vectorToTarget = Vec3.sub(targetLookatPos, worldpos);
+      distanceToTarget = Vec3.length(vectorToTarget);
+    } else {
+      throw Error("invalid target, type is not recognized: " + objectOrPoint);
+    }
+
+    if (typeof options.distance !== "undefined" && !isNaN(options.distance)) {
+      distanceToTarget -= options.distance;
+    } else {
+      distanceToTarget -= 1;
+    }
+  
+		const dir = Vec3.normalize(vectorToTarget);
+		targetMovePos = Vec3.add(worldpos, Vec3.mul(dir, distanceToTarget));
 	
 		if (options.animation === false) {
-			this.location = targetpos;
-			this.lookAt(out.targetLocation, options.lookup);
+			this.location = targetMovePos;
+			this.lookAt(targetLookatPos, options.lookup);
 	
-			var scene = this.scene;
+			const scene = this.scene;
 			if (scene) scene.requireUpdateFrame();
 		} else {
-			this.moveTo(targetpos, {
+			this.moveTo(targetMovePos, {
 				duration: options.duration || 0.8,
 				effect: options.effect || "smooth",
-				lookdir: out.targetLocation.sub(worldpos),
+				lookdir: targetLookatPos.sub(worldpos),
 				lookup: options.lookup || Vec3.up,
 			}, options.onfinish);
 		}
