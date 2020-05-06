@@ -800,7 +800,7 @@ Object.assign(Tarumae.SceneObject.prototype, {
 			}
 		
 			const obj = this;
-			const dir = obj.getLookAt().dir;
+			let dir = obj.getLookAt().dir;
 
 			if (typeof options.ignoreUpwardDirection === "undefined" || options.ignoreUpwardDirection === true) {
 				dir.y = 0;
