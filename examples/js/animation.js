@@ -98,7 +98,7 @@ class AnimationDemo {
 
 window.addEventListener("load", (e) => {
 	const renderer = new Tarumae.Renderer({
-		enableShadow: true
+    enableShadow: true
 	});
 	const scene = renderer.createScene();
 	window._scene = scene;

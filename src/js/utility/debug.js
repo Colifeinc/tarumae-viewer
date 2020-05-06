@@ -244,7 +244,7 @@ Tarumae.Debugger = class {
 			+ "pts: " + toStringDigits(this.numberOfPolygonRenderedPerSecond / 1000, 1) + "k" + newline
 			+ "frame time: " + toStringDigits(this.averageFrameRenderingTime, 2) + " ms. / "
       + "passes: " + (this.numberOfRenderPassesPerFrame)
-      + " / shadowmap: " + this.shadowRenderCount + newline
+      + " / shadowmap passes: " + this.shadowRenderCount + newline
       + "last raycast operation time: " + toStringDigits(this.lastRaycastElapsedTime, 2) + " ms." + newline
       + "current enabled lights: " + this.currentLightCount + newline
       + "light source filter time: " + this.lightSourceFilterElapsedTime + " ms." + newline

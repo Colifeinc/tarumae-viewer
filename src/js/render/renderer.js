@@ -45,7 +45,7 @@ Tarumae.Renderer = class {
 				viewDepth: 2,
 				resolution: 1024 * Math.min(window.devicePixelRatio, 2),
         intensity: 0.2,
-        enableCache: true,
+        enableCache: false,
 			},
 			renderingImage: {
         gamma: 1.0,
