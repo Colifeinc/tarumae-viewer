@@ -76,22 +76,19 @@ Tarumae.SceneObject = class {
 			this.onsceneChange(this._scene);
 		}
 
-		for (let i = 0; i < this.objects.length; i++) {
-			const child = this.objects[i];
-			if (child._scene != this._scene) {
-				child.scene = this._scene;
-			}
-		}
+		for (const child of this.objects) {
+			child.scene = this._scene;
+  	}
 	}
 
 	get location() { return this._location; }
-	set location(value) { this._location.setVec3(value); }
+	set location(_) { this._location.set(...arguments); }
 
 	get angle() { return this._angle; }
-	set angle(value) { this._angle.setVec3(value); }
+	set angle(_) { this._angle.set(...arguments); }
 	
 	get scale() { return this._scale; }
-	set scale(value) { this._scale.setVec3(value); }
+	set scale(_) { this._scale.set(...arguments); }
 
 	get parent() { return this._parent; }
 	set parent(value) {
@@ -210,23 +207,23 @@ Tarumae.SceneObject = class {
 	}
 
 	move(x, y, z) {
-		var movement = new Vec3(x, y, z);
+		const movement = new Vec3(x, y, z);
 		
 		switch (this.collisionMode) {
 			default:
 				break;
 	
 			case Tarumae.CollisionModes.NavMesh:
-				var navmesh = this.collisionTarget;
+				const navmesh = this.collisionTarget;
 				if (navmesh && Array.isArray(navmesh.meshes) && navmesh.meshes.length > 0) {
-					var mesh = navmesh.meshes[0];
+					const mesh = navmesh.meshes[0];
 
 					if (movement.x !== 0 || movement.y !== 0 || movement.z !== 0) {
-						var worldLoc = this.worldLocation;
-						var transform = navmesh.getTransformMatrix(true);
+						const worldLoc = this.worldLocation;
+						const transform = navmesh.getTransformMatrix(true);
 
-						var scene = this.scene;
-						var rdebugger = (scene && scene.renderer && scene.renderer.debugMode) ? scene.renderer.debugger : undefined;
+						const scene = this.scene;
+						const rdebugger = (scene && scene.renderer && scene.renderer.debugMode) ? scene.renderer.debugger : undefined;
 						
 						if (rdebugger) {
 							rdebugger.beforeNavmeshMovementCheck();
@@ -378,11 +375,10 @@ Tarumae.SceneObject = class {
 		this.ondraw(renderer);
 	}
 
-	moveTo(loc, options, onfinish) {
+  moveTo(loc, options = {}, onfinish) {
 		if (typeof loc !== "object") return;
 
-		options = options || {};
-		var _this = this;
+		const _this = this;
 
 		var startLocation = options.startLocation || this.worldLocation,
 			startDirection, startUplook,
@@ -650,81 +646,84 @@ new Tarumae.EventDispatcher(Tarumae.SceneObject).registerEvents(
 	"meshAdd", "meshRemove");
 
 Tarumae.ObjectVectorProperty = class extends Vec3 {
-	constructor(obj, eventName, defValue) {
-		super();
+  constructor(obj, eventName, defValue) {
+    super();
 
-		this.obj = obj;
+    this.obj = obj;
 
-		if (defValue) {
-			this.setVec3(defValue);
-		} else {
-			this._x = 0;
-			this._y = 0;
-			this._z = 0;
-		}	
+    if (defValue) {
+      super.set(defValue);
+    } else {
+      this._x = 0; this._y = 0; this._z = 0;
+    }
 	
-		if (eventName) {
-			this.eventName = eventName;
-			this.changeEvent = obj[eventName];
-		}
-	}
+    if (eventName) {
+      this.eventName = eventName;
+      this.changeEvent = obj[eventName];
+    }
+  }
 	
-	get x() { return this._x; }
-	set x(val) {
-		if (this._x !== val) {
-			this._x = val;
-			if (this.obj) {
-				this.obj.updateTransform();
-				if (this.changeEvent) this.changeEvent.call(this.obj);
-			}	
-		}
-	}
+  get x() { return this._x; }
+  set x(val) {
+    if (this._x !== val) {
+      this._x = val;
+      this.notifyObj();
+    }
+  }
 	
-	get y() { return this._y; }
-	set y(val) {
-		if (this._y !== val) {
-			this._y = val;
-			if (this.obj) {
-				this.obj.updateTransform();
-				if (this.changeEvent) this.changeEvent.call(this.obj);
-			}	
-		}
-	}
+  get y() { return this._y; }
+  set y(val) {
+    if (this._y !== val) {
+      this._y = val;
+      this.notifyObj();
+    }
+  }
 		
-	get z() { return this._z; }
-	set z(val) {
-		if (this._z !== val) {
-			this._z = val;
-			if (this.obj) {
-				this.obj.updateTransform();
-				if (this.changeEvent) this.changeEvent.call(this.obj);
-			}	
-		}
-	}
+  get z() { return this._z; }
+  set z(val) {
+    if (this._z !== val) {
+      this._z = val;
+      this.notifyObj();
+    }
+  }
 		
-	set(x, y, z) {
-		if ((this._x !== x || this._y !== y || this._z !== z)) {
-			this._x = x;
-			this._y = y;
-			this._z = z;
-			if (this.obj) {
-				this.obj.updateTransform();
-				if (this.changeEvent) this.changeEvent.call(this.obj);
-			}
-		}
-	}
-	
-	setVec3(v) {
-		if (!this.equals(v)) {
-			this._x = v.x;
-			this._y = v.y;
-			this._z = v.z;
-			if (this.obj) {
-				this.obj.updateTransform();
-				if (this.changeEvent) this.changeEvent.call(this.obj);
-			}
-		}
-	}
+  set(arg0, arg1, arg2) {
+    switch (arguments.length) {
+      case 1:
+        this.setVec3(arg0);
+        break;
+      
+      case 3:
+        this.setXYZ(arg0, arg1, arg2);
+        break;
+    }
+  }
+
+  setVec3(v) {
+    if (typeof v === "object") {
+      const { x, y, z } = v;
+      this.setXYZ(x, y, z);
+    } else if (Array.isArray(v)) {
+      const [x, y, z] = v;
+      this.setXYZ(x, y, z);
+    }
+  }
+
+  setXYZ(x, y, z) {
+    if (this._x !== x || this._y !== y || this._z !== z) {
+      this._x = x;
+      this._y = y;
+      this._z = z;
+      this.notifyObj();
+    }
+  }
+
+  notifyObj() {
+    if (this.obj) {
+      this.obj.updateTransform();
+      if (this.changeEvent) this.changeEvent.call(this.obj);
+    }
+  }
 	
 };
 
@@ -788,7 +787,7 @@ Object.defineProperties(Tarumae.SceneObject.prototype, {
 Object.assign(Tarumae.SceneObject.prototype, {
 
 	forward: (function() {
-		var defaultOptions = {
+		const defaultOptions = {
 			animation: true,
 			speed: 0.02,
 		};
@@ -800,8 +799,8 @@ Object.assign(Tarumae.SceneObject.prototype, {
 				options = defaultOptions;
 			}
 		
-			var obj = this;
-			var dir = obj.getLookAt().dir;
+			const obj = this;
+			const dir = obj.getLookAt().dir;
 
 			if (typeof options.ignoreUpwardDirection === "undefined" || options.ignoreUpwardDirection === true) {
 				dir.y = 0;
@@ -833,7 +832,7 @@ Object.assign(Tarumae.SceneObject.prototype, {
 	},
 
 	lookAt: (function() {
-		var m;
+		let m;
 
 		return function lookAt(target, up) {
 			if (target instanceof Tarumae.SceneObject) {
@@ -860,9 +859,7 @@ Object.assign(Tarumae.SceneObject.prototype, {
 
 Tarumae.SceneObject.scanTransforms = function(parent, handler) {
 
-	for (var i = 0; i < parent.objects.length; i++) {
-		var obj = parent.objects[i];
-
+	for (const obj of parent.objects) {
 		handler(obj, obj._transform);
 
 		if (obj.objects.length > 0) {
@@ -919,9 +916,9 @@ Tarumae.GridLine = class extends Tarumae.SceneObject {
 }
 
 Tarumae.GridLine.generateGridLineMesh = function(gridSize, stride) {
-	var width = gridSize, height = gridSize;
+	const width = gridSize, height = gridSize;
 
-	var mesh = new Tarumae.Mesh();
+	const mesh = new Tarumae.Mesh();
 	mesh.vertices = [];
 	mesh.composeMode = Tarumae.Mesh.ComposeModes.Lines;
 

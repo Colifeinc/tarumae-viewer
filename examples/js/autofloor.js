@@ -17,7 +17,7 @@ window.addEventListener("load", function() {
 		enablePostprocess: true,
 		renderingImage: {
 			gamma: 1.2,
-			resolutionRatio: 0.75,
+			resolutionRatio: 1,
 		},
 		enableAntialias: true,
 		enableShadow: true,
@@ -106,7 +106,7 @@ window.addEventListener("load", function() {
 	// 	if (rootObj) {
 	// 		setObjectRefmap(rootObj);
 	// 	}
-	// });
+  // });
 
 	const floorViewController = new Tarumae.FloorViewController(scene);
   
