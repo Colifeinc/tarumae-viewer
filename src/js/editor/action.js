@@ -579,7 +579,7 @@ Object.assign(TarumaeEditor.prototype, {
 								editor.operationMode = TarumaeEditor.EditorOperationModes.AddObject;
 							}
 
-							var box = editor.resizeGuideBox;
+							const box = editor.resizeGuideBox;
 							box.visible = false;
 							box.status = "ready";
 							scene.requireUpdateFrame();

@@ -378,14 +378,12 @@ Tarumae.SceneObject = class {
   moveTo(loc, options = {}, onfinish) {
 		if (typeof loc !== "object") return;
 
-		const _this = this;
-
-		var startLocation = options.startLocation || this.worldLocation,
+		let startLocation = options.startLocation || this.worldLocation,
 			startDirection, startUplook,
 			endLocation = loc,
 			endDirection, endUplook;
 
-		var rotationMatrix;
+		let rotationMatrix;
 
 		if (options.lookdir) {
 			endDirection = options.lookdir || (options.lookObject ? options.lookObject.worldLocation : Vec3.forward);
@@ -412,20 +410,20 @@ Tarumae.SceneObject = class {
 		}
 		
 		if (typeof options.animation !== "boolean" || options.animation === true) {
-			this.scene.animate(options, function(t) {
+			this.scene.animate(options, t => {
 
-				var newLocation = Vec3.lerp(startLocation, endLocation, t);
-				var diff = Vec3.sub(newLocation, _this.location);
-				_this.move(diff.x, diff.y, diff.z);
+				const newLocation = Vec3.lerp(startLocation, endLocation, t);
+				const diff = Vec3.sub(newLocation, this.location);
+				this.move(diff.x, diff.y, diff.z);
 
 				if (startDirection && endDirection) {
-					_this.lookAt(
-						Vec3.add(_this.location, Vec3.lerp(startDirection, endDirection, t)),
+					this.lookAt(
+						Vec3.add(this.location, Vec3.lerp(startDirection, endDirection, t)),
 						Vec3.lerp(startUplook, endUplook, t));
 				}
 
 				if (typeof options.onframe === "function") {
-					options.onframe.call(_this, t);
+					options.onframe.call(this, t);
 				}
 
 			}, function() {
@@ -885,57 +883,6 @@ Tarumae.ParticleObject = class extends Tarumae.SceneObject {
 		super();
 	}
 };
-
-
-////////////////////////// GridLine //////////////////////////
-
-Tarumae.GridLine = class extends Tarumae.SceneObject {
-	constructor(gridSize, stride) {
-		super();
-
-		this.mat = { color: new Color3(0.7, 0.7, 0.7) };
-		this.receiveLight = false;
-
-		if (typeof gridSize === "undefined") {
-			this.gridSize = 10.0;
-		} else {
-			this.gridSize = gridSize;
-		}
-
-		if (typeof stride === "undefined") {
-			this.stride = 1.0;
-		} else {
-			this.stride = stride;
-		}
-
-		this.conflictWithRay = false;
-		this.receiveLight = false;
-
-		this.addMesh(Tarumae.GridLine.generateGridLineMesh(this.gridSize, this.stride));
-	}
-}
-
-Tarumae.GridLine.generateGridLineMesh = function(gridSize, stride) {
-	const width = gridSize, height = gridSize;
-
-	const mesh = new Tarumae.Mesh();
-	mesh.vertices = [];
-	mesh.composeMode = Tarumae.Mesh.ComposeModes.Lines;
-
-	for (var y = -height; y <= height; y += stride) {
-		mesh.vertices.push(-width, 0, y);
-		mesh.vertices.push(width, 0, y);
-	}
-
-	for (var x = -width; x <= width; x += stride) {
-		mesh.vertices.push(x, 0, -height);
-		mesh.vertices.push(x, 0, height);
-	}
-
-	return mesh;
-};
-
-
 
 ////////////////////////// Light //////////////////////////
 

@@ -927,10 +927,9 @@ Tarumae.Scene = class {
 	findObjectsByType(type, options) {
 		type = (type || Tarumae.ObjectTypes.GenericObject);
 		options = options || {};
-		var arr = [];
+		let arr = [];
 
-		for (var i = 0; i < this.objects.length; i++) {
-			var obj = this.objects[i];
+		for (const obj of this.objects) {
 			if (obj.type === type) {
 				if (typeof options.filter === "undefined" || options.filter(obj)) {
 					arr.push(obj);
@@ -938,9 +937,8 @@ Tarumae.Scene = class {
 			}
 		}
 
-		for (var k = 0; k < this.objects.length; k++) {
-			var child = this.objects[k];
-			arr = arr.concat(child.findObjectsByType(type, options));
+		for (const obj of this.objects) {
+			arr = arr.concat(obj.findObjectsByType(type, options));
 		}
 
 		return arr;
@@ -970,13 +968,12 @@ Tarumae.Scene = class {
 	eachObject(iterator) {
 		if (typeof iterator !== "function") return;
 
-		for (var i = 0; i < this.objects.length; i++) {
-			var obj = this.objects[i];
+		for (const obj of this.objects) {
 			iterator(obj);
 		}
 
-		for (var k = 0; k < this.objects.length; k++) {
-			this.objects[k].eachChild(iterator);
+		for (const obj of this.objects) {
+			obj.eachChild(iterator);
 		}
 	}
 
@@ -987,7 +984,7 @@ Tarumae.Scene = class {
 	findObjectsByViewPosition(p, options) {
 		if (!(this.objects instanceof Array)) return { object: null };
 
-		var ray = this.renderer.createWorldRayFromScreenPosition(p);
+		const ray = this.renderer.createWorldRayFromScreenPosition(p);
 
 		return this.findObjectsByViewRay(ray, options);
 	}
@@ -1009,25 +1006,22 @@ Tarumae.Scene = class {
 	
 		options = options || {};
 
-		var out = { object: null, hits: [], t: Ray.MaxDistance };
+		const out = { object: null, hits: [], t: Ray.MaxDistance };
 	
-		var rayNormalizedDir = ray.dir.normalize();
+		const rayNormalizedDir = ray.dir.normalize();
 
-		var session = {
+		const session = {
 			level: 0,
 			rayNormalizedDir: rayNormalizedDir,
 			rayNormalizedNegDir: rayNormalizedDir.neg(),
 		};
 
-		for (var i = 0; i < this.objects.length; i++) {
-			var obj = this.objects[i];
+		for (const obj of this.objects) {
 			this.hitTestObjectByRay(obj, ray, out, session, options);
 		}
 
 		if (out.hits.length > 0) {
-			out.hits.sort(function(a, b) {
-				return a.t - b.t;
-			});
+			out.hits.sort((a, b) => a.t - b.t);
 
 			out.object = out.hits[0].object;
 			out.t = out.hits[0].t;
@@ -1095,13 +1089,11 @@ Tarumae.Scene = class {
 			&& (typeof options.filter !== "function" || options.filter(obj))
 			&& Array.isArray(obj.meshes)) {
 
-			var mmat = obj._transform;
-			session.mmat = mmat;
+      session.mmat = obj._transform;
+      session.nmat = obj._normalTransform;
 		
-			for (var k = 0; k < obj.meshes.length; k++) {
-				var mesh = obj.meshes[k];
-			
-				var mout = mesh.hitTestByRay(ray, Ray.MaxDistance, session, options);
+			for (const mesh of obj.meshes) {
+				const mout = mesh.hitTestByRay(ray, Ray.MaxDistance, session, options);
 			
 				if (mout) {
 					out.hits.push({

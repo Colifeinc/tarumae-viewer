@@ -1,5 +1,14 @@
+////////////////////////////////////////////////////////////////////////////////
+// tarumae engine
+// https://tarumae.tech
+//
+// Copyright(c) 2016-2019 BULB Corp., Jingwood, all rights reserved
+////////////////////////////////////////////////////////////////////////////////
+
 import Tarumae from "../entry";
 import { Vec3, Vec4, Color3, Matrix4, MathFunctions } from "@jingwood/graphics-math";
+import "../scene/object.js";
+import "../webgl/texture.js";
 
 Tarumae.Billboard = class extends Tarumae.SceneObject {
 	constructor(image) {

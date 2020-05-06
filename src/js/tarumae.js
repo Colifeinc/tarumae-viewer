@@ -19,6 +19,8 @@ import "./scene/material.js";
 import "./scene/object.js";
 import "./scene/scene.js";
 import "./scene/viewer.js";
+import "./object/billboard.js";
+import "./object/gridline.js";
 import "./render/renderer.js";
 import "./render/pipeline.js";
 import "./view/modelviewer.js";

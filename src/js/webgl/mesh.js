@@ -328,7 +328,7 @@ Tarumae.Mesh = class {
 			}
 		}
 
-		var gl = renderer.gl;
+		const gl = renderer.gl;
 
 		this.meta.vertexBufferId = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.meta.vertexBufferId);
@@ -374,7 +374,7 @@ Tarumae.Mesh = class {
 	unbind() {
 		if (this.meta) {
 
-			var renderer = this.meta.renderer;
+			const renderer = this.meta.renderer;
 		
 			if (this.meta.vertexBufferId) {
 				if (renderer) renderer.gl.deleteBuffer(this.meta.vertexBufferId);
@@ -514,7 +514,7 @@ Tarumae.Mesh = class {
 			gl.drawArrays(gl.LINES, 0, meta.edgeCount * 2);
 		}
 		else {
-			var glPrimitiveMode;
+			let glPrimitiveMode;
 
 			switch (this.composeMode) {
 				case Tarumae.Mesh.ComposeModes.Points: glPrimitiveMode = gl.POINTS; break;
@@ -651,7 +651,7 @@ Tarumae.Mesh = class {
 	}
 
 	calcBoundingBox() {
-		var vertices, vertexElementCount = 0;
+		let vertices, vertexElementCount = 0;
 		
 		if (this.vertexBuffer && this.meta) {
 			vertices = this.vertexBuffer;
@@ -661,7 +661,7 @@ Tarumae.Mesh = class {
 			vertexElementCount = this.vertices.length;
 		}
 
-		var minx = 0, miny = 0, minz = 0, maxx = 0, maxy = 0, maxz = 0;
+		let minx = 0, miny = 0, minz = 0, maxx = 0, maxy = 0, maxz = 0;
 
 		if (vertices && vertexElementCount >= 3) {
 			minx = maxx = vertices[0];
@@ -699,10 +699,10 @@ Tarumae.Mesh = class {
 				vertexElementCount = this.vertices.length;
 			}
 
-			for (var i = 0; i < vertexElementCount; i += 9) {
-				var v1 = new Vec4(vertices[i + 0], vertices[i + 1], vertices[i + 2], 1).mulMat(transform);
-				var v2 = new Vec4(vertices[i + 3], vertices[i + 4], vertices[i + 5], 1).mulMat(transform);
-				var v3 = new Vec4(vertices[i + 6], vertices[i + 7], vertices[i + 8], 1).mulMat(transform);
+			for (let i = 0; i < vertexElementCount; i += 9) {
+				const v1 = new Vec4(vertices[i + 0], vertices[i + 1], vertices[i + 2], 1).mulMat(transform);
+				const v2 = new Vec4(vertices[i + 3], vertices[i + 4], vertices[i + 5], 1).mulMat(transform);
+				const v3 = new Vec4(vertices[i + 6], vertices[i + 7], vertices[i + 8], 1).mulMat(transform);
 
 				this.cachedTransformedVertices.push(v1, v2, v3);
 			}
@@ -756,7 +756,7 @@ Object.assign(Tarumae.Mesh.prototype, {
 			}
 		}
 
-		const arg = new HandlerArg();
+		// const arg = new HandlerArg();
 
 		return function(handler) {
 			const vertices = this.vertexBuffer;
@@ -786,8 +786,8 @@ Object.assign(Tarumae.Mesh.prototype, {
 	hitTestByRay: function(ray, maxt, session, options) {
 		"use strict";
 
-		var vertices = undefined, vertexElementCount = 0;
-		var normals = undefined;
+		let vertices = undefined, vertexElementCount = 0;
+		let normals = undefined;
 
 		if (Array.isArray(this.vertices)) {
 			vertices = this.vertices;
@@ -814,10 +814,9 @@ Object.assign(Tarumae.Mesh.prototype, {
 		if (vertexElementCount < 9) return false;
 
 		if (typeof options.allowUsingBoundingBox !== "boolean" || options.allowUsingBoundingBox === true) {
-			var mmat = session.mmat;
-			var bbox = this.boundingBox;
+			let bbox = this.boundingBox;
 
-			bbox = BoundingBox3D.transformBoundingBox(bbox, mmat);
+			bbox = BoundingBox3D.transformBoundingBox(bbox, session.mmat);
 
 			if (!_mf3.rayIntersectsBox(ray, bbox)) {
 				return null;
@@ -861,73 +860,66 @@ Object.assign(Tarumae.Mesh.prototype, {
 		return (!hit) ? null : { t, hit, worldPosition, localPosition, surfaceIndex };
 	},
 
-	hitTestByRayUsingVertexIndex: (function() {
-		var nmat = new Matrix4();
+  hitTestByRayUsingVertexIndex(ray, vertices, normals, i1, i2, i3, maxt, session, options) {
 
-		return function(ray, vertices, normals, i1, i2, i3, maxt, session, options) {
+    if (this.indexed) {
+      let indexes;
 
-			if (this.indexed) {
-				var indexes;
+      if (Array.isArray(this.indexes)) {
+        indexes = this.indexes;
+      } else if (this.indexBuffer != null) {
+        indexes = this.indexBuffer;
+      }
 
-				if (Array.isArray(this.indexes)) {
-					indexes = this.indexes;
-				} else if (this.indexBuffer != null) {
-					indexes = this.indexBuffer;
-				}
+      i1 = indexes[i1 / 3] * 3;
+      i2 = indexes[i2 / 3] * 3;
+      i3 = indexes[i3 / 3] * 3;
+    }
 
-				i1 = indexes[i1 / 3] * 3;
-				i2 = indexes[i2 / 3] * 3;
-				i3 = indexes[i3 / 3] * 3;
-			}
+    const v1 = new Vec4(vertices[i1], vertices[i1 + 1], vertices[i1 + 2], 1);
+    const v2 = new Vec4(vertices[i2], vertices[i2 + 1], vertices[i2 + 2], 1);
+    const v3 = new Vec4(vertices[i3], vertices[i3 + 1], vertices[i3 + 2], 1);
 
-			var v1 = new Vec4(vertices[i1], vertices[i1 + 1], vertices[i1 + 2], 1);
-			var v2 = new Vec4(vertices[i2], vertices[i2 + 1], vertices[i2 + 2], 1);
-			var v3 = new Vec4(vertices[i3], vertices[i3 + 1], vertices[i3 + 2], 1);
+    const mmat = session.mmat;
 
-			var mmat = session.mmat;
-
-			var vv1 = v1.mulMat(mmat).xyz;
-			var vv2 = v2.mulMat(mmat).xyz;
-			var vv3 = v3.mulMat(mmat).xyz;
+    const vv1 = v1.mulMat(mmat).xyz;
+    const vv2 = v2.mulMat(mmat).xyz;
+    const vv3 = v3.mulMat(mmat).xyz;
 		
-			var out = _mf3.rayIntersectsTriangle(ray, { v1: vv1, v2: vv2, v3: vv3 }, maxt);
+    var out = _mf3.rayIntersectsTriangle(ray, { v1: vv1, v2: vv2, v3: vv3 }, maxt);
 
-			if (out) {
-				var f1 = vv1.sub(out.hit);
-				var f2 = vv2.sub(out.hit);
-				var f3 = vv3.sub(out.hit);
+    if (out) {
+      const f1 = vv1.sub(out.hit);
+      const f2 = vv2.sub(out.hit);
+      const f3 = vv3.sub(out.hit);
 
-				var a = 1 / ((vv1.sub(vv2)).cross(vv1.sub(vv3))).length();
-				var a1 = f2.cross(f3).length() * a;
-				var a2 = f3.cross(f1).length() * a;
-				var a3 = f1.cross(f2).length() * a;
+      const a = 1 / ((vv1.sub(vv2)).cross(vv1.sub(vv3))).length();
+      const a1 = f2.cross(f3).length() * a;
+      const a2 = f3.cross(f1).length() * a;
+      const a3 = f1.cross(f2).length() * a;
 
-				if (options.cullingSurfaceBack === true && (normals instanceof Float32Array || Array.isArray(normals))) {
+      if (options.cullingSurfaceBack === true && (normals instanceof Float32Array || Array.isArray(normals))) {
 				
-					var n1 = new Vec4(normals[i1], normals[i1 + 1], normals[i1 + 2], 0);
-					var n2 = new Vec4(normals[i2], normals[i2 + 1], normals[i2 + 2], 0);
-					var n3 = new Vec4(normals[i3], normals[i3 + 1], normals[i3 + 2], 0);
+        const n1 = new Vec4(normals[i1], normals[i1 + 1], normals[i1 + 2], 0);
+        const n2 = new Vec4(normals[i2], normals[i2 + 1], normals[i2 + 2], 0);
+        const n3 = new Vec4(normals[i3], normals[i3 + 1], normals[i3 + 2], 0);
 					
-					var vertexNormal = (n1.mul(a1)).add(n2.mul(a2)).add(n3.mul(a3));
+        const vertexNormal = (n1.mul(a1)).add(n2.mul(a2)).add(n3.mul(a3));
+        const normal = new Vec4(vertexNormal, 0).mulMat(session.nmat).xyz.normalize();
 
-					nmat.copyFrom(mmat).inverse().transpose();
-
-					var normal = new Vec4(vertexNormal, 0).mulMat(nmat).xyz.normalize();
-
-					if (Vec3.dot(session.rayNormalizedNegDir, normal) < 0) {
-						return;
-					}
-				}
+        if (Vec3.dot(session.rayNormalizedNegDir, normal) < 0) {
+          return;
+        }
+      }
 			
-				out.worldPosition = out.hit;
-				out.localPosition = (v1.mul(a1)).add(v2.mul(a2)).add(v3.mul(a3)).xyz;
+      out.worldPosition = out.hit;
+      out.localPosition = (v1.mul(a1)).add(v2.mul(a2)).add(v3.mul(a3)).xyz;
 
-				return out;
-			}
+      return out;
+    }
 			
-			return;
-		};
-	})(),
+    return;
+  },
 	
 	containsPointHorizontally: (function() {
 		const cp1 = { x: 0, y: 0 }, cv1 = { x: 0, y: 0 }, cv2 = { x: 0, y: 0 }, cv3 = { x: 0, y: 0 };
@@ -955,8 +947,8 @@ Object.assign(Tarumae.Mesh.prototype, {
 	validateMovementUsingVertexData: (function() {
 
 		const enumerateEdge = function(transformedVertices, iterator) {
-			for (var i = 0; i < transformedVertices.length; i += 3) {
-				var v1 = transformedVertices[i], v2 = transformedVertices[i + 1], v3 = transformedVertices[i + 2];
+			for (let i = 0; i < transformedVertices.length; i += 3) {
+				const v1 = transformedVertices[i], v2 = transformedVertices[i + 1], v3 = transformedVertices[i + 2];
 
 				if (iterator(i, { v1: v1, v2: v2, shared: false })) return true;
 				if (iterator(i, { v1: v1, v2: v3, shared: false })) return true;
@@ -1083,7 +1075,7 @@ Object.assign(Tarumae.Mesh, {
 	},
 
 	createFromStream: function(stream) {
-		var mesh = new Tarumae.Mesh();
+		const mesh = new Tarumae.Mesh();
 		mesh.loadFromStream(stream);
 		return mesh;
 	},
@@ -1091,7 +1083,7 @@ Object.assign(Tarumae.Mesh, {
 	translate: function(vertices, t) {
 		if (!Array.isArray(vertices)) return;
 
-		for (var i = 0; i < vertices.length; i += 3) {
+		for (let i = 0; i < vertices.length; i += 3) {
 			vertices[i] += t.x;
 			vertices[i + 1] += t.y;
 			vertices[i + 2] += t.z;
@@ -1101,7 +1093,7 @@ Object.assign(Tarumae.Mesh, {
 	flipNormals: function(normals) {
 		if (!Array.isArray(normals)) return;
 
-		for (var i = 0; i < normals.length; i++) {
+    for (let i = 0; i < normals.length; i++) {
 			normals[i] = -normals[i];
 		}
 	},
@@ -1111,8 +1103,8 @@ Object.assign(Tarumae.Mesh, {
 	},
 
 	rotate: (function() {
-		var m = new Matrix4();
-		var v = new Vec3();
+		const m = new Matrix4();
+		let v = new Vec3();
 
 		return function(mesh, x, y, z) {
 			var vertices = mesh.vertices;

@@ -6,5 +6,8 @@
     ["babel-plugin-inline-import", {
       "extensions": [".vert", ".frag", ".shader"]
     }]
+  ],
+  "ignore": [
+    "./src/js/editor"
   ]
 }
