@@ -14,7 +14,7 @@ yarn
 Start development environment:
 
 ```shell
-yarn serve
+yarn start
 ```
 
 # Build release

@@ -9,7 +9,7 @@
   "scripts": {
     "build": "npx babel --config-file ./babel.prod.json src -d dist --verbose",
     "test": ":",
-    "serve": "parcel serve examples/index.html --out-dir tmp-out",
+    "start": "parcel serve examples/index.html --out-dir tmp-out",
     "build-examples": "rm -rf tmp-build/* && parcel build examples/index.html -d tmp-build --public-url /tarumae-examples"
   },
   "keywords": [],
