@@ -1,6 +1,6 @@
 {
   "name": "tarumae-viewer",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "description": "Optimized WebGL engine for showcase application",
   "main": "dist/js/tarumae.js",
   "files": [
@@ -9,7 +9,7 @@
   "scripts": {
     "build": "npx babel --config-file ./babel.prod.json src -d dist --verbose",
     "test": ":",
-    "start": "parcel serve examples/index.html --out-dir tmp-out",
+    "start": "parcel serve examples/index.html --out-dir tmp-out --port 8010",
     "build-examples": "rm -rf tmp-build/* && parcel build examples/index.html -d tmp-build --public-url /tarumae-examples"
   },
   "keywords": [],
