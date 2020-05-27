@@ -300,8 +300,8 @@ Tarumae.SceneObject = class {
 	removeMesh(mesh) {
 		this.meshes._t_remove(mesh);
 		this.onmeshRemove(mesh);
-	}
-
+  }
+  
 	findObjectByName(name) {
 		for (const obj of this.objects) {
 			if (obj.name === name) return obj;
@@ -632,7 +632,22 @@ Tarumae.SceneObject = class {
 	}
 
 	onscale() {
-	}
+  }
+  
+  destroy() {
+
+    for (const child of this.objects) {
+      child.destroy();
+    }
+
+    this.objects = [];
+
+    for (const mesh of this.meshes) {
+      mesh.destroy();
+    }
+   
+    this.meshes = [];
+  }
 };
 
 new Tarumae.EventDispatcher(Tarumae.SceneObject).registerEvents(

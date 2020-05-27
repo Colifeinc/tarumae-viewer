@@ -62,10 +62,10 @@ Tarumae.Scene = class {
 
 	loadArchive(name, url, loadingSession, callback) {
 	
-		var archiveInfo = this._bundles[name];
+		let archiveInfo = this._bundles[name];
 	
 		if (!archiveInfo) {
-			var archive = new Tarumae.Utility.Archive();
+			const archive = new Tarumae.Utility.Archive();
 	
 			archiveInfo = {
 				name: name,
@@ -77,7 +77,7 @@ Tarumae.Scene = class {
 	
 			archive.isLoading = true;
 	
-			var rm = loadingSession ? loadingSession.rm : this.resourceManager;
+			const rm = loadingSession ? loadingSession.rm : this.resourceManager;
 	
 			if (loadingSession) {
 				loadingSession.downloadArchives.push(archive);
@@ -117,13 +117,14 @@ Tarumae.Scene = class {
 		};
 	}
 
-	createObjectFromBundle(url, ondone, loadingSession) {
-		this.loadArchive(url, url, loadingSession, archive => {
+  createObjectFromBundle(url, ondone, loadingSession) {
+    
+    this.loadArchive(url, url, loadingSession, archive => {
 			const manifestData = archive.getChunkData(0x1, 0x7466696d);
 			if (manifestData) {
 				const uarr = new Uint8Array(manifestData);
-				var carr = new Array(uarr.length);
-				for (var i = 0; i < uarr.length; i++) {
+				const carr = new Array(uarr.length);
+				for (let i = 0; i < uarr.length; i++) {
 					carr[i] = String.fromCharCode(uarr[i]);
 				}
 				let manifest;
@@ -1266,7 +1267,15 @@ Tarumae.Scene = class {
 		const animation = new Tarumae.Animation(this, options, onframe, onfinish);
 		animation.play();
 		return animation;
-	}
+  }
+  
+  destroyAllObjects() {
+    for (const obj of this.objects) {
+      obj.destroy();
+    }
+
+    this.objects = [];
+  }
 };
 
 new Tarumae.EventDispatcher(Tarumae.Scene).registerEvents(
