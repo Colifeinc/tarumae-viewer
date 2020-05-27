@@ -171,7 +171,7 @@ Tarumae.FloorViewController = class {
       const bbox = new BoundingBox3D(obj.getBounds());
       const maxbsize = Math.max(bbox.size.x, bbox.size.y, bbox.size.z);
       
-      let topY = maxbsize / 5;
+      let topY = maxbsize / 1.5;
       if (topY < 10) topY = 10;
       else if (topY > 40) topY = 40;
 
