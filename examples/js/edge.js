@@ -14,11 +14,11 @@ import "../utility/archive";
 import "../utility/res";
 import { Vec3, Vec2 } from "@jingwood/graphics-math";
 
-// import data1 from "/Users/jing/Projects/stylerar/reconstruction/data/no16/16_1_2.txt" ;
-import data1 from "/Users/jing/Projects/stylerar/reconstruction/data/no16/16_3.txt" ;
-// import data1 from "/Users/jing/Projects/stylerar/reconstruction/data/no16/16_24.txt" ;
+// import data1 from "/Users/jing/Projects/reconstruction/data/no16/16_1_2.txt" ;
+import data1 from "/Users/jing/Projects/reconstruction/data/no16/16_3.txt" ;
+// import data1 from "/Users/jing/Projects/reconstruction/data/no16/16_24.txt" ;
 
-// import data1 from "/Users/jing/Projects/stylerar/reconstruction/data/no16/16_3.txt" ;
+// import data1 from "/Users/jing/Projects/reconstruction/data/no16/16_3.txt" ;
 
 window.addEventListener('load', e => {
 	const renderer = new Tarumae.Renderer();
@@ -93,7 +93,7 @@ window.addEventListener('load', e => {
 		scene.requireUpdateFrame();
 	};
 
-	// console.log(readData("file:///Users/jing/Projects/stylerar/reconstruction/data/no16/16_1.txt"));
+	// console.log(readData("file:///Users/jing/Projects/reconstruction/data/no16/16_1.txt"));
 	let vertices = parseData(data1);
 
 	window._delta = 0;
