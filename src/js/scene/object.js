@@ -713,11 +713,11 @@ Tarumae.ObjectVectorProperty = class extends Vec3 {
   }
 
   setVec3(v) {
-    if (typeof v === "object") {
-      const { x, y, z } = v;
-      this.setXYZ(x, y, z);
-    } else if (Array.isArray(v)) {
+    if (Array.isArray(v)) {
       const [x, y, z] = v;
+      this.setXYZ(x, y, z);
+    } else if (typeof v === "object") {
+      const { x, y, z } = v;
       this.setXYZ(x, y, z);
     }
   }

@@ -102,7 +102,12 @@ Tarumae.Utility.Archive = class {
 		}
 
 		return chunk.data;
-	}
+  }
+  
+  getChunkTextData(uid, format) {
+    const data = this.getChunkData(uid, format);
+    return data ? Tarumae.Utility.byteToString(data) : null;
+  }
 };
 
 Object.defineProperties(Tarumae.Utility.Archive, {

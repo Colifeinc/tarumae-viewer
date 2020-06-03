@@ -120,16 +120,12 @@ Tarumae.Scene = class {
   createObjectFromBundle(url, ondone, loadingSession) {
     
     this.loadArchive(url, url, loadingSession, archive => {
-			const manifestData = archive.getChunkData(0x1, 0x7466696d);
-			if (manifestData) {
-				const uarr = new Uint8Array(manifestData);
-				const carr = new Array(uarr.length);
-				for (let i = 0; i < uarr.length; i++) {
-					carr[i] = String.fromCharCode(uarr[i]);
-				}
+			const manifestDataText = archive.getChunkTextData(0x1, 0x7466696d);
+      
+      if (manifestDataText) {
 				let manifest;
 				try {
-					manifest = JSON.parse(carr.join(""));
+					manifest = JSON.parse(manifestDataText);
 				} catch (ex) {
 					console.warn("parse manifest error: " + ex);
 				}
@@ -239,11 +235,6 @@ Tarumae.Scene = class {
 	show() {
 		this.renderer.showScene(this);
 		this.requireUpdateFrame();
-	}
-
-	destroy() {
-		// todo: destroy all objects and meshes that use the resources 
-		// 			 downloaded and created from this scene
 	}
 
 	beforeDrawFrame(renderer) {
@@ -1268,6 +1259,11 @@ Tarumae.Scene = class {
 		animation.play();
 		return animation;
   }
+
+	destroy() {
+		// todo: destroy all objects and meshes that use the resources 
+		// 			 downloaded and created from this scene
+  }
   
   destroyAllObjects() {
     for (const obj of this.objects) {
@@ -1276,6 +1272,7 @@ Tarumae.Scene = class {
 
     this.objects = [];
   }
+
 };
 
 new Tarumae.EventDispatcher(Tarumae.Scene).registerEvents(

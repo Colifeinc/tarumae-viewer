@@ -143,7 +143,7 @@ Tarumae.Camera = class extends Tarumae.SceneObject {
 				effect: options.effect || "smooth",
 				lookdir: targetLookatPos.sub(worldpos),
 				lookup: options.lookup || Vec3.up,
-			}, options.onfinish);
+			}, _ => options.onfinish(targetLookatPos));
 		}
 	}
 };

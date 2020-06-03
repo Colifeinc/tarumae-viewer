@@ -341,6 +341,17 @@ Object.defineProperties(Tarumae.Utility, {
 				// TODO
 			}
 		}
-	}
+	},
 
+  byteToString: {
+    value: function(bytes) {
+      const uarr = new Uint8Array(bytes);
+      const carr = new Array(uarr.length);
+      for (let i = 0; i < uarr.length; i++) {
+        carr[i] = String.fromCharCode(uarr[i]);
+      }
+    
+      return carr.join("");
+    }
+  },
 });
