@@ -20,6 +20,7 @@ import "../shader/panorama";
 import "../shader/point";
 import "../shader/shadowmap";
 import "../shader/attrib";
+// import "../shader/viewer";
 
 Tarumae.Shaders.GrayscaleShader = class extends Tarumae.Shaders.ImageShader {
 };

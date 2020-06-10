@@ -120,7 +120,13 @@ Tarumae.Shader = class {
 	disuse() {
 		// this.gl.useProgram(null);
 		console.warn("unsupported method: shader.disuse()");
-	}
+  }
+  
+  destroy() {
+    if (this.glShaderProgramId) {
+      this.gl.deleteProgram(this.glShaderProgramId);
+    }
+  }
 };
 
 Object.defineProperties(Tarumae.Shader, {

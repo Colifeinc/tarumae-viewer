@@ -201,7 +201,7 @@ Tarumae.Renderer = class {
 				this.resetCanvasSize();
 			}
 		}
-		setInterval(_ => checkCanvasResize(), 1000);
+		this.checkCanvasSizeInterval = setInterval(_ => checkCanvasResize(), 1000);
 
 		this.resetViewport();
 
@@ -223,6 +223,29 @@ Tarumae.Renderer = class {
 
 		this.init();
 		this.render();
+  }
+  
+  init() {
+		this.initialized = true;
+	
+		// apply default shader
+		this.useShader(this.options.defaultShader);
+	
+		Tarumae.Utility.invokeIfExist(this, "oninit");
+
+		this.createPipeline();
+	
+		if (this.currentScene) {
+			this.currentScene.requireUpdateFrame();
+		}
+	
+		console.debug("renderer initialized.");
+	}
+
+	loadShader(shaderDefine, vertSource, fragSource) {	
+		const shader = new Tarumae.Shaders[shaderDefine.class](this, vertSource, fragSource);
+		shaderDefine.instance = shader;
+		Tarumae.Utility.invokeIfExist(shaderDefine, "oncreate");
 	}
 
 	get renderPixelRatio() {
@@ -293,31 +316,6 @@ Tarumae.Renderer = class {
 		}
 	}	
 
-	init() {
-		this.initialized = true;
-	
-		// apply default shader
-		this.useShader(this.options.defaultShader);
-	
-		Tarumae.Utility.invokeIfExist(this, "oninit");
-
-		this.createPipeline();
-	
-		if (this.currentScene) {
-			this.currentScene.requireUpdateFrame();
-		}
-	
-		console.debug("renderer initialized.");
-	}
-
-	loadShader(shaderDefine, vertSource, fragSource) {
-		var renderer = this;
-	
-		let shader = new Tarumae.Shaders[shaderDefine.class](renderer, vertSource, fragSource);
-		shaderDefine.instance = shader;
-		Tarumae.Utility.invokeIfExist(shaderDefine, "oncreate");
-	}
-	
 	useShader(shader) {
 		if (!shader || !this.initialized) return;
 	
@@ -1325,7 +1323,49 @@ Tarumae.Renderer = class {
 
 		renderbuffer.disuse();
 		renderbuffer.destroy();
-	};
+  };
+
+  releaseResources() {
+    this.cachedTextures._t_foreach((_, tex) => tex.destroy());
+    this.cachedTextures = {};
+    this.cachedMeshes._t_foreach((_, mesh) => mesh.destroy());
+    this.cachedMeshes = {};
+  }
+  
+  destroy() {
+
+    for (const pipeline of this.pipelineNodes) {
+      pipeline.destroy();
+    }
+
+    if (this.currentScene) {
+      this.currentScene.destroy();
+    }
+
+    this.releaseResources();
+
+    this.container.removeChild(this.canvas);
+    this.container.removeChild(this.canvas2d);
+    this.container.removeChild(this.surface);
+
+    if (this.debugger) {
+      this.debugger.destroy();
+    }
+
+    if (this.checkCanvasSizeInterval) {
+      clearInterval(this.checkCanvasSizeInterval);
+    }
+
+    for (const [_, define] of Object.entries(Tarumae.Renderer.Shaders)) {
+      if (define.instance) {
+        define.instance.destroy();
+      }
+    }
+
+    Tarumae.Shader.emptyTexture.destroy();
+
+    console.debug('renderer released');
+  }
 };
 
 Tarumae.Renderer.prototype.toWorldPosition = (function() {
@@ -1363,6 +1403,8 @@ Object.assign(Tarumae, {
 	}
 });
 
+// import viewerVert from '../../shader/viewer.vert';
+// import viewerFrag from '../../shader/viewer.frag';
 import solidcolorVert from '../../shader/solidcolor.vert';
 import solidcolorFrag from '../../shader/solidcolor.frag';
 // import billboardVert from '../../shader/billboard.vert';
@@ -1391,10 +1433,7 @@ import attribmapVert from '../../shader/attribmap.vert';
 import attribmapFrag from '../../shader/attribmap.frag';
 
 Tarumae.Renderer.Shaders = {
-	// viewer: {
-	// 	vert: fs.readFileSync(__dirname + "../../../shader/viewer.vert", "utf8"),
-	// 	frag: fs.readFileSync(__dirname + "../../../shader/viewer.frag", "utf8"), class: "ViewerShader"
-	// },
+  // viewer: { vert: viewerVert, frag: viewerFrag, class: "ViewerShader" },
 	solidcolor: { vert: solidcolorVert, frag: solidcolorFrag, class: "SolidColorShader" },
 	// billboard: { vert: billboardVert, frag: billboardFrag, class: "BillboardShader" },
 	// simple: { vert: simpleVert, frag: simpleFrag, class: "SimpleShader" },

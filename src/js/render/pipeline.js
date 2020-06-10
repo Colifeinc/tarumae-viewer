@@ -55,6 +55,8 @@ Tarumae.PipelineNode = class {
   get input() { return this._input; }
   
   get output() { }
+
+  destroy() { }
 };
 
 Tarumae.PipelineNodes = {};
@@ -129,6 +131,14 @@ Tarumae.PipelineNodes.SceneToImageRenderer = class extends Tarumae.PipelineNode 
 
   get output() {
     return this.buffer.texture;
+  }
+
+  destroy() {
+    this.input = null;
+
+    if (this.buffer) {
+      this.buffer.destroy();
+    }
   }
 };
 
@@ -340,13 +350,23 @@ Tarumae.PipelineNodes.ImageFilterRenderer = class extends Tarumae.PipelineNode {
       this.buffer.disuse();
     }
   }
+
+  destroy() {
+    super.destroy();
+
+    this.input = null;
+    
+    if (this.buffer) {
+      this.buffer.destroy();
+    }
+  }
 };
 
 Tarumae.PipelineNodes.BlurRenderer = class extends Tarumae.PipelineNode {
   constructor(renderer, options) {
     super(renderer);
 
-    this.blurHorRenderer = new Tarumae.PipelineNodes.ImageFilterRenderer(renderer, options); 
+    this.blurHorRenderer = new Tarumae.PipelineNodes.ImageFilterRenderer(renderer, options);
     this.blurVerRenderer = new Tarumae.PipelineNodes.ImageFilterRenderer(renderer, options);
     this.blurHorRenderer.filter = 'guassblur-hor';
     this.blurVerRenderer.filter = 'guassblur-ver';
@@ -381,6 +401,13 @@ Tarumae.PipelineNodes.BlurRenderer = class extends Tarumae.PipelineNode {
 
     this.blurHorRenderer.process();
     this.blurVerRenderer.process();
+  }
+
+  destroy() {
+    this.blurHorRenderer.destroy();
+    this.blurVerRenderer.destroy();
+
+    super.destroy();
   }
 };
 
@@ -447,6 +474,16 @@ Tarumae.PipelineNodes.ShadowMapRenderer = class extends Tarumae.PipelineNode {
 
   get output() {
     return this.buffer.texture;
+  }
+
+  destroy() {    
+    this.input = null;
+    
+    if (this.buffer) {
+      this.buffer.destroy();
+    }
+
+    super.destroy();
   }
 };
 
@@ -534,6 +571,16 @@ Tarumae.PipelineNodes.AttributeRenderer = class extends Tarumae.PipelineNode {
   get output() {
     return this.buffer.texture;
   }
+
+  destroy() {    
+    this.input = null;
+    
+    if (this.buffer) {
+      this.buffer.destroy();
+    }
+
+    super.destroy();
+  }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -602,6 +649,15 @@ Tarumae.PipelineNodes.MultipleImagePreviewRenderer = class extends Tarumae.Pipel
       shader.endMesh();
       this.renderer.disuseCurrentShader();
     }
-  
+  }
+
+  destroy() {
+    for (const node of this.nodes) {
+      node.destroy();
+    }
+
+    for (const mesh of this.meshes) {
+      mesh.destroy();
+    }
   }
 }

@@ -55,7 +55,8 @@ Tarumae.Debugger = class {
 			navmeshCheckEnd: null,
 		};
 
-		var debugPanel = document.createElement("div");
+    const debugPanel = document.createElement("div");
+    this.debugPanel = debugPanel;
 		debugPanel.style.top = "0px";
 		debugPanel.style.left = "0px";
 		debugPanel.style.minWidth = "500px";
@@ -67,7 +68,8 @@ Tarumae.Debugger = class {
 		debugPanel.style.display = "none";
 		renderer.container.appendChild(debugPanel);
 
-		var fpsCanvas = document.createElement("canvas");
+    const fpsCanvas = document.createElement("canvas");
+    this.fpsCanvas = fpsCanvas;
 		fpsCanvas.style.top = "0px";
 		fpsCanvas.style.left = (this.renderer.container.clientWidth - this.fpsMonitor.indicatorWidth) + "px";
 		fpsCanvas.style.width = this.fpsMonitor.indicatorWidth + "px";
@@ -79,7 +81,8 @@ Tarumae.Debugger = class {
 		fpsCanvas.style.display = "none";
 		renderer.container.appendChild(fpsCanvas);
 
-		var objInfoPanel = document.createElement("div");
+    const objInfoPanel = document.createElement("div");
+    this.objInfoPanel = objInfoPanel;
 		objInfoPanel.style.bottom = "0px";
 		objInfoPanel.style.left = "0px";
 		objInfoPanel.style.backgroundColor = "rgba(0, 50, 50, 0.2)";
@@ -95,7 +98,13 @@ Tarumae.Debugger = class {
 		this.objInfoPanel = objInfoPanel;
 
 		this.ctx = fpsCanvas.getContext("2d");
-	}
+  }
+  
+  destroy() {
+    this.renderer.container.removeChild(this.fpsCanvas);
+    this.renderer.container.removeChild(this.debugPanel);
+    this.renderer.container.removeChild(this.objInfoPanel);
+  }
   
 	beforeDrawFrame() {
 		this.elapsedTime.drawFrameBegin = Date.now();
@@ -159,7 +168,7 @@ Tarumae.Debugger = class {
 	}
 
 	countFPS(now) {
-		var fm = this.fpsMonitor;
+		const fm = this.fpsMonitor;
 
 		// convert to minutes    
 		if (Math.floor(now * 0.000001667) !== Math.floor(this.elapsedTime.drawFrameEnd * 0.000001667)) {
@@ -190,19 +199,19 @@ Tarumae.Debugger = class {
 	}
 
 	drawFPSRecord() {
-		var ctx = this.ctx;
-		var fm = this.fpsMonitor;
+		const ctx = this.ctx;
+		const fm = this.fpsMonitor;
 
 		ctx.clearRect(0, 0, fm.indicatorWidth, fm.indicatorHeight);
 		ctx.fillStyle = "#55bbbb";
 
-		var width = (fm.indicatorWidth - 2) / fm.maxFPSNumberOfRecord;
+		const width = (fm.indicatorWidth - 2) / fm.maxFPSNumberOfRecord;
 
-		for (var i = 0; i < fm.maxFPSNumberOfRecord && i < fm.fpsRecord.length; i++) {
-			var fps = fm.fpsRecord[i];
+		for (let i = 0; i < fm.maxFPSNumberOfRecord && i < fm.fpsRecord.length; i++) {
+			const fps = fm.fpsRecord[i];
 
 			// var height = fps / fm.maxFPS * fm.indicatorHeight - 2;
-			var height = fps / 60 /* assume max is 60 instead of fm.maxFPS */ * fm.indicatorHeight - 2;
+			const height = fps / 60 /* assume max is 60 instead of fm.maxFPS */ * fm.indicatorHeight - 2;
 
 			ctx.fillRect(fm.indicatorWidth - width - 1 - i * width, fm.indicatorHeight - height - 1, width, height);
 		}
@@ -210,7 +219,7 @@ Tarumae.Debugger = class {
 
 	drawBoundingBox(obj) {
 		if (this.showObjectBoundingBox) {
-			var bbox = obj.getBounds();
+			const bbox = obj.getBounds();
 			this.renderer.drawBBox(bbox, 1.5, "#6666aa");
 		}
 	}
@@ -227,17 +236,17 @@ Tarumae.Debugger = class {
 	}
 
 	renderDebugInfo() {
-		var fm = this.fpsMonitor;
+		const fm = this.fpsMonitor;
     
 		return this.generateDebugInfo("<br/>");
 	}
 
 	generateDebugInfo(newline) {
-		var tarumaeversion = typeof Tarumae.Version === "object" ? Tarumae.Version.toString() : "development version";
+		const tarumaeversion = typeof Tarumae.Version === "object" ? Tarumae.Version.toString() : "development version";
 
-		var fm = this.fpsMonitor;
+		const fm = this.fpsMonitor;
 
-		var toStringDigits = Tarumae.Utility.NumberExtension.toStringWithDigits;
+		const toStringDigits = Tarumae.Utility.NumberExtension.toStringWithDigits;
     
 		return "<b>Tarumae (" + tarumaeversion + ")</b>" + newline + newline
 			+ "fps: " + toStringDigits(fm.currentFPS, 2) + " (" + toStringDigits(fm.minFPS, 2) + " ~ " + toStringDigits(fm.maxFPS, 2) + ") / " 
@@ -259,9 +268,9 @@ Tarumae.Debugger = class {
 
 	showObjectInfoPanel(obj) {
 		if (this.objInfoPanel) {
-			var toStringDigits = Tarumae.Utility.NumberExtension.toStringWithDigits;
+			const toStringDigits = Tarumae.Utility.NumberExtension.toStringWithDigits;
 
-			var html = (obj.name ? this.getShorterUrl(obj.name) : "&lt;unnamed&gt;") + "<br/><br/>";
+			let html = (obj.name ? this.getShorterUrl(obj.name) : "&lt;unnamed&gt;") + "<br/><br/>";
       
 			html += "local: " + obj.location.toString() + "<br/>"
         + "world: " + obj.worldLocation.toString() + "<br/>"
@@ -269,7 +278,7 @@ Tarumae.Debugger = class {
         + "scale: " + obj.scale.toString() + "<br/>"
         + "polys: " + obj.polygonCount + "<br/><br/>";
       
-			var bbox = obj.getBounds();
+			let bbox = obj.getBounds();
 			if (bbox) {
 				bbox = new BoundingBox3D(bbox);
 				html += "bbmin: " + bbox.min.toArrayDigits() + "<br/>"
@@ -346,11 +355,11 @@ Tarumae.Debugger = class {
 	}
 
 	static dumpCameraPose() {
-		var scene = this.currentScene;
+		const scene = this.currentScene;
 		if (scene) {
-			var camera = scene.mainCamera;
+			const camera = scene.mainCamera;
 			if (camera) {
-				var str = "scene.mainCamera.location.set(" + camera.location.toArrayDigits() + ");\n";
+				let str = "scene.mainCamera.location.set(" + camera.location.toArrayDigits() + ");\n";
 				str += "scene.mainCamera.angle.set(" + camera.angle.toArrayDigits() + ");";
 				return str;
 			}

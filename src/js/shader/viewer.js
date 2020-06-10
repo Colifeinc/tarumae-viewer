@@ -1,9 +1,11 @@
 
 import Tarumae from "../entry";
+import { Color3 } from "@jingwood/graphics-math";
 
 Tarumae.Shaders.ViewerShader = class extends Tarumae.Shader {
 	constructor(renderer, vertShaderSrc, fragShaderSrc) {
-		super(renderer, vertShaderSrc, fragShaderSrc);
+    super(renderer, vertShaderSrc, fragShaderSrc);
+    console.log('create viewer shader: ', renderer);
 
 		this.use();
 

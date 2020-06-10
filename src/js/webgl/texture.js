@@ -112,7 +112,7 @@ Tarumae.Texture = class {
 
 		const gl = this.renderer.gl;
 
-		this.glTexture = gl.createTexture();
+    this.glTexture = gl.createTexture();
 
 		if (this.renderer.debugger) {
 			this.renderer.debugger.totalNumberOfTexturesUsed++;
@@ -124,7 +124,10 @@ Tarumae.Texture = class {
 			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.width, this.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, this.image);
 		} else if (typeof Image === "function" && this.image instanceof Image) {
 			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.image);
-		}
+    }
+    
+    const err = gl.getError();
+    if (err) console.log(err);
 	
     this.canMipmap = this.enableMipmapped
       // && this.width > 4 && this.height > 4
@@ -144,9 +147,7 @@ Tarumae.Texture = class {
 	}
 
 	use(renderer) {
-		if (!this.renderer) {
-			this.renderer = renderer;
-		}
+    this.renderer = renderer;
 
 		if (this.isLoading && this.image && !this.image.complete) {
 			return false;
@@ -156,7 +157,8 @@ Tarumae.Texture = class {
 			this.bind(this.renderer);
 		}
 
-		this.renderer.gl.bindTexture(this.renderer.gl.TEXTURE_2D, this.glTexture);
+    this.renderer.gl.bindTexture(this.renderer.gl.TEXTURE_2D, this.glTexture);
+    // console.info('bind texture', this.image);
 
 		return true;
 	}

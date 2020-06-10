@@ -247,7 +247,7 @@ Tarumae.Scene = class {
 	}
 
 	requireUpdateFrame() {
-		this.requestedUpdateFrame = true;
+    this.requestedUpdateFrame = true;
 	}
 
 	loadMaterials(mats, loadingSession, bundle) {
@@ -1261,8 +1261,16 @@ Tarumae.Scene = class {
   }
 
 	destroy() {
-		// todo: destroy all objects and meshes that use the resources 
-		// 			 downloaded and created from this scene
+    this.destroyAllObjects();
+    this.models = {};
+    this.materials = {};
+    this._refmaps = {};
+    this._bundles = {};
+    // scene._bundles = {};
+    this._lightSources = [];
+    this._activedLightSources = [];
+
+    console.debug('scene released');
   }
   
   destroyAllObjects() {

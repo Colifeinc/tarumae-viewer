@@ -48,7 +48,7 @@ window.addEventListener("load", function() {
     });
   };
 
-  const showcaseToba = "floors/floor-afgen-output.toba";
+  const showcaseToba = "floors/floor-ecomode.toba";
   scene.createObjectFromURL(showcaseToba, obj => {
     const floorObj = obj.findObjectByName("floor");
 	
@@ -123,8 +123,6 @@ window.addEventListener("load", function() {
       if (scene.skybox) {
         scene.skybox.visible = true;
       }
-
-      sb.play();
     }
 
     // cache the shadowmap on first time the mode changed
@@ -132,7 +130,7 @@ window.addEventListener("load", function() {
   });
 
   scene.sun.location.set(0, 10, 0);
-  scene.sun.mat.color = [1.1, 1.1, 1.1];
+  scene.sun.mat.color = [1.3, 1.3, 1.3];
 
   scene.show();
 });
