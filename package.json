@@ -1,6 +1,6 @@
 {
   "name": "tarumae-viewer",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "Optimized WebGL engine for showcase application",
   "main": "dist/js/tarumae.js",
   "files": [
@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.9.2",
-    "@jingwood/graphics-math": "^1.1.10",
+    "@jingwood/graphics-math": "^1.1.11",
     "pako": "^1.0.6"
   },
   "devDependencies": {

@@ -65,7 +65,8 @@ Tarumae.Scene = class {
 		let archiveInfo = this._bundles[name];
 	
 		if (!archiveInfo) {
-			const archive = new Tarumae.Utility.Archive();
+      const archive = new Tarumae.Utility.Archive();
+      archive.src = url;
 	
 			archiveInfo = {
 				name: name,
@@ -475,9 +476,11 @@ Tarumae.Scene = class {
 
 		const rm = loadingSession ? loadingSession.rm : this.resourceManager;
 			
-		if (typeof value === "string" && value.length > 0) {
-			if (renderer.cachedMeshes.hasOwnProperty(value)) {
-				var mesh = renderer.cachedMeshes[value];
+    if (typeof value === "string" && value.length > 0) {
+      const cachedKey = bundle ? (bundle.src + '|$|' + value) : value;
+
+			if (renderer.cachedMeshes.hasOwnProperty(cachedKey)) {
+				var mesh = renderer.cachedMeshes[cachedKey];
 				obj.addMesh(mesh);
 				if (typeof name === "string") {
 					obj[name] = mesh;
@@ -491,7 +494,7 @@ Tarumae.Scene = class {
 						loadingSession.progress();
 					}
 			
-					var mesh = scene.prepareObjectMeshFromURLStream(obj, value, buffer, loadingSession);
+					var mesh = scene.prepareObjectMeshFromURLStream(obj, value, buffer, loadingSession, bundle);
 
 					if (mesh) {
 						if (archive) {
@@ -565,14 +568,16 @@ Tarumae.Scene = class {
 		}
 	}
 
-	prepareObjectMeshFromURLStream(obj, url, buffer, loadingSession) {
+	prepareObjectMeshFromURLStream(obj, url, buffer, loadingSession, bundle) {
 		if (!buffer) return;
 
 		var mesh = null;
 		var renderer = this.renderer;
-	
-		if (renderer.cachedMeshes.hasOwnProperty(url)) {
-			mesh = renderer.cachedMeshes[url];
+  
+    const cacheUrl = (bundle ? bundle.src : '') + '|$|' + url;
+    
+		if (renderer.cachedMeshes.hasOwnProperty(cacheUrl)) {
+			mesh = renderer.cachedMeshes[cacheUrl];
 		} else {
 			mesh = new Tarumae.Mesh();
 			mesh.loadFromStream(buffer);
@@ -608,7 +613,9 @@ Tarumae.Scene = class {
 				loadingSession.progress();
 			}
 
-			let timg = scene.renderer.cachedImages[url];
+      const cacheKey = bundle ? (bundle.src + '|$|' + url) : url;
+  
+      let timg = scene.renderer.cachedImages[cacheKey];
 			if (timg) {
 				mat[name] = timg.tex;
 				return;
@@ -632,13 +639,13 @@ Tarumae.Scene = class {
 				let tex = new Tarumae.Texture(image);
 				tex.isLoading = true;
 
-				scene.renderer.cachedImages[url] = {
+				scene.renderer.cachedImages[cacheKey] = {
 					img: image,
 					tex: tex,
 				};
 
 				mat[name] = tex;
-				scene.renderer.cachedTextures[url] = tex;
+				scene.renderer.cachedTextures[cacheKey] = tex;
 
 				image.addEventListener("load", () => {
 					tex.isLoading = false;
@@ -646,7 +653,7 @@ Tarumae.Scene = class {
 				});
 			} else if (buffer instanceof Image) {
 				mat[name] = new Tarumae.Texture(buffer);
-				scene.renderer.cachedTextures[url] = mat[name];
+				scene.renderer.cachedTextures[cacheKey] = mat[name];
 				scene.requireUpdateFrame();
 			}
 		}
@@ -669,9 +676,11 @@ Tarumae.Scene = class {
 
 				case "tex":
 				case "normalmap":
-					if (typeof value === "string" && value.length > 0) {
-						if (scene.renderer.cachedTextures.hasOwnProperty(value)) {
-							mat[name] = scene.renderer.cachedTextures[value];
+          if (typeof value === "string" && value.length > 0) {
+            const cacheKey = bundle ? (bundle.src + '|$|' + value) : value;
+
+						if (scene.renderer.cachedTextures.hasOwnProperty(cacheKey)) {
+              mat[name] = scene.renderer.cachedTextures[cacheKey];
 						} else {
 							if (loadingSession) loadingSession.resourceTextureCount++;
 
