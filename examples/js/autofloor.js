@@ -23,9 +23,9 @@ window.addEventListener("load", function() {
     enableShadow: true,
     shadowQuality: {
       scale: 10,
-      viewDepth: 3,
-      resolution: 512,
-      intensity: 0.23,
+      viewDepth: 4,
+      resolution: 1024,
+      intensity: 0.25,
       enableCache: false,
     },
     bloomEffect: {
@@ -62,7 +62,7 @@ window.addEventListener("load", function() {
     if (wall) wall.mat.color = [1, 1, 1];
 
     obj.eachChild(child => {
-      child.receiveShadow = child === floorObj;
+      child.receiveShadow = child.name && child.name.startsWith("floor");
     });
 		
     scene.add(obj);
@@ -92,6 +92,7 @@ window.addEventListener("load", function() {
   ];
 
   scene.skybox = new Tarumae.SkyBox(renderer, skyImageUrls);
+  scene.skybox.mat = { color: [1.7, 1.6, 1.5] };
   scene.skybox.visible = false;
 
   // baseurl = "textures/cubemap/office-256-blur/"
@@ -130,7 +131,7 @@ window.addEventListener("load", function() {
   });
 
   scene.sun.location.set(0, 10, 0);
-  scene.sun.mat.color = [1.3, 1.3, 1.3];
+  scene.sun.mat.color = [1.2, 1.2, 1.2];
 
   scene.show();
 });

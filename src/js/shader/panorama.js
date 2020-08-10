@@ -18,8 +18,8 @@ Tarumae.Shaders.PanoramaShader = class extends Tarumae.Shader {
 		// this.sundirUniform = this.bindUniform("sundir", "vec3");
 		// this.sunlightUniform = this.bindUniform("sunlight", "vec3");
 
-		// this.colorUniform = this.bindUniform("color", "color3");
-		this.textureUniform = this.findUniform("texture");
+		this.textureUniform = this.bindUniform("texture", "tex", 0);
+		this.colorUniform = this.bindUniform("color", "color3");
 		// this.texTilingUniform = this.findUniform("texTiling");
 		// this.opacityUniform = this.bindUniform("opacity", "float");
 
@@ -70,7 +70,7 @@ Tarumae.Shaders.PanoramaShader = class extends Tarumae.Shader {
 		const mat = obj.mat;
 
 		let texture = null;
-		// var color = null;
+		let color = null;
 
 		if (mat) {
 			// texture
@@ -78,31 +78,25 @@ Tarumae.Shaders.PanoramaShader = class extends Tarumae.Shader {
 				texture = mat.tex;
 			}
 	
-			// color
-			// if (typeof mat.color === "object") {
-			// 	if (Array.isArray(mat.color)) {
-			// 		color = mat.color;
-			// 	} else if (mat.color instanceof Color3) {
-			// 		color = mat.color.toArray();
-			// 	}
-			// }
+      // color
+      if (mat.color) {
+        color = mat.color;
+      }
 		}
 
 		// texture
-		gl.activeTexture(gl.TEXTURE0);
 		if (texture) {
-			texture.use(this.renderer);
-		} else {
-			this.emptyCubemap.use(this.renderer);
-			// Tarumae.Shader.emptyTexture.use(this.renderer);
+			this.textureUniform.set(texture);
+    } else {
+      this.textureUniform.set(this.emptyCubemap);
 		}
 
-		// // color
-		// if (color !== null) {
-		// 	this.colorUniform.set(color);
-		// } else {
-		// 	this.colorUniform.set(this.defaultColor);
-		// }
+		// color
+		if (color) {
+			this.colorUniform.set(color);
+		} else {
+      this.colorUniform.set([1, 1, 1]);
+		}
 
 		// // opacity
 		// if (obj._opacity < 1.0) {

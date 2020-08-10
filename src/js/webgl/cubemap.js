@@ -319,14 +319,28 @@ Tarumae.SkyBox = class extends Tarumae.ImageCubeBox {
     this.cube = new Tarumae.Shapes.Cube();
     this.cube.location.set(0, 2, 0);
     this.cube.scale.set(size, size, size);
+    this.cube.mat = {};
   }
 
   initFinished() {
-    this.cube.mat = { tex: this.cubemap };
+    if (this.cube.mat) {
+      this.cube.mat.tex = this.cubemap;
+    } else {
+      this.cube.mat = { tex: this.cubemap };
+    }
+
     if (this.renderer && this.renderer.currentScene) {
       this.renderer.currentScene.requireUpdateFrame();
     }
     super.initFinished();
+  }
+
+  get mat() {
+    return this.cube.mat;
+  }
+
+  set mat(v) {
+    this.cube.mat = v;
   }
 
   get visible() {

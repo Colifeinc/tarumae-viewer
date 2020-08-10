@@ -8,12 +8,12 @@
 precision mediump float;
 
 uniform samplerCube texture;
-
+uniform vec3 color;
 varying vec3 texcoord;
 
 void main(void) {
 
-	vec3 color = textureCube(texture, texcoord).rgb;
+	vec3 fcolor = textureCube(texture, texcoord).rgb * color;
 
-	gl_FragColor = vec4(color, 1.0);
+	gl_FragColor = vec4(fcolor, 1.0);
 }

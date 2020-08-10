@@ -22,6 +22,7 @@ window.addEventListener("load", function() {
 		shadowQuality: {
 			scale: 2,
       viewDepth: 2,
+      resolution: 2048,
 		},
 		bloomEffect: {
 			enabled: true,
