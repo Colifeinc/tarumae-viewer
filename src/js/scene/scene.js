@@ -16,6 +16,7 @@ import "../scene/camera";
 import "../webgl/texture";
 import "../webgl/cubemap";
 import "../utility/objloader";
+import "../utility/gltfloader";
 
 Tarumae.Scene = class {
 	constructor(renderer) {
@@ -119,43 +120,49 @@ Tarumae.Scene = class {
 	}
 
   createObjectFromBundle(url, ondone, loadingSession) {
-    
     this.loadArchive(url, url, loadingSession, archive => {
-			const manifestDataText = archive.getChunkTextData(0x1, 0x7466696d);
-      
+      const manifestDataText = archive.getChunkTextData(0x1, 0x7466696d);
+          
       if (manifestDataText) {
-				let manifest;
-				try {
-					manifest = JSON.parse(manifestDataText);
-				} catch (ex) {
-					console.warn("parse manifest error: " + ex);
-				}
-				if (manifest && typeof ondone === "function") {
-					ondone(archive, manifest);
-				}
-			}
-		});
-	}
+        let manifest;
+        try {
+          manifest = JSON.parse(manifestDataText);
+        } catch (ex) {
+          console.warn("parse manifest error: " + ex);
+        }
+        if (manifest && typeof ondone === "function") {
+          ondone(archive, manifest);
+        }
+      }
+    });
+  }
 
-	createObjectFromURL(url, callback) {
-		var rm = new Tarumae.ResourceManager();
-		const loadingSession = new Tarumae.ObjectsLoadingSession(rm);
+  createObjectFromURL(url, callback) {
+    if (url.endsWith('.toba') || url.endsWith('.tob')
+      || url.endsWith('.soba') || url.endsWith('.sob')) {
+      const rm = new Tarumae.ResourceManager();
+      const loadingSession = new Tarumae.ObjectsLoadingSession(rm);
 
-		this.createObjectFromBundle(url, (bundle, manifest) => {
-			this.loadObject(manifest, undefined, bundle);
+      this.createObjectFromBundle(url, (bundle, manifest) => {
+        this.loadObject(manifest, undefined, bundle);
 
-			if (typeof callback === "function") {
-				var obj = manifest;
-				if (obj.objects.length === 1) {
-					obj = obj.objects[0];
-				}
-				callback(obj);
-			}
-		}, loadingSession);
+        if (typeof callback === "function") {
+          let obj = manifest;
+          if (obj.objects.length === 1) {
+            obj = obj.objects[0];
+          }
+          callback(obj);
+        }
+      }, loadingSession);
 	
-		rm.load();
-		return loadingSession;
-	}
+      rm.load();
+      return loadingSession;
+    } else if (url.endsWith(".gltf")) {
+      Tarumae.ResourceManager.download(url, Tarumae.ResourceTypes.JSON, json => {
+        callback(Tarumae.GLTFLoader.loadFromJSONObject(json));
+      });
+    }
+  }
 	
 	load() {
 	
