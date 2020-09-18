@@ -340,6 +340,18 @@ Tarumae.Mesh = class {
 			gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer, gl.STATIC_DRAW);
 		}
 
+    // skin
+		if (this.jointBuffer) {
+			this.meta.skinJointBufferId = gl.createBuffer();
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.meta.skinJointBufferId);
+			gl.bufferData(gl.ARRAY_BUFFER, this.jointBuffer, gl.STATIC_DRAW);
+    }
+		if (this.jointWeightsBuffer) {
+			this.meta.skinJointWeightsBufferId = gl.createBuffer();
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.meta.skinJointWeightsBufferId);
+			gl.bufferData(gl.ARRAY_BUFFER, this.jointWeightsBuffer, gl.STATIC_DRAW);
+    }
+    
 		var indexBufferLength = (!this.indexBuffer ? 0 : (this.indexBuffer.length * 2));
 		
 		if (renderer.debugger) {
@@ -449,7 +461,7 @@ Tarumae.Mesh = class {
 		// normal	
 		if (sp.vertexNormalAttribute >= 0) {
 			if (meta.normalCount > 0) {
-				gl.vertexAttribPointer(sp.vertexNormalAttribute, 3, gl.FLOAT, false, meta.stride, meta.normalOffset);
+				gl.vertexAttribPointer(sp.vertexNormalAttribute, 3, gl.FLOAT, true, meta.stride ?? meta.normalStride ?? 0, meta.normalOffset);
 				gl.enableVertexAttribArray(sp.vertexNormalAttribute);
 			} else {
 				gl.disableVertexAttribArray(sp.vertexNormalAttribute);
@@ -507,7 +519,7 @@ Tarumae.Mesh = class {
 			} else {
 				gl.disableVertexAttribArray(sp.vertexSizeAttribute);
 			}
-		}
+    }
 
 		if (renderer.currentShader instanceof Tarumae.Shaders.WireframeShader && meta.edgeCount > 0) {
 			gl.vertexAttribPointer(sp.vertexPositionAttribute, 3, gl.FLOAT, false, meta.stride, meta.edgeDataOffset);

@@ -13,6 +13,11 @@ attribute vec3 vertexTangent;
 attribute vec3 vertexBitangent;
 attribute vec3 vertexColor;
 
+attribute vec4 a_joint;
+attribute vec4 a_weight;
+
+uniform mat4 u_jointMat[200];
+
 uniform mat4 projectViewMatrix;
 uniform mat4 modelMatrix;
 uniform mat3 modelMatrix3x3;
@@ -31,7 +36,14 @@ varying highp vec3 shadowPosition;
 
 void main(void) {
 	vec4 pos = vec4(vertexPosition, 1.0);
-	vec4 transformPos = modelMatrix * pos;
+
+  mat4 skinMat =
+        a_weight.x * u_jointMat[int(a_joint.x)] +
+        a_weight.y * u_jointMat[int(a_joint.y)] +
+        a_weight.z * u_jointMat[int(a_joint.z)] +
+        a_weight.w * u_jointMat[int(a_joint.w)];
+
+	vec4 transformPos = modelMatrix * skinMat * pos;
 
 	gl_Position = projectViewMatrix * transformPos;
 

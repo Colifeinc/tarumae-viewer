@@ -11,8 +11,9 @@ import { Color4 } from "@jingwood/graphics-math";
 window.addEventListener("load", function() {
 
 	const renderer = new Tarumae.Renderer({
+		backColor: new Color4(0, 0, 0),
 		// backColor: new Color4(0.74, .87, .85, 0.5),
-		backgroundImage: "textures/bg-gray-gradient.jpg",
+		// backgroundImage: "textures/bg-gray-gradient.jpg",
 		showDebugPanel: false,
 		enableLighting: true,
 		enablePostprocess: true,
@@ -22,7 +23,7 @@ window.addEventListener("load", function() {
 		shadowQuality: {
 			scale: 2,
       viewDepth: 2,
-      resolution: 2048,
+      resolution: 1024,
 		},
 		bloomEffect: {
 			enabled: true,
@@ -40,20 +41,19 @@ window.addEventListener("load", function() {
  
 	this.models = [
 		{ path: "models/simplebone.gltf" },
+		// { path: "models/cube.gltf" },
 	];
 
 	const ground = {
 		mesh: new Tarumae.Shapes.PlaneMesh(3, 3),
 		mat: {
-			color: [1.5, 1.5, 1.5],
-			tex: "textures/bg-gray-gradient.jpg"
+			// color: [1.0, 1.0, 1.0],
+			// color: [1.5, 1.5, 1.5],
+			// tex: "textures/bg-gray-gradient.jpg"
 		},
-		angle: [0, 30, 0],
+		// angle: [0, 30, 0],
 	};
 	scene.load(ground);
-
-	const holder = new Tarumae.SceneObject();
-	scene.add(holder);
 
 	scene.onkeydown = function(key) {
 		if (key >= Tarumae.Viewer.Keys.D1
@@ -130,9 +130,9 @@ window.addEventListener("load", function() {
 		}
 	}
 
-	scene.mainCamera.fieldOfView = 50;
-	scene.mainCamera.location.set(0, 0.7, 1.4);
-	scene.mainCamera.angle.set(-10, 0, 0);
+	scene.mainCamera.fieldOfView = 60;
+	scene.mainCamera.location.set(0, 0.7, 5.4);
+	scene.mainCamera.angle.set(0, 0, 0);
 	
 	// light sources
 

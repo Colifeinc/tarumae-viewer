@@ -24,12 +24,17 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		this.vertexTangentAttribute = this.findAttribute("vertexTangent");
 		this.vertexBitangentAttribute = this.findAttribute("vertexBitangent");
 		this.vertexColorAttribute = this.findAttribute("vertexColor");
-		
+    
 		this.projectViewMatrixUniform = this.bindUniform("projectViewMatrix", "mat4");
 		this.modelMatrixUniform = this.bindUniform("modelMatrix", "mat4");
 		this.modelMatrix3x3Uniform = this.bindUniform("modelMatrix3x3", "mat3");
 		this.normalMatrixUniform = this.bindUniform("normalMatrix", "mat4");
 		this.shadowMapProjectionMatrixUniform = this.bindUniform("shadowmapProjectionMatrix", "mat4");
+
+    // skin
+    this.vertexJointAttribute = this.findAttribute("a_joint");
+    this.vertexWeightAttribute = this.findAttribute("a_weight");
+		this.jointMatrixUniforms = this.bindUniformArray("u_jointMat", "mat4", 2);
 
 		this.sundirUniform = this.bindUniform("sundir", "vec3");
 		this.sunlightUniform = this.bindUniform("sunlight", "color3");
@@ -345,9 +350,42 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 	beginMesh(mesh) {
 		super.beginMesh(mesh);
 	
-		var gl = this.gl;
+    const gl = this.gl;
+    
+    // skin
+    if (this.vertexJointAttribute >= 0) {
+      if (mesh.jointBuffer) {
+        gl.bindBuffer(gl.ARRAY_BUFFER, mesh.meta.skinJointBufferId);
+        gl.vertexAttribPointer(this.vertexJointAttribute, 4, gl.UNSIGNED_SHORT, false, mesh.meta.jointStride, 0);
+        gl.enableVertexAttribArray(this.vertexJointAttribute);
+      } else {
+        gl.disableVertexAttribArray(this.vertexJointAttribute);
+      }
+    }
+    if (this.vertexWeightAttribute >= 0) {
+      if (mesh.jointWeightsBuffer) {
+        gl.bindBuffer(gl.ARRAY_BUFFER, mesh.meta.skinJointWeightsBufferId);
+        gl.vertexAttribPointer(this.vertexWeightAttribute, 4, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(this.vertexWeightAttribute);
+      } else {
+        gl.disableVertexAttribArray(this.vertexWeightAttribute);
+      }
+    }
 
-		// this.hasUV2Uniform.set(mesh.meta && mesh.meta.uvCount > 1);
+    const mat = new Matrix4().loadIdentity();
+    
+    if (mesh._gltfMesh) {
+   
+      // mat.rotateZ(10);
+      // this.jointMatrixUniforms[0].set(mat);
+
+      // mat.rotateZ(100);
+      // this.jointMatrixUniforms[1].set(mat);
+    }
+    else {
+      this.jointMatrixUniforms[0].set(mat);
+      this.jointMatrixUniforms[1].set(mat);
+    }
 
 		// lightmap
 		if (this.usingLightmap === null) {

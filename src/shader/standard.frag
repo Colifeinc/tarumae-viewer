@@ -18,6 +18,7 @@ struct Light {
 	vec3 color;
 };
 
+
 uniform vec3 cameraLoc;
 uniform vec3 sundir;
 uniform vec3 sunlight;

@@ -149,17 +149,8 @@ Tarumae.SceneObject = class {
       
       // NOTE!! Experimental quaternion support 
       if (this._quaternion) {
-        const m = this._quaternion.toMatrix4();
-        const tr = new Matrix4();
-        tr.a1 = m[0]; tr.b1 = m[1]; tr.c1 = m[2]; tr.d1 = m[3];
-        tr.a2 = m[4]; tr.b2 = m[5]; tr.c2 = m[6]; tr.d2 = m[7];
-        tr.a3 = m[8]; tr.b3 = m[9]; tr.c3 = m[10]; tr.d3 = m[11];
-        tr.a4 = m[12]; tr.b4 = m[13]; tr.c4 = m[14]; tr.d4 = m[15];
-        
-        // t.rotateX(90);
+        const tr = this._quaternion.toMatrix();
         t = t.mul(tr);
-        // t.rotateX(-90);
-
       } else {
         t.rotate(this._angle._x, this._angle._y, this._angle._z, this._angleOrder);
       }
