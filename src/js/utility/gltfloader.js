@@ -10,18 +10,22 @@ import { Vec3, Matrix4, BoundingBox3D } from "@jingwood/graphics-math";
 import { Quaternion } from "@jingwood/graphics-math";
 
 function uriToBuffer(string) {
-  // var regex = /^data:.+\/(.+);base64,(.*)$/;
+  // const regex = /^data:.+\/(.+);base64,(.*)/;
 
   // const matches = string.match(regex);
-  // const type1 = matches[0];
-  // const type2 = matches[1];
-  // const data = matches[2];
+  // if (matches.length > 2) {
+  //   // const type = matches[1];
+  //   const data = matches[2];
 
-  const head = 'data:application/octet-stream;base64,';
-  if (string.startsWith(head)) {
-    const data = string.substr(head.length);
-    const buffer = _base64ToArrayBuffer(data);
-    return buffer;
+  //   const buffer = _base64ToArrayBuffer(data);
+  //   return buffer;
+  // }
+  if (string.startsWith('data:')) {
+    const s = string.indexOf(';base64,');
+    if (s > 0) {
+      const data = string.substr(s + 8);
+      return _base64ToArrayBuffer(data);
+    }
   }
 }
 
@@ -104,14 +108,24 @@ function loadMesh(json, gltfMesh) {
     mesh.meta.jointWeightsStride = json.bufferViews[jointWeightsBufferAccessor.bufferView].byteStride ?? 0;
   }
 
-  // debug
+  // FIXME: debug
   mesh._gltfMesh = gltfMesh;
+
+  console.assert(mesh.vertexBuffer.length > 0);
 
   return mesh;
 }
 
-function loadNode(json, node) {
+function loadJoints(json, joint) {
+
+}
+
+function loadNode(session, node) {
+  const { json } = session;
+
   const obj = new Tarumae.SceneObject();
+
+  obj.name = node.name;
 
   if (!isNaN(node.mesh)) {
     const gltfMesh = json.meshes[node.mesh];
@@ -121,7 +135,7 @@ function loadNode(json, node) {
 
   if (Array.isArray(node.children)) {
     for (const childIndex of node.children) {
-      const child = loadNode(json, json.nodes[childIndex]);
+      const child = loadNode(session, json.nodes[childIndex]);
       if (child) {
         obj.add(child);
       }
@@ -137,11 +151,54 @@ function loadNode(json, node) {
       node.rotation[2], node.rotation[3]);
   }
 
+  if (!isNaN(node.skin)) {
+    const { skinJointMats } = session;
+    
+    let jointMats = skinJointMats[node.skin];
+    
+    if (!jointMats) {
+      jointMats = [];
+      skinJointMats[node.skin] = jointMats;
+
+      const jointIndices = json.skins[node.skin].joints;
+      for (let jointIndex of jointIndices) { 
+        const joint = json.nodes[jointIndex];
+
+        let mat;
+
+        if (joint.rotation) {
+          mat = new Quaternion(joint.rotation[0], joint.rotation[1],
+            joint.rotation[2], joint.rotation[3]).toMatrix();
+        } else {
+          mat = new Matrix4().loadIdentity();
+        }
+        
+        if (joint.translation) {
+          mat.translate(joint.translation[0], joint.translation[1], joint.translation[2]);
+        }
+
+        console.assert(!isNaN(mat.a1) && !isNaN(mat.b1) && !isNaN(mat.c1) && !isNaN(mat.d1));
+        console.assert(!isNaN(mat.a2) && !isNaN(mat.b2) && !isNaN(mat.c2) && !isNaN(mat.d2));
+        console.assert(!isNaN(mat.a3) && !isNaN(mat.b3) && !isNaN(mat.c3) && !isNaN(mat.d3));
+        console.assert(!isNaN(mat.a4) && !isNaN(mat.b4) && !isNaN(mat.c4) && !isNaN(mat.d4));
+
+        jointMats.push(mat);
+      }
+      
+      obj._jointMats = jointMats;
+    }
+  }
+
   return obj;
 }
 
+
+
+
 Tarumae.GLTFLoader = {
   loadFromJSONObject(json) {
+    const session = { json };
+    session.skinJointMats = {};
 
     const root = new Tarumae.SceneObject();
     root.mat = {};
@@ -149,7 +206,7 @@ Tarumae.GLTFLoader = {
     for (const scene of json.scenes) {
       for (const nodeIndex of scene.nodes) {
         const node = json.nodes[nodeIndex];
-        const obj = loadNode(json, node);
+        const obj = loadNode(session, node);
         if (obj) {
           root.add(obj);
         }

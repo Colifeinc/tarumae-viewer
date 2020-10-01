@@ -23,7 +23,7 @@ window.addEventListener("load", function() {
 		shadowQuality: {
 			scale: 2,
       viewDepth: 2,
-      resolution: 1024,
+      resolution: 512,
 		},
 		bloomEffect: {
 			enabled: true,
@@ -40,8 +40,9 @@ window.addEventListener("load", function() {
 	window._scene = scene;
  
 	this.models = [
-		{ path: "models/simplebone.gltf" },
+		// { path: "models/simplebone.gltf" },
 		// { path: "models/cube.gltf" },
+		{ path: "models/char1.gltf" },
 	];
 
 	const ground = {
@@ -51,7 +52,7 @@ window.addEventListener("load", function() {
 			// color: [1.5, 1.5, 1.5],
 			// tex: "textures/bg-gray-gradient.jpg"
 		},
-		// angle: [0, 30, 0],
+    // angle: [0, 30, 0],
 	};
 	scene.load(ground);
 
@@ -168,28 +169,28 @@ window.addEventListener("load", function() {
 	});
 	objController.object = ground;
 
-	const cubebox = new Tarumae.ImageCubeBox(renderer, [
-		"textures/cubemap/office-256/px.jpg",
-		"textures/cubemap/office-256/nx.jpg",
-		"textures/cubemap/office-256/py.jpg",
-		"textures/cubemap/office-256/ny.jpg",
-		"textures/cubemap/office-256/pz.jpg",
-		"textures/cubemap/office-256/nz.jpg",
-	]);
+	// const cubebox = new Tarumae.ImageCubeBox(renderer, [
+	// 	"textures/cubemap/office-256/px.jpg",
+	// 	"textures/cubemap/office-256/nx.jpg",
+	// 	"textures/cubemap/office-256/py.jpg",
+	// 	"textures/cubemap/office-256/ny.jpg",
+	// 	"textures/cubemap/office-256/pz.jpg",
+	// 	"textures/cubemap/office-256/nz.jpg",
+	// ]);
 		
-	window.setObjectRefmap = (obj) => {
-		obj.eachChild(c => {
-			if (c.meshes.length > 0) c.meshes[0]._refmap = window.refmap;
-		});
-	};
+	// window.setObjectRefmap = (obj) => {
+	// 	obj.eachChild(c => {
+	// 		if (c.meshes.length > 0) c.meshes[0]._refmap = window.refmap;
+	// 	});
+	// };
 
-	cubebox.on('load', _ => {
-		window.refmap = cubebox.cubemap;
-		if (window.obj) {
-			window.setObjectRefmap(window.obj);
-			ground.meshes[0]._refmap = window.refmap;
-		}
-	});
+	// cubebox.on('load', _ => {
+	// 	window.refmap = cubebox.cubemap;
+	// 	if (window.obj) {
+	// 		window.setObjectRefmap(window.obj);
+	// 		ground.meshes[0]._refmap = window.refmap;
+	// 	}
+	// });
 
 	scene.show();
 });

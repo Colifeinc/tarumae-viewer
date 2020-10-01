@@ -34,7 +34,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
     // skin
     this.vertexJointAttribute = this.findAttribute("a_joint");
     this.vertexWeightAttribute = this.findAttribute("a_weight");
-		this.jointMatrixUniforms = this.bindUniformArray("u_jointMat", "mat4", 2);
+		this.jointMatrixUniforms = this.bindUniformArray("u_jointMat", "mat4", 200);
 
 		this.sundirUniform = this.bindUniform("sundir", "vec3");
 		this.sunlightUniform = this.bindUniform("sunlight", "color3");
@@ -344,7 +344,19 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 				const m = modelMatrix.mul(shadowMapShader.lightMatrix).mul(shadowMapShader.projectionMatrix);
 				this.shadowMapProjectionMatrixUniform.set(m);
 			}
-		}
+    }
+    
+    // skin
+    if (obj._jointMats) {
+      for (let i = 0; i < obj._jointMats.length; i++) {
+        this.jointMatrixUniforms[i].set(obj._jointMats[i]);
+      }
+    }
+    else {
+      const matrix = new Matrix4().loadIdentity();
+      this.jointMatrixUniforms[0].set(matrix);
+      this.jointMatrixUniforms[1].set(matrix);
+    }
 	}
 
 	beginMesh(mesh) {
@@ -370,21 +382,6 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
       } else {
         gl.disableVertexAttribArray(this.vertexWeightAttribute);
       }
-    }
-
-    const mat = new Matrix4().loadIdentity();
-    
-    if (mesh._gltfMesh) {
-   
-      // mat.rotateZ(10);
-      // this.jointMatrixUniforms[0].set(mat);
-
-      // mat.rotateZ(100);
-      // this.jointMatrixUniforms[1].set(mat);
-    }
-    else {
-      this.jointMatrixUniforms[0].set(mat);
-      this.jointMatrixUniforms[1].set(mat);
     }
 
 		// lightmap
