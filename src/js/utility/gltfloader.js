@@ -60,12 +60,19 @@ function getBufferArray(json, accessor) {
     case 'VEC4':
       return new Float32Array(buffer._data, accessor.byteOffset ?? 0 + bufferView.byteOffset ?? 0, accessor.count * 4);
       
+    case 'MAT4':
+      return new Float32Array(buffer._data, accessor.byteOffset ?? 0 + bufferView.byteOffset ?? 0, accessor.count * 16);
+
     default:
     case 'SCALAR':
       switch (accessor.componentType) {
         default:
         case 5123:
           return new Uint16Array(buffer._data, accessor.byteOffset ?? 0 + bufferView.byteOffset ?? 0, accessor.count);
+        
+        case 5126:
+          return new Float32Array(buffer._data, accessor.byteOffset ?? 0 + bufferView.byteOffset ?? 0, accessor.count);
+
       }
   }
 }
@@ -155,13 +162,17 @@ function loadNode(session, node) {
     const { skinJointMats } = session;
     
     let jointMats = skinJointMats[node.skin];
-    
+    const inverseMatsBuffer = getBufferArray(json, json.accessors[json.skins[node.skin].inverseBindMatrices]);
+    const _im = inverseMatsBuffer;
+    let mat2 = new Matrix4();
+
     if (!jointMats) {
       jointMats = [];
       skinJointMats[node.skin] = jointMats;
 
+      let i = 0;
       const jointIndices = json.skins[node.skin].joints;
-      for (let jointIndex of jointIndices) { 
+      for (let jointIndex of jointIndices) {
         const joint = json.nodes[jointIndex];
 
         let mat;
@@ -176,6 +187,14 @@ function loadNode(session, node) {
         if (joint.translation) {
           mat.translate(joint.translation[0], joint.translation[1], joint.translation[2]);
         }
+
+        mat2.a1 = _im[i + 0]; mat2.b1 = _im[i + 1]; mat2.c1 = _im[i + 2]; mat2.d1 = _im[i + 3];
+        mat2.a2 = _im[i + 4]; mat2.b2 = _im[i + 5]; mat2.c2 = _im[i + 6]; mat2.d2 = _im[i + 7];
+        mat2.a3 = _im[i + 8]; mat2.b3 = _im[i + 9]; mat2.c3 = _im[i + 10]; mat2.d3 = _im[i + 11];
+        mat2.a4 = _im[i + 12]; mat2.b4 = _im[i + 13]; mat2.c4 = _im[i + 14]; mat2.d4 = _im[i + 15];
+        mat.transpose();
+        i += 16;
+        mat = mat2.mul(mat);
 
         console.assert(!isNaN(mat.a1) && !isNaN(mat.b1) && !isNaN(mat.c1) && !isNaN(mat.d1));
         console.assert(!isNaN(mat.a2) && !isNaN(mat.b2) && !isNaN(mat.c2) && !isNaN(mat.d2));

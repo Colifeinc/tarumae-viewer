@@ -40,9 +40,9 @@ window.addEventListener("load", function() {
 	window._scene = scene;
  
 	this.models = [
-		// { path: "models/simplebone.gltf" },
+		{ path: "models/simplebone.gltf" },
 		// { path: "models/cube.gltf" },
-		{ path: "models/char1.gltf" },
+		// { path: "models/char1.gltf" },
 	];
 
 	const ground = {
