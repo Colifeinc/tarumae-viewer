@@ -165,6 +165,7 @@ function loadNode(session, node) {
     const inverseMatsBuffer = getBufferArray(json, json.accessors[json.skins[node.skin].inverseBindMatrices]);
     const _im = inverseMatsBuffer;
     let mat2 = new Matrix4();
+    let lastMat = new Matrix4().loadIdentity();
 
     if (!jointMats) {
       jointMats = [];
@@ -192,9 +193,12 @@ function loadNode(session, node) {
         mat2.a2 = _im[i + 4]; mat2.b2 = _im[i + 5]; mat2.c2 = _im[i + 6]; mat2.d2 = _im[i + 7];
         mat2.a3 = _im[i + 8]; mat2.b3 = _im[i + 9]; mat2.c3 = _im[i + 10]; mat2.d3 = _im[i + 11];
         mat2.a4 = _im[i + 12]; mat2.b4 = _im[i + 13]; mat2.c4 = _im[i + 14]; mat2.d4 = _im[i + 15];
-        mat.transpose();
+        //mat.transpose();
         i += 16;
-        mat = mat2.mul(mat);
+        // mat = mat.mul(mat2);
+
+        mat = mat.mul(lastMat);
+        lastMat.copyFrom(mat);
 
         console.assert(!isNaN(mat.a1) && !isNaN(mat.b1) && !isNaN(mat.c1) && !isNaN(mat.d1));
         console.assert(!isNaN(mat.a2) && !isNaN(mat.b2) && !isNaN(mat.c2) && !isNaN(mat.d2));
