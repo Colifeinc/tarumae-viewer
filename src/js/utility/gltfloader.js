@@ -55,26 +55,35 @@ function getBufferArray(json, accessor) {
 
   switch (accessor.type) {
     case 'VEC3':
-      return new Float32Array(buffer._data, accessor.byteOffset ?? 0 + bufferView.byteOffset ?? 0, accessor.count * 3);
+      return new Float32Array(buffer._data, (accessor.byteOffset ?? 0) + (bufferView.byteOffset ?? 0), accessor.count * 3);
      
     case 'VEC4':
-      return new Float32Array(buffer._data, accessor.byteOffset ?? 0 + bufferView.byteOffset ?? 0, accessor.count * 4);
+      return new Float32Array(buffer._data, (accessor.byteOffset ?? 0) + (bufferView.byteOffset ?? 0), accessor.count * 4);
       
     case 'MAT4':
-      return new Float32Array(buffer._data, accessor.byteOffset ?? 0 + bufferView.byteOffset ?? 0, accessor.count * 16);
+      return new Float32Array(buffer._data, (accessor.byteOffset ?? 0) + (bufferView.byteOffset ?? 0), accessor.count * 16);
 
     default:
     case 'SCALAR':
       switch (accessor.componentType) {
         default:
         case 5123:
-          return new Uint16Array(buffer._data, accessor.byteOffset ?? 0 + bufferView.byteOffset ?? 0, accessor.count);
+          return new Uint16Array(buffer._data, (accessor.byteOffset ?? 0) + (bufferView.byteOffset ?? 0), accessor.count);
         
         case 5126:
-          return new Float32Array(buffer._data, accessor.byteOffset ?? 0 + bufferView.byteOffset ?? 0, accessor.count);
+          return new Float32Array(buffer._data, (accessor.byteOffset ?? 0) + (bufferView.byteOffset ?? 0), accessor.count);
 
       }
   }
+}
+
+function concatFloat32Array(first, second) {
+    let result = new Float32Array(first.length + second.length);
+
+    result.set(first);
+    result.set(second, first.length);
+
+    return result;
 }
 
 function loadMesh(json, gltfMesh) {
@@ -103,6 +112,7 @@ function loadMesh(json, gltfMesh) {
     mesh.meta.normalOffset = json.bufferViews[normalBufferAccessor.bufferView].byteOffset;
     mesh.meta.normalStride = json.bufferViews[normalBufferAccessor.bufferView].byteStride ?? 0;
     mesh.meta.normalCount = normalBufferAccessor.count;
+    mesh.vertexBuffer = concatFloat32Array(mesh.vertexBuffer, getBufferArray(json, normalBufferAccessor));
   }
 
   if (jointBufferAccessor) {
