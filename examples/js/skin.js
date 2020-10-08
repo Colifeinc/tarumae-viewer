@@ -40,9 +40,11 @@ window.addEventListener("load", function() {
 	window._scene = scene;
  
 	this.models = [
-		{ path: "models/simplebone.gltf" },
+		 { path: "models/simplebone.gltf" },
 		// { path: "models/cube.gltf" },
 		// { path: "models/char1.gltf" },
+		// { path: "models/whale.CYCLES.gltf" },
+		// { path: "models/woman.gltf" },
 	];
 
 	const ground = {
@@ -132,7 +134,7 @@ window.addEventListener("load", function() {
 	}
 
 	scene.mainCamera.fieldOfView = 60;
-	scene.mainCamera.location.set(0, 0.7, 5.4);
+	scene.mainCamera.location.set(0, 0.7, 2.4);
 	scene.mainCamera.angle.set(0, 0, 0);
 	
 	// light sources
