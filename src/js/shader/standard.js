@@ -348,9 +348,17 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
     
     // skin
     if (obj._jointMats) {
+      // for (let i = 0; i < obj._jointMats.length; i++) {
+      //   this.jointMatrixUniforms[i].set(obj._jointMats[i]);
+      // }
+      const matrix = new Matrix4().loadIdentity();
       for (let i = 0; i < obj._jointMats.length; i++) {
-        this.jointMatrixUniforms[i].set(obj._jointMats[i]);
+        this.jointMatrixUniforms[i].set(matrix);
       }
+      // // matrix.translate(0, 1, 0);
+      // this.jointMatrixUniforms[0].set(matrix);
+      // //matrix.translate(0, 1, 0);
+      // this.jointMatrixUniforms[1].set(matrix);
     }
     else {
       const matrix = new Matrix4().loadIdentity();
