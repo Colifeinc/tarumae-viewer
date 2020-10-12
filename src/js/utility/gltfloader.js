@@ -86,7 +86,26 @@ function concatFloat32Array(first, second) {
     return result;
 }
 
-function loadMesh(json, gltfMesh) {
+function loadTexture(json, id) {
+}
+
+function loadMaterial(session, id) {
+  const { loadedMats } = session;
+
+  let mat = loadedMats[id];
+  if (mat) return mat;
+
+  mat = new Tarumae.Material();
+  session.loadedMats[id] = mat;
+
+  const matjson = session.json.materials[id];
+  if (matjson.pbrMetallicRoughness) {
+  }
+}
+
+function loadMesh(session, gltfMesh) {
+  const { json } = session;
+
   const meshPrimitives = gltfMesh.primitives[0];
  
   const vertexBufferAccessor = json.accessors[meshPrimitives.attributes.POSITION];
@@ -125,6 +144,10 @@ function loadMesh(json, gltfMesh) {
     mesh.meta.jointWeightsStride = json.bufferViews[jointWeightsBufferAccessor.bufferView].byteStride ?? 0;
   }
 
+  if (!isNaN(meshPrimitives.material)) {
+    mesh.mat = loadMaterial(session, meshPrimitives.material);
+  }
+
   // FIXME: debug
   mesh._gltfMesh = gltfMesh;
 
@@ -133,8 +156,59 @@ function loadMesh(json, gltfMesh) {
   return mesh;
 }
 
-function loadJoints(json, joint) {
+function loadJoints(session, id) {
+  const { skinJointMats, json } = session;
+    
+  let jointMats = skinJointMats[id];
 
+  if (!jointMats) {
+    const inverseMatsBuffer = getBufferArray(json, json.accessors[json.skins[id].inverseBindMatrices]);
+    const _im = inverseMatsBuffer;
+    let mat2 = new Matrix4();
+    let lastMat = new Matrix4().loadIdentity();
+  
+    jointMats = [];
+    skinJointMats[id] = jointMats;
+
+    let i = 0;
+    const jointIndices = json.skins[id].joints;
+    for (let jointIndex of jointIndices) {
+      const joint = json.nodes[jointIndex];
+
+      let mat;
+
+      if (joint.rotation) {
+        mat = new Quaternion(joint.rotation[0], joint.rotation[1],
+          joint.rotation[2], joint.rotation[3]).toMatrix();
+      } else {
+        mat = new Matrix4().loadIdentity();
+      }
+      
+      // if (joint.translation) {
+      //   mat.translate(joint.translation[0], joint.translation[1], joint.translation[2]);
+      // }
+
+      mat2.a1 = _im[i + 0]; mat2.b1 = _im[i + 1]; mat2.c1 = _im[i + 2]; mat2.d1 = _im[i + 3];
+      mat2.a2 = _im[i + 4]; mat2.b2 = _im[i + 5]; mat2.c2 = _im[i + 6]; mat2.d2 = _im[i + 7];
+      mat2.a3 = _im[i + 8]; mat2.b3 = _im[i + 9]; mat2.c3 = _im[i + 10]; mat2.d3 = _im[i + 11];
+      mat2.a4 = _im[i + 12]; mat2.b4 = _im[i + 13]; mat2.c4 = _im[i + 14]; mat2.d4 = _im[i + 15];
+      //mat.transpose();
+      i += 16;
+      // mat = mat.mul(mat2);
+
+      // mat = mat.mul(lastMat);
+      // lastMat.copyFrom(mat);
+
+      console.assert(!isNaN(mat.a1) && !isNaN(mat.b1) && !isNaN(mat.c1) && !isNaN(mat.d1));
+      console.assert(!isNaN(mat.a2) && !isNaN(mat.b2) && !isNaN(mat.c2) && !isNaN(mat.d2));
+      console.assert(!isNaN(mat.a3) && !isNaN(mat.b3) && !isNaN(mat.c3) && !isNaN(mat.d3));
+      console.assert(!isNaN(mat.a4) && !isNaN(mat.b4) && !isNaN(mat.c4) && !isNaN(mat.d4));
+
+      jointMats.push(mat);
+    }
+  }
+
+  return jointMats;
 }
 
 function loadNode(session, node) {
@@ -146,7 +220,7 @@ function loadNode(session, node) {
 
   if (!isNaN(node.mesh)) {
     const gltfMesh = json.meshes[node.mesh];
-    const mesh = loadMesh(json, gltfMesh);
+    const mesh = loadMesh(session, gltfMesh);
     obj.meshes.push(mesh);
   }
 
@@ -169,69 +243,24 @@ function loadNode(session, node) {
   }
 
   if (!isNaN(node.skin)) {
-    const { skinJointMats } = session;
-    
-    let jointMats = skinJointMats[node.skin];
-    const inverseMatsBuffer = getBufferArray(json, json.accessors[json.skins[node.skin].inverseBindMatrices]);
-    const _im = inverseMatsBuffer;
-    let mat2 = new Matrix4();
-    let lastMat = new Matrix4().loadIdentity();
+    obj._jointMats = loadJoints(session, node.skin);
+  }
 
-    if (!jointMats) {
-      jointMats = [];
-      skinJointMats[node.skin] = jointMats;
-
-      let i = 0;
-      const jointIndices = json.skins[node.skin].joints;
-      for (let jointIndex of jointIndices) {
-        const joint = json.nodes[jointIndex];
-
-        let mat;
-
-        if (joint.rotation) {
-          mat = new Quaternion(joint.rotation[0], joint.rotation[1],
-            joint.rotation[2], joint.rotation[3]).toMatrix();
-        } else {
-          mat = new Matrix4().loadIdentity();
-        }
-        
-        if (joint.translation) {
-          mat.translate(joint.translation[0], joint.translation[1], joint.translation[2]);
-        }
-
-        mat2.a1 = _im[i + 0]; mat2.b1 = _im[i + 1]; mat2.c1 = _im[i + 2]; mat2.d1 = _im[i + 3];
-        mat2.a2 = _im[i + 4]; mat2.b2 = _im[i + 5]; mat2.c2 = _im[i + 6]; mat2.d2 = _im[i + 7];
-        mat2.a3 = _im[i + 8]; mat2.b3 = _im[i + 9]; mat2.c3 = _im[i + 10]; mat2.d3 = _im[i + 11];
-        mat2.a4 = _im[i + 12]; mat2.b4 = _im[i + 13]; mat2.c4 = _im[i + 14]; mat2.d4 = _im[i + 15];
-        //mat.transpose();
-        i += 16;
-        // mat = mat.mul(mat2);
-
-        mat = mat.mul(lastMat);
-        lastMat.copyFrom(mat);
-
-        console.assert(!isNaN(mat.a1) && !isNaN(mat.b1) && !isNaN(mat.c1) && !isNaN(mat.d1));
-        console.assert(!isNaN(mat.a2) && !isNaN(mat.b2) && !isNaN(mat.c2) && !isNaN(mat.d2));
-        console.assert(!isNaN(mat.a3) && !isNaN(mat.b3) && !isNaN(mat.c3) && !isNaN(mat.d3));
-        console.assert(!isNaN(mat.a4) && !isNaN(mat.b4) && !isNaN(mat.c4) && !isNaN(mat.d4));
-
-        jointMats.push(mat);
-      }
-      
-      obj._jointMats = jointMats;
-    }
+  if (obj.meshes[0] && obj.meshes[0].mat) {
+    obj.mat = obj.meshes[0].mat;
   }
 
   return obj;
 }
 
 
-
-
 Tarumae.GLTFLoader = {
   loadFromJSONObject(json) {
-    const session = { json };
-    session.skinJointMats = {};
+    const session = {
+      json,
+      skinJointMats: {},
+      loadedMats: {}
+    };
 
     const root = new Tarumae.SceneObject();
     root.mat = {};
