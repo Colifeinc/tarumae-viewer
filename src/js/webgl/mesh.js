@@ -98,7 +98,7 @@ Tarumae.Mesh = class {
 						if ((flags & Tarumae.Mesh.HeaderFlags.HasGrabBoundary) === Tarumae.Mesh.HeaderFlags.hasGrabBoundary) {
 							this.meta.hasGrabBoundary = true;
 		
-							var grabBoundaryBuffer = new Float32Array(stream, 96, 24);
+							const grabBoundaryBuffer = new Float32Array(stream, 96, 24);
 		
 							this._grabBoundary = {
 								min: new Vec3(grabBoundaryBuffer[0], grabBoundaryBuffer[1], grabBoundaryBuffer[2]),
@@ -128,14 +128,14 @@ Tarumae.Mesh = class {
 			}
 
 			if ((flags & Tarumae.Mesh.HeaderFlags.HasBoundingBox) === Tarumae.Mesh.HeaderFlags.HasBoundingBox) {
-				var boundingBoxBuffer = new Float32Array(stream, 32, 48);
+				const boundingBoxBuffer = new Float32Array(stream, 32, 48);
 
 				this._boundingBox = {
 					min: new Vec3(boundingBoxBuffer[0], boundingBoxBuffer[1], boundingBoxBuffer[2]),
 					max: new Vec3(boundingBoxBuffer[3], boundingBoxBuffer[4], boundingBoxBuffer[5]),
 				};
 
-				var size = this._boundingBox.max.sub(this._boundingBox.min);
+				const size = this._boundingBox.max.sub(this._boundingBox.min);
 				if (size.equals(Vec3.zero)) {
 					console.warn("bounding box loaded from mesh but is zero");
 				}
@@ -149,7 +149,7 @@ Tarumae.Mesh = class {
 				this.meta.hasColor = true;
 			}
 		
-			var headerLength = header[2];
+			const headerLength = header[2];
 
 			this.vertexBuffer = new Float32Array(stream, headerLength);
 

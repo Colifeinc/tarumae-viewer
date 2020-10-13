@@ -23,7 +23,7 @@ window.addEventListener("load", function() {
 		shadowQuality: {
 			scale: 2,
       viewDepth: 2,
-      resolution: 512,
+      resolution: 1024,
 		},
 		bloomEffect: {
 			enabled: true,
@@ -43,7 +43,7 @@ window.addEventListener("load", function() {
 		// { path: "models/simplebone.gltf" },
 		// { path: "models/cube.gltf" },
     // { path: "models/char1.gltf" },
-     { path: "models/char2.gltf" },
+    { path: "models/char2.gltf" },
 
     // { path: "models/whale.CYCLES.gltf" },
 		// { path: "models/woman.gltf" },
@@ -56,7 +56,7 @@ window.addEventListener("load", function() {
 			// color: [1.5, 1.5, 1.5],
 			// tex: "textures/bg-gray-gradient.jpg"
 		},
-    // angle: [0, 30, 0],
+    angle: [15, 20, 0],
 	};
 	scene.load(ground);
 
@@ -133,10 +133,12 @@ window.addEventListener("load", function() {
 				// nextObj.angle.y = -(1 - t) * 500 + 25;
 			});
 		}
-	}
+  }
+  
+  scene.sun.location.set(1, 1, 1);
 
 	scene.mainCamera.fieldOfView = 60;
-	scene.mainCamera.location.set(0, 0.7, 5.4);
+	scene.mainCamera.location.set(0, 0.7, 2.4);
 	scene.mainCamera.angle.set(0, 0, 0);
 	
 	// light sources

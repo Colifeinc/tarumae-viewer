@@ -54,6 +54,9 @@ function getBufferArray(json, accessor) {
   }
 
   switch (accessor.type) {
+    case 'VEC2':
+      return new Float32Array(buffer._data, (accessor.byteOffset ?? 0) + (bufferView.byteOffset ?? 0), accessor.count * 2);
+     
     case 'VEC3':
       return new Float32Array(buffer._data, (accessor.byteOffset ?? 0) + (bufferView.byteOffset ?? 0), accessor.count * 3);
      
@@ -67,6 +70,8 @@ function getBufferArray(json, accessor) {
     case 'SCALAR':
       switch (accessor.componentType) {
         default:
+          return new Uint8Array(buffer._data, (accessor.byteOffset ?? 0) + (bufferView.byteOffset ?? 0), accessor.count || bufferView.byteLength);
+        
         case 5123:
           return new Uint16Array(buffer._data, (accessor.byteOffset ?? 0) + (bufferView.byteOffset ?? 0), accessor.count);
         
@@ -90,7 +95,7 @@ function loadTexture(json, id) {
 }
 
 function loadMaterial(session, id) {
-  const { loadedMats } = session;
+  const { json, loadedMats } = session;
 
   let mat = loadedMats[id];
   if (mat) return mat;
@@ -98,9 +103,36 @@ function loadMaterial(session, id) {
   mat = new Tarumae.Material();
   session.loadedMats[id] = mat;
 
-  const matjson = session.json.materials[id];
+  const matjson = json.materials[id];
   if (matjson.pbrMetallicRoughness) {
+    const matrgh = matjson.pbrMetallicRoughness;
+
+    if (matrgh.baseColorTexture && !isNaN(matrgh.baseColorTexture.index)) {
+      const sourceEntry = json.textures[matrgh.baseColorTexture.index];
+      if (!isNaN(sourceEntry.source)) {
+        const imageEntry = json.images[sourceEntry.source];
+        const imgData = getBufferArray(json, imageEntry);
+        
+        const blob = new Blob([imgData], { type: "image/png" });
+
+        const tex = new Tarumae.Texture();
+        tex.isLoading = true;
+
+				const img = new Image();
+        img.src = URL.createObjectURL(blob);
+
+        img.onload = _ => {
+          tex.image = img;
+          tex.isLoading = false;
+          _scene.requireUpdateFrame();
+        };
+        
+        mat.tex = tex;
+      }
+    }
   }
+
+  return mat;
 }
 
 function loadMesh(session, gltfMesh) {
@@ -110,6 +142,7 @@ function loadMesh(session, gltfMesh) {
  
   const vertexBufferAccessor = json.accessors[meshPrimitives.attributes.POSITION];
   const normalBufferAccessor = json.accessors[meshPrimitives.attributes.NORMAL];
+  const texcoord0BufferAccessor = json.accessors[meshPrimitives.attributes.TEXCOORD_0];
   
   const jointBufferAccessor = json.accessors[meshPrimitives.attributes.JOINTS_0];
   const jointWeightsBufferAccessor = json.accessors[meshPrimitives.attributes.WEIGHTS_0];
@@ -134,6 +167,13 @@ function loadMesh(session, gltfMesh) {
     mesh.vertexBuffer = concatFloat32Array(mesh.vertexBuffer, getBufferArray(json, normalBufferAccessor));
   }
 
+  if (texcoord0BufferAccessor) {
+    mesh.meta.texcoordOffset = json.bufferViews[texcoord0BufferAccessor.bufferView].byteOffset;
+    mesh.meta.texcoordStride = json.bufferViews[texcoord0BufferAccessor.bufferView].byteStride ?? 0;
+    mesh.meta.texcoordCount = texcoord0BufferAccessor.count;
+    mesh.vertexBuffer = concatFloat32Array(mesh.vertexBuffer, getBufferArray(json, texcoord0BufferAccessor));
+  }
+
   if (jointBufferAccessor) {
     mesh.jointBuffer = getBufferArray(json, jointBufferAccessor);
     mesh.meta.jointStride = json.bufferViews[jointBufferAccessor.bufferView].byteStride ?? 0;
@@ -144,6 +184,7 @@ function loadMesh(session, gltfMesh) {
     mesh.meta.jointWeightsStride = json.bufferViews[jointWeightsBufferAccessor.bufferView].byteStride ?? 0;
   }
 
+  // material
   if (!isNaN(meshPrimitives.material)) {
     mesh.mat = loadMaterial(session, meshPrimitives.material);
   }
@@ -162,16 +203,16 @@ function loadJoints(session, id) {
   let jointMats = skinJointMats[id];
 
   if (!jointMats) {
+    jointMats = [];
+    skinJointMats[id] = jointMats;
+    
     const inverseMatsBuffer = getBufferArray(json, json.accessors[json.skins[id].inverseBindMatrices]);
     const _im = inverseMatsBuffer;
     let mat2 = new Matrix4();
     let lastMat = new Matrix4().loadIdentity();
-  
-    jointMats = [];
-    skinJointMats[id] = jointMats;
-
     let i = 0;
     const jointIndices = json.skins[id].joints;
+
     for (let jointIndex of jointIndices) {
       const joint = json.nodes[jointIndex];
 
@@ -184,19 +225,20 @@ function loadJoints(session, id) {
         mat = new Matrix4().loadIdentity();
       }
       
-      // if (joint.translation) {
-      //   mat.translate(joint.translation[0], joint.translation[1], joint.translation[2]);
-      // }
+      if (joint.translation) {
+        mat.translate(joint.translation[0], joint.translation[1], joint.translation[2]);
+      }
 
-      mat2.a1 = _im[i + 0]; mat2.b1 = _im[i + 1]; mat2.c1 = _im[i + 2]; mat2.d1 = _im[i + 3];
-      mat2.a2 = _im[i + 4]; mat2.b2 = _im[i + 5]; mat2.c2 = _im[i + 6]; mat2.d2 = _im[i + 7];
-      mat2.a3 = _im[i + 8]; mat2.b3 = _im[i + 9]; mat2.c3 = _im[i + 10]; mat2.d3 = _im[i + 11];
-      mat2.a4 = _im[i + 12]; mat2.b4 = _im[i + 13]; mat2.c4 = _im[i + 14]; mat2.d4 = _im[i + 15];
+      mat2.a1 = _im[i + 0]; mat2.b1 = _im[i + 1]; mat2.c1 = _im[i + 2]; mat2.d1 = _im[i + 12];
+      mat2.a2 = _im[i + 4]; mat2.b2 = _im[i + 5]; mat2.c2 = _im[i + 6]; mat2.d2 = _im[i + 13];
+      mat2.a3 = _im[i + 8]; mat2.b3 = _im[i + 9]; mat2.c3 = _im[i + 10]; mat2.d3 = _im[i + 14];
+      mat2.a4 = _im[i + 3]; mat2.b4 = _im[i + 7]; mat2.c4 = _im[i + 11]; mat2.d4 = _im[i + 15];
       //mat.transpose();
       i += 16;
       // mat = mat.mul(mat2);
 
       // mat = mat.mul(lastMat);
+      // // mat = lastMat.mul(mat);
       // lastMat.copyFrom(mat);
 
       console.assert(!isNaN(mat.a1) && !isNaN(mat.b1) && !isNaN(mat.c1) && !isNaN(mat.d1));
@@ -204,8 +246,17 @@ function loadJoints(session, id) {
       console.assert(!isNaN(mat.a3) && !isNaN(mat.b3) && !isNaN(mat.c3) && !isNaN(mat.d3));
       console.assert(!isNaN(mat.a4) && !isNaN(mat.b4) && !isNaN(mat.c4) && !isNaN(mat.d4));
 
-      jointMats.push(mat);
+      // jointMats.push(mat);
+      jointMats.push(new Matrix4().loadIdentity());
     }
+
+    let t = 0;
+    setInterval(() => {
+      jointMats[4].loadIdentity();
+      jointMats[4].rotateY(Math.sin(t) * 40);
+      t += 0.1;
+      _scene.requireUpdateFrame();
+    }, 10);
   }
 
   return jointMats;

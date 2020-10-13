@@ -348,22 +348,17 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
     
     // skin
     if (obj._jointMats) {
-      // for (let i = 0; i < obj._jointMats.length; i++) {
-      //   this.jointMatrixUniforms[i].set(obj._jointMats[i]);
-      // }
-      const matrix = new Matrix4().loadIdentity();
       for (let i = 0; i < obj._jointMats.length; i++) {
-        this.jointMatrixUniforms[i].set(matrix);
+        this.jointMatrixUniforms[i].set(obj._jointMats[i]);
       }
-      // // matrix.translate(0, 1, 0);
-      // this.jointMatrixUniforms[0].set(matrix);
-      // //matrix.translate(0, 1, 0);
-      // this.jointMatrixUniforms[1].set(matrix);
+      // const matrix = new Matrix4().loadIdentity();
+      // for (let i = 0; i < obj._jointMats.length; i++) {
+      //   this.jointMatrixUniforms[i].set(matrix);
+      // }
     }
     else {
-      const matrix = new Matrix4().loadIdentity();
-      this.jointMatrixUniforms[0].set(matrix);
-      this.jointMatrixUniforms[1].set(matrix);
+      this.jointMatrixUniforms[0].set(Matrix4.Identity);
+      this.jointMatrixUniforms[1].set(Matrix4.Identity);
     }
 	}
 
