@@ -43,7 +43,9 @@ void main(void) {
         a_weight.z * u_jointMat[int(a_joint.z)] +
         a_weight.w * u_jointMat[int(a_joint.w)];
 
-	vec4 transformPos = modelMatrix * skinMat * pos;
+  pos = skinMat * pos;
+  
+	vec4 transformPos = modelMatrix * pos;
 
 	gl_Position = projectViewMatrix * transformPos;
 

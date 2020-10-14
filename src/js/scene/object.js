@@ -921,3 +921,8 @@ Tarumae.PointLight = class extends Tarumae.SceneObject {
 		this.type = Tarumae.ObjectTypes.PointLight;
 	}
 };
+
+////////////////////////// Joint //////////////////////////
+
+Tarumae.JointObject = class extends Tarumae.SceneObject {
+};

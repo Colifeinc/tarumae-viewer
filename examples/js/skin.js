@@ -24,11 +24,12 @@ window.addEventListener("load", function() {
 			scale: 2,
       viewDepth: 2,
       resolution: 1024,
+      enableCache: false,
 		},
 		bloomEffect: {
 			enabled: true,
-			threshold: 0.1,
-			gamma: 1.8,
+			threshold: 0.2,
+			gamma: 1.4,
 		},
 		renderingImage: {
 			gamma: 1.2,
