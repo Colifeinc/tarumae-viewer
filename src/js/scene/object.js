@@ -925,4 +925,53 @@ Tarumae.PointLight = class extends Tarumae.SceneObject {
 ////////////////////////// Joint //////////////////////////
 
 Tarumae.JointObject = class extends Tarumae.SceneObject {
+  constructor() {
+    super();
+
+    this.jointMatrix = new Matrix4();
+  }
+
+  // updateTransform() {
+  //   super.updateTransform();
+
+  //   if (this.jointMatrix) {
+  //     this.updateJoint();
+  //   }
+  // }
+
+  updateJoint() {
+    let t = this.jointMatrix;
+
+    if (this._parent && this._parent.jointMatrix) {
+      t.copyFrom(this._parent.jointMatrix);
+    } else {
+      t.loadIdentity();
+    }
+
+    if (!this._location.equals(0, 0, 0)
+      || !this._angle.equals(0, 0, 0)
+      || !this._scale.equals(1, 1, 1)) {
+
+      // TODO: merge transform calc
+      t.translate(this._location._x, this._location._y, this._location._z);
+      
+      // NOTE!! Experimental quaternion support 
+      if (this._quaternion) {
+        const tr = this._quaternion.toMatrix();
+        t = t.mul(tr);
+      } else {
+        t.rotate(this._angle._x, this._angle._y, this._angle._z, this._angleOrder);
+      }
+
+      t.scale(this._scale._x, this._scale._y, this._scale._z);
+    }
+
+    for (const child of this.objects) {
+      child.updateJoint();
+    }
+  }
+
+  draw(g) {
+    g.drawPoint(this.worldLocation, 10, this.skin ? 'red' : 'silver');
+  }
 };

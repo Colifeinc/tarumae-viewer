@@ -52,7 +52,9 @@ Tarumae.GLTFLoader = class {
   constructor() {
   }
 
-  getBufferArray(json, accessor) {
+  getBufferArray(accessor) {
+    const { json } = this.session;
+
     const bufferView = json.bufferViews[accessor.bufferView];
 
     let buffer = bufferView._buffer;
@@ -103,7 +105,7 @@ Tarumae.GLTFLoader = class {
       return imageEntry._tex;
     }
   
-    const imgData = this.getBufferArray(json, imageEntry);
+    const imgData = this.getBufferArray(imageEntry);
         
     const blob = new Blob([imgData], { type: "image/png" });
 
@@ -161,8 +163,8 @@ Tarumae.GLTFLoader = class {
     const indicesBufferAccessor = json.accessors[meshPrimitives.indices];
 
     const mesh = new Tarumae.Mesh();
-    mesh.vertexBuffer = this.getBufferArray(json, vertexBufferAccessor);
-    mesh.indexBuffer = this.getBufferArray(json, indicesBufferAccessor);
+    mesh.vertexBuffer = this.getBufferArray(vertexBufferAccessor);
+    mesh.indexBuffer = this.getBufferArray(indicesBufferAccessor);
   
     mesh.indexed = true;
     mesh.meta = {
@@ -176,23 +178,23 @@ Tarumae.GLTFLoader = class {
       mesh.meta.normalOffset = json.bufferViews[normalBufferAccessor.bufferView].byteOffset;
       mesh.meta.normalStride = json.bufferViews[normalBufferAccessor.bufferView].byteStride ?? 0;
       mesh.meta.normalCount = normalBufferAccessor.count;
-      mesh.vertexBuffer = concatFloat32Array(mesh.vertexBuffer, this.getBufferArray(json, normalBufferAccessor));
+      mesh.vertexBuffer = concatFloat32Array(mesh.vertexBuffer, this.getBufferArray(normalBufferAccessor));
     }
 
     if (texcoord0BufferAccessor) {
       mesh.meta.texcoordOffset = json.bufferViews[texcoord0BufferAccessor.bufferView].byteOffset;
       mesh.meta.texcoordStride = json.bufferViews[texcoord0BufferAccessor.bufferView].byteStride ?? 0;
       mesh.meta.texcoordCount = texcoord0BufferAccessor.count;
-      mesh.vertexBuffer = concatFloat32Array(mesh.vertexBuffer, this.getBufferArray(json, texcoord0BufferAccessor));
+      mesh.vertexBuffer = concatFloat32Array(mesh.vertexBuffer, this.getBufferArray(texcoord0BufferAccessor));
     }
 
     if (jointBufferAccessor) {
-      mesh.jointBuffer = this.getBufferArray(json, jointBufferAccessor);
+      mesh.jointBuffer = this.getBufferArray(jointBufferAccessor);
       mesh.meta.jointStride = json.bufferViews[jointBufferAccessor.bufferView].byteStride ?? 0;
     }
 
     if (jointWeightsBufferAccessor) {
-      mesh.jointWeightsBuffer = this.getBufferArray(json, jointWeightsBufferAccessor);
+      mesh.jointWeightsBuffer = this.getBufferArray(jointWeightsBufferAccessor);
       mesh.meta.jointWeightsStride = json.bufferViews[jointWeightsBufferAccessor.bufferView].byteStride ?? 0;
     }
 
@@ -219,7 +221,7 @@ Tarumae.GLTFLoader = class {
   //     jointMats = [];
   //     skinJointMats[id] = jointMats;
     
-  //     const inverseMatsBuffer = this.getBufferArray(json, json.accessors[json.skins[id].inverseBindMatrices]);
+  //     const inverseMatsBuffer = this.getBufferArray(json.accessors[json.skins[id].inverseBindMatrices]);
   //     const _im = inverseMatsBuffer;
   //     let mat2 = new Matrix4();
   //     let lastMat = new Matrix4().loadIdentity();
@@ -282,7 +284,7 @@ Tarumae.GLTFLoader = class {
   }
 
   loadSkin(skin) {
-    // const { json } = this.session;
+    const { json } = this.session;
 
     // let skinInfo = this.session.loadedSkins[skinId];
     // if (skinInfo) return skinInfo;
@@ -290,7 +292,21 @@ Tarumae.GLTFLoader = class {
     const skinInfo = {
       joints: [],
       rootJoints: [],
+      inverseMatrices: [],
     };
+
+    const _im = this.getBufferArray(json.accessors[skin.inverseBindMatrices]);
+
+    for (let i = 0; i < _im.length; i += 16) {
+      const mat2 = new Matrix4();
+      mat2.a1 = _im[i + 0]; mat2.b1 = _im[i + 1]; mat2.c1 = _im[i + 2]; mat2.d1 = _im[i + 3];
+      mat2.a2 = _im[i + 4]; mat2.b2 = _im[i + 5]; mat2.c2 = _im[i + 6]; mat2.d2 = _im[i + 7];
+      mat2.a3 = _im[i + 8]; mat2.b3 = _im[i + 9]; mat2.c3 = _im[i + 10]; mat2.d3 = _im[i + 11];
+      mat2.a4 = _im[i + 12]; mat2.b4 = _im[i + 13]; mat2.c4 = _im[i + 14]; mat2.d4 = _im[i + 15];
+      skinInfo.inverseMatrices.push(mat2);
+    }
+
+    console.log(skinInfo.inverseMatrices);
     // this.session.loadedSkins[skinId] = skinInfo;
 
     if (Array.isArray(skin.joints)) {
@@ -349,7 +365,6 @@ Tarumae.GLTFLoader = class {
 
     if (objType === Tarumae.JointObject) {
       this.session.loadedJoints[nodeId] = obj;
-      console.log('create joint object');
     }
 
     if (!isNaN(node.mesh)) {
@@ -372,8 +387,11 @@ Tarumae.GLTFLoader = class {
     }
 
     if (node.rotation) {
-      obj._quaternion = new Quaternion(node.rotation[0], node.rotation[1],
+      // obj._quaternion = new Quaternion(node.rotation[0], node.rotation[1],
+      //   node.rotation[2], node.rotation[3]);
+      const q = new Quaternion(node.rotation[0], node.rotation[1],
         node.rotation[2], node.rotation[3]);
+      obj.angle.set(q.toMatrix().extractEulerAngles());
     }
 
     if (!isNaN(node.skin)) {
@@ -425,17 +443,18 @@ Tarumae.GLTFLoader = class {
 
     for (const { obj, skinId } of this.session.skinnedObjects) {
       obj.skin = this.session.loadedSkins[skinId];
-      // for (const rootJoint of obj.skin.rootJoints) {
-      //   rootJoint.updateTransform();
-      // }
-
-      let t = 0;
-      setInterval(() => {
-        obj.skin.joints[2].angle.z = Math.sin(t) * 40;
-        t += 0.1;
-        _scene.requireUpdateFrame();
-      }, 10);
+      
+      // let t = 0;
+      // setInterval(() => {
+      //   // obj.skin.joints[0].angle.z = Math.sin(t) * 50;
+      //   obj.skin.joints[1].angle.y = Math.sin(t) * 90;
+      //   // obj.skin.joints[2].updateTransform();
+      //   t += 0.01;
+      //   _scene.requireUpdateFrame();
+      // }, 10);
     }
+
+    // root.update();
 
     return root;
   }

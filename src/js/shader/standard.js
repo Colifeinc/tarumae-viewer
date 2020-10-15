@@ -348,17 +348,19 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
     
     // skin
     if (obj.skin) {
-      for (let i = 0; i < obj.skin.joints; i++) {
-        this.jointMatrixUniforms[i].set(obj.skin.joints[i].transform);
+      for (let i = 0; i < obj.skin.joints.length; i++) {
+        //  this.jointMatrixUniforms[i].set(obj.skin.joints[i]._transform);
+        // this.jointMatrixUniforms[i].set(obj.skin.inverseMatrices[i]);
+        
+        // this.jointMatrixUniforms[i].set(obj.skin.joints[i].jointMatrix);
+        this.jointMatrixUniforms[i].set(obj.skin.inverseMatrices[i].mul(
+          obj.skin.joints[i].jointMatrix));
       }
+      // console.log('set skin matrices');
       // const matrix = new Matrix4().loadIdentity();
-      // for (let i = 0; i < obj._jointMats.length; i++) {
+      // for (let i = 0; i < obj.skin.joints.length; i++) {
       //   this.jointMatrixUniforms[i].set(matrix);
       // }
-    }
-    else {
-      this.jointMatrixUniforms[0].set(Matrix4.Identity);
-      this.jointMatrixUniforms[1].set(Matrix4.Identity);
     }
 	}
 
@@ -431,7 +433,14 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
     this.normalMapUniform.unset();
 
 		gl.disable(gl.BLEND);
-		gl.enable(gl.DEPTH_TEST);
+    gl.enable(gl.DEPTH_TEST);
+
+    if (obj.skin) {
+      const matrix = new Matrix4().loadIdentity();
+      for (let i = 0; i < 200; i++) {
+        this.jointMatrixUniforms[i].set(matrix);
+      }
+    }
 	}
 
 };

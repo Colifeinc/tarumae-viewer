@@ -43,6 +43,7 @@ window.addEventListener("load", function() {
 	this.models = [
 		// { path: "models/simplebone.gltf" },
 		// { path: "models/cube.gltf" },
+		// { path: "models/cube2.gltf" },
     // { path: "models/char1.gltf" },
     { path: "models/char2.gltf" },
 
@@ -57,7 +58,7 @@ window.addEventListener("load", function() {
 			// color: [1.5, 1.5, 1.5],
 			// tex: "textures/bg-gray-gradient.jpg"
 		},
-    angle: [15, 20, 0],
+    // angle: [15, 20, 0],
 	};
 	scene.load(ground);
 
