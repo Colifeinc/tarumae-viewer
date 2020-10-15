@@ -931,13 +931,15 @@ Tarumae.JointObject = class extends Tarumae.SceneObject {
     this.jointMatrix = new Matrix4();
   }
 
-  // updateTransform() {
-  //   super.updateTransform();
+  updateTransform() {
+    
+    if (this.jointMatrix) {
+      this.updateJoint();
+    }
 
-  //   if (this.jointMatrix) {
-  //     this.updateJoint();
-  //   }
-  // }
+    super.updateTransform();
+
+  }
 
   updateJoint() {
     let t = this.jointMatrix;
@@ -948,30 +950,23 @@ Tarumae.JointObject = class extends Tarumae.SceneObject {
       t.loadIdentity();
     }
 
-    if (!this._location.equals(0, 0, 0)
-      || !this._angle.equals(0, 0, 0)
-      || !this._scale.equals(1, 1, 1)) {
-
-      // TODO: merge transform calc
-      t.translate(this._location._x, this._location._y, this._location._z);
+    // TODO: merge transform calc
+    t.translate(this._location._x, this._location._y, this._location._z);
       
-      // NOTE!! Experimental quaternion support 
-      if (this._quaternion) {
-        const tr = this._quaternion.toMatrix();
-        t = t.mul(tr);
-      } else {
-        t.rotate(this._angle._x, this._angle._y, this._angle._z, this._angleOrder);
-      }
-
-      t.scale(this._scale._x, this._scale._y, this._scale._z);
+    // NOTE!! Experimental quaternion support 
+    if (this._quaternion) {
+      const tr = this._quaternion.toMatrix();
+      t = tr.mul(t);
+    } else {
+      // FIXME: gltf from blender should use 'XZY' order to get correct result
+      t.rotate(this._angle._x, this._angle._y, this._angle._z, 'XZY');
     }
 
-    for (const child of this.objects) {
-      child.updateJoint();
-    }
+    t.scale(this._scale._x, this._scale._y, this._scale._z);
   }
 
   draw(g) {
-    g.drawPoint(this.worldLocation, 10, this.skin ? 'red' : 'silver');
+    // const p = this.location.mulMat(this.skin.inverseMatrices[i].mul this.jointMatrix);
+    // g.drawPoint(this.worldLocation, 10, this.skin ? 'red' : 'silver');
   }
 };

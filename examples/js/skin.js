@@ -48,7 +48,6 @@ window.addEventListener("load", function() {
     { path: "models/char2.gltf" },
 
     // { path: "models/whale.CYCLES.gltf" },
-		// { path: "models/woman.gltf" },
 	];
 
 	const ground = {

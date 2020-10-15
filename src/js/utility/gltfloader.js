@@ -303,11 +303,9 @@ Tarumae.GLTFLoader = class {
       mat2.a2 = _im[i + 4]; mat2.b2 = _im[i + 5]; mat2.c2 = _im[i + 6]; mat2.d2 = _im[i + 7];
       mat2.a3 = _im[i + 8]; mat2.b3 = _im[i + 9]; mat2.c3 = _im[i + 10]; mat2.d3 = _im[i + 11];
       mat2.a4 = _im[i + 12]; mat2.b4 = _im[i + 13]; mat2.c4 = _im[i + 14]; mat2.d4 = _im[i + 15];
+      // mat2.transpose();
       skinInfo.inverseMatrices.push(mat2);
     }
-
-    console.log(skinInfo.inverseMatrices);
-    // this.session.loadedSkins[skinId] = skinInfo;
 
     if (Array.isArray(skin.joints)) {
       for (const jointId of skin.joints) {
@@ -419,9 +417,50 @@ Tarumae.GLTFLoader = class {
     };
   }
 
-  load(json) {
+  loadFromUrl(url, callback) {
+    const pathSplit = url.lastIndexOf('/');
+    if (pathSplit >= 0) {
+      this.basePath = url.substr(0, pathSplit);
+    }
+
+    Tarumae.ResourceManager.download(url, Tarumae.ResourceTypes.JSON, json => {
+      this.load(json, obj => callback(obj));
+    });
+  }
+
+  load(json, callback) {
     this.reset();
     this.session.json = json;
+
+    if (json.buffers.some(_b => _b.uri && !_b.uri.startsWith('data:application/') )) {
+      const rm = new Tarumae.ResourceManager();
+
+      for (const buffer of json.buffers) {
+        if (buffer.uri.startsWith('data:application/')) {
+          continue;
+        }
+
+        let path;
+
+        if ((buffer.uri.indexOf('//') < 0 || !buffer.uri.startsWith('/'))
+          && this.basePath) {
+          path = this.basePath.concat('/').concat(buffer.uri);
+        } else {
+          path = buffer.uri;
+        }
+
+        rm.add(path, Tarumae.ResourceTypes.Binary, _data => {
+          buffer._data = _data
+        });
+      }
+
+      rm.load(_ => callback(this.loadJson(json)));
+    } else {
+      callback(this.loadJson(json));
+    }
+  }
+
+  loadJson(json) {
 
     const root = new Tarumae.SceneObject();
     root.mat = {};
@@ -458,4 +497,5 @@ Tarumae.GLTFLoader = class {
 
     return root;
   }
+    
 };

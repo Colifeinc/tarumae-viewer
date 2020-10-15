@@ -46,7 +46,7 @@ Tarumae.ResourceManager = class {
 	}
 
 	addSingleResource(url, type, onload, onprogress) {
-		var res = { "url": url, "type": type, "data": null, "sessionId": this.loadingSessionId };
+		var res = { url, type, "data": null, "sessionId": this.loadingSessionId };
 		var self = this;
 	
 		res.onload = function() {
@@ -93,8 +93,8 @@ Tarumae.ResourceManager = class {
 		this.onprogress(round((1 - p), 3));
 	}
 
-	preload(url,type,data) {
-		var res = { "url": url, "type": type, "data": data, "sessionId": this.loadingSessionId };
+	preload(url, type, data) {
+		var res = { url, type, data, sessionId: this.loadingSessionId };
 		this.resources[url] = res;
 	}
 

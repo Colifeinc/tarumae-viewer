@@ -158,10 +158,8 @@ Tarumae.Scene = class {
       rm.load();
       return loadingSession;
     } else if (url.endsWith(".gltf")) {
-      Tarumae.ResourceManager.download(url, Tarumae.ResourceTypes.JSON, json => {
-        const loader = new Tarumae.GLTFLoader();
-        callback(loader.load(json));
-      });
+      const loader = new Tarumae.GLTFLoader();
+      loader.loadFromUrl(url, obj => callback(obj));     
     }
   }
 	
