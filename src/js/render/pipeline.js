@@ -160,6 +160,14 @@ Tarumae.PipelineNodes.ImageToScreenRenderer = class extends Tarumae.PipelineNode
     this.options = options;
     this.screenPlaneMesh = new Tarumae.ScreenMesh();
     
+    if (this.options.width) {
+      this.width = this.options.width;
+    }
+
+    if (this.options.height) {
+      this.height = this.options.height;
+    }
+    
     if (options.flipTexcoordY !== false) {
       this.screenPlaneMesh.flipTexcoordY();
     }
@@ -207,8 +215,9 @@ Tarumae.PipelineNodes.ImageToScreenRenderer = class extends Tarumae.PipelineNode
       }
 
       this.renderer.setGLViewportSize(this.width, this.height);
-      //this.renderer.setViewportToPhysicalRenderSize();
-
+      // this.renderer.setGLViewportSize(this.renderer.renderLogicalSize.width,
+      //   this.renderer.renderLogicalSize.height);
+      
       imageShader.resolution[0] = this.width;
       imageShader.resolution[1] = this.height;
 
@@ -221,6 +230,10 @@ Tarumae.PipelineNodes.ImageToScreenRenderer = class extends Tarumae.PipelineNode
       this.screenPlaneMesh.draw(this.renderer);
       imageShader.endMesh();
       this.renderer.disuseCurrentShader();
+
+      // this.renderer.setViewportToPhysicalRenderSize();
+      // this.renderer.setGLViewportSize(this.renderer.renderLogicalSize.width,
+      //   this.renderer.renderLogicalSize.height);
     }
   }
 };

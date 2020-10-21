@@ -6,7 +6,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 import Tarumae from "../../src/js/tarumae.js";
-import { Color4 } from "@jingwood/graphics-math";
+import { Vec3, Color4 } from "@jingwood/graphics-math";
 
 window.addEventListener("load", function() {
 
@@ -18,9 +18,9 @@ window.addEventListener("load", function() {
 		enableLighting: true,
 		enablePostprocess: true,
 		enableAntialias: true,
-		enableEnvmap: true,
+		enableEnvmap: false,
 		enableShadow: true,
-		shadowQuality: {
+    shadowQuality: {
 			scale: 2,
       viewDepth: 2,
       resolution: 1024,
@@ -32,24 +32,14 @@ window.addEventListener("load", function() {
 			gamma: 1.4,
 		},
 		renderingImage: {
-			gamma: 1.2,
-			resolutionRatio: 1,
+			gamma: 1.4,
+			resolutionRatio: window.devicePixelRatio,
 		},
 	});
 
 	const scene = renderer.createScene();
 	window._scene = scene;
  
-	this.models = [
-		// { path: "models/simplebone.gltf" },
-		// { path: "models/cube.gltf" },
-		// { path: "models/cube2.gltf" },
-    // { path: "models/char1.gltf" },
-    { path: "models/char2.gltf" },
-
-    // { path: "models/whale.CYCLES.gltf" },
-	];
-
 	const ground = {
 		mesh: new Tarumae.Shapes.PlaneMesh(3, 3),
 		mat: {
@@ -57,109 +47,113 @@ window.addEventListener("load", function() {
 			// color: [1.5, 1.5, 1.5],
 			// tex: "textures/bg-gray-gradient.jpg"
 		},
-    // angle: [15, 20, 0],
+    angle: [15, 20, 0],
 	};
 	scene.load(ground);
 
-	scene.onkeydown = function(key) {
-		if (key >= Tarumae.Viewer.Keys.D1
-			&& key <= Tarumae.Viewer.Keys.D9) {
-			switchTo(key - Tarumae.Viewer.Keys.D1);
-		}
-	};
-
-	let firstObject = true;
 	this.currentIndex = -1;
 
-	for (const [i, mod] of models.entries()) {
-		
-		scene.createObjectFromURL(mod.path, obj => {
-			mod.obj = obj;
+  let obj1, obj2, obj3, obj4, jointsBackup = [];
+  let spine, hips, chest;
+
+  scene.createObjectFromURL('models/char3.gltf', obj => {
+    obj1 = obj;
+    ground.add(obj);
+    window.obj1 = obj1;
+    chest = obj1.findObjectByName('chest');
+    spine = obj1.findObjectByName('spine');
+    hips = obj1.findObjectByName('hips');
+    
+    const joint1 = obj1.objects[0].objects[0].skin.joints;
+    for (let i = 0; i < joint1.length; i++) {
+      jointsBackup.push({
+        angle: joint1[i].angle.clone(),
+        location: joint1[i].location.clone(),
+      });
+    }
+  });
+
+  scene.createObjectFromURL('models/char4.gltf', obj => {
+    obj2 = obj;
+  });
+
+  scene.createObjectFromURL('models/char5.gltf', obj => {
+    obj3 = obj;
+  });
+
+  scene.createObjectFromURL('models/char2.gltf', obj => {
+    obj4 = obj;
+  });
+
+  let weight1 = 0, weight2 = 0, weight3 = 0, r1 = 0;
+  window.changeP1 = function (v) {
+    weight1 = v;
+    updateJoints();
+  };
+  window.changeP2 = function (v) {
+    weight2 = v;
+    updateJoints();
+  };
+  window.changeP3 = function (v) {
+    weight3 = v;
+    updateJoints();
+  };
+  window.changeR1 = function (v) {
+    r1 = v;
+    updateJoints();
+  };
+
+  function updateJoints() {
+    const joint1 = obj1.objects[0].objects[0].skin.joints;
+    const joint2 = obj2.objects[0].objects[0].skin.joints;
+    const joint3 = obj3.objects[0].objects[0].skin.joints;
+    const joint4 = obj4.objects[0].objects[0].skin.joints;
+
+    for (let i = 0; i < joint1.length; i++) {
+      joint1[i].angle.set(Vec3.add(jointsBackup[i].angle,
+        Vec3.add(
+          Vec3.add(
+            Vec3.mul(Vec3.sub(joint2[i].angle, jointsBackup[i].angle), weight1),
+            Vec3.mul(Vec3.sub(joint3[i].angle, jointsBackup[i].angle), weight2)),
+            Vec3.mul(Vec3.sub(joint4[i].angle, jointsBackup[i].angle), weight3)
+        )));
       
-      obj.scale.set(0, 0, 0);
-      obj.opacity = 0;
+      // joint1[i].angle.set(
+      //   Vec3.add(
+      //     Vec3.lerp(jointsBackup[i].angle, joint3[i].angle, weight2),  
+      //     Vec3.lerp(jointsBackup[i].angle, joint4[i].angle, weight3))); 
       
-			obj.eachChild(child => {
-				if (child.mat) {
-					if (child.mat.glossy > 0) {
-						child.mat.roughness = 1 - child.mat.glossy;
-					}
-				}
-			});
+      joint1[i].location.set(Vec3.add(jointsBackup[i].location,
+        Vec3.add(
+          Vec3.add(
+            Vec3.mul(Vec3.sub(joint2[i].location, jointsBackup[i].location), weight1),
+            Vec3.mul(Vec3.sub(joint3[i].location, jointsBackup[i].location), weight2)),
+            Vec3.mul(Vec3.sub(joint4[i].location, jointsBackup[i].location), weight3)
+        )));
+      
+      chest.angle.y = r1;
+      spine.angle.y = r1 * 0.5;
+      hips.angle.y = r1 * 0.2;
+    }
 
-			ground.add(obj);
-
-			if (firstObject) {
-				switchTo(i);
-				firstObject = false;
-			}
-		});
-	}
-
-	function switchTo(idx) {
-		if (idx === window.currentIndex) return;
-		
-		if (window.currentIndex !== -1) {
-			const mod = window.models[currentIndex];
-			if (mod) {
-				const prevObj = window.models[currentIndex].obj;
-				scene.animate({duration: 0.3}, t => {
-					prevObj.scale.set(1 - t, 1 - t, 1 - t);
-					prevObj.opacity = 1 - t;
-				}, _ => prevObj.visible = false);
-			}
-		}
-
-		currentIndex = idx;
-
-		const mod = models[currentIndex];
-		if (mod && mod.obj) {
-			const nextObj = mod.obj;
-			if (mod.color) {
-				if (!nextObj.mat) nextObj.mat = {}
-				nextObj.mat.color = mod.color;
-			}
-			if (mod.scale) {
-				nextObj.scale.set(mod.scale[0], mod.scale[1], mod.scale[2]);
-			}
-			window.obj = nextObj;
-			if (window.refmap) window.setObjectRefmap(window.obj);
-				
-			nextObj.visible = true;
-			scene.animate({ effect: "fadein", duration: 0.3 }, t => {
-				nextObj.scale.set(t, t, t);
-				nextObj.opacity = t;
-			});
-			scene.animate({ effect: "fadeout" }, t => {
-				// nextObj.angle.y = -(1 - t) * 500 + 25;
-			});
-		}
+    scene.requireUpdateFrame();
   }
   
   scene.sun.location.set(1, 1, 1);
+  scene.sun.mat = { color: [1.2, 1.2, 1.2] };
 
 	scene.mainCamera.fieldOfView = 60;
-	scene.mainCamera.location.set(0, 0.7, 2.4);
+	scene.mainCamera.location.set(0, 0.5, 1.5);
 	scene.mainCamera.angle.set(0, 0, 0);
 	
 	// light sources
 
 	const lights = new Tarumae.SceneObject();
 
-	// const light1 = new Tarumae.PointLight();
-	// light1.location.set(-3, 4, 2);
-	// light1.mat.emission = 2;
-	// lights.add(light1);
-		
 	const light2 = new Tarumae.PointLight();
 	light2.location.set(5, 7, 10);
-	light2.mat.emission = 20;
+	light2.mat.emission = 100;
 	lights.add(light2);
-
-	// const light3 = new Tarumae.PointLight();
-	// light3.location.set(2, 4, -5);
-	// light3.mat.emission = 1;
-	// lights.add(light3);
 
 	const light4 = new Tarumae.PointLight();
 	light4.location.set(-3, -6, 4);
@@ -176,28 +170,6 @@ window.addEventListener("load", function() {
 	});
 	objController.object = ground;
 
-	// const cubebox = new Tarumae.ImageCubeBox(renderer, [
-	// 	"textures/cubemap/office-256/px.jpg",
-	// 	"textures/cubemap/office-256/nx.jpg",
-	// 	"textures/cubemap/office-256/py.jpg",
-	// 	"textures/cubemap/office-256/ny.jpg",
-	// 	"textures/cubemap/office-256/pz.jpg",
-	// 	"textures/cubemap/office-256/nz.jpg",
-	// ]);
-		
-	// window.setObjectRefmap = (obj) => {
-	// 	obj.eachChild(c => {
-	// 		if (c.meshes.length > 0) c.meshes[0]._refmap = window.refmap;
-	// 	});
-	// };
-
-	// cubebox.on('load', _ => {
-	// 	window.refmap = cubebox.cubemap;
-	// 	if (window.obj) {
-	// 		window.setObjectRefmap(window.obj);
-	// 		ground.meshes[0]._refmap = window.refmap;
-	// 	}
-	// });
 
 	scene.show();
 });
