@@ -347,7 +347,13 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
     }
     
     // skin
+    this.maxJointCount = 2;
+
     if (obj.skin) {
+      if (this.maxJointCount < obj.skin.joints.length) {
+        this.maxJointCount = obj.skin.joints.length;
+      }
+
       if (obj.skin.inverseMatrices.length > 0) {
         for (let i = 0; i < obj.skin.joints.length; i++) {
           //  this.jointMatrixUniforms[i].set(obj.skin.joints[i]._transform);
@@ -363,10 +369,11 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
         }
       }
       // console.log('set skin matrices');
-      // const matrix = new Matrix4().loadIdentity();
-      // for (let i = 0; i < obj.skin.joints.length; i++) {
-      //   this.jointMatrixUniforms[i].set(matrix);
-      // }
+     
+    } else {
+      for (let i = 0; i < this.maxJointCount; i++) {
+        this.jointMatrixUniforms[i].set(Matrix4.IdentityArray);
+      }
     }
 	}
 
