@@ -15,10 +15,6 @@ window.addEventListener("load", function() {
     backColor: new Color4(0.96, .98, 1, 1),
 		
     enablePostprocess: true,
-    renderingImage: {
-      gamma: 1.2,
-      resolutionRatio: 1,
-    },
     enableAntialias: true,
     enableShadow: true,
     shadowQuality: {
@@ -31,6 +27,10 @@ window.addEventListener("load", function() {
     bloomEffect: {
       threshold: 0.3,
       gamma: 1.4,
+    },
+    renderingImage: {
+      gamma: 1.2,
+      resolutionRatio: 1,
     },
   });
 

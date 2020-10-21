@@ -8,10 +8,29 @@
   <meta property="og:url" content="https://tarumae.tech" />
   <meta property="og:image" content="img/examples/skin.png" />
 	<link href="css/demo-fullsize.css" rel="stylesheet" type="text/css" />
-	<script src="js/skin.js"></script>
+  <script src="js/skin.js"></script>
+  <style type="text/css">
+    .panel{
+      position:absolute;
+      left: 3em;
+      top: 3em;
+      background-color: rgba(100, 100, 100, .5);
+      padding: 1em;
+      color: white;
+    }
+  </style>
 </head>
 <body>
 	<div id="canvas-container">
-	</div>
+  </div>
+  <div class="panel">
+    <p>
+      ぐう <input name="p1" type="range" min="0" max="1" step="0.01" value="0.5" oninput="changeP1(this.value)" >
+    </p>
+    <p>
+      ちょき <input name="p2" type="range" min="0" max="1" step="0.01" value="0.5" oninput="changeP2(this.value)" >
+    </p>
+    
+  </div>
 </body>
 </html>

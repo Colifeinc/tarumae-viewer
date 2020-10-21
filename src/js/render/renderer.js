@@ -435,17 +435,20 @@ Tarumae.Renderer = class {
 	createPipeline() {
 		this.pipelineNodes = [];
 
-		if (this.options.backgroundImage) {
-			this.createTextureFromURL(this.options.backgroundImage, tex => {
-				const bgImageSource = new Tarumae.PipelineNodes.ImageSource(this, tex);
-				this._bgImageRenderer = new Tarumae.PipelineNodes.ImageToScreenRenderer(this, {
-					flipTexcoordY: true
-				});
-				this._bgImageRenderer.enableAntialias = false;
-				this._bgImageRenderer.input = bgImageSource;
-				if (this.currentScene) this.currentScene.requireUpdateFrame();
-			});
-		}
+    const renderImageWidth = this.renderPhysicalSize.width * (this.options.renderingImage.resolutionRatio || 1.0),
+      renderImageHeight = this.renderPhysicalSize.height * (this.options.renderingImage.resolutionRatio || 1.0);
+    
+    if (this.options.backgroundImage) {
+      this.createTextureFromURL(this.options.backgroundImage, tex => {
+        const bgImageSource = new Tarumae.PipelineNodes.ImageSource(this, tex);
+        this._bgImageRenderer = new Tarumae.PipelineNodes.ImageToScreenRenderer(this, {
+          flipTexcoordY: true
+        });
+        this._bgImageRenderer.enableAntialias = false;
+        this._bgImageRenderer.input = bgImageSource;
+        if (this.currentScene) this.currentScene.requireUpdateFrame();
+      });
+    }
 		
 		if (this.options.enablePostprocess || this.options.enableShadow) {
       const width = this.renderPhysicalSize.width, height = this.renderPhysicalSize.height;
@@ -473,8 +476,8 @@ Tarumae.Renderer = class {
       // scene to image
 
 			const sceneImageRenderer = new Tarumae.PipelineNodes.SceneToImageRenderer(this, {
-				width: this.renderPhysicalSize.width * (this.options.renderingImage.resolutionRatio || 1.0),
-				height: this.renderPhysicalSize.height * (this.options.renderingImage.resolutionRatio || 1.0)
+				width: renderImageWidth,
+				height: renderImageHeight,
 			});
 			sceneImageRenderer.shadowMap2DInput = shadowMapCacheNode;
 
@@ -529,8 +532,8 @@ Tarumae.Renderer = class {
         ssaoBlurNode.input = ssaoImageRenderer;
 
         ssaoEffectRenderer = new Tarumae.PipelineNodes.ImageFilterRenderer(this, {
-          width: this.renderPhysicalSize.width * (this.options.renderingImage.resolutionRatio || 1.0),
-          height: this.renderPhysicalSize.height * (this.options.renderingImage.resolutionRatio || 1.0),
+          width: renderImageWidth,
+          height: finalRenderImageHeightfinalRenderImageHeight,
           filter: "linear-interp",
           tex2Filter: "darker",
           tex2Intensity: this.options.ssao.intensity || 0.2,
@@ -549,8 +552,8 @@ Tarumae.Renderer = class {
       if (pipelinePreview) {
         
 				const finalImagePreviewRenderer = new Tarumae.PipelineNodes.ImageFilterRenderer(this, {
-					width: this.renderPhysicalSize.width * (this.options.renderingImage.resolutionRatio || 1.0),
-          height: this.renderPhysicalSize.height * (this.options.renderingImage.resolutionRatio || 1.0),
+					width: renderImageWidth,
+          height: finalRenderImageHeightfinalRenderImageHeight,
           filter: "linear-interp",
           tex2Filter: "lighter",
 				});
@@ -574,8 +577,8 @@ Tarumae.Renderer = class {
       
       
   			const finalScreenRenderer = new Tarumae.PipelineNodes.ImageToScreenRenderer(this, {
-					width: this.renderPhysicalSize.width * (this.options.renderingImage.resolutionRatio || 1.0),
-					height: this.renderPhysicalSize.height * (this.options.renderingImage.resolutionRatio || 1.0),
+					width: this.renderPhysicalSize.width,
+					height: this.renderPhysicalSize.height,
           filter: "linear-interp",
           tex2Filter: "lighter",
         });
