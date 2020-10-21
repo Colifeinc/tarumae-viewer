@@ -42,7 +42,7 @@ window.addEventListener("load", function() {
   const setObjectRefmap = (obj) => {
     obj.eachChild(c => {
       if (c.meshes.length > 0) c.meshes[0]._refmap = refCubebox.cubemap;
-      if (c.mat && !c.mat.glossy) {
+      if (typeof c.mat === 'object' && !c.mat.glossy) {
         c.mat.glossy = 0.1;
       }
     });
@@ -95,19 +95,19 @@ window.addEventListener("load", function() {
   scene.skybox.mat = { color: [1.7, 1.6, 1.5] };
   scene.skybox.visible = false;
 
-  // baseurl = "textures/cubemap/office-256-blur/"
-  // const refBoxUrls = [
-  //   baseurl + "px.jpg", baseurl + "nx.jpg", baseurl + "py.jpg",
-  //   baseurl + "ny.jpg", baseurl + "pz.jpg", baseurl + "nz.jpg",
-  // ];
+  baseurl = "textures/cubemap/office-256-blur/"
+  const refBoxUrls = [
+    baseurl + "px.jpg", baseurl + "nx.jpg", baseurl + "py.jpg",
+    baseurl + "ny.jpg", baseurl + "pz.jpg", baseurl + "nz.jpg",
+  ];
 	
-  // refCubebox = new Tarumae.ImageCubeBox(renderer, refBoxUrls);
+  refCubebox = new Tarumae.ImageCubeBox(renderer, refBoxUrls);
 
-  // refCubebox.on('load', _ => {
-  // 	if (rootObj) {
-  // 		setObjectRefmap(rootObj);
-  // 	}
-  // });
+  refCubebox.on('load', _ => {
+  	if (rootObj) {
+  		setObjectRefmap(rootObj);
+  	}
+  });
 
   const floorViewController = new Tarumae.FloorViewController(scene);
   
