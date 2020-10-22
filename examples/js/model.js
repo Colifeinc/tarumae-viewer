@@ -21,16 +21,16 @@ window.addEventListener("load", function() {
 		enableShadow: true,
 		shadowQuality: {
 			scale: 2,
-      viewDepth: 2,
-      resolution: 2048,
+      viewDepth: 1.5,
+      resolution: 512,
 		},
 		bloomEffect: {
 			enabled: true,
 			threshold: 0.1,
-			gamma: 1.8,
+			gamma: 1.4,
 		},
 		renderingImage: {
-			gamma: 1.2,
+			gamma: 1.4,
 			resolutionRatio: 1,
 		},
 	});

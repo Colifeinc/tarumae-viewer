@@ -34,7 +34,7 @@ window.addEventListener("load", function () {
     },
     renderingImage: {
       gamma: 1.4,
-      resolutionRatio: window.devicePixelRatio,
+      resolutionRatio: 1,
     },
   });
 

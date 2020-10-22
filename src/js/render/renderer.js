@@ -533,7 +533,7 @@ Tarumae.Renderer = class {
 
         ssaoEffectRenderer = new Tarumae.PipelineNodes.ImageFilterRenderer(this, {
           width: renderImageWidth,
-          height: finalRenderImageHeightfinalRenderImageHeight,
+          height: renderImageHeight,
           filter: "linear-interp",
           tex2Filter: "darker",
           tex2Intensity: this.options.ssao.intensity || 0.2,
@@ -553,7 +553,7 @@ Tarumae.Renderer = class {
         
 				const finalImagePreviewRenderer = new Tarumae.PipelineNodes.ImageFilterRenderer(this, {
 					width: renderImageWidth,
-          height: finalRenderImageHeightfinalRenderImageHeight,
+          height: renderImageHeight,
           filter: "linear-interp",
           tex2Filter: "lighter",
 				});
@@ -565,10 +565,10 @@ Tarumae.Renderer = class {
 				const previewRenderer = new Tarumae.PipelineNodes.MultipleImagePreviewRenderer(this);
 				previewRenderer.addPreview(sceneImageRenderer);
 				// previewRenderer.addPreview(imgRendererBlur);
-				// previewRenderer.addPreview(bluredShadowMapNode);
-				// previewRenderer.addPreview(bloomBlurNode);
-				previewRenderer.addPreview(ssaoBlurNode);
-				previewRenderer.addPreview(ssaoEffectRenderer);
+				previewRenderer.addPreview(shadowMapCacheNode);
+				previewRenderer.addPreview(bloomBlurNode);
+				// previewRenderer.addPreview(ssaoBlurNode);
+				// previewRenderer.addPreview(ssaoEffectRenderer);
 				previewRenderer.addPreview(finalImagePreviewRenderer);
 				previewRenderer.enableAntialias = true;
 				this.pipelineNodes.push(previewRenderer);
