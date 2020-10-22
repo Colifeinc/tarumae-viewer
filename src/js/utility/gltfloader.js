@@ -52,14 +52,20 @@ Tarumae.GLTFLoader = class {
   constructor() {
   }
 
-  getBufferArray(accessor) {
+  getBufferArray(accessor) {    
     const { json } = this.session;
+
+    if (!Array.isArray(json.buffers)) return;
 
     const bufferView = json.bufferViews[accessor.bufferView];
 
     let buffer = bufferView._buffer;
 
     if (!buffer) {
+      if (bufferView.buffer < 0 || bufferView.buffer >= json.buffers.length) {
+        return;
+      }
+
       buffer = json.buffers[bufferView.buffer];
       bufferView._buffer = buffer;
     }
@@ -139,9 +145,13 @@ Tarumae.GLTFLoader = class {
       const matrgh = matjson.pbrMetallicRoughness;
 
       if (matrgh.baseColorTexture && !isNaN(matrgh.baseColorTexture.index)) {
-        const sourceEntry = json.textures[matrgh.baseColorTexture.index];
-        if (!isNaN(sourceEntry.source)) {
-          mat.tex = this.loadTexture(sourceEntry.source);
+        if (Array.isArray(json.textures)
+          && matrgh.baseColorTexture.index >= 0
+          && matrgh.baseColorTexture.index < json.textures.length) {
+          const sourceEntry = json.textures[matrgh.baseColorTexture.index];
+          if (!isNaN(sourceEntry.source)) {
+            mat.tex = this.loadTexture(sourceEntry.source);
+          }
         }
       }
     }
@@ -151,6 +161,10 @@ Tarumae.GLTFLoader = class {
 
   loadMesh(gltfMesh) {
     const { json } = this.session;
+
+    if (!Array.isArray(json.accessors)) {
+      return;
+    }
 
     const meshPrimitives = gltfMesh.primitives[0];
  
@@ -178,14 +192,28 @@ Tarumae.GLTFLoader = class {
       mesh.meta.normalOffset = json.bufferViews[normalBufferAccessor.bufferView].byteOffset;
       mesh.meta.normalStride = json.bufferViews[normalBufferAccessor.bufferView].byteStride ?? 0;
       mesh.meta.normalCount = normalBufferAccessor.count;
-      mesh.vertexBuffer = concatFloat32Array(mesh.vertexBuffer, this.getBufferArray(normalBufferAccessor));
+
+      if (mesh.vertexBuffer) {
+        mesh.vertexBuffer = concatFloat32Array(mesh.vertexBuffer, this.getBufferArray(normalBufferAccessor));
+      } else {
+        mesh.vertexBuffer = normalBufferAccessor;
+      }
     }
 
     if (texcoord0BufferAccessor) {
-      mesh.meta.texcoordOffset = json.bufferViews[texcoord0BufferAccessor.bufferView].byteOffset;
-      mesh.meta.texcoordStride = json.bufferViews[texcoord0BufferAccessor.bufferView].byteStride ?? 0;
-      mesh.meta.texcoordCount = texcoord0BufferAccessor.count;
-      mesh.vertexBuffer = concatFloat32Array(mesh.vertexBuffer, this.getBufferArray(texcoord0BufferAccessor));
+      const _tex0Buffer = this.getBufferArray(texcoord0BufferAccessor);
+
+      if (_tex0Buffer) {
+        mesh.meta.texcoordOffset = json.bufferViews[texcoord0BufferAccessor.bufferView].byteOffset;
+        mesh.meta.texcoordStride = json.bufferViews[texcoord0BufferAccessor.bufferView].byteStride ?? 0;
+        mesh.meta.texcoordCount = texcoord0BufferAccessor.count;
+
+        if (mesh.vertexBuffer) {
+          mesh.vertexBuffer = concatFloat32Array(mesh.vertexBuffer, _tex0Buffer);
+        } else {
+          mesh.vertexBuffer = texcoord0BufferAccessor;
+        }
+      }
     }
 
     if (jointBufferAccessor) {
@@ -206,81 +234,11 @@ Tarumae.GLTFLoader = class {
     // FIXME: debug
     mesh._gltfMesh = gltfMesh;
 
-    console.assert(mesh.vertexBuffer.length > 0);
+    if (!mesh.vertexBuffer || mesh.vertexBuffer.length <= 0) {
+      console.warn("mesh loaded from gltf doesn't contain vertex buffer");
+    }
 
     return mesh;
-  }
-
-  // loadJoints(session, id) {
-
-  //   const { skinJointMats, json } = this.session;
-    
-  //   let jointMats = skinJointMats[id];
-
-  //   if (!jointMats) {
-  //     jointMats = [];
-  //     skinJointMats[id] = jointMats;
-    
-  //     const inverseMatsBuffer = this.getBufferArray(json.accessors[json.skins[id].inverseBindMatrices]);
-  //     const _im = inverseMatsBuffer;
-  //     let mat2 = new Matrix4();
-  //     let lastMat = new Matrix4().loadIdentity();
-  //     let i = 0;
-  //     const jointIndices = json.skins[id].joints;
-
-  //     for (let jointIndex of jointIndices) {
-  //       const joint = json.nodes[jointIndex];
-
-  //       let mat;
-
-  //       if (joint.rotation) {
-  //         mat = new Quaternion(joint.rotation[0], joint.rotation[1],
-  //           joint.rotation[2], joint.rotation[3]).toMatrix();
-  //       } else {
-  //         mat = new Matrix4().loadIdentity();
-  //       }
-      
-  //       if (joint.translation) {
-  //         mat.translate(joint.translation[0], joint.translation[1], joint.translation[2]);
-  //       }
-
-  //       mat2.a1 = _im[i + 0]; mat2.b1 = _im[i + 1]; mat2.c1 = _im[i + 2]; mat2.d1 = _im[i + 12];
-  //       mat2.a2 = _im[i + 4]; mat2.b2 = _im[i + 5]; mat2.c2 = _im[i + 6]; mat2.d2 = _im[i + 13];
-  //       mat2.a3 = _im[i + 8]; mat2.b3 = _im[i + 9]; mat2.c3 = _im[i + 10]; mat2.d3 = _im[i + 14];
-  //       mat2.a4 = _im[i + 3]; mat2.b4 = _im[i + 7]; mat2.c4 = _im[i + 11]; mat2.d4 = _im[i + 15];
-  //       //mat.transpose();
-  //       i += 16;
-  //       // mat = mat.mul(mat2);
-
-  //       // mat = mat.mul(lastMat);
-  //       // // mat = lastMat.mul(mat);
-  //       // lastMat.copyFrom(mat);
-
-  //       console.assert(!isNaN(mat.a1) && !isNaN(mat.b1) && !isNaN(mat.c1) && !isNaN(mat.d1));
-  //       console.assert(!isNaN(mat.a2) && !isNaN(mat.b2) && !isNaN(mat.c2) && !isNaN(mat.d2));
-  //       console.assert(!isNaN(mat.a3) && !isNaN(mat.b3) && !isNaN(mat.c3) && !isNaN(mat.d3));
-  //       console.assert(!isNaN(mat.a4) && !isNaN(mat.b4) && !isNaN(mat.c4) && !isNaN(mat.d4));
-
-  //       // jointMats.push(mat);
-  //       jointMats.push(new Matrix4().loadIdentity());
-  //     }
-
-  //     let t = 0;
-  //     setInterval(() => {
-  //       jointMats[1].loadIdentity();
-  //       jointMats[1].rotateZ(Math.sin(t) * 40);
-  //       t += 0.1;
-  //       _scene.requireUpdateFrame();
-  //     }, 10);
-  //   }
-
-  //   return jointMats;
-  // }
-
-  loadJoint(jointId) {
-  }
-
-  findJointRoot(jointObj) {
   }
 
   loadSkin(skin) {
@@ -294,17 +252,20 @@ Tarumae.GLTFLoader = class {
       rootJoints: [],
       inverseMatrices: [],
     };
-
-    const _im = this.getBufferArray(json.accessors[skin.inverseBindMatrices]);
-
-    for (let i = 0; i < _im.length; i += 16) {
-      const mat2 = new Matrix4();
-      mat2.a1 = _im[i + 0]; mat2.b1 = _im[i + 1]; mat2.c1 = _im[i + 2]; mat2.d1 = _im[i + 3];
-      mat2.a2 = _im[i + 4]; mat2.b2 = _im[i + 5]; mat2.c2 = _im[i + 6]; mat2.d2 = _im[i + 7];
-      mat2.a3 = _im[i + 8]; mat2.b3 = _im[i + 9]; mat2.c3 = _im[i + 10]; mat2.d3 = _im[i + 11];
-      mat2.a4 = _im[i + 12]; mat2.b4 = _im[i + 13]; mat2.c4 = _im[i + 14]; mat2.d4 = _im[i + 15];
-      // mat2.transpose();
-      skinInfo.inverseMatrices.push(mat2);
+    
+    if (Array.isArray(json.accessors)
+      && skin.inverseBindMatrices >= 0 && skin.inverseBindMatrices < json.accessors.length) {
+      const _im = this.getBufferArray(json.accessors[skin.inverseBindMatrices]);
+  
+      for (let i = 0; i < _im.length; i += 16) {
+        const mat2 = new Matrix4();
+        mat2.a1 = _im[i + 0]; mat2.b1 = _im[i + 1]; mat2.c1 = _im[i + 2]; mat2.d1 = _im[i + 3];
+        mat2.a2 = _im[i + 4]; mat2.b2 = _im[i + 5]; mat2.c2 = _im[i + 6]; mat2.d2 = _im[i + 7];
+        mat2.a3 = _im[i + 8]; mat2.b3 = _im[i + 9]; mat2.c3 = _im[i + 10]; mat2.d3 = _im[i + 11];
+        mat2.a4 = _im[i + 12]; mat2.b4 = _im[i + 13]; mat2.c4 = _im[i + 14]; mat2.d4 = _im[i + 15];
+        // mat2.transpose();
+        skinInfo.inverseMatrices.push(mat2);
+      }
     }
 
     if (Array.isArray(skin.joints)) {
@@ -365,7 +326,8 @@ Tarumae.GLTFLoader = class {
       this.session.loadedJoints[nodeId] = obj;
     }
 
-    if (!isNaN(node.mesh)) {
+    if (Array.isArray(json.meshes) && !isNaN(node.mesh)
+      && node.mesh >= 0 && node.mesh < json.meshes.length) {
       const gltfMesh = json.meshes[node.mesh];
       const mesh = this.loadMesh(gltfMesh);
       obj.meshes.push(mesh);
@@ -387,17 +349,12 @@ Tarumae.GLTFLoader = class {
     if (node.rotation) {
       obj._quaternion = new Quaternion(node.rotation[0], node.rotation[1],
         node.rotation[2], node.rotation[3]);
-      // const q = new Quaternion(node.rotation[0], node.rotation[1],
-      //   node.rotation[2], node.rotation[3]);
       obj.angle.set(obj._quaternion.toMatrix().extractEulerAngles());
       obj.rotationType = 'q';
     }
 
     if (!isNaN(node.skin)) {
       this.session.skinnedObjects.push({ obj, skinId: node.skin });
-      // obj.skin = this.loadSkin(node.skin);
-      // console.log(obj);
-      //   obj._jointMats = this.loadJoints(node.skin);
     }
 
     if (obj.meshes[0] && obj.meshes[0].mat) {
@@ -433,7 +390,8 @@ Tarumae.GLTFLoader = class {
     this.reset();
     this.session.json = json;
 
-    if (json.buffers.some(_b => _b.uri && !_b.uri.startsWith('data:application/') )) {
+    if (Array.isArray(json.buffers)
+      && json.buffers.some(_b => _b.uri && !_b.uri.startsWith('data:application/'))) {
       const rm = new Tarumae.ResourceManager();
 
       for (const buffer of json.buffers) {
@@ -483,18 +441,7 @@ Tarumae.GLTFLoader = class {
 
     for (const { obj, skinId } of this.session.skinnedObjects) {
       obj.skin = this.session.loadedSkins[skinId];
-      
-      // let t = 0;
-      // setInterval(() => {
-      //   // obj.skin.joints[0].angle.z = Math.sin(t) * 50;
-      //   obj.skin.joints[1].angle.y = Math.sin(t) * 90;
-      //   // obj.skin.joints[2].updateTransform();
-      //   t += 0.01;
-      //   _scene.requireUpdateFrame();
-      // }, 10);
     }
-
-    // root.update();
 
     return root;
   }

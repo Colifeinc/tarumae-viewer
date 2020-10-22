@@ -362,7 +362,7 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
         for (let i = 0; i < obj.skin.joints.length; i++) {
           this.jointMatrixUniforms[i].set(obj.skin.joints[i].jointMatrix);
         }
-      }     
+      }
     } else {
       for (let i = 0; i < this.maxJointCount; i++) {
         this.jointMatrixUniforms[i].set(Matrix4.IdentityArray);
