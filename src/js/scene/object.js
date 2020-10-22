@@ -956,7 +956,7 @@ Tarumae.JointObject = class extends Tarumae.SceneObject {
     // NOTE!! Experimental quaternion support 
     if (this._quaternion) {
       const tr = this._quaternion.toMatrix();
-      t = tr.mul(t);
+      t.copyFrom(tr.mul(t));
     } else {
       // FIXME: gltf from blender should use 'XZY' order to get correct result
       t.rotate(this._angle._x, this._angle._y, this._angle._z, 'XZY');

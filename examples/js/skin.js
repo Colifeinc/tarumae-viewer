@@ -7,6 +7,7 @@
 
 import Tarumae from "../../src/js/tarumae.js";
 import { Vec3, Color4 } from "@jingwood/graphics-math";
+import { Quaternion } from "@jingwood/graphics-math/dist/quaternion";
 
 window.addEventListener("load", function() {
 
@@ -69,6 +70,7 @@ window.addEventListener("load", function() {
       jointsBackup.push({
         angle: joint1[i].angle.clone(),
         location: joint1[i].location.clone(),
+        _quaternion: new Quaternion(joint1[i]._quaternion),
       });
     }
   });
@@ -110,6 +112,12 @@ window.addEventListener("load", function() {
     const joint4 = obj4.objects[0].objects[0].skin.joints;
 
     for (let i = 0; i < joint1.length; i++) {
+      // const q =
+      
+      //     jointsBackup[i]._quaternion.slerp(joint2[i]._quaternion, weight1);
+      // //);
+      // joint1[i]._quaternion.copyFrom(q);
+      
       joint1[i].angle.set(Vec3.add(jointsBackup[i].angle,
         Vec3.add(
           Vec3.add(
