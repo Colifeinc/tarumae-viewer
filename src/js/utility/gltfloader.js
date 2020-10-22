@@ -385,11 +385,12 @@ Tarumae.GLTFLoader = class {
     }
 
     if (node.rotation) {
-      // obj._quaternion = new Quaternion(node.rotation[0], node.rotation[1],
-      //   node.rotation[2], node.rotation[3]);
-      const q = new Quaternion(node.rotation[0], node.rotation[1],
+      obj._quaternion = new Quaternion(node.rotation[0], node.rotation[1],
         node.rotation[2], node.rotation[3]);
-      obj.angle.set(q.toMatrix().extractEulerAngles());
+      // const q = new Quaternion(node.rotation[0], node.rotation[1],
+      //   node.rotation[2], node.rotation[3]);
+      obj.angle.set(obj._quaternion.toMatrix().extractEulerAngles());
+      obj.rotationType = 'q';
     }
 
     if (!isNaN(node.skin)) {

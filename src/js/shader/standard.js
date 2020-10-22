@@ -356,23 +356,13 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 
       if (obj.skin.inverseMatrices.length > 0) {
         for (let i = 0; i < obj.skin.joints.length; i++) {
-          //  this.jointMatrixUniforms[i].set(obj.skin.joints[i]._transform);
-          // this.jointMatrixUniforms[i].set(obj.skin.inverseMatrices[i]);
-        
           this.jointMatrixUniforms[i].set(obj.skin.inverseMatrices[i].mul(obj.skin.joints[i].jointMatrix));
-          // this.jointMatrixUniforms[i].set(obj.skin.joints[i].jointMatrix);
-          // const t = obj.skin.inverseMatrices[i].mul(obj.skin.joints[i].jointMatrix);
-          // console.assert(!isNaN(t.a1) && !isNaN(t.a2) && !isNaN(t.a3) && !isNaN(t.a4));
-          // this.jointMatrixUniforms[i].set(t);
-          // this.jointMatrixUniforms[i].set(obj.skin.joints[i].jointMatrix.mul(obj.skin.inverseMatrices[i]));
         }
       } else {
         for (let i = 0; i < obj.skin.joints.length; i++) {
           this.jointMatrixUniforms[i].set(obj.skin.joints[i].jointMatrix);
         }
-      }
-      // console.log('set skin matrices');
-     
+      }     
     } else {
       for (let i = 0; i < this.maxJointCount; i++) {
         this.jointMatrixUniforms[i].set(Matrix4.IdentityArray);

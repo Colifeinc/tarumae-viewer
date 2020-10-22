@@ -9,61 +9,70 @@ import Tarumae from "../../src/js/tarumae.js";
 import { Vec3, Color4 } from "@jingwood/graphics-math";
 import { Quaternion } from "@jingwood/graphics-math/dist/quaternion";
 
-window.addEventListener("load", function() {
+window.addEventListener("load", function () {
 
-	const renderer = new Tarumae.Renderer({
-		backColor: new Color4(0, 0, 0),
-		// backColor: new Color4(0.74, .87, .85, 0.5),
-		// backgroundImage: "textures/bg-gray-gradient.jpg",
-		showDebugPanel: false,
-		enableLighting: true,
-		enablePostprocess: true,
-		enableAntialias: true,
-		enableEnvmap: false,
-		enableShadow: true,
+  const renderer = new Tarumae.Renderer({
+    backColor: new Color4(0, 0, 0),
+    // backColor: new Color4(0.74, .87, .85, 0.5),
+    // backgroundImage: "textures/bg-gray-gradient.jpg",
+    showDebugPanel: false,
+    enableLighting: true,
+    enablePostprocess: true,
+    enableAntialias: true,
+    enableEnvmap: false,
+    enableShadow: true,
     shadowQuality: {
-			scale: 2,
+      scale: 2,
       viewDepth: 2,
       resolution: 1024,
       enableCache: false,
-		},
-		bloomEffect: {
-			enabled: true,
-			threshold: 0.2,
-			gamma: 1.4,
-		},
-		renderingImage: {
-			gamma: 1.4,
-			resolutionRatio: window.devicePixelRatio,
-		},
-	});
+    },
+    bloomEffect: {
+      enabled: true,
+      threshold: 0.2,
+      gamma: 1.4,
+    },
+    renderingImage: {
+      gamma: 1.4,
+      resolutionRatio: window.devicePixelRatio,
+    },
+  });
 
-	const scene = renderer.createScene();
-	window._scene = scene;
+  const scene = renderer.createScene();
+  window._scene = scene;
  
-	const ground = {
-		mesh: new Tarumae.Shapes.PlaneMesh(3, 3),
-		mat: {
-			// color: [1.0, 1.0, 1.0],
-			// color: [1.5, 1.5, 1.5],
-			// tex: "textures/bg-gray-gradient.jpg"
-		},
+  const ground = {
+    mesh: new Tarumae.Shapes.PlaneMesh(3, 3),
+    mat: {
+      // color: [1.0, 1.0, 1.0],
+      // color: [1.5, 1.5, 1.5],
+      // tex: "textures/bg-gray-gradient.jpg"
+    },
     angle: [15, 20, 0],
-	};
-	scene.load(ground);
+  };
+  scene.load(ground);
 
-	this.currentIndex = -1;
+  this.currentIndex = -1;
 
   let obj1, obj2, obj3, obj4, jointsBackup = [];
-  let spine, hips, chest;
+  let spine, hips, chest, neck, head;
 
   scene.createObjectFromURL('models/char3.gltf', obj => {
     obj1 = obj;
     ground.add(obj);
     window.obj1 = obj1;
+    
     chest = obj1.findObjectByName('chest');
     spine = obj1.findObjectByName('spine');
     hips = obj1.findObjectByName('hips');
+    neck = obj1.findObjectByName('neck');
+    head = obj1.findObjectByName('head');
+
+    chest.rotationSystem = 'e';
+    spine.rotationType = 'e';
+    hips.rotationType = 'e';
+    neck.rotationType = 'e';
+    head.rotationType = 'e';
     
     const joint1 = obj1.objects[0].objects[0].skin.joints;
     for (let i = 0; i < joint1.length; i++) {
@@ -71,6 +80,7 @@ window.addEventListener("load", function() {
         angle: joint1[i].angle.clone(),
         location: joint1[i].location.clone(),
         _quaternion: new Quaternion(joint1[i]._quaternion),
+        _quaternionInv: Quaternion.inverse(joint1[i]._quaternion),
       });
     }
   });
@@ -87,7 +97,7 @@ window.addEventListener("load", function() {
     obj4 = obj;
   });
 
-  let weight1 = 0, weight2 = 0, weight3 = 0, r1 = 0;
+  let weight1 = 0, weight2 = 0, weight3 = 0, r1 = 0, headAngle = new Vec3();
   window.changeP1 = function (v) {
     weight1 = v;
     updateJoints();
@@ -104,6 +114,14 @@ window.addEventListener("load", function() {
     r1 = v;
     updateJoints();
   };
+  window.changeHeadY = function(v) {
+    headAngle.y = v;
+    updateJoints();
+  };
+  window.changeHeadX = function(v) {
+    headAngle.x = v;
+    updateJoints();
+  };
 
   function updateJoints() {
     const joint1 = obj1.objects[0].objects[0].skin.joints;
@@ -112,19 +130,26 @@ window.addEventListener("load", function() {
     const joint4 = obj4.objects[0].objects[0].skin.joints;
 
     for (let i = 0; i < joint1.length; i++) {
-      // const q =
+
+      const j1 = Quaternion.mul(jointsBackup[i]._quaternionInv, joint2[i]._quaternion);
+      const j2 = Quaternion.mul(jointsBackup[i]._quaternionInv, joint3[i]._quaternion);
+      const j3 = Quaternion.mul(jointsBackup[i]._quaternionInv, joint4[i]._quaternion);
+
+      const q1 = Quaternion.slerp(Quaternion.Zero, j1, weight1);
+      const q2 = Quaternion.slerp(Quaternion.Zero, j2, weight2);
+      const q3 = Quaternion.slerp(Quaternion.Zero, j3, weight3);
       
-      //     jointsBackup[i]._quaternion.slerp(joint2[i]._quaternion, weight1);
-      // //);
-      // joint1[i]._quaternion.copyFrom(q);
+      const q = Quaternion.mul(jointsBackup[i]._quaternion, Quaternion.mul(Quaternion.mul(q1, q2), q3));
       
-      joint1[i].angle.set(Vec3.add(jointsBackup[i].angle,
-        Vec3.add(
-          Vec3.add(
-            Vec3.mul(Vec3.sub(joint2[i].angle, jointsBackup[i].angle), weight1),
-            Vec3.mul(Vec3.sub(joint3[i].angle, jointsBackup[i].angle), weight2)),
-            Vec3.mul(Vec3.sub(joint4[i].angle, jointsBackup[i].angle), weight3)
-        )));
+      joint1[i]._quaternion.copyFrom(q);
+      
+      // joint1[i].angle.set(Vec3.add(jointsBackup[i].angle,
+      //   Vec3.add(
+      //     Vec3.add(
+      //       Vec3.mul(Vec3.sub(joint2[i].angle, jointsBackup[i].angle), weight1),
+      //       Vec3.mul(Vec3.sub(joint3[i].angle, jointsBackup[i].angle), weight2)),
+      //       Vec3.mul(Vec3.sub(joint4[i].angle, jointsBackup[i].angle), weight3)
+      //   )));
       
       // joint1[i].angle.set(
       //   Vec3.add(
@@ -142,7 +167,11 @@ window.addEventListener("load", function() {
       chest.angle.y = r1;
       spine.angle.y = r1 * 0.5;
       hips.angle.y = r1 * 0.2;
+      head.angle.set(headAngle);
+      neck.angle.set(Vec3.mul(headAngle, 0.5));
     }
+
+    hips.updateTransform();
 
     scene.requireUpdateFrame();
   }
@@ -151,7 +180,7 @@ window.addEventListener("load", function() {
   scene.sun.mat = { color: [1.2, 1.2, 1.2] };
 
 	scene.mainCamera.fieldOfView = 60;
-	scene.mainCamera.location.set(0, 0.5, 1.5);
+	scene.mainCamera.location.set(0, 0.7, 2);
 	scene.mainCamera.angle.set(0, 0, 0);
 	
 	// light sources

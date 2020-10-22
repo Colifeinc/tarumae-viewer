@@ -35,7 +35,9 @@ Tarumae.SceneObject = class {
 		this._location = new Tarumae.ObjectVectorProperty(this, "onmove");
 		this._angle = new Tarumae.ObjectVectorProperty(this, "onrotate");
 		this._scale = new Tarumae.ObjectVectorProperty(this, "onscale", Vec3.One);
-		this._worldLocation = Vec3.zero;
+    this._worldLocation = Vec3.zero;
+    this._quaternion = null;
+    this.rotationType = 'e';
 		this._suspendTransformUpdate = false;
 
 		this.meshes = [];
@@ -954,7 +956,7 @@ Tarumae.JointObject = class extends Tarumae.SceneObject {
     t.translate(this._location._x, this._location._y, this._location._z);
       
     // NOTE!! Experimental quaternion support 
-    if (this._quaternion) {
+    if (this.rotationType === 'q' && this._quaternion) {
       const tr = this._quaternion.toMatrix();
       t.copyFrom(tr.mul(t));
     } else {
