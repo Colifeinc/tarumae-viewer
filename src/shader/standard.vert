@@ -12,7 +12,6 @@ attribute vec2 vertexTexcoord2;
 attribute vec3 vertexTangent;
 attribute vec3 vertexBitangent;
 attribute vec3 vertexColor;
-
 attribute vec4 a_joint;
 attribute vec4 a_weight;
 
@@ -43,11 +42,11 @@ void main(void) {
         a_weight.z * u_jointMat[int(a_joint.z)] +
         a_weight.w * u_jointMat[int(a_joint.w)];
 
-	vec4 transformPos = modelMatrix * skinMat * pos;
+	vec4 position = modelMatrix * skinMat * pos;
 
-	gl_Position = projectViewMatrix * transformPos;
+	gl_Position = projectViewMatrix * position;
 
-	vertex = transformPos.xyz;
+	vertex = position.xyz;
 	normal = normalize((normalMatrix * vec4(vertexNormal, 0.0)).xyz);
 	vcolor = vertexColor;
 	

@@ -441,10 +441,10 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		gl.disable(gl.BLEND);
     gl.enable(gl.DEPTH_TEST);
 
+    // skin
     if (obj.skin) {
-      const matrix = new Matrix4().loadIdentity();
-      for (let i = 0; i < 200; i++) {
-        this.jointMatrixUniforms[i].set(matrix);
+      for (let i = 0; i < this.maxJointCount; i++) {
+        this.jointMatrixUniforms[i].set(Matrix4.IdentityArray);
       }
     }
 	}
