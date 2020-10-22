@@ -1306,26 +1306,6 @@ new Tarumae.EventDispatcher(Tarumae.Scene).registerEvents(
 	"frame",
 	"archiveLoaded");
 
-///////////////////////// ObjectTypes /////////////////////////
-
-Tarumae.ObjectTypes = {
-	GenericObject: 0,
-	Empty: 11,
-	Range: 15,
-	Wall: 201,
-	Beam: 202,
-	Door: 203,
-	Window: 204,
-	Floor: 205,
-	Div: 701,
-	Text2D: 702,
-	Camera: 801,
-	PointLight: 901,
-	SpotLight: 902,
-	ReflectionSource: 950,
-	Cursor: 999,
-};
-
 ///////////////////////// ObjectsLoadingSession /////////////////////////
 
 Tarumae.ObjectsLoadingSession = class {

@@ -891,6 +891,27 @@ Tarumae.SceneObject.scanTransforms = function(parent, handler) {
 	}
 };
 
+///////////////////////// ObjectTypes /////////////////////////
+
+Tarumae.ObjectTypes = {
+	GenericObject: 0,
+	Empty: 11,
+	Range: 15,
+	Wall: 201,
+	Beam: 202,
+	Door: 203,
+	Window: 204,
+	Floor: 205,
+	Div: 701,
+  Text2D: 702,
+  Camera: 801,
+  Joint: 820,
+	PointLight: 901,
+	SpotLight: 902,
+	ReflectionSource: 950,
+	Cursor: 999,
+};
+
 ////////////////////////// Sun //////////////////////////
 
 Tarumae.Sun = class extends Tarumae.SceneObject {
@@ -930,6 +951,7 @@ Tarumae.JointObject = class extends Tarumae.SceneObject {
   constructor() {
     super();
 
+    this.type = Tarumae.ObjectTypes.Joint;
     this.jointMatrix = new Matrix4();
   }
 
