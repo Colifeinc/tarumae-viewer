@@ -12,7 +12,7 @@ Tarumae.Shaders.ShadowMapShader = class extends Tarumae.Shader {
     // skin
     this.vertexJointAttribute = this.findAttribute("a_joint");
     this.vertexWeightAttribute = this.findAttribute("a_weight");
-    this.jointMatrixUniforms = this.bindUniformArray("u_jointMat", "mat4", 200);
+    this.jointMatrixUniforms = this.bindUniformArray("u_jointMat", "mat4", 100);
 
 		this.lightMatrix = new Matrix4();
 		this.projectionMatrix = new Matrix4();

@@ -12,7 +12,7 @@ attribute vec4 a_joint;
 attribute vec4 a_weight;
 
 uniform mat4 projectionMatrix;
-uniform mat4 u_jointMat[200];
+uniform mat4 u_jointMat[100];
 
 varying float depth;
 
