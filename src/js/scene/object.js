@@ -127,7 +127,11 @@ Tarumae.SceneObject = class {
 		}
 
 		return polygonCount;
-	}
+  }
+  
+  get transform() {
+    return this._transform;
+  }
 
 	updateTransform() {
 		if (this._suspendTransformUpdate) return;

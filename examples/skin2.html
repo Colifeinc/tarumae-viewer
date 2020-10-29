@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# website: http://ogp.me/ns/website#">
+	<title>Skin2 - Tarumae Examples</title>
+  <meta charset="utf-8" />
+  <meta property="og:title" content="骨構造テスト2 - Tarumae Engine" />
+  <meta property="og:site_name" content="Tarumae Engine" />
+  <meta property="og:url" content="https://tarumae.tech" />
+  <meta property="og:image" content="img/examples/skin.png" />
+	<link href="css/demo-fullsize.css" rel="stylesheet" type="text/css" />
+  <script src="js/skin2.js"></script>
+  <style type="text/css">
+    .panel {
+      position: absolute;
+      border-radius: 0.5em;
+      left: 3em;
+      top: 3em;
+      background-color: rgba(100, 100, 100, .5);
+      padding: 1em;
+      color: white;
+    }
+
+    .panel label {
+      width: 5em;
+      min-width: 5em;
+      text-align: right;
+      clear: both;
+      float: left;
+      margin-right: 15px;
+    }
+
+    .panel input {
+      width: 20em;
+    }
+
+    .panel input.col2 {
+      width: 9.7em;
+    }
+
+    .panel .seperator {
+      border-bottom: solid 1px #666;
+      margin-top: 0.5em;
+      margin-bottom: 0.5em;
+    }
+
+    #progressContainer {
+      min-height: 10px;
+    }
+
+    #progress{
+      height: 10px;
+      width: 0px;
+      background-color: #4466ff;
+    }
+  </style>
+</head>
+<body>
+	<div id="canvas-container">
+  </div>
+  <div class="panel">
+    <div id='info'></div>
+    <div id='progressContainer' onmouseover="changeFrame()">
+      <div id='progress' onmouseover="changeFrame()"></div>
+    </div>
+    <p>
+      <button id='play' onclick='playOrPause()'>Play</button>
+    </p>
+    <p>
+      <label class="label" id='speedLabel'>Speed: 1x</label>
+      <input type="range" min="10" max="1000" step="1" value="100" oninput="changeSpeed(this.value)" >
+    </p>
+  </div>
+</body>
+</html>
