@@ -233,7 +233,7 @@ Object.defineProperties(Tarumae.Utility, {
 			const width = tex.width, height = tex.height;
 			const data = new Uint8Array(width * height * 4);
 
-			tex.use();
+			tex.use(renderer);
 			renderer.gl.readPixels(0, 0, width, height, renderer.gl.RGBA, renderer.gl.UNSIGNED_BYTE, data);
 			tex.disuse();
 
