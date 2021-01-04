@@ -957,6 +957,7 @@ Tarumae.JointObject = class extends Tarumae.SceneObject {
 
     this.type = Tarumae.ObjectTypes.Joint;
     this.jointMatrix = new Matrix4();
+    this._jointWorldRotation = new Matrix4();
   }
 
   updateTransform() {
@@ -970,7 +971,7 @@ Tarumae.JointObject = class extends Tarumae.SceneObject {
   }
 
   updateJoint() {
-    let t = this.jointMatrix;
+    const t = this.jointMatrix;
 
     if (this._parent && this._parent.jointMatrix) {
       t.copyFrom(this._parent.jointMatrix);
@@ -991,10 +992,33 @@ Tarumae.JointObject = class extends Tarumae.SceneObject {
     }
 
     t.scale(this._scale._x, this._scale._y, this._scale._z);
+
+    // ------------------------------------------------------------------------------
+
+    const tr = this._jointWorldRotation;
+
+    if (this._parent && this._parent._jointWorldRotation) {
+      tr.copyFrom(this._parent._jointWorldRotation);
+    } else {
+      tr.loadIdentity();
+    }
+
+    // NOTE!! Experimental quaternion support 
+    if (this.rotationType === 'q' && this._quaternion) {
+      const tmat = this._quaternion.toMatrix();
+      tr.copyFrom(tmat.mul(tr));
+    } else {
+      // FIXME: gltf from blender should use 'XZY' order to get correct result
+      tr.rotate(this._angle._x, this._angle._y, this._angle._z, 'XZY');
+    }
+  }
+
+  get jointWorldRotation() {
+    return this._jointWorldRotation;
   }
 
   draw(g) {
-    // const p = this.location.mulMat(this.skin.inverseMatrices[i].mul this.jointMatrix);
+    // const p = this.location.mulMat(this.skin.inverseMatrices[i].mul(this.jointMatrix));
     // g.drawPoint(this.worldLocation, 10, this.skin ? 'red' : 'silver');
   }
 };
