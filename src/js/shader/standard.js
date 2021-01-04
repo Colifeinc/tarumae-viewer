@@ -354,15 +354,21 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
         this.maxJointCount = obj.skin.joints.length;
       }
 
+      obj._calculatedJointMatrixCache = new Array(this.maxJointCount);
+
       if (obj.skin.inverseMatrices.length > 0) {
-        for (let i = 0; i < obj.skin.joints.length; i++) {
-          this.jointMatrixUniforms[i].set(obj.skin.inverseMatrices[i].mul(obj.skin.joints[i].jointMatrix));
+        for (let i = 0; i < this.maxJointCount; i++) {
+          const mat = obj.skin.inverseMatrices[i].mul(obj.skin.joints[i].jointMatrix);
+          this.jointMatrixUniforms[i].set(mat);
+          obj._calculatedJointMatrixCache[i] = mat;
         }
       } else {
-        for (let i = 0; i < obj.skin.joints.length; i++) {
+        for (let i = 0; i < this.maxJointCount; i++) {
           this.jointMatrixUniforms[i].set(obj.skin.joints[i].jointMatrix);
+          obj._calculatedJointMatrixCache[i] = obj.skin.joints[i].jointMatrix;
         }
       }
+      
     } else {
       for (let i = 0; i < this.maxJointCount; i++) {
         this.jointMatrixUniforms[i].set(Matrix4.IdentityArray);
