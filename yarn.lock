@@ -912,10 +912,8 @@
   resolved "https://registry.yarnpkg.com/@iarna/toml/-/toml-2.2.5.tgz#b32366c89b43c6f8cefbdefac778b9c828e3ba8c"
   integrity sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==
 
-"@jingwood/graphics-math@^1.1.14":
+"@jingwood/graphics-math@file:../js-graphics-math":
   version "1.1.14"
-  resolved "https://registry.yarnpkg.com/@jingwood/graphics-math/-/graphics-math-1.1.14.tgz#deaedad2c2b1470e5ec1705a7791c05626e7f14b"
-  integrity sha512-vLWrUGE47S1lML9AP8EciPhxzJgzzp9khpHfOxVHDYtpbMag2Xk1vy/Gb0V/UFDfkE2fPoWCsL2k39SC7lZjew==
   dependencies:
     "@babel/runtime" "^7.9.2"
 
