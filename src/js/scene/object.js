@@ -35,7 +35,9 @@ Tarumae.SceneObject = class {
 		this._location = new Tarumae.ObjectVectorProperty(this, "onmove");
 		this._angle = new Tarumae.ObjectVectorProperty(this, "onrotate");
 		this._scale = new Tarumae.ObjectVectorProperty(this, "onscale", Vec3.One);
-		this._worldLocation = Vec3.zero;
+    this._worldLocation = Vec3.zero;
+    this._quaternion = null;
+    this.rotationType = 'e';
 		this._suspendTransformUpdate = false;
 
 		this.meshes = [];
@@ -125,7 +127,11 @@ Tarumae.SceneObject = class {
 		}
 
 		return polygonCount;
-	}
+  }
+  
+  get transform() {
+    return this._transform;
+  }
 
 	updateTransform() {
 		if (this._suspendTransformUpdate) return;
@@ -149,17 +155,8 @@ Tarumae.SceneObject = class {
       
       // NOTE!! Experimental quaternion support 
       if (this._quaternion) {
-        const m = this._quaternion.toMatrix4();
-        const tr = new Matrix4();
-        tr.a1 = m[0]; tr.b1 = m[1]; tr.c1 = m[2]; tr.d1 = m[3];
-        tr.a2 = m[4]; tr.b2 = m[5]; tr.c2 = m[6]; tr.d2 = m[7];
-        tr.a3 = m[8]; tr.b3 = m[9]; tr.c3 = m[10]; tr.d3 = m[11];
-        tr.a4 = m[12]; tr.b4 = m[13]; tr.c4 = m[14]; tr.d4 = m[15];
-        
-        // t.rotateX(90);
+        const tr = this._quaternion.toMatrix();
         t = t.mul(tr);
-        // t.rotateX(-90);
-
       } else {
         t.rotate(this._angle._x, this._angle._y, this._angle._z, this._angleOrder);
       }
@@ -898,6 +895,27 @@ Tarumae.SceneObject.scanTransforms = function(parent, handler) {
 	}
 };
 
+///////////////////////// ObjectTypes /////////////////////////
+
+Tarumae.ObjectTypes = {
+	GenericObject: 0,
+	Empty: 11,
+	Range: 15,
+	Wall: 201,
+	Beam: 202,
+	Door: 203,
+	Window: 204,
+	Floor: 205,
+	Div: 701,
+  Text2D: 702,
+  Camera: 801,
+  Joint: 820,
+	PointLight: 901,
+	SpotLight: 902,
+	ReflectionSource: 950,
+	Cursor: 999,
+};
+
 ////////////////////////// Sun //////////////////////////
 
 Tarumae.Sun = class extends Tarumae.SceneObject {
@@ -929,4 +947,78 @@ Tarumae.PointLight = class extends Tarumae.SceneObject {
 
 		this.type = Tarumae.ObjectTypes.PointLight;
 	}
+};
+
+////////////////////////// Joint //////////////////////////
+
+Tarumae.JointObject = class extends Tarumae.SceneObject {
+  constructor() {
+    super();
+
+    this.type = Tarumae.ObjectTypes.Joint;
+    this.jointMatrix = new Matrix4();
+    this._jointWorldRotation = new Matrix4();
+  }
+
+  updateTransform() {
+    
+    if (this.jointMatrix) {
+      this.updateJoint();
+    }
+
+    super.updateTransform();
+
+  }
+
+  updateJoint() {
+    const t = this.jointMatrix;
+
+    if (this._parent && this._parent.jointMatrix) {
+      t.copyFrom(this._parent.jointMatrix);
+    } else {
+      t.loadIdentity();
+    }
+
+    // TODO: merge transform calc
+    t.translate(this._location._x, this._location._y, this._location._z);
+      
+    // NOTE!! Experimental quaternion support 
+    if (this.rotationType === 'q' && this._quaternion) {
+      const tr = this._quaternion.toMatrix();
+      t.copyFrom(tr.mul(t));
+    } else {
+      // FIXME: gltf from blender should use 'XZY' order to get correct result
+      t.rotate(this._angle._x, this._angle._y, this._angle._z, 'XZY');
+    }
+
+    t.scale(this._scale._x, this._scale._y, this._scale._z);
+
+    // ------------------------------------------------------------------------------
+
+    const tr = this._jointWorldRotation;
+
+    if (this._parent && this._parent._jointWorldRotation) {
+      tr.copyFrom(this._parent._jointWorldRotation);
+    } else {
+      tr.loadIdentity();
+    }
+
+    // NOTE!! Experimental quaternion support 
+    if (this.rotationType === 'q' && this._quaternion) {
+      const tmat = this._quaternion.toMatrix();
+      tr.copyFrom(tmat.mul(tr));
+    } else {
+      // FIXME: gltf from blender should use 'XZY' order to get correct result
+      tr.rotate(this._angle._x, this._angle._y, this._angle._z, 'XZY');
+    }
+  }
+
+  get jointWorldRotation() {
+    return this._jointWorldRotation;
+  }
+
+  draw(g) {
+    // const p = this.location.mulMat(this.skin.inverseMatrices[i].mul(this.jointMatrix));
+    // g.drawPoint(this.worldLocation, 10, this.skin ? 'red' : 'silver');
+  }
 };

@@ -98,13 +98,35 @@ Tarumae.Shader = class {
 		return this.gl.getAttribLocation(this.glShaderProgramId, name);
 	}
 
+  bindAttribute(name) {
+		return this.gl.getAttribLocation(this.glShaderProgramId, name);
+  }
+  
 	findUniform(name) {
 		return this.gl.getUniformLocation(this.glShaderProgramId, name);
 	}
 
 	bindUniform(name, type, slot) {
 		return new Tarumae.ShaderUniform(this, name, type, slot);
-	}
+  }
+  
+  bindUniformArray(name, type, count) {
+    const uniforms = [];
+
+		for (let i = 0; i < count; i++) {
+			const indexName = `${name}[${i}]`;
+
+      const uniformField = this.bindUniform(indexName, type);
+      if (!uniformField) {
+        console.warn(`attempt to bind an array uniform that only has ${i} elements less than the specified ${count}`);
+        break;
+      }
+      
+      uniforms.push(uniformField);
+		}
+	
+    return uniforms;
+  }
 
 	bindUniforms(items) {
 		for (var i = 0; i < items.length; i += 3) {
@@ -135,6 +157,28 @@ Object.defineProperties(Tarumae.Shader, {
 	defaultSunColor: { value: new Color3(1.0, 0.97, 0.94) },
 	emptyTexture: { value: Tarumae.Texture.createEmpty() },
 });
+
+Tarumae.ShaderAttribute = class {
+  constructor(shader, name, type) {
+    this.shader = shader;
+    this.gl = shader.gl;
+
+    this.glAttribute = gl.getAttribLocation(this.shader.glShaderProgramId, name);
+
+    this.enable = mesh => {
+      if (this.vertexNormalAttribute < 0) return;
+      const meta = mesh.meta;
+      if (!meta) return;
+      
+			if (meta.joCount > 0) {
+				gl.vertexAttribPointer(sp.vertexNormalAttribute, 3, gl.FLOAT, false, meta.stride, meta.normalOffset);
+				gl.enableVertexAttribArray(sp.vertexNormalAttribute);
+			} else {
+				gl.disableVertexAttribArray(sp.vertexNormalAttribute);
+			}
+		}
+  }
+};
 
 Tarumae.ShaderUniform = class {
 	constructor(shader, name, type, slot) {

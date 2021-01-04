@@ -33,5 +33,7 @@ import "./webgl/cubemap.js";
 import "./webgl/mesh.js";
 import "./webgl/shader.js";
 import "./webgl/texture.js";
+import "./utility/objloader.js";
+import "./utility/gltfloader.js";
 
 export default Tarumae;

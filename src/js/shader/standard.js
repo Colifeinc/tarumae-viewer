@@ -24,12 +24,17 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 		this.vertexTangentAttribute = this.findAttribute("vertexTangent");
 		this.vertexBitangentAttribute = this.findAttribute("vertexBitangent");
 		this.vertexColorAttribute = this.findAttribute("vertexColor");
-		
+    
 		this.projectViewMatrixUniform = this.bindUniform("projectViewMatrix", "mat4");
 		this.modelMatrixUniform = this.bindUniform("modelMatrix", "mat4");
 		this.modelMatrix3x3Uniform = this.bindUniform("modelMatrix3x3", "mat3");
 		this.normalMatrixUniform = this.bindUniform("normalMatrix", "mat4");
 		this.shadowMapProjectionMatrixUniform = this.bindUniform("shadowmapProjectionMatrix", "mat4");
+
+    // skin
+    this.vertexJointAttribute = this.findAttribute("a_joint");
+    this.vertexWeightAttribute = this.findAttribute("a_weight");
+		this.jointMatrixUniforms = this.bindUniformArray("u_jointMat", "mat4", 100);
 
 		this.sundirUniform = this.bindUniform("sundir", "vec3");
 		this.sunlightUniform = this.bindUniform("sunlight", "color3");
@@ -339,15 +344,62 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
 				const m = modelMatrix.mul(shadowMapShader.lightMatrix).mul(shadowMapShader.projectionMatrix);
 				this.shadowMapProjectionMatrixUniform.set(m);
 			}
-		}
+    }
+    
+    // skin
+    this.maxJointCount = 2;
+
+    if (obj.skin) {
+      if (this.maxJointCount < obj.skin.joints.length) {
+        this.maxJointCount = obj.skin.joints.length;
+      }
+
+      obj._calculatedJointMatrixCache = new Array(this.maxJointCount);
+
+      if (obj.skin.inverseMatrices.length > 0) {
+        for (let i = 0; i < this.maxJointCount; i++) {
+          const mat = obj.skin.inverseMatrices[i].mul(obj.skin.joints[i].jointMatrix);
+          this.jointMatrixUniforms[i].set(mat);
+          obj._calculatedJointMatrixCache[i] = mat;
+        }
+      } else {
+        for (let i = 0; i < this.maxJointCount; i++) {
+          this.jointMatrixUniforms[i].set(obj.skin.joints[i].jointMatrix);
+          obj._calculatedJointMatrixCache[i] = obj.skin.joints[i].jointMatrix;
+        }
+      }
+      
+    } else {
+      for (let i = 0; i < this.maxJointCount; i++) {
+        this.jointMatrixUniforms[i].set(Matrix4.IdentityArray);
+      }
+    }
 	}
 
 	beginMesh(mesh) {
 		super.beginMesh(mesh);
 	
-		var gl = this.gl;
-
-		// this.hasUV2Uniform.set(mesh.meta && mesh.meta.uvCount > 1);
+    const gl = this.gl;
+    
+    // skin
+    if (this.vertexJointAttribute >= 0) {
+      if (mesh.jointBuffer) {
+        gl.bindBuffer(gl.ARRAY_BUFFER, mesh.meta.skinJointBufferId);
+        gl.vertexAttribPointer(this.vertexJointAttribute, 4, gl.UNSIGNED_SHORT, false, mesh.meta.jointStride, 0);
+        gl.enableVertexAttribArray(this.vertexJointAttribute);
+      } else {
+        gl.disableVertexAttribArray(this.vertexJointAttribute);
+      }
+    }
+    if (this.vertexWeightAttribute >= 0) {
+      if (mesh.jointWeightsBuffer) {
+        gl.bindBuffer(gl.ARRAY_BUFFER, mesh.meta.skinJointWeightsBufferId);
+        gl.vertexAttribPointer(this.vertexWeightAttribute, 4, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(this.vertexWeightAttribute);
+      } else {
+        gl.disableVertexAttribArray(this.vertexWeightAttribute);
+      }
+    }
 
 		// lightmap
 		if (this.usingLightmap === null) {
@@ -393,7 +445,14 @@ Tarumae.Shaders.StandardShader = class extends Tarumae.Shader {
     this.normalMapUniform.unset();
 
 		gl.disable(gl.BLEND);
-		gl.enable(gl.DEPTH_TEST);
+    gl.enable(gl.DEPTH_TEST);
+
+    // skin
+    if (obj.skin) {
+      for (let i = 0; i < this.maxJointCount; i++) {
+        this.jointMatrixUniforms[i].set(Matrix4.IdentityArray);
+      }
+    }
 	}
 
 };

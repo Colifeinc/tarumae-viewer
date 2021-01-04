@@ -69,7 +69,7 @@ Tarumae.loadObjFormat = function(text) {
   }
 
   for (const face of s.faces) {
-    const i1 = face[2]-1, i2 = face[5]-1, i3 = face[8]-1;
+    //const i1 = face[2]-1, i2 = face[5]-1, i3 = face[8]-1;
     const v1 = s.normals[face[2]-1], v2 = s.normals[face[5]-1], v3 = s.normals[face[8]-1];
     s.vertexBuffer.push(v1.x, v1.y, v1.z, v2.x, v2.y, v2.z, v3.x, v3.y, v3.z);
   }
