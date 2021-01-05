@@ -903,10 +903,10 @@
   resolved "https://registry.yarnpkg.com/@iarna/toml/-/toml-2.2.5.tgz#b32366c89b43c6f8cefbdefac778b9c828e3ba8c"
   integrity sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==
 
-"@jingwood/graphics-math@^1.1.11":
-  version "1.1.15"
-  resolved "https://registry.yarnpkg.com/@jingwood/graphics-math/-/graphics-math-1.1.15.tgz#ebded6b6e243fcbc4ebbe030e6db530744b5f1fb"
-  integrity sha512-0194V3lPqaJsMjk3xBZYfCruJ6p17NccbyLsyjeL0R4+y/ICGK9h+aV6QqPPN9z7Sfs3DOiIAuX80gokM1o5zA==
+"@jingwood/graphics-math@^1.1.16":
+  version "1.1.16"
+  resolved "https://registry.yarnpkg.com/@jingwood/graphics-math/-/graphics-math-1.1.16.tgz#9fd680234353c2e9e90588a9217b33e48787a94c"
+  integrity sha512-r/jomUfMX59wZsb3drvcYyvv/uWHX+SebqMHzTJEKOW9F41Ov1dEayZe4GqEc1uM2H8n4LdEzy2z0xVYypkSdg==
   dependencies:
     "@babel/runtime" "^7.9.2"
 
