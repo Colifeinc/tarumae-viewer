@@ -102,7 +102,6 @@ Tarumae.GLTFLoader = class {
     }
   }
 
-
   loadTexture(sourceId) {
     const { json } = this.session;
    
@@ -303,10 +302,24 @@ Tarumae.GLTFLoader = class {
     return false;
   }
 
+  getJointNodeIndex(id) {
+    const { json } = this.session;
+
+    if (Array.isArray(json.skins)) {
+      for (const skin of json.skins) {
+        if (Array.isArray(skin.joints)) {
+          return skin.joints.findIndex(_j => _j == id);
+        }
+      }
+    }
+
+    return -1;
+  }
+
   loadNode(nodeId) {
     const { json } = this.session;
     const node = json.nodes[nodeId];
-    const objTypeStack = this.session.objTypeStack;
+    // const objTypeStack = this.session.objTypeStack;
 
     // const objType = objTypeStack[objTypeStack.length - 1];
     let objType;
@@ -324,6 +337,7 @@ Tarumae.GLTFLoader = class {
 
     if (objType === Tarumae.JointObject) {
       this.session.loadedJoints[nodeId] = obj;
+      obj._jointIndex = this.getJointNodeIndex(nodeId);
     }
 
     if (Array.isArray(json.meshes) && !isNaN(node.mesh)

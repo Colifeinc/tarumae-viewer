@@ -29,7 +29,7 @@
       margin-right: 15px;
     }
 
-    .panel input {
+    .panel input[type='range'] {
       width: 20em;
     }
 
@@ -66,9 +66,17 @@
       <button id='play' onclick='playOrPause()'>Play</button>
     </p>
     <p>
-      <label class="label" id='speedLabel'>Speed: 1x</label>
+      <label id='speedLabel'>Speed: 1x</label>
       <input type="range" min="10" max="1000" step="1" value="100" oninput="changeSpeed(this.value)" >
     </p>
+    <div>
+      <input type="checkbox" >
+      Skeleton 1
+      <input type="checkbox">
+      Skeleton 2
+      <input type="checkbox" >
+      Transformed Skeleton 1
+    </div>
   </div>
 </body>
 </html>
