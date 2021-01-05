@@ -135,9 +135,9 @@ window.addEventListener("load", function () {
       const j2 = Quaternion.mul(jointsBackup[i]._quaternionInv, joint3[i]._quaternion);
       const j3 = Quaternion.mul(jointsBackup[i]._quaternionInv, joint4[i]._quaternion);
 
-      const q1 = Quaternion.slerp(Quaternion.Zero, j1, weight1);
-      const q2 = Quaternion.slerp(Quaternion.Zero, j2, weight2);
-      const q3 = Quaternion.slerp(Quaternion.Zero, j3, weight3);
+      const q1 = Quaternion.slerp(Quaternion.zero, j1, weight1);
+      const q2 = Quaternion.slerp(Quaternion.zero, j2, weight2);
+      const q3 = Quaternion.slerp(Quaternion.zero, j3, weight3);
       
       const q = Quaternion.mul(jointsBackup[i]._quaternion, Quaternion.mul(Quaternion.mul(q1, q2), q3));
       
