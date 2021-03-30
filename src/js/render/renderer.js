@@ -1181,7 +1181,7 @@ Tarumae.Renderer = class {
 			{ x: box.max.x, y: box.max.y, z: box.max.z },
 		]);
 		
-		this.drawingContext2D.drawLineSegments2D([
+		this.drawingContext2D.drawLineSegments([
 			points[0], points[1], points[2], points[3],
 			points[4], points[5], points[6], points[7],
 		
@@ -1213,7 +1213,7 @@ Tarumae.Renderer = class {
 			{ x: box.max.x, y: box.max.y, z: box.max.z },
 		]);
 		
-		this.drawingContext2D.drawLineSegments2D([
+		this.drawingContext2D.drawLineSegments([
 			points[0], points[1], points[2], points[3],
 			points[4], points[5], points[6], points[7],
 		
