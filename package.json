@@ -1,6 +1,6 @@
 {
   "name": "tarumae-viewer",
-  "version": "1.7.6",
+  "version": "1.7.7",
   "description": "Optimized WebGL engine for showcase application",
   "main": "dist/js/tarumae.js",
   "files": [
