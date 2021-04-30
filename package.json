@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.9.2",
-    "@jingwood/graphics-math": "^1.1.17",
+    "@jingwood/graphics-math": "^1.1.18",
     "is-svg": "4.2.2",
     "pako": "^1.0.6"
   },
