@@ -1316,16 +1316,18 @@ Tarumae.Renderer = class {
 		
 		this.renderFrame();
 
-		try {
-			const img = Tarumae.Utility.getImageDataURLFromTexture(this,
-				renderbuffer.texture, imgformat, imgQuality);
-			return img;
-		} catch (e) {
-			console.warn(e);
-		}
+    let img
 
-		renderbuffer.disuse();
-		renderbuffer.destroy();
+		try {
+			img = Tarumae.Utility.getImageDataURLFromTexture(this, renderbuffer.texture, imgformat, imgQuality)
+		} catch (e) {
+			console.warn(e)
+    }
+
+		renderbuffer.disuse()
+		renderbuffer.destroy()
+
+    return img
   };
 
   releaseResources() {

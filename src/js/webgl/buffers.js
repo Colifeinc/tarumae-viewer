@@ -106,7 +106,7 @@ Tarumae.FrameBuffer = class extends Tarumae.CommonBuffer {
 		}
 
 		if (this.renderbufferGL) {
-			this.gl.deleteRenderBuffer(this.renderbufferGL);
+			this.gl.deleteRenderbuffer(this.renderbufferGL);
 		}
 	
 		super.destroy(this);
