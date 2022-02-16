@@ -11,3 +11,6 @@ build/*.js
 build/*.html
 tmp-out/
 tmp-build/
+
+tarumae-min.js
+tarumae-single.js
