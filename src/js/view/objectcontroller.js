@@ -8,6 +8,9 @@ Tarumae.ObjectViewController = class {
   
     minVerticalRotateAngle = -90,
     maxVerticalRotateAngle = 90,
+
+    minOriginDistance = 0,
+    maxOriginDistance = 50,
   
     enableDragAcceleration = true,
     dragAccelerationAttenuation = 0.03,
@@ -26,6 +29,8 @@ Tarumae.ObjectViewController = class {
     this.enableScrollToScaleObject = enableScrollToScaleObject;
     this.minVerticalRotateAngle = minVerticalRotateAngle;
     this.maxVerticalRotateAngle = maxVerticalRotateAngle;
+    this.minOriginDistance = minOriginDistance;
+    this.maxOriginDistance = maxOriginDistance;
     this.enableDragAcceleration = enableDragAcceleration;
     this.dragAccelerationAttenuation = dragAccelerationAttenuation;
     this.dragAccelerationIntensity = dragAccelerationIntensity;
