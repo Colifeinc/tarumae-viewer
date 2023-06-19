@@ -311,7 +311,8 @@ Tarumae.Storyboard = class {
   }
 
   add(keyframe) {
-    this.keyframes.push(keyframe);
+    this.keyframes.push(keyframe)
+    return this
   }
 
   play() {
